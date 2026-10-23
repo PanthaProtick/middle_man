@@ -25,7 +25,7 @@ PAYLOAD = {
 async def wait_for_order_waiters(connection, count):
     for _ in range(200):
         await connection.execute("SELECT pg_stat_clear_snapshot()")
-        waiting = await connection.fetchval("SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND wait_event_type='Lock' AND query LIKE '%orders%'")
+        waiting = await connection.fetchval("SELECT count(*) FROM pg_stat_activity WHERE pid <> pg_backend_pid() AND wait_event_type='Lock' AND (query LIKE '%orders%' OR query LIKE '%shops%')")
         if waiting >= count:
             return
         await asyncio.sleep(0.01)

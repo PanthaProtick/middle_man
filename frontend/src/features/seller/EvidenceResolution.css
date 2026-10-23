@@ -1,0 +1,29 @@
+.evidence-resolution {
+  padding: 16px;
+  overflow-wrap: anywhere;
+}
+.evidence-resolution fieldset {
+  display: grid;
+  gap: 12px;
+  border: 0;
+  padding: 0;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+.evidence-resolution label {
+  display: grid;
+  gap: 6px;
+}
+.evidence-resolution select,
+.evidence-resolution textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  color: var(--text-primary);
+  background: var(--bg-secondary, #111827);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 8px;
+}
+.evidence-resolution textarea { min-height: 80px; }
+.evidence-resolution button { margin: 6px 6px 6px 0; }

@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.idempotency import check_idempotency_record, save_idempotency_record
 from app.core.tokens import get_utc_now
 from app.models.buyer import BuyerSubmission, PublicOrder
-from app.models.entities import BuyerRevisionTable, OrderTable, ShopTable
+from app.models.entities import BuyerRevisionTable, OrderTable, ReceivedTransactionTable, ShopTable
 from app.services.buyer_measurements import _memory_link_measurements, record_measurement
 from app.services.buyer_projection import to_public_order
 from app.services.buyer_revision import buyer_revision
@@ -90,6 +90,9 @@ class BuyerService:
         digest = hashlib.sha256(portal_token.strip().encode("utf-8")).hexdigest()
         payload_hash = compute_payload_hash(submission.model_dump(mode="json"))
         if self.db is not None:
+            shop_id = await self.db.scalar(select(OrderTable.shop_id).where(OrderTable.token_lookup_digest == digest))
+            if shop_id is not None:
+                await self.db.execute(select(ShopTable).where(ShopTable.id == shop_id).with_for_update())
             order = await self.db.scalar(select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update())
             if order is None:
                 raise NotFoundError("Order not found")
@@ -109,6 +112,13 @@ class BuyerService:
             order.updated_at = now
             await record_measurement(self.db, digest, "submission", now)
 
+            tx = await self.db.scalar(select(ReceivedTransactionTable).where(
+                ReceivedTransactionTable.shop_id == order.shop_id,
+                ReceivedTransactionTable.provider == submission.payment_claim.provider,
+                ReceivedTransactionTable.trx_id == submission.payment_claim.trx_id))
+            if tx is not None:
+                tx.version += 1
+                tx.updated_at = now
             # Trigger reconciliation against shop receipts
             await reconcile_order(self.db, order.id, clock=self.clock)
 
@@ -133,6 +143,12 @@ class BuyerService:
         raw.update(lifecycle="pending", buyer_revision=1, first_submitted_at=now, version=int(raw.get("version", 1)) + 1, updated_at=now)
         await record_measurement(None, digest, "submission", now)
 
+        from app.services.transaction_store import _memory_transactions
+        for tx_raw in _memory_transactions.values():
+            if (tx_raw["shop_id"] == raw["shop_id"] and tx_raw["provider"] == submission.payment_claim.provider
+                    and tx_raw["trx_id"] == submission.payment_claim.trx_id):
+                tx_raw["version"] += 1
+                tx_raw["updated_at"] = now
         # Trigger reconciliation against shop receipts
         await reconcile_order(None, order_id, clock=self.clock)
 

@@ -14,6 +14,7 @@ from app.models.entities import (
     OrderReviewReasonTable,
     OrderTable,
     ReceivedTransactionTable,
+    ShopTable,
     UsedPaymentMarkerTable,
 )
 from app.services.reconciliation_rules import (
@@ -54,11 +55,13 @@ async def get_order_review_reasons_db(db: AsyncSession, order_id: str) -> List[s
 async def append_order_review_reasons_db(
     db: AsyncSession, order_id: str, new_reasons: List[str], now: datetime.datetime
 ) -> None:
+    await db.flush()
     existing = await get_order_review_reasons_db(db, order_id)
     combined = sorted(list(set(existing + new_reasons)))
     await db.execute(delete(OrderReviewReasonTable).where(OrderReviewReasonTable.order_id == order_id))
     for r in combined:
         db.add(OrderReviewReasonTable(id=str(uuid.uuid4()), order_id=order_id, reason=r, created_at=now))
+    await db.flush()
 
 
 async def clear_order_review_reasons_db(db: AsyncSession, order_id: str) -> None:
@@ -74,6 +77,9 @@ async def reconcile_order_db(
 ) -> bool:
     for attempt in range(max_retries):
         try:
+            shop_id = await db.scalar(select(OrderTable.shop_id).where(OrderTable.id == order_id))
+            if shop_id is not None:
+                await db.execute(select(ShopTable).where(ShopTable.id == shop_id).with_for_update())
             return await _reconcile_order_db_attempt(db, order_id, now, digest_calculator)
         except DBAPIError:
             await db.rollback()
@@ -139,6 +145,15 @@ async def _reconcile_order_db_attempt(
         UsedPaymentMarkerTable.transaction_digest == digest,
     )
     marker_exists = (await db.execute(marker_stmt)).scalar_one_or_none() is not None
+
+    from app.services.resolution_history import rejected_revisions
+    rejected = await rejected_revisions(db, order.shop_id, candidate_tx.id)
+    rejected_orders = set((await db.scalars(select(BuyerRevisionTable.order_id).where(
+        BuyerRevisionTable.id.in_(rejected)))).all()) if rejected else set()
+    if order_id in rejected_orders:
+        await append_order_review_reasons_db(db, order_id, [COMPETING_CLAIMS], now)
+        return False
+    competing_order_ids = [oid for oid in competing_order_ids if oid not in rejected_orders]
 
     reasons = evaluate_candidate_match(
         order_account_id=str(order.payment_account_id),

@@ -56,3 +56,21 @@ are lost when the process restarts. Configuration flags report configuration,
 not successful provider calls, database persistence, or authorization enforcement.
 Frontend fallback items are also local simulations, not confirmed server writes.
 Tests of these demo behaviors must not be reported as live-service acceptance.
+
+
+## Seller receipt comparison and resolution
+
+- `GET /api/seller/transactions/{id}` returns the owning seller's receipt observations,
+  same-shop claim comparisons and review reasons, accepted order ID, and decision history.
+- `POST /api/seller/transactions/{id}/resolve` requires `Idempotency-Key`,
+  `expected_version`, `reason`, `selected_observation_id`, and optionally
+  `selected_order_id`. Unknown write fields are rejected. Selection never overrides
+  exact-match requirements. Selecting an order explicitly holds other current claim
+  revisions; selecting observations alone leaves competing claims unresolved.
+- Same key/payload replays the committed response; changed payload or stale version
+  returns 409. New claims change receipt version. Retry an unknown outcome with the
+  identical key/payload; refetch stale comparisons before a new decision.
+- Used allocations are immutable. Later contradictions remain seller alerts. All
+  receipt comparison and mutation responses, including errors, use private/no-store
+  headers. Buyer projections expose no decision reasons or competing-claim identities.
+- Literal SMS endpoints are registered before the dynamic receipt-ID endpoint.

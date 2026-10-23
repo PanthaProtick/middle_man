@@ -46,7 +46,7 @@ app = FastAPI(
 @app.middleware("http")
 async def protect_public_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
     response = await call_next(request)
-    if request.url.path.startswith((f"{settings.API_PREFIX}/public/orders", f"{settings.API_PREFIX}/seller/transactions/sms-")):
+    if request.url.path.startswith((f"{settings.API_PREFIX}/public/orders", f"{settings.API_PREFIX}/seller/transactions")):
         response.headers["Cache-Control"] = "no-store, private"
         response.headers["Referrer-Policy"] = "no-referrer"
     return response
@@ -112,8 +112,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 app.include_router(api_router, prefix=settings.API_PREFIX)
 app.include_router(seller_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
-app.include_router(transactions_router, prefix=settings.API_PREFIX)
+# Literal SMS paths must precede the receipt-ID route.
 app.include_router(sms_router, prefix=settings.API_PREFIX)
+app.include_router(transactions_router, prefix=settings.API_PREFIX)
 app.include_router(public_orders_router, prefix=settings.API_PREFIX)
 
 

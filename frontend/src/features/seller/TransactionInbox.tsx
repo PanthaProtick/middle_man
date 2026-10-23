@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { RefreshCw, Search, SlidersHorizontal } from 'lucide-react';
 import type { ReceiptView } from './types';
+import { EvidenceResolution } from './EvidenceResolution';
 import { TransactionCard } from './TransactionCard';
 
 interface TransactionInboxProps {
   transactions: ReceiptView[];
+  token?: string;
+  onResolved?: () => void;
   loading?: boolean;
   filter: string;
   onFilterChange: (filter: string) => void;
@@ -15,6 +18,8 @@ interface TransactionInboxProps {
 
 export function TransactionInbox({
   transactions,
+  token,
+  onResolved,
   loading = false,
   filter,
   onFilterChange,
@@ -94,12 +99,14 @@ export function TransactionInbox({
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {transactions.map((tx) => (
+            <React.Fragment key={tx.id}>
             <TransactionCard
-              key={tx.id}
               transaction={tx}
               isExpanded={expandedId === tx.id}
               onToggleExpand={() => toggleExpand(tx.id)}
             />
+            {expandedId === tx.id && token && <EvidenceResolution receiptId={tx.id} token={token} onResolved={onResolved ?? (() => {})} />}
+            </React.Fragment>
           ))}
 
           {nextCursor && onLoadMore && (

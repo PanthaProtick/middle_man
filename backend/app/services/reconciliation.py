@@ -152,6 +152,12 @@ async def _reconcile_order_memory(order_id: str, now: datetime.datetime) -> bool
     if not candidate_tx:
         return False
 
+    from app.services.resolution_history import rejected_revisions
+    rejected = await rejected_revisions(None, order["shop_id"], candidate_tx["id"])
+    if active_rev["id"] in rejected:
+        _memory_order_review_reasons[order_id] = sorted(set(_memory_order_review_reasons.get(order_id, []) + [COMPETING_CLAIMS]))
+        return False
+    competing_order_ids = [oid for oid in competing_order_ids if _memory_buyer_revisions[oid][-1]["id"] not in rejected]
     is_allocated = candidate_tx["id"] in _memory_transaction_allocations or candidate_tx.get("reconciliation_state") in ("used", "allocated")
     digest = compute_payment_digest(order["shop_id"], provider, trx_id)
     marker_exists = (order["shop_id"], provider, digest) in _memory_used_payment_markers

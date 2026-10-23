@@ -1,16 +1,20 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, Query, Response
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.database import get_db
+from app.models.resolution import ReceiptComparison, ResolutionInput
 from app.models.transaction import (
     ManualReceipt,
     ReceiptListResponse,
     ReceiptView,
 )
-from app.services.seller_service import NotFoundError, SellerService
+from app.services.evidence_resolution import resolve_evidence
+from app.services.receipt_comparison import compare_receipt
+from app.services.seller_service import NotFoundError, SellerDomainException, SellerService
 from app.services.transaction_service import TransactionService
 
 router = APIRouter(prefix="/seller/transactions", tags=["seller-transactions"])
@@ -73,3 +77,35 @@ async def list_transactions(
         parse_filter=parse,
     )
     return ReceiptListResponse(items=items, next_cursor=next_cursor)
+
+
+@router.get("/{receipt_id}", response_model=ReceiptComparison)
+async def inspect_receipt(
+    receipt_id: str, response: Response,
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> ReceiptComparison:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if shop is None:
+        raise NotFoundError()
+    return await compare_receipt(db, shop.id, receipt_id)
+
+
+@router.post("/{receipt_id}/resolve", response_model=ReceiptComparison)
+async def resolve_receipt(
+    receipt_id: str, payload: ResolutionInput, response: Response,
+    idempotency_key: str = Header(..., alias="Idempotency-Key", min_length=1, max_length=128),
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> ReceiptComparison:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if shop is None:
+        raise NotFoundError()
+    try:
+        return await resolve_evidence(db, shop.id, seller.owner_id, receipt_id, payload, idempotency_key)
+    except SQLAlchemyError:
+        if db is not None:
+            await db.rollback()
+        raise SellerDomainException(503, "DATABASE_UNAVAILABLE", "Decision outcome unknown. Retry the same decision and key, then refresh.") from None

@@ -12,6 +12,7 @@ from app.core.idempotency import (
 from app.core.tokens import get_utc_now
 from app.models.entities import (
     ReceivedTransactionTable,
+    ShopTable,
     TransactionObservationTable,
 )
 from app.models.transaction import (
@@ -64,6 +65,8 @@ class TransactionService:
         self, shop_id: str, actor_id: str, payload: ManualReceipt, idempotency_key: Optional[str] = None,
         *, source: Literal["manual", "sms"] = "manual", commit: bool = True, reconcile: bool = True,
     ) -> Tuple[ReceiptView, int]:
+        if self.db is not None:
+            await self.db.execute(select(ShopTable).where(ShopTable.id == shop_id).with_for_update())
         await self._verify_account(shop_id, payload.payment_account_id, payload.provider)
 
         payload_hash = compute_payload_hash(payload.model_dump())
@@ -121,7 +124,8 @@ class TransactionService:
                 else:
                     conflict_state = "conflicting"
                     existing.has_conflict = True
-                    existing.reconciliation_state = "conflicted"
+                    if existing.reconciliation_state != "used":
+                        existing.reconciliation_state = "conflicted"
                     existing.version = int(existing.version) + 1
                     existing.updated_at = now
                 status_code = 200
@@ -202,7 +206,8 @@ class TransactionService:
             else:
                 conflict_state = "conflicting"
                 tx_data["has_conflict"] = True
-                tx_data["reconciliation_state"] = "conflicted"
+                if tx_data["reconciliation_state"] != "used":
+                    tx_data["reconciliation_state"] = "conflicted"
                 current_v = int(str(tx_data["version"]))
                 tx_data["version"] = current_v + 1
                 tx_data["updated_at"] = now

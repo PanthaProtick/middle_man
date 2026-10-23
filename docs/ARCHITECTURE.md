@@ -54,3 +54,26 @@ flowchart LR
   ```bash
   npm run check
   ```
+
+
+## Seller evidence resolution
+
+Receipt comparison and resolution use typed seller-only contracts. The existing
+PostgreSQL audit log stores structured resolution decisions; observations remain
+immutable. Rejected claim revision IDs, rather than order IDs alone, hold alternatives
+without giving a decision authority over future revisions. Exact reconciliation
+continues enforcing amount, sender, receiving account, time and single-use rules.
+Resolution never changes an accepted allocation.
+
+Claim admission, manual/SMS observations, seller resolution and recovery reconciliation
+acquire the shop row lock before order/receipt locks. Same-shop writes therefore
+serialize, including absent receipt identities. This trades throughput on unrelated
+payments within a shop for a consistent known-claims snapshot in Phase 1's single
+operator model. Higher write volume would require coordinated payment-identity locks
+across every writer, including identities without a receipt; narrowing one path alone
+would weaken the boundary. Comparison loads review reasons in bulk while the mutation
+holds the lock. Resolution audit, allocation and idempotent outcome commit together.
+
+The memory adapter remains for offline tests. Durable acceptance is separately checked
+against isolated loopback PostgreSQL schemas. Synthetic browser adapters never enable
+public access or establish live authentication readiness for deployment.
