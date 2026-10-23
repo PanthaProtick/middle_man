@@ -6,6 +6,7 @@ import { recordManualTransaction, parseBdtToMinor, SellerApiError } from './api'
 interface ManualTransactionModalProps {
   accounts: PaymentAccount[];
   token?: string;
+  initialAccountId?: string;
   onClose: () => void;
   onTransactionRecorded: (tx: ReceiptView) => void;
   onError?: (msg: string) => void;
@@ -30,13 +31,14 @@ const labelStyle: React.CSSProperties = {
 export function ManualTransactionModal({
   accounts,
   token,
+  initialAccountId,
   onClose,
   onTransactionRecorded,
   onError,
 }: ManualTransactionModalProps): React.JSX.Element {
   const activeAccounts = accounts.filter((a) => a.is_active);
   const [selectedAccountId, setSelectedAccountId] = useState<string>(
-    activeAccounts[0]?.id || ''
+    initialAccountId || activeAccounts[0]?.id || ''
   );
   const [trxId, setTrxId] = useState<string>('');
   const [amountBdt, setAmountBdt] = useState<string>('');

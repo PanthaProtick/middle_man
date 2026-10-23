@@ -31,7 +31,7 @@ if db_url and settings.is_database_configured:
 
     try:
         engine = create_async_engine(
-            db_url, echo=settings.DEBUG, future=True, pool_pre_ping=True, connect_args=connect_args
+            db_url, echo=settings.DEBUG, hide_parameters=True, future=True, pool_pre_ping=True, connect_args=connect_args
         )
         AsyncSessionLocal = async_sessionmaker(
             engine, class_=AsyncSession, expire_on_commit=False, autoflush=False

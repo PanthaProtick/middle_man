@@ -107,8 +107,9 @@ async def configure_faults(body: dict[str, bool]):
 app.mount("/assets", StaticFiles(directory=ROOT / "frontend/dist/assets"))
 
 
+@app.get("/seller")
 @app.get("/orders/{token}")
-async def buyer_page(token: str):
+async def buyer_page(token: str = ""):
     return FileResponse(ROOT / "frontend/dist/index.html", headers={"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"})
 
 

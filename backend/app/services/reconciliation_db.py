@@ -222,6 +222,8 @@ async def _reconcile_order_db_attempt(
     candidate_tx.version = int(candidate_tx.version) + 1
 
     await clear_order_review_reasons_db(db, order_id)
+    # Callers project the accepted amount before committing the enclosing mutation.
+    await db.flush()
     return True
 
 
@@ -249,7 +251,7 @@ async def reconcile_receipt_db(
 
     confirmed: List[str] = []
     for o_id in matching_ids:
-        if await reconcile_order_db(db, o_id, now, digest_calculator):
+        if await reconcile_order_db(db, o_id, now, digest_calculator, max_retries=1):
             confirmed.append(o_id)
     return confirmed
 

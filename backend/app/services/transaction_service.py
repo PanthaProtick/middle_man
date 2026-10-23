@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Optional, Tuple
+from typing import List, Literal, Optional, Tuple
 
 from fastapi import status
 from sqlalchemy import desc, select
@@ -57,6 +57,12 @@ class TransactionService:
 
     async def record_manual_transaction(
         self, shop_id: str, actor_id: str, payload: ManualReceipt, idempotency_key: Optional[str] = None
+    ) -> Tuple[ReceiptView, int]:
+        return await self.record_observation(shop_id, actor_id, payload, idempotency_key)
+
+    async def record_observation(
+        self, shop_id: str, actor_id: str, payload: ManualReceipt, idempotency_key: Optional[str] = None,
+        *, source: Literal["manual", "sms"] = "manual", commit: bool = True, reconcile: bool = True,
     ) -> Tuple[ReceiptView, int]:
         await self._verify_account(shop_id, payload.payment_account_id, payload.provider)
 
@@ -125,7 +131,7 @@ class TransactionService:
                 shop_id=shop_id,
                 transaction_id=existing.id,
                 payment_account_id=payload.payment_account_id,
-                source="manual",
+                source=source,
                 actor=actor_id,
                 amount_minor=payload.amount_minor,
                 sender_number_raw=payload.sender_number,
@@ -136,8 +142,12 @@ class TransactionService:
                 created_at=now,
             )
             self.db.add(obs)
-            await reconcile_receipt(self.db, existing.id)
-            await self.db.commit()
+            await self.db.flush()
+            if reconcile:
+                await reconcile_receipt(self.db, existing.id)
+            await self.db.flush()
+            if commit:
+                await self.db.commit()
 
             stmt_obs = select(TransactionObservationTable).where(
                 TransactionObservationTable.transaction_id == existing.id
@@ -203,7 +213,7 @@ class TransactionService:
             "id": str(uuid.uuid4()),
             "transaction_id": target_id,
             "payment_account_id": payload.payment_account_id,
-            "source": "manual",
+            "source": source,
             "actor": actor_id,
             "amount_minor": payload.amount_minor,
             "sender_number_raw": payload.sender_number,
@@ -214,7 +224,8 @@ class TransactionService:
             "created_at": now,
         }
         _memory_observations[target_id].append(obs_dict)
-        await reconcile_receipt(None, target_id)
+        if reconcile:
+            await reconcile_receipt(None, target_id)
 
         receipt_view = to_receipt_view(tx_data, _memory_observations[target_id])
         if idempotency_key:

@@ -7,6 +7,7 @@ import { AddAccountForm } from './AddAccountForm';
 import { OrderList } from './OrderList';
 import { CreateOrderModal } from './CreateOrderModal';
 import { TransactionInbox } from './TransactionInbox';
+import { SmsImportPanel } from './SmsImportPanel';
 import { ManualTransactionModal } from './ManualTransactionModal';
 
 interface SellerWorkspaceProps {
@@ -26,6 +27,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
   const [transactionsNextCursor, setTransactionsNextCursor] = useState<string | null>(null);
   const [transactionsLoading, setTransactionsLoading] = useState<boolean>(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
+  const [manualAccountId, setManualAccountId] = useState<string>();
   const [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,8 +73,8 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
           setTransactions(res.items);
         }
         setTransactionsNextCursor(res.next_cursor || null);
-      } catch {
-        // Soft-fail in mock/test runs where transaction routes may not be intercepted
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load received payments');
       } finally {
         setTransactionsLoading(false);
       }
@@ -231,6 +233,9 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
             </button>
           </div>
 
+          <SmsImportPanel accounts={accounts} token={token}
+            onManual={(id) => { setManualAccountId(id); setIsRecordModalOpen(true); }}
+            onImported={() => { void loadTransactions(transactionsFilter); void loadOrders(ordersFilter); }} />
           <TransactionInbox
             transactions={transactions}
             loading={transactionsLoading}
@@ -278,9 +283,10 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
 
       {isRecordModalOpen && (
         <ManualTransactionModal
+          initialAccountId={manualAccountId}
           accounts={accounts}
           token={token}
-          onClose={() => setIsRecordModalOpen(false)}
+          onClose={() => { setIsRecordModalOpen(false); setManualAccountId(undefined); }}
           onTransactionRecorded={(newTx) => {
             setTransactions((prev) => {
               const idx = prev.findIndex((t) => t.id === newTx.id);

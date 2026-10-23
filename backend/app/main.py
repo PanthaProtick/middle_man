@@ -13,6 +13,7 @@ from app.api.orders import router as orders_router
 from app.api.public_orders import router as public_orders_router
 from app.api.routes import router as api_router
 from app.api.seller import router as seller_router
+from app.api.sms import router as sms_router
 from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
 from app.core.config import settings
@@ -45,7 +46,7 @@ app = FastAPI(
 @app.middleware("http")
 async def protect_public_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
     response = await call_next(request)
-    if request.url.path.startswith(f"{settings.API_PREFIX}/public/orders"):
+    if request.url.path.startswith((f"{settings.API_PREFIX}/public/orders", f"{settings.API_PREFIX}/seller/transactions/sms-")):
         response.headers["Cache-Control"] = "no-store, private"
         response.headers["Referrer-Policy"] = "no-referrer"
     return response
@@ -100,7 +101,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             message="Request validation failed",
             fields=fields,
         ),
-        detail=jsonable_encoder(exc.errors()),
+        detail=(None if request.url.path.startswith(f"{settings.API_PREFIX}/seller/transactions/sms-")
+                else jsonable_encoder(exc.errors())),
         request_id=request_id,
     )
     return JSONResponse(status_code=422, content=resp_model.model_dump())
@@ -111,6 +113,7 @@ app.include_router(api_router, prefix=settings.API_PREFIX)
 app.include_router(seller_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
 app.include_router(transactions_router, prefix=settings.API_PREFIX)
+app.include_router(sms_router, prefix=settings.API_PREFIX)
 app.include_router(public_orders_router, prefix=settings.API_PREFIX)
 
 
