@@ -74,3 +74,22 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   receipt comparison and mutation responses, including errors, use private/no-store
   headers. Buyer projections expose no decision reasons or competing-claim identities.
 - Literal SMS endpoints are registered before the dynamic receipt-ID endpoint.
+
+## Seller buyer corrections
+
+- Seller-authenticated link resolution and same-shop order authorization are required;
+  a buyer token never authorizes corrections or private history.
+- `PATCH /api/seller/orders/{id}/buyer-details` requires `Idempotency-Key`,
+  `expected_version`, `reason`, and one or more typed buyer fields. Pending payment
+  claims can change; confirmed orders accept delivery fields only. Commercial terms
+  are rejected as unknown fields. Stale versions return 409.
+- Immutable buyer revisions record actor, reason, creation time and a separate
+  `claim_accepted_at`. Delivery-only edits retain the claim bound; payment-claim
+  changes use the server acceptance time. First submission time is preserved.
+- `GET /api/seller/orders/{id}/history` pages revisions by cursor and limit (max 100).
+  All correction/history responses, including failures, are private/no-store.
+- Corrections take the shared shop lock, append a revision, invalidate affected
+  receipt versions, recheck both old and new payment identities, and commit the
+  idempotent result atomically. Pending review reasons describe the latest check.
+- Migration `0008_claim_acceptance_time.sql` backfills existing revisions from their
+  creation time. No shared or hosted migration is implied by local verification.

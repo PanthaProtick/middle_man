@@ -107,11 +107,14 @@ async def _reconcile_order_db_attempt(
     if not active_rev:
         return False
 
+    # Review reasons describe this check of the active revision, not old claims.
+    await clear_order_review_reasons_db(db, order_id)
+
     provider = active_rev.payment_provider
     trx_id = clean_trx_id(active_rev.payment_trx_id)
     sender_canonical = active_rev.payment_sender_canonical
     claimed_amount = int(active_rev.payment_amount_minor)
-    claim_sub_time = active_rev.created_at or order.first_submitted_at or now
+    claim_sub_time = active_rev.claim_accepted_at
 
     # Check competing active claims on matching active revisions
     comp_stmt = select(OrderTable.id).join(

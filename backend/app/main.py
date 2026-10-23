@@ -46,7 +46,7 @@ app = FastAPI(
 @app.middleware("http")
 async def protect_public_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
     response = await call_next(request)
-    if request.url.path.startswith((f"{settings.API_PREFIX}/public/orders", f"{settings.API_PREFIX}/seller/transactions")):
+    if request.url.path.startswith((f"{settings.API_PREFIX}/public/orders", f"{settings.API_PREFIX}/seller/")):
         response.headers["Cache-Control"] = "no-store, private"
         response.headers["Referrer-Policy"] = "no-referrer"
     return response

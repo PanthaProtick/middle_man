@@ -60,6 +60,7 @@ export default function App(): React.JSX.Element {
           </a>
         </header>
         <BuyerPortal portalToken={portalToken} />
+        <p style={{textAlign: 'center'}}><a href={`/?order-link=${encodeURIComponent(portalToken)}`} referrerPolicy="no-referrer">Seller access: correct buyer information</a></p>
       </div>
     );
   }

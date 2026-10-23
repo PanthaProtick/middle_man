@@ -5,6 +5,8 @@ import { formatBangladeshTime, formatRemainingCod } from './api';
 import { OrderDetailModal } from './OrderDetailModal';
 
 interface OrderListProps {
+  token?: string;
+  onCorrected?: (order: SellerOrder) => void;
   orders: SellerOrder[];
   statusFilter: string;
   onFilterChange: (status: string) => void;
@@ -22,6 +24,7 @@ const LIFECYCLE_BADGES: Record<OrderLifecycle, { label: string; bg: string; colo
 };
 
 export function OrderList({
+  token, onCorrected,
   orders,
   statusFilter,
   onFilterChange,
@@ -233,6 +236,8 @@ export function OrderList({
 
       {selectedOrder && (
         <OrderDetailModal
+          token={token}
+          onCorrected={fresh => {setSelectedOrder(fresh); onCorrected?.(fresh);}}
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
         />

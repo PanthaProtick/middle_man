@@ -75,7 +75,7 @@ async def test_duplicate_revision_is_rejected_by_migrated_schema(postgres_buyer)
     response = await client.post(f"/api/public/orders/{order['portal_token']}/submission", json=PAYLOAD, headers={"Idempotency-Key": "unique"})
     assert response.status_code == 200
     with pytest.raises(asyncpg.UniqueViolationError):
-        await connection.execute("INSERT INTO buyer_revisions SELECT 'different-id', order_id, revision_number, buyer_name, contact_number_raw, contact_number_canonical, address_raw, address_district, address_thana, address_area, address_street_line, address_landmark, payment_provider, payment_trx_id, payment_sender_raw, payment_sender_canonical, payment_amount_minor, payment_claimed_at, payment_evidence_id, source, actor, reason, created_at FROM buyer_revisions")
+        await connection.execute("INSERT INTO buyer_revisions SELECT 'different-id', order_id, revision_number, buyer_name, contact_number_raw, contact_number_canonical, address_raw, address_district, address_thana, address_area, address_street_line, address_landmark, payment_provider, payment_trx_id, payment_sender_raw, payment_sender_canonical, payment_amount_minor, payment_claimed_at, payment_evidence_id, source, actor, reason, created_at, claim_accepted_at FROM buyer_revisions")
 
 
 async def test_measurements_separate_repeat_bot_and_status_requests(postgres_buyer):

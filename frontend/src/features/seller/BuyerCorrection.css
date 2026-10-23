@@ -1,0 +1,28 @@
+.buyer-correction {
+  margin: 20px 0;
+  padding: 16px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: rgba(10, 14, 23, 0.6);
+}
+.buyer-correction h3 { margin: 0 0 12px; font-size: 1.05rem; }
+.buyer-correction fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
+.buyer-correction fieldset fieldset { border-top: 1px solid var(--border-subtle); margin-top: 12px; padding-top: 8px; }
+.buyer-correction label { display: grid; gap: 6px; margin: 12px 0; font-size: 0.85rem; }
+.buyer-correction input, .buyer-correction textarea, .buyer-correction select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  padding: 10px;
+  color: var(--text-primary, #f8fafc);
+  background: #111827;
+  border: 1px solid #64748b;
+  border-radius: 6px;
+  font: inherit;
+}
+.buyer-correction textarea { min-height: 76px; resize: vertical; }
+.buyer-correction :disabled { opacity: 0.65; }
+.buyer-correction button { padding: 10px 14px; margin: 8px 0; cursor: pointer; }
+.buyer-correction summary { padding: 12px 0; cursor: pointer; }
+.buyer-correction article { border-top: 1px solid var(--border-subtle); overflow-wrap: anywhere; font-size: 0.85rem; }
+.buyer-correction [role=alert] { color: #fca5a5; }

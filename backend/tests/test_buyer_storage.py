@@ -94,6 +94,7 @@ def test_buyer_revision_storage_and_order_association() -> None:
             id=rev_id,
             order_id=order_id,
             revision_number=1,
+            claim_accepted_at=now,
             buyer_name="Sabbir Ahmed",
             contact_number_raw="০১৭১১-২২৩৩৪৪",
             contact_number_canonical="01711223344",

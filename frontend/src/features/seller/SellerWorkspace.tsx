@@ -9,6 +9,7 @@ import { CreateOrderModal } from './CreateOrderModal';
 import { TransactionInbox } from './TransactionInbox';
 import { SmsImportPanel } from './SmsImportPanel';
 import { ManualTransactionModal } from './ManualTransactionModal';
+import { BuyerCorrection } from './BuyerCorrection';
 
 interface SellerWorkspaceProps {
   token?: string;
@@ -214,7 +215,12 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
         </form>
       ) : (
         <div style={{ marginTop: '20px' }}>
+          {new URLSearchParams(window.location.search).get('order-link') && <BuyerCorrection
+            portalToken={new URLSearchParams(window.location.search).get('order-link')!} token={token}
+            onCorrected={() => {void loadOrders(ordersFilter);}} />}
           <OrderList
+            token={token}
+            onCorrected={() => {void loadOrders(ordersFilter);}}
             orders={orders}
             statusFilter={ordersFilter}
             onFilterChange={handleFilterChange}

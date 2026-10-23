@@ -125,12 +125,13 @@ async def _reconcile_order_memory(order_id: str, now: datetime.datetime) -> bool
     revisions = _memory_buyer_revisions.get(order_id, [])
     if not revisions:
         return False
+    _memory_order_review_reasons.pop(order_id, None)
     active_rev = revisions[-1]
 
     provider = active_rev["payment_provider"]
     trx_id = clean_trx_id(active_rev["payment_trx_id"])
     claimed_amount = int(active_rev["payment_amount_minor"])
-    claim_sub_time = active_rev.get("created_at") or order.get("first_submitted_at") or now
+    claim_sub_time = active_rev.get("claim_accepted_at") or active_rev.get("created_at") or order.get("first_submitted_at") or now
 
     competing_order_ids = [
         o_id for o_id, rev_list in _memory_buyer_revisions.items()

@@ -96,6 +96,7 @@ class BuyerRevisionTable(Base):
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     order_id: Mapped[str] = mapped_column(String(36), ForeignKey("orders.id"), nullable=False, index=True)
     revision_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    claim_accepted_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     buyer_name: Mapped[str] = mapped_column(String(200), nullable=False)
     contact_number_raw: Mapped[str] = mapped_column(String(32), nullable=False)
     contact_number_canonical: Mapped[str] = mapped_column(String(20), nullable=False)

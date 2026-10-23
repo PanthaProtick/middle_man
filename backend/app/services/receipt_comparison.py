@@ -40,7 +40,7 @@ async def compare_receipt(db: AsyncSession | None, shop_id: str, receipt_id: str
             reasons_by_order.setdefault(order_id, []).append(reason)
         claims = [ClaimComparison(order_id=o.id, revision_id=r.id, lifecycle=o.lifecycle,
                   buyer_name=r.buyer_name, sender_number=r.payment_sender_canonical,
-                  amount_minor=r.payment_amount_minor, submitted_at=r.created_at,
+                  amount_minor=r.payment_amount_minor, submitted_at=r.claim_accepted_at,
                   review_reasons=sorted(reasons_by_order.get(o.id, []))) for o, r in rows]
     else:
         from app.services.buyer_service import _memory_buyer_revisions
@@ -59,7 +59,7 @@ async def compare_receipt(db: AsyncSession | None, shop_id: str, receipt_id: str
                 continue
             claims.append(ClaimComparison(order_id=order_id, revision_id=revision["id"], lifecycle=order["lifecycle"],
                           buyer_name=revision["buyer_name"], sender_number=revision["payment_sender_canonical"],
-                          amount_minor=revision["payment_amount_minor"], submitted_at=revision["created_at"],
+                          amount_minor=revision["payment_amount_minor"], submitted_at=revision["claim_accepted_at"],
                           review_reasons=await get_order_review_reasons(None, order_id)))
     history = await resolution_history(db, shop_id, receipt_id)
     rejected = set(history[-1].rejected_revision_ids) if history else set()

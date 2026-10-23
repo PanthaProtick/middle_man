@@ -10,6 +10,7 @@ def buyer_revision(submission: BuyerSubmission, order_id: str, now: datetime.dat
         "id": str(uuid.uuid4()),
         "order_id": order_id,
         "revision_number": 1,
+        "claim_accepted_at": now,
         "buyer_name": submission.buyer_name,
         "contact_number_raw": submission.contact_number_raw,
         "contact_number_canonical": submission.contact_number_canonical,

@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.database import get_db
+from app.models.correction import BuyerCorrection, BuyerHistory
 from app.models.order import (
     OrderInput,
     ResolveOrderLinkInput,
@@ -12,10 +13,39 @@ from app.models.order import (
     SellerOrder,
     SellerOrderListResponse,
 )
+from app.services.buyer_correction import correct, history
 from app.services.order_service import OrderService
 from app.services.seller_service import NotFoundError, SellerService
 
 router = APIRouter(prefix="/seller", tags=["seller-orders"])
+
+
+@router.patch('/orders/{order_id}/buyer-details', response_model=SellerOrder)
+async def correct_buyer_details(
+    order_id: str, payload: BuyerCorrection, response: Response,
+    idempotency_key: str = Header(..., alias='Idempotency-Key', min_length=1, max_length=64),
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> SellerOrder:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError('Order not found')
+    return await correct(db, shop.id, seller.owner_id, order_id, payload, idempotency_key)
+
+
+@router.get('/orders/{order_id}/history', response_model=BuyerHistory)
+async def buyer_history(
+    order_id: str, response: Response, cursor: Optional[str] = Query(None, max_length=36),
+    limit: int = Query(25, ge=1, le=100),
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> BuyerHistory:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError('Order not found')
+    return await history(db, shop.id, order_id, cursor, limit)
 
 
 def _set_security_headers(response: Response) -> None:

@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import { X, Copy, Check, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { SellerOrder } from './types';
 import { formatBangladeshTime, formatRemainingCod } from './api';
+import { BuyerCorrection } from './BuyerCorrection';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
   onClose: () => void;
+  token?: string;
+  onCorrected?: (order: SellerOrder) => void;
 }
 
-export function OrderDetailModal({ order, onClose }: OrderDetailModalProps): React.JSX.Element {
+export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected }: OrderDetailModalProps): React.JSX.Element {
+  const [order, setOrder] = useState(initialOrder);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -49,6 +53,8 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps): Rea
           border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
           padding: '24px',
+          maxHeight: '90vh',
+          overflowY: 'auto',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
@@ -186,6 +192,7 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps): Rea
           </div>
         </div>
 
+        {token && order.buyer_revision && <BuyerCorrection key={order.id} orderId={order.id} token={token} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button className="btn btn-primary" onClick={handleCopy}>
