@@ -20,6 +20,7 @@ from app.models.transaction import (
     ParseState,
     ReceiptView,
 )
+from app.services.reconciliation import reconcile_receipt
 from app.services.seller_service import (
     NotFoundError,
     SellerDomainException,
@@ -135,6 +136,7 @@ class TransactionService:
                 created_at=now,
             )
             self.db.add(obs)
+            await reconcile_receipt(self.db, existing.id)
             await self.db.commit()
 
             stmt_obs = select(TransactionObservationTable).where(
@@ -212,6 +214,7 @@ class TransactionService:
             "created_at": now,
         }
         _memory_observations[target_id].append(obs_dict)
+        await reconcile_receipt(None, target_id)
 
         receipt_view = to_receipt_view(tx_data, _memory_observations[target_id])
         if idempotency_key:

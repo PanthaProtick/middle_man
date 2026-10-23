@@ -15,6 +15,7 @@ from app.services.buyer_measurements import _memory_link_measurements, record_me
 from app.services.buyer_projection import to_public_order
 from app.services.buyer_revision import buyer_revision
 from app.services.order_service import _check_and_apply_expiry, _memory_orders, _memory_orders_by_digest
+from app.services.reconciliation import get_order_allocation, reconcile_order
 from app.services.seller_service import NotFoundError, SellerDomainException, compute_payload_hash
 
 
@@ -66,7 +67,9 @@ class BuyerService:
             if order.first_submitted_at is None:
                 await record_measurement(self.db, digest, "open", now, is_bot)
             _check_and_apply_expiry(order, now)
-            public_order = to_public_order(order, await self._shop_name(order.shop_id))
+            alloc = await get_order_allocation(self.db, order.id) if order.lifecycle == "confirmed" else None
+            accepted_amount = alloc.accepted_amount_minor if alloc else None
+            public_order = to_public_order(order, await self._shop_name(order.shop_id), accepted_amount_minor=accepted_amount)
             await self.db.commit()
             return public_order
 
@@ -78,7 +81,9 @@ class BuyerService:
         if raw.get("first_submitted_at") is None:
             await record_measurement(None, digest, "open", now, is_bot)
         _check_and_apply_expiry(raw, now)
-        return to_public_order(raw, await self._shop_name(str(raw["shop_id"])))
+        alloc = await get_order_allocation(None, order_id) if raw.get("lifecycle") == "confirmed" else None
+        accepted_amount = alloc.accepted_amount_minor if alloc else None
+        return to_public_order(raw, await self._shop_name(str(raw["shop_id"])), accepted_amount_minor=accepted_amount)
 
     async def submit_buyer_details(self, portal_token: str, submission: BuyerSubmission, idempotency_key: str) -> tuple[PublicOrder, int]:
         # Hashing scopes avoids persisting the bearer token and bounds composite key length.
@@ -103,7 +108,13 @@ class BuyerService:
             order.version += 1
             order.updated_at = now
             await record_measurement(self.db, digest, "submission", now)
-            public_order = to_public_order(order, await self._shop_name(order.shop_id))
+
+            # Trigger reconciliation against shop receipts
+            await reconcile_order(self.db, order.id, clock=self.clock)
+
+            alloc = await get_order_allocation(self.db, order.id) if order.lifecycle == "confirmed" else None
+            accepted_amount = alloc.accepted_amount_minor if alloc else None
+            public_order = to_public_order(order, await self._shop_name(order.shop_id), accepted_amount_minor=accepted_amount)
             await save_idempotency_record(self.db, idempotency_key, digest, "buyer_submission", payload_hash, 200, public_order.model_dump(mode="json"), commit=False)
             await self.db.commit()
             return public_order, 200
@@ -121,6 +132,12 @@ class BuyerService:
         _memory_buyer_revisions[order_id] = [buyer_revision(submission, order_id, now)]
         raw.update(lifecycle="pending", buyer_revision=1, first_submitted_at=now, version=int(raw.get("version", 1)) + 1, updated_at=now)
         await record_measurement(None, digest, "submission", now)
-        public_order = to_public_order(raw, await self._shop_name(str(raw["shop_id"])))
+
+        # Trigger reconciliation against shop receipts
+        await reconcile_order(None, order_id, clock=self.clock)
+
+        alloc = await get_order_allocation(None, order_id) if raw.get("lifecycle") == "confirmed" else None
+        accepted_amount = alloc.accepted_amount_minor if alloc else None
+        public_order = to_public_order(raw, await self._shop_name(str(raw["shop_id"])), accepted_amount_minor=accepted_amount)
         await save_idempotency_record(None, idempotency_key, digest, "buyer_submission", payload_hash, 200, public_order.model_dump(mode="json"))
         return public_order, 200

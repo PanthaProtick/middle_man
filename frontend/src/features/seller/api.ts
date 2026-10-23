@@ -80,6 +80,18 @@ export function parseBdtToMinor(bdtStr: string): number {
   return Number(minor);
 }
 
+export function formatRemainingCod(order: {
+  lifecycle: string;
+  actual_cod_minor: number | null;
+  expected_cod_minor: number;
+}): string {
+  const minor =
+    order.lifecycle === 'confirmed' && order.actual_cod_minor !== null
+      ? order.actual_cod_minor
+      : order.expected_cod_minor;
+  return `BDT ${(minor / 100).toLocaleString()}`;
+}
+
 export class SellerApiError extends Error {
   code: string;
   fields?: ApiError['fields'];

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, Optional
 
 from pydantic import BaseModel, ConfigDict
 
@@ -39,13 +39,22 @@ def get_status_message(lifecycle: str) -> str:
     return f"Order status: {lifecycle}"
 
 
-def to_public_order(order: OrderTable | dict[str, Any], shop_display_name: str) -> PublicOrder:
+def to_public_order(
+    order: OrderTable | dict[str, Any],
+    shop_display_name: str,
+    accepted_amount_minor: Optional[int] = None,
+) -> PublicOrder:
     terms = PublicTerms.model_validate(order)
+    actual_cod = (
+        terms.total_minor - accepted_amount_minor
+        if terms.lifecycle == "confirmed" and accepted_amount_minor is not None
+        else None
+    )
     return PublicOrder(
         **terms.model_dump(),
         shop_display_name=shop_display_name,
         expected_cod_minor=terms.total_minor - terms.required_advance_minor,
-        actual_cod_minor=None,
+        actual_cod_minor=actual_cod,
         status_message=get_status_message(terms.lifecycle),
         submission_acknowledgement=f"ACK-{terms.id[:8].upper()}" if terms.lifecycle in ("pending", "confirmed") else None,
     )

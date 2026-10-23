@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Clock, ShieldCheck, Package, ExternalLink } from 'lucide-react';
+import { X, Copy, Check, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { SellerOrder } from './types';
-import { formatBangladeshTime } from './api';
+import { formatBangladeshTime, formatRemainingCod } from './api';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -24,6 +24,8 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps): Rea
   };
 
   const isExpired = order.lifecycle === 'expired';
+  const isConfirmed = order.lifecycle === 'confirmed';
+  const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
 
   return (
     <div
@@ -81,12 +83,68 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps): Rea
             </div>
           </div>
           <div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Expected Remaining COD</div>
-            <div style={{ fontSize: '0.95rem', fontWeight: 600, color: '#a5b4fc' }}>
-              BDT {(order.expected_cod_minor / 100).toLocaleString()}
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              {isConfirmed ? 'Actual Remaining COD' : 'Expected Remaining COD'}
+            </div>
+            <div style={{ fontSize: '0.95rem', fontWeight: 600, color: isConfirmed ? '#34d399' : '#a5b4fc' }}>
+              {formatRemainingCod(order)}
             </div>
           </div>
         </div>
+
+        {isConfirmed && (
+          <div style={{ marginBottom: '16px', background: 'rgba(16, 185, 129, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#86efac', marginBottom: '6px' }}>
+              <CheckCircle2 size={14} /> Confirmed Payment Allocation
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '0.8rem' }}>
+              <div>
+                <span style={{ color: 'var(--text-secondary)' }}>Basis: </span>
+                <span style={{ fontWeight: 600, color: '#f1f5f9', textTransform: 'capitalize' }}>
+                  {order.allocation_basis ?? 'automatic'}
+                </span>
+              </div>
+              <div>
+                <span style={{ color: 'var(--text-secondary)' }}>Accepted Advance: </span>
+                <span style={{ fontWeight: 600, color: '#38bdf8' }}>
+                  BDT {((order.total_minor - (order.actual_cod_minor ?? order.expected_cod_minor)) / 100).toLocaleString()}
+                </span>
+              </div>
+              {order.completed_at && (
+                <div style={{ gridColumn: 'span 2' }}>
+                  <span style={{ color: 'var(--text-secondary)' }}>Confirmed At: </span>
+                  <span style={{ color: '#cbd5e1' }}>{formatBangladeshTime(order.completed_at)}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {hasReviewReasons && (
+          <div style={{ marginBottom: '16px', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#fca5a5', marginBottom: '6px' }}>
+              <AlertTriangle size={14} /> Review Required / অসঙ্গতি পাওয়া গেছে
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+              {order.review_reasons.map((reason) => (
+                <span
+                  key={reason}
+                  style={{
+                    background: 'rgba(239, 68, 68, 0.2)',
+                    border: '1px solid rgba(239, 68, 68, 0.4)',
+                    color: '#fecaca',
+                    fontSize: '0.75rem',
+                    padding: '2px 8px',
+                    borderRadius: '4px',
+                    fontFamily: 'monospace',
+                  }}
+                >
+                  {reason}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ marginBottom: '16px', background: 'rgba(10, 14, 23, 0.6)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: '#c7d2fe', marginBottom: '6px' }}>

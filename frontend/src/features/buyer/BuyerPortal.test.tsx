@@ -176,4 +176,29 @@ describe('BuyerPortal Component', () => {
     expect(container.querySelector('button')?.textContent).toContain('Retry');
     expect(container.textContent).toContain('Unable to load order. Please retry.');
   });
+
+  it('displays confirmed order status immediately with actual COD balance', async () => {
+    const mockConfirmedOrder: PublicOrder = {
+      ...mockPublicOrderAwaiting,
+      lifecycle: 'confirmed',
+      actual_cod_minor: 300000,
+      expected_cod_minor: 300000,
+      status_message: 'Your order has been confirmed by the seller.',
+      submission_acknowledgement: 'ACK-ORDER-1',
+      completed_at: '2026-10-24T10:05:00Z',
+    };
+
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(
+      new Response(JSON.stringify(mockConfirmedOrder), { status: 200 })
+    );
+
+    await act(async () => {
+      root.render(<BuyerPortal portalToken="mock-token-confirmed" />);
+    });
+
+    expect(container.textContent).toContain('Order Confirmed');
+    expect(container.textContent).toContain('Remaining COD');
+    expect(container.textContent).toContain('৳3,000.00');
+    expect(container.textContent).toContain('ACK-ORDER-1');
+  });
 });

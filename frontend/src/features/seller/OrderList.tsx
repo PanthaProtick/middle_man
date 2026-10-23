@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Copy, Check, Clock, AlertTriangle, Eye } from 'lucide-react';
 import type { OrderLifecycle, SellerOrder } from './types';
-import { formatBangladeshTime } from './api';
+import { formatBangladeshTime, formatRemainingCod } from './api';
 import { OrderDetailModal } from './OrderDetailModal';
 
 interface OrderListProps {
@@ -43,12 +43,21 @@ export function OrderList({
     }
   };
 
+  const confirmedCount = orders.filter((o) => o.lifecycle === 'confirmed').length;
+  const exceptionCount = orders.filter((o) => o.lifecycle === 'pending' && o.review_reasons?.length > 0).length;
+
   return (
     <div style={{ marginTop: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
-        <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', margin: 0 }}>
-          Orders & Active Buyer Links ({orders.length})
-        </h4>
+        <div>
+          <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', margin: 0 }}>
+            Orders & Active Buyer Links ({orders.length})
+          </h4>
+          <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', marginTop: '4px' }}>
+            <span style={{ color: '#34d399' }}>✓ Confirmed: {confirmedCount}</span>
+            {exceptionCount > 0 && <span style={{ color: '#fca5a5' }}>⚠ Review Exceptions: {exceptionCount}</span>}
+          </div>
+        </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
           <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status:</label>
@@ -159,8 +168,12 @@ export function OrderList({
                     <span style={{ color: '#38bdf8', fontWeight: 500 }}>BDT {(ord.required_advance_minor / 100).toLocaleString()}</span>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>Expected COD: </span>
-                    <span style={{ color: '#a5b4fc', fontWeight: 600 }}>BDT {(ord.expected_cod_minor / 100).toLocaleString()}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>
+                      {ord.lifecycle === 'confirmed' ? 'Actual COD: ' : 'Expected COD: '}
+                    </span>
+                    <span style={{ color: ord.lifecycle === 'confirmed' ? '#34d399' : '#a5b4fc', fontWeight: 600 }}>
+                      {formatRemainingCod(ord)}
+                    </span>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-secondary)' }}>Account: </span>
@@ -169,6 +182,30 @@ export function OrderList({
                     </span>
                   </div>
                 </div>
+
+                {ord.lifecycle === 'pending' && ord.review_reasons && ord.review_reasons.length > 0 && (
+                  <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: '0.725rem', color: '#fca5a5', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                      <AlertTriangle size={11} /> Review:
+                    </span>
+                    {ord.review_reasons.map((r) => (
+                      <span
+                        key={r}
+                        style={{
+                          fontSize: '0.7rem',
+                          padding: '1px 6px',
+                          background: 'rgba(239, 68, 68, 0.2)',
+                          border: '1px solid rgba(239, 68, 68, 0.3)',
+                          color: '#fca5a5',
+                          borderRadius: '4px',
+                          fontFamily: 'monospace',
+                        }}
+                      >
+                        {r}
+                      </span>
+                    ))}
+                  </div>
+                )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: '#94a3b8', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '6px' }}>
                   <div>Created: {formatBangladeshTime(ord.created_at)}</div>

@@ -85,6 +85,8 @@ class OrderTable(Base):
     shop: Mapped["ShopTable"] = relationship("ShopTable", back_populates="orders")
     payment_account: Mapped["PaymentAccountTable"] = relationship("PaymentAccountTable")
     revisions: Mapped[list["BuyerRevisionTable"]] = relationship("BuyerRevisionTable", back_populates="order")
+    allocation: Mapped["AllocationTable | None"] = relationship("AllocationTable", back_populates="order", uselist=False)
+    review_reasons: Mapped[list["OrderReviewReasonTable"]] = relationship("OrderReviewReasonTable", back_populates="order")
 
 
 class BuyerRevisionTable(Base):
@@ -197,4 +199,68 @@ class TransactionObservationTable(Base):
         "ReceivedTransactionTable", back_populates="observations"
     )
     payment_account: Mapped["PaymentAccountTable"] = relationship("PaymentAccountTable")
+
+
+class AllocationTable(Base):
+    __tablename__ = "allocations"
+    __table_args__ = (
+        UniqueConstraint("order_id", name="uq_allocations_order_id"),
+        UniqueConstraint("transaction_id", name="uq_allocations_transaction_id"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
+    order_id: Mapped[str] = mapped_column(String(36), ForeignKey("orders.id"), nullable=False, index=True)
+    transaction_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("received_transactions.id"), nullable=False, index=True
+    )
+    accepted_amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    basis: Mapped[str] = mapped_column(String(32), default="automatic", nullable=False)
+    actor: Mapped[str] = mapped_column(String(128), nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    order: Mapped["OrderTable"] = relationship("OrderTable", back_populates="allocation")
+    transaction: Mapped["ReceivedTransactionTable"] = relationship("ReceivedTransactionTable")
+
+
+class UsedPaymentMarkerTable(Base):
+    __tablename__ = "used_payment_markers"
+    __table_args__ = (
+        UniqueConstraint("shop_id", "provider", "transaction_digest", name="uq_used_payment_markers_digest"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    transaction_digest: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class AuditEventTable(Base):
+    __tablename__ = "audit_events"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
+    aggregate_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    aggregate_id: Mapped[str] = mapped_column(String(36), nullable=False)
+    actor: Mapped[str] = mapped_column(String(128), nullable=False)
+    action: Mapped[str] = mapped_column(String(64), nullable=False)
+    details: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+
+class OrderReviewReasonTable(Base):
+    __tablename__ = "order_review_reasons"
+    __table_args__ = (
+        UniqueConstraint("order_id", "reason", name="uq_order_review_reason"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    order_id: Mapped[str] = mapped_column(String(36), ForeignKey("orders.id"), nullable=False, index=True)
+    reason: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    order: Mapped["OrderTable"] = relationship("OrderTable", back_populates="review_reasons")
+
 

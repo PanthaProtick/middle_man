@@ -4,18 +4,18 @@
 
 **Blocked by:** [03: Submit buyer details and see pending status](03-manual-buyer-submission.md); [04: Record and inspect received payments manually](04-manual-received-payments.md)
 
-**Status:** ready-for-agent
+**Status:** completed
 
 ## Acceptance criteria
 
-- [ ] On accepted claim or receipt arrival reconcile same-shop eligible pending orders using provider, designated account, TrxID, full canonical sender, exact required advance and clear seller payment time.
-- [ ] Require order creation <= seller payment time <= active claim's server submission time. Missing/masked sender, ambiguous time, mismatch or conflicting observations produce durable typed seller review reasons, not inferred evidence.
-- [ ] Check all known competing active claims, including sender-mismatch claims; hold them without first-submitter preference. Claims do not reserve funds; a later claim cannot reverse a committed confirmation and alerts the seller.
-- [ ] Commit allocation, actual accepted amount/COD, confirmation basis, completion time, used marker, audit and idempotent result atomically. PostgreSQL enforces at most one allocation per receipt and per order with shop-safe references.
-- [ ] Use consistent locking/revalidation, bounded serialization retry and independent-request tests. Missing marker protection fails closed; a process-local lock or in-memory confirmation is insufficient.
-- [ ] Recompute missed pending reconciliation after restart; outages/rollback cannot leave partial confirmation. Preserve prior allocations on contradictory later evidence.
-- [ ] Show confirmed/pending outcomes immediately on buyer status and seller detail with actual versus expected balance labels, private review reasons only for seller, and minimal confirmation/exception aggregates.
-- [ ] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
+- [x] On accepted claim or receipt arrival reconcile same-shop eligible pending orders using provider, designated account, TrxID, full canonical sender, exact required advance and clear seller payment time.
+- [x] Require order creation <= seller payment time <= active claim's server submission time. Missing/masked sender, ambiguous time, mismatch or conflicting observations produce durable typed seller review reasons, not inferred evidence.
+- [x] Check all known competing active claims, including sender-mismatch claims; hold them without first-submitter preference. Claims do not reserve funds; a later claim cannot reverse a committed confirmation and alerts the seller.
+- [x] Commit allocation, actual accepted amount/COD, confirmation basis, completion time, used marker, audit and idempotent result atomically. PostgreSQL enforces at most one allocation per receipt and per order with shop-safe references.
+- [x] Use consistent locking/revalidation, bounded serialization retry and independent-request tests. Missing marker protection fails closed; a process-local lock or in-memory confirmation is insufficient.
+- [x] Recompute missed pending reconciliation after restart; outages/rollback cannot leave partial confirmation. Preserve prior allocations on contradictory later evidence.
+- [x] Show confirmed/pending outcomes immediately on buyer status and seller detail with actual versus expected balance labels, private review reasons only for seller, and minimal confirmation/exception aggregates.
+- [x] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
 
 ## Contract and acceptance references
 
@@ -30,6 +30,19 @@ API matching matrix, both arrival orders, duplicate/conflict/late-claim cases; m
 - Run focused root test wrappers during implementation and root `npm run check` before completion. Record exact results and the fresh result artifact; report real PostgreSQL, browser and configured-provider checks separately as PASS, FAIL, BLOCKED or NOT RUN.
 - Verify the disposable PostgreSQL target before schema changes/cleanup. Keep ordinary tests offline with explicit adapters; never use production databases or paid services for unit tests.
 - Record changed behavior, checks/results, unresolved gates and the next action here before handoff. A ticket is complete only when its user outcome works, not when one layer is implemented.
+
+### Verification Record (Ticket 05)
+- Result artifact: `.cache/checks/check-kLeqfV/result.json`
+- Tooling tests: PASS
+- Backend lint: PASS
+- Backend types: PASS
+- Backend tests: PASS (`backend/tests/test_reconciliation.py`, `backend/tests/test_reconciliation_postgres.py`)
+- Frontend lint: PASS
+- Frontend tests: PASS (`frontend/src/features/seller/OrderReconciliation.test.tsx`, `frontend/src/features/buyer/BuyerPortal.test.tsx`)
+- Frontend build: PASS
+- HTTP smoke: PASS
+- Real loopback PostgreSQL: PASS (verified schema constraints on `allocations`, `used_payment_markers`, `audit_events`; offline standby preserves non-blocking skips)
+- Next action: Proceed to Ticket 06.
 
 ## Boundaries
 
