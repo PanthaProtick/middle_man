@@ -5,6 +5,7 @@ import TechStackBar from './components/TechStackBar';
 import { GeminiPlayground } from './features/gemini';
 import { DataExplorer } from './features/items';
 import { SellerWorkspace } from './features/seller';
+import { BuyerPortal } from './features/buyer';
 import { fetchHealth, type HealthStatus } from './services/api';
 
 type TabType = 'seller' | 'gemini' | 'database' | 'setup';
@@ -13,6 +14,10 @@ export default function App(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<TabType>('seller');
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
+  const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
+  const isOrderPortal = pathname.startsWith('/orders/');
+  const portalToken = isOrderPortal ? pathname.replace('/orders/', '').trim() : '';
+
   useEffect(() => {
     fetchHealth().then(setHealth);
     const interval = setInterval(() => {
@@ -20,6 +25,44 @@ export default function App(): React.JSX.Element {
     }, 10000);
     return () => clearInterval(interval);
   }, []);
+
+  if (isOrderPortal && portalToken) {
+    return (
+      <div className="app-container" style={{ minHeight: '100vh', padding: '16px 8px' }}>
+        <header
+          style={{
+            maxWidth: '480px',
+            margin: '0 auto 16px auto',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            borderBottom: '1px solid var(--border-subtle)',
+            paddingBottom: '12px',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc' }}>
+              F-Commerce Order Confirmation
+            </span>
+          </div>
+          <a
+            href="/"
+            style={{
+              fontSize: '0.8rem',
+              color: '#818cf8',
+              textDecoration: 'none',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              background: 'rgba(99, 102, 241, 0.1)',
+            }}
+          >
+            ← Back to Home
+          </a>
+        </header>
+        <BuyerPortal portalToken={portalToken} />
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">

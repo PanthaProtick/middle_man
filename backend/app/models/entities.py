@@ -75,6 +75,8 @@ class OrderTable(Base):
     # Lifecycle and versions
     lifecycle: Mapped[str] = mapped_column(String(32), default="awaiting_buyer", nullable=False, index=True)
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    buyer_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    first_submitted_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
@@ -82,6 +84,47 @@ class OrderTable(Base):
 
     shop: Mapped["ShopTable"] = relationship("ShopTable", back_populates="orders")
     payment_account: Mapped["PaymentAccountTable"] = relationship("PaymentAccountTable")
+    revisions: Mapped[list["BuyerRevisionTable"]] = relationship("BuyerRevisionTable", back_populates="order")
+
+
+class BuyerRevisionTable(Base):
+    __tablename__ = "buyer_revisions"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    order_id: Mapped[str] = mapped_column(String(36), ForeignKey("orders.id"), nullable=False, index=True)
+    revision_number: Mapped[int] = mapped_column(Integer, nullable=False)
+    buyer_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    contact_number_raw: Mapped[str] = mapped_column(String(32), nullable=False)
+    contact_number_canonical: Mapped[str] = mapped_column(String(20), nullable=False)
+    address_raw: Mapped[str] = mapped_column(Text, nullable=False)
+    address_district: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    address_thana: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    address_area: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    address_street_line: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    address_landmark: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    payment_provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    payment_trx_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    payment_sender_raw: Mapped[str] = mapped_column(String(32), nullable=False)
+    payment_sender_canonical: Mapped[str] = mapped_column(String(20), nullable=False)
+    payment_amount_minor: Mapped[int] = mapped_column(Integer, nullable=False)
+    payment_claimed_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    payment_evidence_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    source: Mapped[str] = mapped_column(String(32), default="buyer", nullable=False)
+    actor: Mapped[str] = mapped_column(String(32), default="buyer", nullable=False)
+    reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    order: Mapped["OrderTable"] = relationship("OrderTable", back_populates="revisions")
+
+
+class LinkMeasurementTable(Base):
+    __tablename__ = "link_measurements"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    token_lookup_digest: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    event_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    is_bot_or_repeat: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
 
 class IdempotencyRecordTable(Base):

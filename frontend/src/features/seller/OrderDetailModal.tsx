@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Clock, ShieldCheck, Package } from 'lucide-react';
+import { X, Copy, Check, Clock, ShieldCheck, Package, ExternalLink } from 'lucide-react';
 import type { SellerOrder } from './types';
 import { formatBangladeshTime } from './api';
 
@@ -129,19 +129,31 @@ export function OrderDetailModal({ order, onClose }: OrderDetailModalProps): Rea
         </div>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
-          <button className="btn btn-primary" onClick={handleCopy}>
-            {copied ? (
-              <>
-                <Check size={14} color="#34d399" />
-                <span style={{ color: '#34d399' }}>Copied Buyer Link</span>
-              </>
-            ) : (
-              <>
-                <Copy size={14} />
-                <span>Copy Buyer Link</span>
-              </>
-            )}
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn btn-primary" onClick={handleCopy}>
+              {copied ? (
+                <>
+                  <Check size={14} color="#34d399" />
+                  <span style={{ color: '#34d399' }}>Copied Buyer Link</span>
+                </>
+              ) : (
+                <>
+                  <Copy size={14} />
+                  <span>Copy Buyer Link</span>
+                </>
+              )}
+            </button>
+            <a
+              href={order.portal_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-secondary"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
+            >
+              <ExternalLink size={14} />
+              <span>Open Portal</span>
+            </a>
+          </div>
           <button className="btn btn-secondary" onClick={onClose}>
             Close
           </button>

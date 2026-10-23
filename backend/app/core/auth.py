@@ -64,10 +64,11 @@ async def get_seller_identity(
     if not token:
         raise AuthenticationError("Empty authentication token")
 
-    if settings.ENV == "development":
+    if settings.ENV in ("development", "test"):
         dev_identity = _dev_identity_adapter.verify(token)
         if dev_identity is not None:
             return dev_identity
+        raise AuthenticationError("Invalid authentication credentials")
 
     if not settings.is_clerk_configured:
         # If in live mode but no verifier configured or unreachable:

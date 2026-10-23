@@ -39,6 +39,8 @@ def reset_order_memory_store() -> None:
     _memory_orders.clear()
     _memory_orders_by_digest.clear()
     reset_shared_idempotency_store()
+    from app.services.buyer_service import reset_buyer_memory_store
+    reset_buyer_memory_store()
 
 
 def _check_and_apply_expiry(record: Any, now: datetime.datetime) -> bool:
