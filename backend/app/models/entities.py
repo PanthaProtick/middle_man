@@ -142,3 +142,59 @@ class IdempotencyRecordTable(Base):
         default=lambda: datetime.datetime.now(datetime.timezone.utc),
         nullable=False,
     )
+
+
+class ReceivedTransactionTable(Base):
+    __tablename__ = "received_transactions"
+    __table_args__ = (
+        UniqueConstraint("shop_id", "provider", "trx_id", name="uq_received_transactions_identity"),
+    )
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
+    payment_account_id: Mapped[str] = mapped_column(String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    trx_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    sender_number_raw: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    sender_number_canonical: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    occurred_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reconciliation_state: Mapped[str] = mapped_column(String(32), default="unmatched", nullable=False, index=True)
+    has_conflict: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    shop: Mapped["ShopTable"] = relationship("ShopTable")
+    payment_account: Mapped["PaymentAccountTable"] = relationship("PaymentAccountTable")
+    observations: Mapped[list["TransactionObservationTable"]] = relationship(
+        "TransactionObservationTable", back_populates="transaction"
+    )
+
+
+class TransactionObservationTable(Base):
+    __tablename__ = "transaction_observations"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
+    transaction_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("received_transactions.id"), nullable=False, index=True
+    )
+    payment_account_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True
+    )
+    source: Mapped[str] = mapped_column(String(32), default="manual", nullable=False)
+    actor: Mapped[str] = mapped_column(String(128), nullable=False)
+    amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    sender_number_raw: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    sender_number_canonical: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    occurred_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    parse_state: Mapped[str] = mapped_column(String(32), default="valid", nullable=False)
+    conflict_state: Mapped[str] = mapped_column(String(32), default="none", nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    transaction: Mapped["ReceivedTransactionTable"] = relationship(
+        "ReceivedTransactionTable", back_populates="observations"
+    )
+    payment_account: Mapped["PaymentAccountTable"] = relationship("PaymentAccountTable")
+

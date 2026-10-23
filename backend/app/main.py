@@ -13,6 +13,7 @@ from app.api.orders import router as orders_router
 from app.api.public_orders import router as public_orders_router
 from app.api.routes import router as api_router
 from app.api.seller import router as seller_router
+from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
 from app.core.config import settings
 from app.models.seller import ErrorBody, ErrorFieldItem, StandardErrorResponse
@@ -109,6 +110,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 app.include_router(api_router, prefix=settings.API_PREFIX)
 app.include_router(seller_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
+app.include_router(transactions_router, prefix=settings.API_PREFIX)
 app.include_router(public_orders_router, prefix=settings.API_PREFIX)
 
 

@@ -161,6 +161,32 @@ class SellerService:
             if a["shop_id"] == shop_id
         ]
 
+    async def get_payment_account(self, shop_id: str, account_id: str) -> Optional[PaymentAccountResponse]:
+        if self.db is not None:
+            stmt = select(PaymentAccountTable).where(
+                PaymentAccountTable.id == account_id,
+                PaymentAccountTable.shop_id == shop_id,
+            )
+            result = await self.db.execute(stmt)
+            acc = result.scalar_one_or_none()
+            if not acc:
+                return None
+            return PaymentAccountResponse(
+                id=str(acc.id),
+                shop_id=str(acc.shop_id),
+                provider=str(acc.provider),
+                receiving_number=str(acc.receiving_number),
+                label=str(acc.label),
+                is_active=bool(acc.is_active),
+                version=int(acc.version),
+                created_at=acc.created_at,
+                updated_at=acc.updated_at,
+            )
+        raw = _memory_accounts.get(account_id)
+        if not raw or raw["shop_id"] != shop_id:
+            return None
+        return PaymentAccountResponse(**raw)
+
     async def create_payment_account(
         self, shop_id: str, owner_id: str, input_data: AccountInput, idempotency_key: Optional[str]
     ) -> tuple[PaymentAccountResponse, int]:

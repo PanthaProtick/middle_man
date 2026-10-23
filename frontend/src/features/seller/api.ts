@@ -2,8 +2,11 @@ import type {
   AccountInput,
   AccountUpdateInput,
   ApiError,
+  ManualReceiptInput,
   OrderInput,
   PaymentAccount,
+  ReceiptListResponse,
+  ReceiptView,
   SellerOrder,
   SellerOrderListResponse,
   ShopStatus,
@@ -62,6 +65,19 @@ export function formatBangladeshTime(isoString: string): string {
   } catch {
     return isoString;
   }
+}
+
+export function parseBdtToMinor(bdtStr: string): number {
+  const trimmed = bdtStr.trim();
+  if (!trimmed || !/^\d+(\.\d{1,2})?$/.test(trimmed)) {
+    throw new Error('Amount must be a positive number with up to 2 decimal places');
+  }
+  const [whole, decimal = ''] = trimmed.split('.');
+  const minor = BigInt(whole) * 100n + BigInt(decimal.padEnd(2, '0'));
+  if (minor <= 0n) {
+    throw new Error('Amount must be greater than 0');
+  }
+  return Number(minor);
 }
 
 export class SellerApiError extends Error {
@@ -220,5 +236,36 @@ export async function resolveOrderLink(
       body: JSON.stringify({ portal_token: portalToken }),
     },
     token,
+  );
+}
+
+export async function fetchTransactions(
+  params: { cursor?: string; limit?: number; review?: string; used?: string; parse?: string } = {},
+  token?: string,
+): Promise<ReceiptListResponse> {
+  const query = new URLSearchParams();
+  if (params.cursor) query.set('cursor', params.cursor);
+  if (params.limit) query.set('limit', String(params.limit));
+  if (params.review) query.set('review', params.review);
+  if (params.used) query.set('used', params.used);
+  if (params.parse) query.set('parse', params.parse);
+  const qStr = query.toString();
+  const url = `/api/seller/transactions${qStr ? `?${qStr}` : ''}`;
+  return requestJson<ReceiptListResponse>(url, { method: 'GET' }, token);
+}
+
+export async function recordManualTransaction(
+  input: ManualReceiptInput,
+  idempotencyKey?: string,
+  token?: string,
+): Promise<ReceiptView> {
+  return requestJson<ReceiptView>(
+    '/api/seller/transactions',
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+    token,
+    idempotencyKey,
   );
 }

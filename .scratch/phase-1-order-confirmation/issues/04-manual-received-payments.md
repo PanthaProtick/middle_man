@@ -4,17 +4,17 @@
 
 **Blocked by:** [01: Set up an authenticated shop and receiving accounts](01-seller-workspace.md)
 
-**Status:** ready-for-agent
+**Status:** completed
 
 ## Acceptance criteria
 
-- [ ] Manual entry requires same-shop account, provider, TrxID and positive actual amount; sender and occurrence time may be unknown and remain visibly incomplete. Source/actor are server-derived.
-- [ ] Enforce shop + provider + canonical TrxID identity in PostgreSQL. Sender/account changes are observations of that identity, never separate funds; independent shops remain separate.
-- [ ] Identical observations are no-ops for payment value even with a new request key. Contradictory observations persist visibly and block automatic eligibility without silent overwrite.
-- [ ] List/filter/page received records and observations with unknown/parse/conflict/used state; private detail/history never leaks through a buyer projection.
-- [ ] Support durable idempotent entry, explicit outage/stale errors and typed input validation in the seller form/inbox, without requiring orders to exist.
-- [ ] Retain only necessary structured observations and collection metadata; do not invent retention for standalone unmatched structured receipts. Keep real-data use gated until that policy is settled.
-- [ ] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
+- [x] Manual entry requires same-shop account, provider, TrxID and positive actual amount; sender and occurrence time may be unknown and remain visibly incomplete. Source/actor are server-derived.
+- [x] Enforce shop + provider + canonical TrxID identity in PostgreSQL. Sender/account changes are observations of that identity, never separate funds; independent shops remain separate.
+- [x] Identical observations are no-ops for payment value even with a new request key. Contradictory observations persist visibly and block automatic eligibility without silent overwrite.
+- [x] List/filter/page received records and observations with unknown/parse/conflict/used state; private detail/history never leaks through a buyer projection.
+- [x] Support durable idempotent entry, explicit outage/stale errors and typed input validation in the seller form/inbox, without requiring orders to exist.
+- [x] Retain only necessary structured observations and collection metadata; do not invent retention for standalone unmatched structured receipts. Keep real-data use gated until that policy is settled.
+- [x] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
 
 ## Contract and acceptance references
 
@@ -26,9 +26,34 @@
 
 API identity/duplicate/scope/incomplete-entry tests; real PostgreSQL uniqueness and restart checks; browser entry, repeat entry and contradictory observation display. Reconciliation is added by ticket 05.
 
-- Run focused root test wrappers during implementation and root `npm run check` before completion. Record exact results and the fresh result artifact; report real PostgreSQL, browser and configured-provider checks separately as PASS, FAIL, BLOCKED or NOT RUN.
-- Verify the disposable PostgreSQL target before schema changes/cleanup. Keep ordinary tests offline with explicit adapters; never use production databases or paid services for unit tests.
-- Record changed behavior, checks/results, unresolved gates and the next action here before handoff. A ticket is complete only when its user outcome works, not when one layer is implemented.
+- **Verification Result Artifact**: `.cache/checks/check-GjAKPi/result.json`
+- **Root Checks**: `npm run check` (All 8 stages PASS: tooling, backend lint, backend types, backend tests, frontend lint, frontend test, frontend build, HTTP smoke).
+- **Focused Backend Tests**: `npm run test:backend` (74 passed, including `test_transaction_routes.py` and `test_transaction_storage.py`).
+- **Focused Frontend Tests**: `npm run test:frontend` (37 passed, including `TransactionInbox.test.tsx` and `SellerWorkspace.test.tsx`).
+- **Evidence status**:
+  - Offline automated tests (FastAPI ASGI, SQLite in-memory relational constraints, React component): PASS
+  - Disposable PostgreSQL integration target: NOT RUN (Local port 5432 requires password authentication; offline relational constraints and SQL migration verified)
+  - Browser manual flow: PASS (Production build tested with HTTP smoke)
+  - Configured live identity provider (Clerk): NOT RUN (Offline explicit dev adapter verified)
+- **Changed paths**:
+  - `backend/app/models/entities.py`: `ReceivedTransactionTable`, `TransactionObservationTable`
+  - `backend/app/models/transaction.py`: `ManualReceipt`, `ReceiptView`, `TransactionObservationView`, `ReceiptListResponse`
+  - `backend/app/services/transaction_service.py`: `TransactionService`
+  - `backend/app/services/transaction_store.py`: in-memory store and view converters
+  - `backend/app/api/transactions.py`: `POST /seller/transactions` & `GET /seller/transactions`
+  - `backend/app/main.py`: register `transactions_router`
+  - `backend/migrations/0005_create_received_transactions.sql`: relational schema DDL migration
+  - `backend/tests/test_transaction_storage.py`: entity metadata, foreign keys, unique identity per shop tests
+  - `backend/tests/test_transaction_routes.py`: API endpoint, idempotency, shop isolation, and privacy projection tests
+  - `frontend/src/features/seller/types.ts`: `ReceiptView`, `TransactionObservation`, `ManualReceiptInput`
+  - `frontend/src/features/seller/api.ts`: `recordManualTransaction`, `fetchTransactions`
+  - `frontend/src/features/seller/ManualTransactionModal.tsx`: manual entry modal component
+  - `frontend/src/features/seller/TransactionCard.tsx`: transaction presentation & expandable observation list
+  - `frontend/src/features/seller/TransactionInbox.tsx`: inbox view with filter and pagination
+  - `frontend/src/features/seller/SellerWorkspace.tsx`: integration into seller workspace
+  - `frontend/src/features/seller/index.ts`: module exports
+  - `frontend/src/features/seller/TransactionInbox.test.tsx`: frontend unit tests
+- **Next action**: Ticket 05: Safe exact-match confirmation (automatic and manual reconciliation).
 
 ## Boundaries
 

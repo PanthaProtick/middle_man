@@ -91,3 +91,56 @@ export interface ApiError {
   message: string;
   fields?: ApiErrorDetail[];
 }
+
+export type ParseState = 'valid' | 'incomplete';
+export type ConflictState = 'none' | 'identical' | 'conflicting';
+export type ReconciliationState = 'unmatched' | 'conflicted' | 'used';
+
+export interface TransactionObservation {
+  id: string;
+  transaction_id: string;
+  payment_account_id: string;
+  source: string;
+  actor: string;
+  amount_minor: number;
+  sender_number_raw?: string | null;
+  sender_number_canonical?: string | null;
+  occurred_at?: string | null;
+  parse_state: ParseState;
+  conflict_state: ConflictState;
+  created_at: string;
+}
+
+export interface ReceiptView {
+  id: string;
+  shop_id: string;
+  payment_account_id: string;
+  provider: 'bkash' | 'nagad';
+  trx_id: string;
+  amount_minor: number;
+  sender_number_raw?: string | null;
+  sender_number_canonical?: string | null;
+  occurred_at?: string | null;
+  reconciliation_state: ReconciliationState;
+  has_conflict: boolean;
+  version: number;
+  created_at: string;
+  updated_at: string;
+  observations: TransactionObservation[];
+  related_claims_count: number;
+}
+
+export interface ManualReceiptInput {
+  payment_account_id: string;
+  provider: 'bkash' | 'nagad';
+  trx_id: string;
+  amount_minor: number;
+  sender_number?: string | null;
+  occurred_at?: string | null;
+}
+
+export interface ReceiptListResponse {
+  items: ReceiptView[];
+  next_cursor?: string | null;
+}
+
