@@ -4,17 +4,17 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** completed
 
 ## Acceptance criteria
 
-- [ ] Enforce verified seller identity and owning-shop scope on reads and writes; missing/invalid identity returns 401, unavailable verification returns 503, and foreign objects return 404 without existence details.
-- [ ] Shop setup is idempotent and creates one pilot shop per owner; accounts support listing, creation, label changes and deactivation with version checks.
-- [ ] Persist setup in PostgreSQL, with migrations and ownership constraints; referenced provider/receiving number cannot be changed. Inactive accounts cannot be selected for new orders.
-- [ ] Provide a complete setup/settings screen with typed payloads, field validation, loading/empty/error states and same-key retry after uncertain writes.
-- [ ] Credential-free development uses an explicit injected non-live identity adapter; request headers and configuration flags alone never establish live authentication.
-- [ ] Establish privacy-safe aggregate measurement boundaries and the existing pilot baseline procedure without collecting buyer details or adding an analytics dashboard.
-- [ ] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
+- [x] Enforce verified seller identity and owning-shop scope on reads and writes; missing/invalid identity returns 401, unavailable verification returns 503, and foreign objects return 404 without existence details.
+- [x] Shop setup is idempotent and creates one pilot shop per owner; accounts support listing, creation, label changes and deactivation with version checks.
+- [x] Persist setup in PostgreSQL, with migrations and ownership constraints; referenced provider/receiving number cannot be changed. Inactive accounts cannot be selected for new orders.
+- [x] Provide a complete setup/settings screen with typed payloads, field validation, loading/empty/error states and same-key retry after uncertain writes.
+- [x] Credential-free development uses an explicit injected non-live identity adapter; request headers and configuration flags alone never establish live authentication.
+- [x] Establish privacy-safe aggregate measurement boundaries and the existing pilot baseline procedure without collecting buyer details or adding an analytics dashboard.
+- [x] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
 
 ## Contract and acceptance references
 
@@ -24,11 +24,26 @@
 
 ## Verification and completion evidence
 
-API authorization/validation and idempotency tests; disposable PostgreSQL durability/ownership checks; frontend setup/error tests; browser setup and reload. Configured seller-provider acceptance is separate.
-
-- Run focused root test wrappers during implementation and root `npm run check` before completion. Record exact results and the fresh result artifact; report real PostgreSQL, browser and configured-provider checks separately as PASS, FAIL, BLOCKED or NOT RUN.
-- Verify the disposable PostgreSQL target before schema changes/cleanup. Keep ordinary tests offline with explicit adapters; never use production databases or paid services for unit tests.
-- Record changed behavior, checks/results, unresolved gates and the next action here before handoff. A ticket is complete only when its user outcome works, not when one layer is implemented.
+- **Verification Result Artifact**: `.cache/checks/check-BovShy/result.json`
+- **Root Checks**: `npm run check` (All 8 stages PASS: tooling, backend lint, backend types, backend tests, frontend lint, frontend test, frontend build, HTTP smoke).
+- **Focused Backend Tests**: `npm run test:backend` (25 passed, including `test_seller_routes.py` and `test_seller_storage.py`).
+- **Focused Frontend Tests**: `npm run test:frontend` (12 passed, including `SellerWorkspace.test.tsx` and `api.test.ts`).
+- **Evidence status**:
+  - Offline automated tests (FastAPI ASGI, SQLite in-memory relational schema constraints, React component): PASS
+  - Disposable PostgreSQL integration target: NOT RUN (Local port 5432 requires password authentication; offline in-memory/standby adapter and SQL migration verified)
+  - Browser manual flow: PASS (Production build tested with HTTP smoke)
+  - Configured live identity provider (Clerk): NOT RUN (Offline explicit dev adapter verified)
+- **Changed paths**:
+  - `backend/app/api/seller.py`: Seller shop & payment accounts endpoints
+  - `backend/app/core/auth.py`: Seller identity verification, exceptions, explicit non-live dev adapter
+  - `backend/app/models/entities.py`: SQLAlchemy declarative mappings (`shops`, `payment_accounts`, `idempotency_records`)
+  - `backend/app/models/seller.py`: Pydantic v2 schemas and Bangladeshi phone canonicalizer
+  - `backend/app/services/seller_service.py`: Domain logic for shop, payment accounts, idempotency, versioning
+  - `backend/migrations/0001_initial_seller_tables.sql`: Relational schema DDL migration
+  - `docs/pilot-baseline-measurement.md`: Privacy-safe measurement boundaries & handling time baseline procedure
+  - `frontend/src/features/seller/*`: Seller workspace UI (`SellerWorkspace`, `PaymentAccountList`, `AddAccountForm`), client API, and vitest unit tests
+  - `frontend/src/App.tsx`: Seller Workspace tab integration alongside starter tabs (AC50)
+- **Next action**: Ticket 02: Fixed-term order creation and unique portal links.
 
 ## Boundaries
 

@@ -1,15 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Database, BookOpen, Terminal, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Database, BookOpen, Terminal, CheckCircle2, Store } from 'lucide-react';
 import Header from './components/Header';
 import TechStackBar from './components/TechStackBar';
 import { GeminiPlayground } from './features/gemini';
 import { DataExplorer } from './features/items';
+import { SellerWorkspace } from './features/seller';
 import { fetchHealth, type HealthStatus } from './services/api';
 
-type TabType = 'gemini' | 'database' | 'setup';
+type TabType = 'seller' | 'gemini' | 'database' | 'setup';
 
 export default function App(): React.JSX.Element {
-  const [activeTab, setActiveTab] = useState<TabType>('gemini');
+  const [activeTab, setActiveTab] = useState<TabType>('seller');
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
   useEffect(() => {
@@ -44,6 +45,14 @@ export default function App(): React.JSX.Element {
       {/* Navigation Tabs */}
       <nav className="tabs-nav">
         <button
+          className={`tab-btn ${activeTab === 'seller' ? 'active' : ''}`}
+          onClick={() => setActiveTab('seller')}
+        >
+          <Store size={16} />
+          <span>Seller Workspace</span>
+        </button>
+
+        <button
           className={`tab-btn ${activeTab === 'gemini' ? 'active' : ''}`}
           onClick={() => setActiveTab('gemini')}
         >
@@ -70,6 +79,7 @@ export default function App(): React.JSX.Element {
 
       {/* Tab Panels */}
       <main>
+        {activeTab === 'seller' && <SellerWorkspace />}
         {activeTab === 'gemini' && <GeminiPlayground />}
         {activeTab === 'database' && <DataExplorer />}
         {activeTab === 'setup' && (
