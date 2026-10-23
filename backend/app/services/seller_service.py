@@ -8,7 +8,12 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.entities import IdempotencyRecordTable, PaymentAccountTable, ShopTable
+from app.core.idempotency import (
+    check_idempotency_record,
+    reset_shared_idempotency_store,
+    save_idempotency_record,
+)
+from app.models.entities import PaymentAccountTable, ShopTable
 from app.models.seller import AccountInput, AccountUpdateInput, PaymentAccountResponse, ShopInput, ShopResponse
 
 
@@ -41,14 +46,13 @@ def compute_payload_hash(data: Any) -> str:
 _memory_shops: dict[str, dict[str, Any]] = {}  # id -> dict
 _memory_shops_by_owner: dict[str, str] = {}  # owner_id -> id
 _memory_accounts: dict[str, dict[str, Any]] = {}  # id -> dict
-_memory_idempotency: dict[str, dict[str, Any]] = {}  # key -> dict
 
 
 def reset_memory_store() -> None:
     _memory_shops.clear()
     _memory_shops_by_owner.clear()
     _memory_accounts.clear()
-    _memory_idempotency.clear()
+    reset_shared_idempotency_store()
 
 
 class SellerService:
@@ -58,49 +62,12 @@ class SellerService:
     async def _check_idempotency(
         self, key: Optional[str], scope: str, operation: str, payload_hash: str
     ) -> Optional[tuple[int, Any]]:
-        if not key:
-            return None
-        composite_key = f"{scope}:{operation}:{key}"
-        if self.db is not None:
-            stmt = select(IdempotencyRecordTable).where(IdempotencyRecordTable.key == composite_key)
-            result = await self.db.execute(stmt)
-            record = result.scalar_one_or_none()
-            if record:
-                if record.payload_hash != payload_hash:
-                    raise IdempotencyConflictError()
-                return int(record.status_code), json.loads(str(record.response_json))
-        else:
-            rec = _memory_idempotency.get(composite_key)
-            if rec:
-                if rec["payload_hash"] != payload_hash:
-                    raise IdempotencyConflictError()
-                return int(rec["status_code"]), rec["data"]
-        return None
+        return await check_idempotency_record(self.db, key, scope, operation, payload_hash)
 
     async def _save_idempotency(
         self, key: Optional[str], scope: str, operation: str, payload_hash: str, status_code: int, data: Any
     ) -> None:
-        if not key:
-            return
-        composite_key = f"{scope}:{operation}:{key}"
-        if self.db is not None:
-            record = IdempotencyRecordTable(
-                key=composite_key,
-                scope=scope,
-                operation=operation,
-                payload_hash=payload_hash,
-                status_code=status_code,
-                response_json=json.dumps(data, default=str),
-                created_at=datetime.datetime.now(datetime.timezone.utc),
-            )
-            self.db.add(record)
-            await self.db.commit()
-        else:
-            _memory_idempotency[composite_key] = {
-                "payload_hash": payload_hash,
-                "status_code": status_code,
-                "data": data,
-            }
+        await save_idempotency_record(self.db, key, scope, operation, payload_hash, status_code, data)
 
     async def get_shop_by_owner(self, owner_id: str) -> Optional[ShopResponse]:
         if self.db is not None:

@@ -2,7 +2,10 @@ import type {
   AccountInput,
   AccountUpdateInput,
   ApiError,
+  OrderInput,
   PaymentAccount,
+  SellerOrder,
+  SellerOrderListResponse,
   ShopStatus,
 } from './types';
 
@@ -39,6 +42,26 @@ export function canonicalizeBdPhone(raw: string): string {
     throw new Error(`Invalid Bangladeshi phone number: '${raw}'. Must be 11 digits starting with 01[3-9].`);
   }
   return cleaned;
+}
+
+export function formatBangladeshTime(isoString: string): string {
+  try {
+    const d = new Date(isoString);
+    if (Number.isNaN(d.getTime())) return isoString;
+    return (
+      d.toLocaleString('en-GB', {
+        timeZone: 'Asia/Dhaka',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }) + ' (BST / UTC+6)'
+    );
+  } catch {
+    return isoString;
+  }
 }
 
 export class SellerApiError extends Error {
@@ -148,6 +171,53 @@ export async function updatePaymentAccount(
     {
       method: 'PATCH',
       body: JSON.stringify(input),
+    },
+    token,
+  );
+}
+
+export async function fetchOrders(
+  params: { cursor?: string; limit?: number; status?: string } = {},
+  token?: string,
+): Promise<SellerOrderListResponse> {
+  const query = new URLSearchParams();
+  if (params.cursor) query.set('cursor', params.cursor);
+  if (params.limit) query.set('limit', String(params.limit));
+  if (params.status) query.set('status', params.status);
+  const qStr = query.toString();
+  const url = `/api/seller/orders${qStr ? `?${qStr}` : ''}`;
+  return requestJson<SellerOrderListResponse>(url, { method: 'GET' }, token);
+}
+
+export async function createOrder(
+  input: OrderInput,
+  idempotencyKey: string,
+  token?: string,
+): Promise<SellerOrder> {
+  return requestJson<SellerOrder>(
+    '/api/seller/orders',
+    {
+      method: 'POST',
+      body: JSON.stringify(input),
+    },
+    token,
+    idempotencyKey,
+  );
+}
+
+export async function fetchOrder(orderId: string, token?: string): Promise<SellerOrder> {
+  return requestJson<SellerOrder>(`/api/seller/orders/${orderId}`, { method: 'GET' }, token);
+}
+
+export async function resolveOrderLink(
+  portalToken: string,
+  token?: string,
+): Promise<{ order_id: string }> {
+  return requestJson<{ order_id: string }>(
+    '/api/seller/order-links/resolve',
+    {
+      method: 'POST',
+      body: JSON.stringify({ portal_token: portalToken }),
     },
     token,
   );

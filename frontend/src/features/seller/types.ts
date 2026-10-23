@@ -35,6 +35,51 @@ export interface AccountUpdateInput {
   is_active?: boolean;
 }
 
+export type OrderLifecycle =
+  | 'awaiting_buyer'
+  | 'pending'
+  | 'confirmed'
+  | 'rejected'
+  | 'cancelled'
+  | 'expired';
+
+export interface SellerOrder {
+  id: string;
+  shop_id: string;
+  payment_account_id: string;
+  product_name: string;
+  total_minor: number;
+  required_advance_minor: number;
+  expected_cod_minor: number;
+  actual_cod_minor: number | null;
+  account_provider: 'bkash' | 'nagad';
+  account_receiving_number: string;
+  account_label: string;
+  lifecycle: OrderLifecycle;
+  version: number;
+  review_reasons: string[];
+  buyer_revision: number | null;
+  allocation_basis: string | null;
+  portal_token: string;
+  portal_url: string;
+  created_at: string;
+  updated_at: string;
+  expires_at: string;
+  completed_at: string | null;
+}
+
+export interface OrderInput {
+  product_name: string;
+  total_minor: number;
+  required_advance_minor: number;
+  payment_account_id: string;
+}
+
+export interface SellerOrderListResponse {
+  items: SellerOrder[];
+  next_cursor: string | null;
+}
+
 export interface ApiErrorDetail {
   field?: string;
   code: string;

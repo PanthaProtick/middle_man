@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Store, AlertCircle, RefreshCw, Smartphone } from 'lucide-react';
-import type { PaymentAccount, Shop } from './types';
-import { fetchShop, createShop, fetchPaymentAccounts } from './api';
+import { Store, AlertCircle, RefreshCw, Smartphone, Plus } from 'lucide-react';
+import type { PaymentAccount, SellerOrder, Shop } from './types';
+import { fetchShop, createShop, fetchPaymentAccounts, fetchOrders } from './api';
 import { PaymentAccountList } from './PaymentAccountList';
 import { AddAccountForm } from './AddAccountForm';
+import { OrderList } from './OrderList';
+import { CreateOrderModal } from './CreateOrderModal';
 
 interface SellerWorkspaceProps {
   token?: string;
@@ -14,12 +16,33 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
   const [shop, setShop] = useState<Shop | null>(null);
   const [setupNeeded, setSetupNeeded] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
+  const [orders, setOrders] = useState<SellerOrder[]>([]);
+  const [ordersFilter, setOrdersFilter] = useState<string>('');
+  const [ordersNextCursor, setOrdersNextCursor] = useState<string | null>(null);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
   // Shop setup state
   const [shopName, setShopName] = useState<string>('');
   const [setupSubmitting, setSetupSubmitting] = useState<boolean>(false);
   const shopIdempotencyKeyRef = useRef<string>(crypto.randomUUID());
+
+  const loadOrders = useCallback(
+    async (status?: string, cursor?: string) => {
+      try {
+        const res = await fetchOrders({ status: status || undefined, cursor }, token);
+        if (cursor) {
+          setOrders((prev) => [...prev, ...res.items]);
+        } else {
+          setOrders(res.items);
+        }
+        setOrdersNextCursor(res.next_cursor);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load orders');
+      }
+    },
+    [token],
+  );
 
   const loadData = useCallback(() => {
     fetchShop(token)
@@ -29,6 +52,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
         if (status.shop) {
           const accs = await fetchPaymentAccounts(token);
           setAccounts(accs);
+          await loadOrders(ordersFilter);
         }
         setError(null);
       })
@@ -38,11 +62,16 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
       .finally(() => {
         setLoading(false);
       });
-  }, [token]);
+  }, [token, ordersFilter, loadOrders]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const handleFilterChange = (status: string) => {
+    setOrdersFilter(status);
+    loadOrders(status);
+  };
 
   const handleCreateShop = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -99,13 +128,18 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
           <p className="card-subtitle">
             {setupNeeded
               ? 'Create an isolated pilot shop workspace to manage chat-negotiated orders and delivery advances.'
-              : 'Isolated shop workspace and designated bKash / Nagad receiving accounts.'}
+              : 'Manage delivery advances, snapshot commercial terms, and generate secure buyer links.'}
           </p>
         </div>
         {!setupNeeded && (
-          <button className="btn btn-secondary btn-sm" onClick={() => { setLoading(true); loadData(); }}>
-            <RefreshCw size={14} /> Refresh
-          </button>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button className="btn btn-primary btn-sm" onClick={() => setIsCreateModalOpen(true)}>
+              <Plus size={14} /> Create Order Link
+            </button>
+            <button className="btn btn-secondary btn-sm" onClick={() => { setLoading(true); loadData(); }}>
+              <RefreshCw size={14} /> Refresh
+            </button>
+          </div>
         )}
       </div>
 
@@ -138,6 +172,16 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
         </form>
       ) : (
         <div style={{ marginTop: '20px' }}>
+          <OrderList
+            orders={orders}
+            statusFilter={ordersFilter}
+            onFilterChange={handleFilterChange}
+            nextCursor={ordersNextCursor}
+            onLoadMore={() => ordersNextCursor && loadOrders(ordersFilter, ordersNextCursor)}
+          />
+
+          <hr style={{ border: 'none', borderTop: '1px solid var(--border-subtle)', margin: '28px 0 20px' }} />
+
           <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Smartphone size={16} /> Designated Receiving Accounts
           </h4>
@@ -156,6 +200,16 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
             onError={setError}
           />
         </div>
+      )}
+
+      {isCreateModalOpen && (
+        <CreateOrderModal
+          accounts={accounts}
+          token={token}
+          onClose={() => setIsCreateModalOpen(false)}
+          onOrderCreated={(newOrder) => setOrders((prev) => [newOrder, ...prev])}
+          onError={setError}
+        />
       )}
     </div>
   );

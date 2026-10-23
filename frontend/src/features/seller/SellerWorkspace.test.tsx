@@ -6,8 +6,13 @@ import { SellerWorkspace } from './SellerWorkspace';
 import {
   fetchShop,
   createShop,
+  fetchOrders,
+  createOrder,
+  resolveOrderLink,
   canonicalizeBdPhone,
+  formatBangladeshTime,
 } from './api';
+import type { SellerOrder } from './types';
 
 describe('Seller API Client', () => {
   beforeEach(() => {
@@ -22,6 +27,12 @@ describe('Seller API Client', () => {
     expect(() => canonicalizeBdPhone('12345')).toThrow();
   });
 
+  it('formats dates in Bangladesh time with explicit zone', () => {
+    const formatted = formatBangladeshTime('2026-10-24T12:00:00Z');
+    expect(formatted).toContain('BST / UTC+6');
+    expect(formatted).toContain('2026');
+  });
+
   it('fetchShop returns shop status when backend responds', async () => {
     const mockResponse = {
       shop: {
@@ -34,7 +45,7 @@ describe('Seller API Client', () => {
       setup_needed: false,
     };
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify(mockResponse), { status: 200, headers: { 'Content-Type': 'application/json' } })
+      new Response(JSON.stringify(mockResponse), { status: 200, headers: { 'Content-Type': 'application/json' } }),
     );
 
     const res = await fetchShop('test-token');
@@ -54,7 +65,7 @@ describe('Seller API Client', () => {
       setup_needed: false,
     };
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify(mockResponse), { status: 201, headers: { 'Content-Type': 'application/json' } })
+      new Response(JSON.stringify(mockResponse), { status: 201, headers: { 'Content-Type': 'application/json' } }),
     );
 
     const res = await createShop('New Shop', 'key-123', 'test-token');
@@ -65,10 +76,71 @@ describe('Seller API Client', () => {
         method: 'POST',
         headers: expect.objectContaining({
           'Idempotency-Key': 'key-123',
-          'Authorization': 'Bearer test-token',
+          Authorization: 'Bearer test-token',
         }),
-      })
+      }),
     );
+  });
+
+  it('fetchOrders, createOrder, and resolveOrderLink invoke respective endpoints', async () => {
+    const mockOrder: SellerOrder = {
+      id: 'ord-123',
+      shop_id: 's1',
+      payment_account_id: 'acc-1',
+      product_name: 'Smart Watch',
+      total_minor: 300000,
+      required_advance_minor: 50000,
+      expected_cod_minor: 250000,
+      actual_cod_minor: null,
+      account_provider: 'bkash',
+      account_receiving_number: '01711223344',
+      account_label: 'Main bKash',
+      lifecycle: 'awaiting_buyer',
+      version: 1,
+      review_reasons: [],
+      buyer_revision: null,
+      allocation_basis: null,
+      portal_token: 'tok-abc-123',
+      portal_url: '/orders/tok-abc-123',
+      created_at: '2026-10-23T10:00:00Z',
+      updated_at: '2026-10-23T10:00:00Z',
+      expires_at: '2026-10-25T10:00:00Z',
+      completed_at: null,
+    };
+
+    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementation((url, init) => {
+      const urlStr = String(url);
+      if (urlStr.includes('/seller/orders') && init?.method === 'POST') {
+        return Promise.resolve(new Response(JSON.stringify(mockOrder), { status: 201 }));
+      }
+      if (urlStr.includes('/seller/orders')) {
+        return Promise.resolve(new Response(JSON.stringify({ items: [mockOrder], next_cursor: null }), { status: 200 }));
+      }
+      if (urlStr.includes('/seller/order-links/resolve')) {
+        return Promise.resolve(new Response(JSON.stringify({ order_id: 'ord-123' }), { status: 200 }));
+      }
+      return Promise.reject(new Error(`Unhandled URL: ${urlStr}`));
+    });
+
+    const listRes = await fetchOrders({ status: 'awaiting_buyer' }, 'tok');
+    expect(listRes.items.length).toBe(1);
+    expect(listRes.items[0].product_name).toBe('Smart Watch');
+
+    const created = await createOrder(
+      { product_name: 'Smart Watch', total_minor: 300000, required_advance_minor: 50000, payment_account_id: 'acc-1' },
+      'idem-key-99',
+      'tok',
+    );
+    expect(created.id).toBe('ord-123');
+    expect(fetchSpy).toHaveBeenCalledWith(
+      expect.stringMatching(/\/api\/seller\/orders$/),
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'Idempotency-Key': 'idem-key-99' }),
+      }),
+    );
+
+    const resolved = await resolveOrderLink('tok-abc-123', 'tok');
+    expect(resolved.order_id).toBe('ord-123');
   });
 });
 
@@ -85,7 +157,7 @@ describe('SellerWorkspace Component', () => {
       new Response(JSON.stringify({ shop: null, setup_needed: true }), {
         status: 200,
         headers: { 'Content-Type': 'application/json' },
-      })
+      }),
     );
 
     const root = createRoot(container);
@@ -97,7 +169,32 @@ describe('SellerWorkspace Component', () => {
     expect(container.querySelector('input[name="displayName"]')).not.toBeNull();
   });
 
-  it('renders accounts list and add-account form when shop exists', async () => {
+  it('renders accounts list and orders list when shop exists and inspects order', async () => {
+    const mockOrder: SellerOrder = {
+      id: 'ord-1',
+      shop_id: 's1',
+      payment_account_id: 'acc-1',
+      product_name: 'Wireless Earbuds',
+      total_minor: 250000,
+      required_advance_minor: 50000,
+      expected_cod_minor: 200000,
+      actual_cod_minor: null,
+      account_provider: 'bkash',
+      account_receiving_number: '01711223344',
+      account_label: 'Personal bKash',
+      lifecycle: 'awaiting_buyer',
+      version: 1,
+      review_reasons: [],
+      buyer_revision: null,
+      allocation_basis: null,
+      portal_token: 'portal-tok-1',
+      portal_url: '/orders/portal-tok-1',
+      created_at: '2026-10-23T12:00:00Z',
+      updated_at: '2026-10-23T12:00:00Z',
+      expires_at: '2026-10-25T12:00:00Z',
+      completed_at: null,
+    };
+
     vi.spyOn(globalThis, 'fetch').mockImplementation((url) => {
       const urlStr = String(url);
       if (urlStr.includes('/seller/shop')) {
@@ -107,8 +204,8 @@ describe('SellerWorkspace Component', () => {
               shop: { id: 's1', owner_id: 'o1', display_name: 'Active Shop', created_at: '', updated_at: '' },
               setup_needed: false,
             }),
-            { status: 200, headers: { 'Content-Type': 'application/json' } }
-          )
+            { status: 200, headers: { 'Content-Type': 'application/json' } },
+          ),
         );
       }
       if (urlStr.includes('/seller/payment-accounts')) {
@@ -127,8 +224,16 @@ describe('SellerWorkspace Component', () => {
                 updated_at: '',
               },
             ]),
-            { status: 200, headers: { 'Content-Type': 'application/json' } }
-          )
+            { status: 200, headers: { 'Content-Type': 'application/json' } },
+          ),
+        );
+      }
+      if (urlStr.includes('/seller/orders')) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ items: [mockOrder], next_cursor: null }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
         );
       }
       return Promise.reject(new Error(`Unhandled URL: ${urlStr}`));
@@ -141,7 +246,26 @@ describe('SellerWorkspace Component', () => {
 
     expect(container.textContent).toContain('Active Shop');
     expect(container.textContent).toContain('Personal bKash');
-    expect(container.textContent).toContain('01711223344');
+    expect(container.textContent).toContain('Wireless Earbuds');
+    expect(container.textContent).toContain('Expected COD:');
+    expect(container.textContent).toContain('BDT 2,000');
+    expect(container.textContent).toContain('Awaiting Buyer');
+    expect(container.textContent).toContain('Create Order Link');
+    expect(container.textContent).toContain('Inspect');
+    expect(container.textContent).toContain('Copy Link');
+
+    // Click "Inspect" button to open OrderDetailModal
+    const inspectBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Inspect'),
+    );
+    expect(inspectBtn).toBeDefined();
+    await act(async () => {
+      inspectBtn?.click();
+    });
+
+    expect(container.textContent).toContain('Order & Link Details');
+    expect(container.textContent).toContain('Fixed Receiving Account Snapshot');
+    expect(container.textContent).toContain('Copy Buyer Link');
   });
 
   it('renders explicit error and retry state when initial shop load fails', async () => {

@@ -27,6 +27,7 @@ class ShopTable(Base):
     accounts: Mapped[list["PaymentAccountTable"]] = relationship(
         "PaymentAccountTable", back_populates="shop"
     )
+    orders: Mapped[list["OrderTable"]] = relationship("OrderTable", back_populates="shop")
 
 
 class PaymentAccountTable(Base):
@@ -52,6 +53,35 @@ class PaymentAccountTable(Base):
     )
 
     shop: Mapped["ShopTable"] = relationship("ShopTable", back_populates="accounts")
+
+
+class OrderTable(Base):
+    __tablename__ = "orders"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
+    payment_account_id: Mapped[str] = mapped_column(String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True)
+    token_lookup_digest: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
+    encrypted_portal_token: Mapped[str] = mapped_column(Text, nullable=False)
+
+    # Snapshot of commercial terms & receiving account details
+    product_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    total_minor: Mapped[int] = mapped_column(Integer, nullable=False)
+    required_advance_minor: Mapped[int] = mapped_column(Integer, nullable=False)
+    account_provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    account_receiving_number: Mapped[str] = mapped_column(String(20), nullable=False)
+    account_label: Mapped[str] = mapped_column(String(200), nullable=False)
+
+    # Lifecycle and versions
+    lifecycle: Mapped[str] = mapped_column(String(32), default="awaiting_buyer", nullable=False, index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    expires_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    completed_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    shop: Mapped["ShopTable"] = relationship("ShopTable", back_populates="orders")
+    payment_account: Mapped["PaymentAccountTable"] = relationship("PaymentAccountTable")
 
 
 class IdempotencyRecordTable(Base):
