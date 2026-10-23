@@ -1,0 +1,30 @@
+{
+  "name": "dev-template",
+  "private": true,
+  "version": "1.0.0",
+  "description": "React and FastAPI development template for agent-assisted full-stack prototyping",
+  "engines": { "node": ">=22.12.0" },
+  "scripts": {
+    "doctor": "node scripts/workspace.mjs doctor",
+    "context": "node scripts/workspace.mjs context",
+    "setup": "node scripts/workspace.mjs setup",
+    "smoke": "node scripts/workspace.mjs smoke",
+    "audit:frontend": "node scripts/workspace.mjs audit:frontend",
+    "check": "node scripts/workspace.mjs check",
+    "check:backend": "node scripts/workspace.mjs check:backend",
+    "check:frontend": "node scripts/workspace.mjs check:frontend",
+    "test": "node scripts/workspace.mjs test",
+    "test:tooling": "node scripts/workspace.mjs test:tooling",
+    "test:backend": "node scripts/workspace.mjs test:backend",
+    "test:frontend": "node scripts/workspace.mjs test:frontend",
+    "lint": "node scripts/workspace.mjs lint",
+    "lint:backend": "node scripts/workspace.mjs lint:backend",
+    "lint:frontend": "node scripts/workspace.mjs lint:frontend",
+    "typecheck": "node scripts/workspace.mjs typecheck",
+    "typecheck:backend": "node scripts/workspace.mjs typecheck:backend",
+    "typecheck:frontend": "node scripts/workspace.mjs typecheck:frontend",
+    "build": "node scripts/workspace.mjs build",
+    "dev:backend": "node scripts/workspace.mjs dev:backend",
+    "dev:frontend": "node scripts/workspace.mjs dev:frontend"
+  }
+}

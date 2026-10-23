@@ -1,0 +1,71 @@
+# Agent instructions
+
+## Work loop
+
+- Before editing, trace the relevant code, callers, contracts, and tests. Identify
+  acceptance cases, assumptions, and architectural trade-offs; challenge weak fixes.
+- Make one testable behavior work at a time. Preserve unrelated code, comments,
+  and checkout changes. Add regression tests for bugs and success/failure cases
+  for changed endpoints or domain logic; keep meaningful existing assertions.
+- After two failures with the same hypothesis, gather new evidence and revise it.
+  Escalate an unresolved decision with a reproducer and the remaining uncertainty.
+- Use focused tests while editing. Before completing code or tooling changes, run
+  root `npm run check`. Report actual results and any failed, blocked, or unrun gates.
+  Mock tests and HTTP smoke do not prove browser or live-provider behavior.
+
+## Repository invariants
+
+- Backend: FastAPI, typed Python, Pydantic v2 request/response contracts; tests in
+  `backend/tests/`. Frontend: strict TypeScript, explicit payload/prop types, no
+  `any`; feature-specific UI, hooks, types, and tests in `frontend/src/features/`.
+- Keep sources below 250–300 lines; decompose growing files by responsibility.
+- Development and unit tests support offline standby behavior without live
+  credentials. Current item routes use process memory; Clerk settings alone do
+  not implement authentication. Configuration flags do not establish readiness.
+- Code and executable checks are ground truth. Keep this file below 200 lines;
+  put task history in task records and detailed references in `docs/`.
+
+## Context discipline
+
+- Codex and Antigravity share this file and `.agents/skills/`. Read only the
+  matching skill; adapt host-specific tools to the active harness. Imported
+  workflows do not change repository contracts or authorize external actions.
+- Start with `git status --short` and scoped `rg` searches. `npm run context`
+  lists source paths; `npm run context -- <file> "<file>#L10-L40"` emits bounded,
+  numbered text for handoffs. Follow callers and tests before choosing an edit.
+- Keep conventions intact; reduce retrieved material, not verification coverage.
+  Read failure tails and relevant files instead of dumping lockfiles, all skills,
+  generated assets, or entire logs. Never include real environment/credential files.
+- Before a handoff or context reset, update the existing ticket with decisions,
+  changed paths, exact checks/results, unresolved risks, and the next action.
+  Resume by checking the current diff and evidence; summaries are not ground truth.
+
+## Commands (workspace root)
+
+Use root wrappers to preserve cache and lockfile handling:
+
+- `npm run check`: tooling, lint, strict types, tests, build, and HTTP smoke.
+- `npm run test:backend -- tests/<file>.py` or
+  `npm run test:frontend -- src/<path>.test.ts`: focused iteration.
+- `npm run typecheck`: check both applications' types.
+- `npm run doctor`: diagnose prerequisites; `npm run setup`: install locked dependencies.
+
+Other commands are discoverable in `package.json`. Successful checks print short
+summaries and a fresh `.cache/checks/<run>/result.json` path; adjacent logs hold
+full output. Gates reject filters; use the focused test commands during iteration.
+
+## Context and task records
+
+Read only references needed for the current decision:
+
+- Setup, dependency, or cache failures: [environment recovery](docs/agents/environment.md).
+- Verification failures, browser/live acceptance, or log interpretation:
+  [verification reference](docs/agents/verification.md).
+- Architecture/state changes: [architecture](docs/ARCHITECTURE.md).
+- API/client changes: [contracts](docs/API_CONTRACTS.md).
+- Resumable or multi-session work: use [the task template](tasks/task-template.md).
+  Small changes need no separate plan file. Update an existing ticket instead of
+  duplicating its status. Load imported skills only when relevant to the task.
+- Issue tracker operations: [local tracker](docs/agents/issue-tracker.md);
+  triage status: [labels](docs/agents/triage-labels.md);
+  domain terminology/ADRs: [domain conventions](docs/agents/domain.md).
