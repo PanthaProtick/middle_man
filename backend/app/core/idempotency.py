@@ -1,4 +1,5 @@
 import datetime
+import hashlib
 import json
 from typing import Any, Optional, Tuple
 
@@ -15,6 +16,11 @@ def reset_shared_idempotency_store() -> None:
     _memory_idempotency_store.clear()
 
 
+def _record_key(scope: str, operation: str, key: str) -> str:
+    composite = f"{scope}:{operation}:{key}"
+    return composite if len(composite) <= 128 else "sha256:" + hashlib.sha256(composite.encode()).hexdigest()
+
+
 async def check_idempotency_record(
     db: Optional[AsyncSession],
     key: Optional[str],
@@ -24,7 +30,7 @@ async def check_idempotency_record(
 ) -> Optional[Tuple[int, Any]]:
     if not key:
         return None
-    composite_key = f"{scope}:{operation}:{key}"
+    composite_key = _record_key(scope, operation, key)
     if db is not None:
         stmt = select(IdempotencyRecordTable).where(IdempotencyRecordTable.key == composite_key)
         result = await db.execute(stmt)
@@ -52,10 +58,12 @@ async def save_idempotency_record(
     payload_hash: str,
     status_code: int,
     data: Any,
+    *,
+    commit: bool = True,
 ) -> None:
     if not key:
         return
-    composite_key = f"{scope}:{operation}:{key}"
+    composite_key = _record_key(scope, operation, key)
     if db is not None:
         record = IdempotencyRecordTable(
             key=composite_key,
@@ -67,7 +75,10 @@ async def save_idempotency_record(
             created_at=datetime.datetime.now(datetime.timezone.utc),
         )
         db.add(record)
-        await db.commit()
+        if commit:
+            await db.commit()
+        else:
+            await db.flush()
     else:
         _memory_idempotency_store[composite_key] = {
             "payload_hash": payload_hash,

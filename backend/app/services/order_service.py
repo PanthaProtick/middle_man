@@ -81,7 +81,7 @@ def _to_seller_order(row: OrderTable) -> SellerOrder:
         lifecycle=str(row.lifecycle),  # type: ignore[arg-type]
         version=int(row.version),
         review_reasons=[],
-        buyer_revision=None,
+        buyer_revision=row.buyer_revision,
         allocation_basis=None,
         portal_token=decrypted_token,
         portal_url=f"/orders/{decrypted_token}",
@@ -193,7 +193,7 @@ class OrderService:
     async def get_order(self, shop_id: str, order_id: str) -> SellerOrder:
         now = get_utc_now()
         if self.db is not None:
-            stmt = select(OrderTable).where(OrderTable.id == order_id, OrderTable.shop_id == shop_id)
+            stmt = select(OrderTable).where(OrderTable.id == order_id, OrderTable.shop_id == shop_id).with_for_update()
             result = await self.db.execute(stmt)
             order = result.scalar_one_or_none()
             if not order:
@@ -223,11 +223,13 @@ class OrderService:
         limit = max(1, min(limit, 100))
 
         if self.db is not None:
-            stmt = select(OrderTable).where(OrderTable.shop_id == shop_id).order_by(desc(OrderTable.created_at), desc(OrderTable.id))
+            stmt = select(OrderTable).where(OrderTable.shop_id == shop_id).order_by(desc(OrderTable.created_at), desc(OrderTable.id)).with_for_update()
             result = await self.db.execute(stmt)
             all_orders = list(result.scalars().all())
 
-            updated = any(_check_and_apply_expiry(o, now) for o in all_orders)
+            updated = False
+            for order in all_orders:
+                updated = _check_and_apply_expiry(order, now) or updated
             if updated:
                 await self.db.commit()
 

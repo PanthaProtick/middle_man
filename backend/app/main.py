@@ -2,11 +2,12 @@ import logging
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+from starlette.middleware.base import RequestResponseEndpoint
 
 from app.api.orders import router as orders_router
 from app.api.public_orders import router as public_orders_router
@@ -38,6 +39,15 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
 )
+
+
+@app.middleware("http")
+async def protect_public_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
+    response = await call_next(request)
+    if request.url.path.startswith(f"{settings.API_PREFIX}/public/orders"):
+        response.headers["Cache-Control"] = "no-store, private"
+        response.headers["Referrer-Policy"] = "no-referrer"
+    return response
 
 # CORS setup
 app.add_middleware(
@@ -110,4 +120,4 @@ async def root() -> RedirectResponse:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True, access_log=False)

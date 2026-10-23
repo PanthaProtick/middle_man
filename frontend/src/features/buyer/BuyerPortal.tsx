@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Loader2, AlertCircle, ShieldAlert } from 'lucide-react';
-import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
-import { BuyerApiError, fetchPublicOrder, submitBuyerDetails } from './api';
+import type { BuyerFormDraft, PublicOrder } from './types';
+import { BuyerApiError, fetchPublicOrder } from './api';
 import { BuyerOrderDetails } from './BuyerOrderDetails';
 import { BuyerSubmissionForm } from './BuyerSubmissionForm';
 import { BuyerStatusView } from './BuyerStatusView';
+import { useBuyerSubmission } from './useBuyerSubmission';
 
 interface BuyerPortalProps {
   portalToken: string;
@@ -26,12 +27,10 @@ export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Elemen
     claimed_advance_bdt: '',
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const { handleSubmit, isSubmitting, isLocked, submissionError, serverFields } = useBuyerSubmission(portalToken, setOrder);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
 
-  // Retain same idempotency key for retrying the same payload
-  const idempotencyKeyRef = useRef<string | null>(null);
 
   const loadOrder = useCallback(() => {
     fetchPublicOrder(portalToken)
@@ -46,7 +45,7 @@ export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Elemen
         setGateDisabledMessage(null);
       })
       .catch((err: unknown) => {
-        if (err instanceof BuyerApiError && err.statusCode === 503) {
+        if (err instanceof BuyerApiError && err.code === 'PUBLIC_ACCESS_POLICY_UNSETTLED') {
           setGateDisabledMessage(
             err.message || 'Public buyer access is disabled until access/projection policy is settled',
           );
@@ -84,33 +83,14 @@ export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Elemen
 
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
+    setRefreshError(null);
     try {
       const fresh = await fetchPublicOrder(portalToken);
       setOrder(fresh);
     } catch {
-      // Ignored
+      setRefreshError('Unable to refresh. Showing the last saved status. / নতুন স্ট্যাটাস পাওয়া যায়নি। আগের সংরক্ষিত অবস্থা দেখানো হচ্ছে।');
     } finally {
       setIsRefreshing(false);
-    }
-  };
-
-  const handleSubmit = async (submission: BuyerSubmissionInput) => {
-    setIsSubmitting(true);
-    setSubmissionError(null);
-    if (!idempotencyKeyRef.current) {
-      idempotencyKeyRef.current = 'buyer-sub-' + Math.random().toString(36).substring(2, 12) + '-' + Date.now();
-    }
-    try {
-      const updated = await submitBuyerDetails(portalToken, submission, idempotencyKeyRef.current);
-      setOrder(updated);
-    } catch (err) {
-      if (err instanceof BuyerApiError) {
-        setSubmissionError(err.message);
-      } else {
-        setSubmissionError(err instanceof Error ? err.message : 'Submission failed. Please check connection and try again.');
-      }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -142,7 +122,7 @@ export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Elemen
       <div style={{ maxWidth: '480px', margin: '40px auto', padding: '0 16px' }}>
         <div className="card" style={{ border: '1px solid rgba(239, 68, 68, 0.4)', textAlign: 'center', padding: '24px' }}>
           <AlertCircle size={40} color="#ef4444" style={{ margin: '0 auto 12px auto' }} />
-          <h3 style={{ margin: '0 0 8px 0', color: '#fca5a5' }}>Order Not Found / সমস্যা হয়েছে</h3>
+          <h3 style={{ margin: '0 0 8px 0', color: '#fca5a5' }}>Unable to Load Order / অর্ডার দেখা যাচ্ছে না</h3>
           <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '16px' }}>
             {error || 'The requested order could not be loaded.'}
           </p>
@@ -157,6 +137,7 @@ export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   return (
     <div style={{ maxWidth: '480px', margin: '20px auto', padding: '0 16px 40px 16px' }}>
       <BuyerOrderDetails order={order} />
+      {refreshError && <p role="alert">{refreshError}</p>}
 
       {order.lifecycle === 'awaiting_buyer' ? (
         <BuyerSubmissionForm
@@ -165,6 +146,8 @@ export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Elemen
           onDraftChange={setDraft}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
+          isLocked={isLocked}
+          serverFields={serverFields}
           submissionError={submissionError}
         />
       ) : (

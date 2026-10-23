@@ -6,6 +6,8 @@ import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 
+pytest_plugins = ("buyer_postgres_support",)
+
 # Clear provider inputs before importing the app: a developer's .env must never
 # turn an offline verification run into a live database or paid API call.
 for name in (

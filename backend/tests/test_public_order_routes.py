@@ -3,7 +3,9 @@ import datetime
 import pytest
 from httpx import AsyncClient
 
+from app.api.public_orders import get_buyer_clock
 from app.core.auth import SellerIdentity, get_seller_identity
+from app.core.public_gate import allow_synthetic_buyer_demo, verify_public_access_gate
 from app.core.tokens import get_utc_now
 from app.main import app
 from app.services.order_service import reset_order_memory_store
@@ -14,7 +16,10 @@ from app.services.seller_service import reset_memory_store
 def clean_memory_stores():
     reset_memory_store()
     reset_order_memory_store()
+    app.dependency_overrides[verify_public_access_gate] = allow_synthetic_buyer_demo
     yield
+    app.dependency_overrides.pop(verify_public_access_gate, None)
+    app.dependency_overrides.pop(get_buyer_clock, None)
     reset_memory_store()
     reset_order_memory_store()
 
@@ -63,7 +68,8 @@ async def _create_test_order(client: AsyncClient) -> dict:
 
 @pytest.mark.asyncio
 async def test_public_policy_gate_blocks_live_unsettled_access(client: AsyncClient, seller_identity):
-    # Request with public gate disabled/unsettled
+    app.dependency_overrides.pop(verify_public_access_gate, None)
+    # Request headers cannot grant permission
     res = await client.get(
         "/api/public/orders/some-random-token",
         headers={"X-Test-Public-Gate-Disabled": "true"},
@@ -114,6 +120,7 @@ async def test_get_public_order_expired_evaluates_atomically(client: AsyncClient
 
     # Freeze/inject time after 48h expiry
     future_time = get_utc_now() + datetime.timedelta(hours=49)
+    app.dependency_overrides[get_buyer_clock] = lambda: lambda: future_time
     res = await client.get(
         f"/api/public/orders/{token}",
         headers={"X-Test-Now": future_time.isoformat()},
@@ -130,6 +137,7 @@ async def test_submission_strictly_at_or_after_deadline_returns_410(client: Asyn
 
     # Submit exactly at or after expiry (AC31)
     future_time = get_utc_now() + datetime.timedelta(hours=48, seconds=1)
+    app.dependency_overrides[get_buyer_clock] = lambda: lambda: future_time
     submission_payload = {
         "buyer_name": "Arif Hasan",
         "contact_number": "01711111111",
@@ -240,6 +248,7 @@ async def test_pending_submitted_order_never_expires_automatically(client: Async
 
     # Fast forward time past 48h
     future_time = get_utc_now() + datetime.timedelta(hours=50)
+    app.dependency_overrides[get_buyer_clock] = lambda: lambda: future_time
     res = await client.get(
         f"/api/public/orders/{token}",
         headers={"X-Test-Now": future_time.isoformat()},

@@ -3,6 +3,7 @@ import { Send, AlertCircle, User, Phone, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import { PaymentClaimFields } from './PaymentClaimFields';
 import { canonicalizeBdPhone } from '../seller/api';
+import { parseClaimedAmount } from './api';
 
 interface BuyerSubmissionFormProps {
   order: PublicOrder;
@@ -10,6 +11,8 @@ interface BuyerSubmissionFormProps {
   onDraftChange: (draft: BuyerFormDraft) => void;
   onSubmit: (submission: BuyerSubmissionInput) => Promise<void>;
   isSubmitting: boolean;
+  isLocked?: boolean;
+  serverFields?: Record<string, string>;
   submissionError: string | null;
 }
 
@@ -19,9 +22,12 @@ export function BuyerSubmissionForm({
   onDraftChange,
   onSubmit,
   isSubmitting,
+  isLocked = false,
+  serverFields = {},
   submissionError,
 }: BuyerSubmissionFormProps): React.JSX.Element {
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [localErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const fieldErrors = { ...serverFields, ...localErrors };
 
   const validate = (): boolean => {
     const errors: Record<string, string> = {};
@@ -58,8 +64,9 @@ export function BuyerSubmissionForm({
       errors.payment_trx_id = 'Transaction ID is required / TrxID লিখুন';
     }
 
-    const advanceNum = parseFloat(draft.claimed_advance_bdt);
-    if (isNaN(advanceNum) || advanceNum <= 0) {
+    try {
+      parseClaimedAmount(draft.claimed_advance_bdt);
+    } catch {
       errors.claimed_advance_bdt = 'Valid payment amount is required / সঠিক টাকার পরিমাণ দিন';
     }
 
@@ -71,7 +78,7 @@ export function BuyerSubmissionForm({
     e.preventDefault();
     if (!validate()) return;
 
-    const amountMinor = Math.round(parseFloat(draft.claimed_advance_bdt) * 100);
+    const amountMinor = parseClaimedAmount(draft.claimed_advance_bdt);
     const submission: BuyerSubmissionInput = {
       buyer_name: draft.buyer_name.trim(),
       contact_number: draft.contact_number.trim(),
@@ -128,6 +135,7 @@ export function BuyerSubmissionForm({
         </div>
       )}
 
+      <fieldset disabled={isSubmitting || isLocked} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       {/* Buyer Name */}
       <div className="form-group" style={{ marginBottom: '14px' }}>
         <label htmlFor="buyer_name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}>
@@ -141,12 +149,14 @@ export function BuyerSubmissionForm({
           value={draft.buyer_name}
           onChange={(e) => updateField('buyer_name', e.target.value)}
           placeholder="e.g. Rahim Uddin"
+          maxLength={200}
+          aria-describedby={fieldErrors.buyer_name ? "buyer_name-error" : undefined}
           aria-invalid={!!fieldErrors.buyer_name}
           className="form-control"
           style={{ marginTop: '6px', width: '100%' }}
         />
         {fieldErrors.buyer_name && (
-          <div style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.buyer_name}</div>
+          <div id="buyer_name-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.buyer_name}</div>
         )}
       </div>
 
@@ -163,6 +173,8 @@ export function BuyerSubmissionForm({
           value={draft.contact_number}
           onChange={(e) => updateField('contact_number', e.target.value)}
           placeholder="017XXXXXXXX or ০১৭XXXXXXXX"
+          maxLength={32}
+          aria-describedby={fieldErrors.contact_number ? "contact_number-error" : undefined}
           aria-invalid={!!fieldErrors.contact_number}
           className="form-control"
           style={{ marginTop: '6px', width: '100%' }}
@@ -171,7 +183,7 @@ export function BuyerSubmissionForm({
           For courier call & delivery updates (কুরিয়ার কলের জন্য)
         </div>
         {fieldErrors.contact_number && (
-          <div style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
+          <div id="contact_number-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
         )}
       </div>
 
@@ -188,12 +200,14 @@ export function BuyerSubmissionForm({
           value={draft.address_raw}
           onChange={(e) => updateField('address_raw', e.target.value)}
           placeholder="House/Holding, Road, Area/Thana, District (e.g. বাড়ি ১২, রোড ৫, ধানমন্ডি, ঢাকা)"
+          maxLength={2000}
+          aria-describedby={fieldErrors.address_raw ? "address_raw-error" : undefined}
           aria-invalid={!!fieldErrors.address_raw}
           className="form-control"
           style={{ marginTop: '6px', width: '100%', resize: 'vertical' }}
         />
         {fieldErrors.address_raw && (
-          <div style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
+          <div id="address_raw-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
         )}
       </div>
 
@@ -204,6 +218,7 @@ export function BuyerSubmissionForm({
         onUpdateField={updateField}
       />
 
+      </fieldset>
       {/* Submit Button */}
       <button
         type="submit"
@@ -221,7 +236,7 @@ export function BuyerSubmissionForm({
         }}
       >
         <Send size={18} />
-        <span>{isSubmitting ? 'Submitting / জমা হচ্ছে...' : 'Submit Order Details / তথ্য জমা দিন'}</span>
+        <span>{isSubmitting ? 'Submitting / জমা হচ্ছে...' : isLocked ? 'Retry Same Submission / একই তথ্য দিয়ে আবার চেষ্টা করুন' : 'Submit Order Details / তথ্য জমা দিন'}</span>
       </button>
     </form>
   );

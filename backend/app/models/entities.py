@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Boolean, DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import BigInteger, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.database import Base
@@ -66,8 +66,8 @@ class OrderTable(Base):
 
     # Snapshot of commercial terms & receiving account details
     product_name: Mapped[str] = mapped_column(String(200), nullable=False)
-    total_minor: Mapped[int] = mapped_column(Integer, nullable=False)
-    required_advance_minor: Mapped[int] = mapped_column(Integer, nullable=False)
+    total_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    required_advance_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
     account_provider: Mapped[str] = mapped_column(String(32), nullable=False)
     account_receiving_number: Mapped[str] = mapped_column(String(20), nullable=False)
     account_label: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -89,6 +89,7 @@ class OrderTable(Base):
 
 class BuyerRevisionTable(Base):
     __tablename__ = "buyer_revisions"
+    __table_args__ = (UniqueConstraint("order_id", "revision_number", name="uq_buyer_order_revision"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     order_id: Mapped[str] = mapped_column(String(36), ForeignKey("orders.id"), nullable=False, index=True)
@@ -106,7 +107,7 @@ class BuyerRevisionTable(Base):
     payment_trx_id: Mapped[str] = mapped_column(String(128), nullable=False)
     payment_sender_raw: Mapped[str] = mapped_column(String(32), nullable=False)
     payment_sender_canonical: Mapped[str] = mapped_column(String(20), nullable=False)
-    payment_amount_minor: Mapped[int] = mapped_column(Integer, nullable=False)
+    payment_amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
     payment_claimed_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     payment_evidence_id: Mapped[str | None] = mapped_column(String(64), nullable=True)
     source: Mapped[str] = mapped_column(String(32), default="buyer", nullable=False)

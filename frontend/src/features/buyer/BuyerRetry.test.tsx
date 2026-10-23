@@ -1,0 +1,109 @@
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import { expect, it, vi } from 'vitest';
+import { BuyerPortal } from './BuyerPortal';
+
+const order = {
+  id: 'synthetic-order', shop_display_name: 'Synthetic shop', product_name: 'Synthetic product',
+  total_minor: 30000, required_advance_minor: 10000, expected_cod_minor: 20000,
+  account_provider: 'bkash', account_receiving_number: '01711111111', account_label: 'Synthetic',
+  lifecycle: 'awaiting_buyer', created_at: '2026-10-23T00:00:00Z', expires_at: '2026-10-25T00:00:00Z',
+};
+
+function edit(container: HTMLElement, name: string, value: string) {
+  const input = container.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`)!;
+  const prototype = input instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
+  Object.getOwnPropertyDescriptor(prototype, 'value')!.set!.call(input, value);
+  input.dispatchEvent(new Event('input', { bubbles: true }));
+}
+
+async function filledPortal() {
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  await act(async () => root.render(<BuyerPortal portalToken="synthetic" />));
+  await act(async () => {
+    edit(container, 'buyer_name', 'Synthetic buyer');
+    edit(container, 'contact_number', '01711111111');
+    edit(container, 'address_raw', 'Synthetic address');
+    edit(container, 'payment_sender', '01822222222');
+    edit(container, 'payment_trx_id', 'SYNTHETIC');
+  });
+  return {
+    container,
+    submit: () => act(async () => { container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }),
+    close: async () => { await act(async () => root.unmount()); container.remove(); vi.restoreAllMocks(); },
+  };
+}
+
+it('retries the frozen payload and key after an unknown outcome', async () => {
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+    if (init?.method === 'POST') throw new TypeError('Synthetic lost response');
+    return new Response(JSON.stringify(order));
+  });
+  const container = document.createElement('div');
+  document.body.append(container);
+  const root = createRoot(container);
+  try {
+    await act(async () => root.render(<BuyerPortal portalToken="synthetic" />));
+    await act(async () => {
+      edit(container, 'buyer_name', 'First reviewed name');
+      edit(container, 'contact_number', '01711111111');
+      edit(container, 'address_raw', 'Synthetic address');
+      edit(container, 'payment_sender', '01822222222');
+      edit(container, 'payment_trx_id', 'SYNTHETIC');
+    });
+    await act(async () => container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+    expect(container.textContent).not.toContain('ACK-');
+    // Even programmatic changes cannot turn an unknown write into a different attempt.
+    await act(async () => edit(container, 'buyer_name', 'Changed after lost response'));
+    await act(async () => container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+    const posts = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
+    expect(posts).toHaveLength(2);
+    expect(posts[1][1]?.body).toBe(posts[0][1]?.body);
+    expect(posts[1][1]?.headers).toEqual(posts[0][1]?.headers);
+    expect(container.querySelector('fieldset')?.disabled).toBe(true);
+  } finally {
+    await act(async () => root.unmount());
+    container.remove();
+    vi.restoreAllMocks();
+  }
+});
+
+it('reconciles a lost response to saved pending status without another submission', async () => {
+  let submitted = false;
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+    if (init?.method === 'POST') { submitted = true; throw new TypeError('Response lost after commit'); }
+    return new Response(JSON.stringify(submitted ? { ...order, lifecycle: 'pending', submission_acknowledgement: 'ACK-SAVED' } : order));
+  });
+  const page = await filledPortal();
+  try {
+    await page.submit();
+    expect(page.container.textContent).toContain('ACK-SAVED');
+    expect(page.container.querySelector('form')).toBeNull();
+    expect(fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(1);
+  } finally { await page.close(); }
+});
+
+it('preserves input and shows server field validation before allowing a corrected attempt', async () => {
+  let postCount = 0;
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+    if (init?.method !== 'POST') return new Response(JSON.stringify(order));
+    postCount++;
+    return postCount === 1
+      ? new Response(JSON.stringify({ error: { code: 'VALIDATION_ERROR', message: 'Please correct the details', fields: [{ field: 'payment_claim.trx_id', code: 'synthetic', message: 'Synthetic TrxID validation' }] } }), { status: 422 })
+      : new Response(JSON.stringify({ ...order, lifecycle: 'pending', submission_acknowledgement: 'ACK-CORRECTED' }));
+  });
+  const page = await filledPortal();
+  try {
+    await page.submit();
+    expect(page.container.querySelector<HTMLInputElement>('[name="buyer_name"]')?.value).toBe('Synthetic buyer');
+    expect(page.container.querySelector('fieldset')?.disabled).toBe(false);
+    expect(page.container.querySelector('#payment_trx_id-error')?.textContent).toBe('Synthetic TrxID validation');
+    await act(async () => edit(page.container, 'payment_trx_id', 'CORRECTED'));
+    await page.submit();
+    const posts = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
+    expect(posts[1][1]?.headers).not.toEqual(posts[0][1]?.headers);
+    expect(page.container.textContent).toContain('ACK-CORRECTED');
+  } finally { await page.close(); }
+});

@@ -81,3 +81,19 @@ def test_buyer_submission_accepts_different_contact_and_sender():
     assert sub.contact_number_canonical == "01711111111"
     assert sub.payment_claim.sender_number_canonical == "01822222222"
     assert sub.contact_number_canonical != sub.payment_claim.sender_number_canonical
+
+
+@pytest.mark.parametrize("amount", [True, "10000", 1.5, 9007199254740992])
+def test_claim_rejects_coercion_and_unsafe_integer(amount):
+    with pytest.raises(ValidationError):
+        PaymentClaim(provider="bkash", trx_id="Synthetic", sender_number="01712345678", amount_minor=amount)
+
+
+def test_claim_preserves_raw_phone_and_rejects_client_internal_fields():
+    claim = {"provider": "bkash", "trx_id": "  Case Sensitive  ", "sender_number": " +880 1812-345678 ", "amount_minor": 10000}
+    saved = PaymentClaim(**claim)
+    assert saved.sender_number_raw == claim["sender_number"]
+    assert saved.trx_id == "Case Sensitive"
+    for override in ({"sender_number_canonical": "01712345678"}, {"lifecycle": "confirmed"}, {"evidence_id": "foreign-evidence"}, {"claimed_at": "2026-10-23T12:00:00"}):
+        with pytest.raises(ValidationError):
+            PaymentClaim(**{**claim, **override})

@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Any, Literal, Optional
+from typing import Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
 from app.models.order import MAX_SAFE_INTEGER
 from app.models.seller import canonicalize_bd_phone
@@ -17,6 +17,7 @@ def clean_trx_id(raw: str) -> str:
 
 
 class Address(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     raw_text: str = Field(..., min_length=1, max_length=2000)
     district: Optional[str] = Field(None, max_length=100)
     thana: Optional[str] = Field(None, max_length=100)
@@ -34,16 +35,21 @@ class Address(BaseModel):
 
 
 class PaymentClaim(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     provider: Literal["bkash", "nagad"]
     trx_id: str = Field(..., min_length=1, max_length=128)
     sender_number: str = Field(..., min_length=1, max_length=32)
-    amount_minor: int = Field(..., gt=0)
-    claimed_at: Optional[datetime] = None
+    amount_minor: int = Field(..., gt=0, strict=True)
+    claimed_at: Optional[AwareDatetime] = None
     evidence_id: Optional[str] = Field(None, max_length=64)
 
-    # Internal raw & canonical representations
-    sender_number_raw: str = ""
-    sender_number_canonical: str = ""
+    @property
+    def sender_number_raw(self) -> str:
+        return self.sender_number
+
+    @property
+    def sender_number_canonical(self) -> str:
+        return canonicalize_bd_phone(self.sender_number)
 
     @field_validator("trx_id")
     @classmethod
@@ -59,25 +65,34 @@ class PaymentClaim(BaseModel):
             raise ValueError("Claimed amount exceeds maximum safe integer value")
         return v
 
-    @model_validator(mode="before")
+    @field_validator("sender_number")
     @classmethod
-    def process_sender_numbers(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            raw_sender = str(data.get("sender_number", "")).strip()
-            data["sender_number_raw"] = raw_sender
-            data["sender_number_canonical"] = canonicalize_bd_phone(raw_sender)
-        return data
+    def validate_sender(cls, value: str) -> str:
+        canonicalize_bd_phone(value)
+        return value
+
+    @field_validator("evidence_id")
+    @classmethod
+    def validate_evidence(cls, value: Optional[str]) -> Optional[str]:
+        if value is not None:
+            raise ValueError("Screenshot references are unavailable in the manual-only submission slice")
+        return value
 
 
 class BuyerSubmission(BaseModel):
+    model_config = ConfigDict(extra="forbid")
     buyer_name: str = Field(..., min_length=1, max_length=200)
     contact_number: str = Field(..., min_length=1, max_length=32)
     address: Address
     payment_claim: PaymentClaim
 
-    # Internal raw & canonical representations
-    contact_number_raw: str = ""
-    contact_number_canonical: str = ""
+    @property
+    def contact_number_raw(self) -> str:
+        return self.contact_number
+
+    @property
+    def contact_number_canonical(self) -> str:
+        return canonicalize_bd_phone(self.contact_number)
 
     @field_validator("buyer_name")
     @classmethod
@@ -87,14 +102,11 @@ class BuyerSubmission(BaseModel):
             raise ValueError("Buyer name cannot be blank")
         return s
 
-    @model_validator(mode="before")
+    @field_validator("contact_number")
     @classmethod
-    def process_contact_numbers(cls, data: Any) -> Any:
-        if isinstance(data, dict):
-            raw_contact = str(data.get("contact_number", "")).strip()
-            data["contact_number_raw"] = raw_contact
-            data["contact_number_canonical"] = canonicalize_bd_phone(raw_contact)
-        return data
+    def validate_contact(cls, value: str) -> str:
+        canonicalize_bd_phone(value)
+        return value
 
 
 class PublicOrder(BaseModel):

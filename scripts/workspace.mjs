@@ -64,7 +64,7 @@ const tasks = {
   'typecheck:backend': typecheckBackend,
   'typecheck:frontend': () => frontend(['run', 'typecheck']),
   build: () => frontend(['run', 'build']),
-  'dev:backend': () => backend(['uvicorn', 'app.main:app', '--reload', '--port', '8000']),
+  'dev:backend': () => backend(['uvicorn', 'app.main:app', '--reload', '--port', '8000', '--no-access-log']),
   'dev:frontend': () => frontend(['run', 'dev']),
 };
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { act } from 'react';
-import { createRoot } from 'react-dom/client';
+import { createRoot, type Root } from 'react-dom/client';
 import { BuyerPortal } from './BuyerPortal';
 import type { PublicOrder } from './types';
 
@@ -16,6 +16,7 @@ function setInputValue(input: HTMLInputElement | HTMLTextAreaElement, value: str
 
 describe('BuyerPortal Component', () => {
   let container: HTMLDivElement;
+  let root: Root;
 
   const mockPublicOrderAwaiting: PublicOrder = {
     id: 'order-uuid-1',
@@ -39,10 +40,12 @@ describe('BuyerPortal Component', () => {
   beforeEach(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
+    root = createRoot(container);
     vi.restoreAllMocks();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await act(async () => root.unmount());
     container.remove();
   });
 
@@ -51,7 +54,6 @@ describe('BuyerPortal Component', () => {
       Promise.resolve(new Response(JSON.stringify(mockPublicOrderAwaiting), { status: 200 }))
     );
 
-    const root = createRoot(container);
     await act(async () => {
       root.render(<BuyerPortal portalToken="mock-token-123" />);
     });
@@ -79,7 +81,6 @@ describe('BuyerPortal Component', () => {
       writable: true,
     });
 
-    const root = createRoot(container);
     await act(async () => {
       root.render(<BuyerPortal portalToken="mock-token-123" />);
     });
@@ -114,7 +115,6 @@ describe('BuyerPortal Component', () => {
         )
       );
 
-    const root = createRoot(container);
     await act(async () => {
       root.render(<BuyerPortal portalToken="mock-token-123" />);
     });
@@ -159,12 +159,21 @@ describe('BuyerPortal Component', () => {
       )
     );
 
-    const root = createRoot(container);
     await act(async () => {
       root.render(<BuyerPortal portalToken="mock-token-123" />);
     });
 
     expect(container.textContent).toContain('Public Access Disabled');
     expect(container.textContent).toContain('Public buyer access is disabled until access/projection policy is settled');
+  });
+
+  it('offers retry for a database outage without labelling it a policy denial', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify({
+      error: { code: 'DATABASE_UNAVAILABLE', message: 'Unable to load order. Please retry.' },
+    }), { status: 503 }));
+    await act(async () => root.render(<BuyerPortal portalToken="synthetic" />));
+    expect(container.textContent).not.toContain('Public Access Disabled');
+    expect(container.querySelector('button')?.textContent).toContain('Retry');
+    expect(container.textContent).toContain('Unable to load order. Please retry.');
   });
 });

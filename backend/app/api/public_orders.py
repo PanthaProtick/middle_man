@@ -1,63 +1,56 @@
 import datetime
+from collections.abc import Callable
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import get_db
 from app.core.public_gate import verify_public_access_gate
+from app.core.tokens import get_utc_now
 from app.models.buyer import BuyerSubmission, PublicOrder
 from app.services.buyer_service import BuyerService
 
 router = APIRouter(prefix="/public/orders", tags=["public-orders"])
 
 
-def _set_public_security_headers(response: Response) -> None:
-    response.headers["Cache-Control"] = "no-store, private"
-    response.headers["Referrer-Policy"] = "no-referrer"
+def get_buyer_clock() -> Callable[[], datetime.datetime]:
+    return get_utc_now
 
 
-def _parse_test_now(test_now: Optional[str]) -> Optional[datetime.datetime]:
-    if test_now:
-        try:
-            return datetime.datetime.fromisoformat(test_now)
-        except ValueError:
-            pass
-    return None
-
-
-@router.get("/{portal_token}", response_model=PublicOrder, summary="Get public order details by portal token")
+@router.get("/{portal_token}", response_model=PublicOrder)
 async def get_public_order(
     portal_token: str,
-    response: Response,
-    test_now: Optional[str] = Header(None, alias="X-Test-Now"),
+    request: Request,
+    clock: Callable[[], datetime.datetime] = Depends(get_buyer_clock),
     is_gate_approved: bool = Depends(verify_public_access_gate),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> PublicOrder:
-    _set_public_security_headers(response)
-    now = _parse_test_now(test_now)
-    buyer_svc = BuyerService(db)
-    return await buyer_svc.get_public_order(portal_token=portal_token, now=now)
+    try:
+        agent = request.headers.get("user-agent", "").lower()
+        return await BuyerService(db, clock).get_public_order(portal_token, is_bot=any(word in agent for word in ("bot", "crawler", "spider", "preview")))
+    except SQLAlchemyError:
+        if db is not None:
+            await db.rollback()
+        raise HTTPException(503, detail={"code": "DATABASE_UNAVAILABLE", "message": "Unable to load order. Please retry."}) from None
 
 
-@router.post("/{portal_token}/submission", response_model=PublicOrder, summary="Submit buyer details and payment claim")
+@router.post("/{portal_token}/submission", response_model=PublicOrder)
 async def submit_buyer_details(
     portal_token: str,
     payload: BuyerSubmission,
     response: Response,
-    idempotency_key: Optional[str] = Header(None, alias="Idempotency-Key"),
-    test_now: Optional[str] = Header(None, alias="X-Test-Now"),
+    idempotency_key: str = Header(..., alias="Idempotency-Key", min_length=1, max_length=64),
+    clock: Callable[[], datetime.datetime] = Depends(get_buyer_clock),
     is_gate_approved: bool = Depends(verify_public_access_gate),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> PublicOrder:
-    _set_public_security_headers(response)
-    now = _parse_test_now(test_now)
-    buyer_svc = BuyerService(db)
-    order, status_code = await buyer_svc.submit_buyer_details(
-        portal_token=portal_token,
-        submission=payload,
-        idempotency_key=idempotency_key,
-        now=now,
-    )
+    try:
+        order, status_code = await BuyerService(db, clock).submit_buyer_details(portal_token, payload, idempotency_key)
+    except SQLAlchemyError:
+        if db is not None:
+            await db.rollback()
+        raise HTTPException(503, detail={"code": "DATABASE_UNAVAILABLE", "message": "Submission outcome unknown. Retry the same details and key, then refresh status."}) from None
     response.status_code = status_code
     return order

@@ -54,10 +54,12 @@ export function PaymentClaimFields({
             id="claimed_advance_bdt"
             name="claimed_advance_bdt"
             type="number"
-            step="1"
+            step="0.01"
+            min="0.01"
             value={draft.claimed_advance_bdt}
             onChange={(e) => onUpdateField('claimed_advance_bdt', e.target.value)}
-            aria-invalid={!!fieldErrors.claimed_advance_bdt}
+            aria-describedby={fieldErrors.claimed_advance_bdt ? "claimed_advance_bdt-error" : undefined}
+          aria-invalid={!!fieldErrors.claimed_advance_bdt}
             className="form-control"
             style={{ marginTop: '6px', width: '100%' }}
           />
@@ -65,7 +67,7 @@ export function PaymentClaimFields({
             Expected: {formatBDT(order.required_advance_minor)}
           </div>
           {fieldErrors.claimed_advance_bdt && (
-            <div style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
+            <div id="claimed_advance_bdt-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
               {fieldErrors.claimed_advance_bdt}
             </div>
           )}
@@ -84,10 +86,12 @@ export function PaymentClaimFields({
         <input
           id="payment_sender"
           name="payment_sender"
+          maxLength={32}
           type="tel"
           value={draft.payment_sender}
           onChange={(e) => onUpdateField('payment_sender', e.target.value)}
           placeholder="01XXXXXXXXX (number used to send money)"
+          aria-describedby={fieldErrors.payment_sender ? "payment_sender-error" : undefined}
           aria-invalid={!!fieldErrors.payment_sender}
           className="form-control"
           style={{ marginTop: '6px', width: '100%' }}
@@ -96,7 +100,7 @@ export function PaymentClaimFields({
           Can be different if a friend, relative, or agent paid for you (আলাদা নাম্বার হতে পারে)
         </div>
         {fieldErrors.payment_sender && (
-          <div style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
+          <div id="payment_sender-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
             {fieldErrors.payment_sender}
           </div>
         )}
@@ -114,16 +118,18 @@ export function PaymentClaimFields({
         <input
           id="payment_trx_id"
           name="payment_trx_id"
+          maxLength={128}
           type="text"
           value={draft.payment_trx_id}
           onChange={(e) => onUpdateField('payment_trx_id', e.target.value)}
           placeholder="e.g. 9J4K2L7M"
+          aria-describedby={fieldErrors.payment_trx_id ? "payment_trx_id-error" : undefined}
           aria-invalid={!!fieldErrors.payment_trx_id}
           className="form-control"
-          style={{ marginTop: '6px', width: '100%', textTransform: 'uppercase' }}
+          style={{ marginTop: '6px', width: '100%' }}
         />
         {fieldErrors.payment_trx_id && (
-          <div style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
+          <div id="payment_trx_id-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
             {fieldErrors.payment_trx_id}
           </div>
         )}

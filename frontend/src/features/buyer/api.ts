@@ -84,3 +84,12 @@ export function formatBDT(minor: number): string {
   const bdt = minor / 100;
   return `৳${bdt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
+
+export function parseClaimedAmount(raw: string): number {
+  const value = raw.trim();
+  if (!/^\d+(\.\d{1,2})?$/.test(value)) throw new Error('Enter a positive BDT amount with at most two decimal places.');
+  const [whole, fraction = ''] = value.split('.');
+  const minor = BigInt(whole) * 100n + BigInt(fraction.padEnd(2, '0'));
+  if (minor <= 0n || minor > BigInt(Number.MAX_SAFE_INTEGER)) throw new Error('Payment amount is outside the supported range.');
+  return Number(minor);
+}
