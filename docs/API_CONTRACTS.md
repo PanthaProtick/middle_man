@@ -1,5 +1,37 @@
 # API Contracts & Data Flow Guide
 
+## Optional address assistance
+
+`POST /api/public/orders/{token}/address-extraction` requires `Idempotency-Key`
+and `{raw_text, ai_opt_in: true}`. Consent must be a JSON boolean. The existing
+public gate applies; orders must still be unsubmitted and unexpired, including on
+replay. A changed payload with the same key returns 409. At most five distinct
+requests per order are accepted; the manual submission remains available.
+
+The response has `available` (boolean), `suggestions`,
+`review_required: true`, and `message`. Suggestions contain required nullable
+`district`, `thana`, `area`, `street_line`, `landmark`, and `clarification_question`
+strings, plus a required boolean `needs_clarification`.
+Invalid, blocked, oversized, incomplete or unavailable provider output returns a
+manual fallback. Suggestions never submit orders or confirm payments. The buyer
+edits the separate review fields and explicitly applies them to the readable
+address; nulls remain empty. Address edits, submission and navigation invalidate
+late responses. A transport retry retains the same address/key.
+
+Gemini is backend-only, with no tools, no automatic retries, a five-second HTTP
+timeout and a six-second total provider deadline. The adapter uses the official
+[generateContent contract](https://ai.google.dev/api/generate-content). Tests use
+an explicit offline provider/HTTP transport. Current model suitability, service
+data terms and actual configured-provider behavior remain launch gates.
+
+`address_extractions` owns raw requests/responses by shop and order, with immutable
+collection time and original 30-day deadlines. Raw text is excluded from generic
+idempotency records, audit logs and public status projections. Cleanup must clear
+both raw columns by `delete_after`; ticket 16 owns scheduled cleanup and overdue
+reporting, alongside the shared backup/provider purge launch gates. Structured
+results are retained separately for replay and remain personal data under the
+shared completed-order retention policy. Replays never extend raw deadlines.
+
 > [!NOTE]
 > This document is part of **Tier 2 (On-Demand Context)**. Agents should consult this file when adding new FastAPI endpoints or updating frontend client calls.
 

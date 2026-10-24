@@ -3,6 +3,7 @@ import { Send, AlertCircle, User, Phone, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import { PaymentClaimFields } from './PaymentClaimFields';
 import { EvidenceUploadField } from './EvidenceUploadField';
+import { AddressAssistance } from './AddressAssistance';
 import { canonicalizeBdPhone } from '../seller/api';
 import { parseClaimedAmount } from './api';
 
@@ -214,6 +215,9 @@ export function BuyerSubmissionForm({
           <div id="address_raw-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
         )}
       </div>
+
+      {portalToken && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
+        onUse={value => updateField('address_raw', value)} disabled={isSubmitting || isLocked} />}
 
       {portalToken && (
         <EvidenceUploadField
