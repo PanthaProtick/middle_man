@@ -13,7 +13,8 @@ pytest_plugins = ("buyer_postgres_support",)
 for name in (
     "DATABASE_URL", "DIRECT_URL", "PGHOST", "PGDATABASE", "PGUSER", "PGPASSWORD",
     "GEMINI_API_KEY", "CLERK_SECRET_KEY", "CLERK_PUBLISHABLE_KEY", "CLERK_WEBHOOK_SECRET",
-    "CLERK_ISSUER", "CLERK_JWT_KEY",
+    "CLERK_ISSUER", "CLERK_JWT_KEY", "ORDER_LINK_ENCRYPTION_KEY",
+    "PAYMENT_MARKER_SECRET", "PAYMENT_IDENTITY_SECRET",
 ):
     os.environ[name] = ""
 os.environ["ENV"] = "test"

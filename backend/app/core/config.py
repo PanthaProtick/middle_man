@@ -5,6 +5,13 @@ from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
+def _has_placeholder(val: str, specific: list[str]) -> bool:
+    if not val:
+        return True
+    lowered = val.lower()
+    return any(ind in lowered for ind in specific + ["placeholder", "<", ">"])
+
+
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Dev Template API"
     ENV: str = "development"
@@ -34,6 +41,13 @@ class Settings(BaseSettings):
     # Google Gemini API
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-2.5-flash"
+
+    # Order Link Encryption
+    ORDER_LINK_ENCRYPTION_KEY: str = ""
+
+    # Payment Marker Protection
+    PAYMENT_MARKER_SECRET: str = ""
+    PAYMENT_IDENTITY_SECRET: str = ""
 
     # CORS
     CORS_ORIGINS: Union[List[str], str] = [
@@ -92,6 +106,28 @@ class Settings(BaseSettings):
         if key.startswith("sk_test_your_") or key == "your-clerk-secret-key" or "<" in key:
             return False
         return True
+
+    @property
+    def is_order_link_encryption_configured(self) -> bool:
+        """Checks if a dedicated application key for link encryption is provided and not a placeholder."""
+        key = self.ORDER_LINK_ENCRYPTION_KEY.strip()
+        return bool(key) and not _has_placeholder(
+            key, ["your-encryption-key", "your-order-link-encryption-key"]
+        )
+
+    @property
+    def effective_payment_marker_secret(self) -> str:
+        """Returns the primary marker secret or identity alias."""
+        return self.PAYMENT_MARKER_SECRET.strip() or self.PAYMENT_IDENTITY_SECRET.strip()
+
+    @property
+    def is_payment_marker_protection_configured(self) -> bool:
+        """Checks if a dedicated secret for payment marker protection is provided and not a placeholder."""
+        secret = self.effective_payment_marker_secret
+        return bool(secret) and not _has_placeholder(
+            secret,
+            ["your-marker-secret", "your-payment-marker-secret", "your-payment-identity-secret"],
+        )
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod

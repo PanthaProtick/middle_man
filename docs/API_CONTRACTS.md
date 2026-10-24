@@ -261,9 +261,9 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   expired. Replay caches return unavailable rather than replaying personal responses.
 - Consumed receipts retain a nonspendable allocation/receipt skeleton to preserve
   relational uniqueness, with readable TrxID/sender, amounts and decision text removed.
-  Independent shop/provider keyed identity markers survive. The existing HMAC uses
-  `CLERK_SECRET_KEY`; migration 0017 binds a per-shop key fingerprint. A changed or
-  missing key blocks receipt ingestion, reconciliation, manual acceptance and
+  Independent shop/provider keyed identity markers survive. The HMAC uses a dedicated
+  `PAYMENT_MARKER_SECRET` independent of authentication credentials; migration 0017 binds
+  a per-shop key fingerprint. A changed or missing key blocks receipt ingestion, reconciliation, manual acceptance and
   structured cleanup. Legacy bindings require all existing markers to verify against
   retained identities first. Restore the original key to recover; key rotation requires
   a separately reviewed migration, never silently rebinding after details are removed.

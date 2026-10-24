@@ -66,7 +66,10 @@ async def test_key_rotation_fails_closed_and_cleanup_failure_survives_restart(po
     client, _, sessions, _ = postgres_buyer
     order, receipt = await confirm_case(client)
     deadline = dt.datetime.fromisoformat(order['completed_at']) + dt.timedelta(days=367)
-    monkeypatch.setattr(settings, 'CLERK_SECRET_KEY', 'rotated-secret')
+
+    # 1. Mismatched marker secret fails closed on cleanup and import
+    monkeypatch.setattr(settings, 'PAYMENT_MARKER_SECRET', 'rotated-secret')
+    monkeypatch.setattr(settings, 'PAYMENT_IDENTITY_SECRET', '')
     async with sessions() as db:
         result = await purge_completed_orders(db, deadline, order['shop_id'])
         assert result.failed >= 1
@@ -77,9 +80,19 @@ async def test_key_rotation_fails_closed_and_cleanup_failure_survives_restart(po
         'trx_id': 'new-identity', 'amount_minor': 150000}, headers={'Idempotency-Key': 'rotated'})
     assert replay.status_code == 503, replay.text
     assert replay.json()['error']['code'] == 'PAYMENT_MARKER_KEY_UNAVAILABLE'
-    monkeypatch.setattr(settings, 'CLERK_SECRET_KEY', '')
+
+    # 2. Restoring valid marker secret allows cleanup to complete
+    monkeypatch.setattr(settings, 'PAYMENT_MARKER_SECRET', '')
     async with sessions() as db:
         assert (await purge_completed_orders(db, deadline, order['shop_id'])).failed == 0
+
+    # 3. Rotating Clerk credentials does NOT invalidate consumed payment marker protection
+    monkeypatch.setattr(settings, 'CLERK_SECRET_KEY', 'rotated-clerk-secret-after-cleanup')
+    replay_clerk = await client.post('/api/seller/transactions', json={
+        'payment_account_id': receipt['payment_account_id'], 'provider': 'bkash',
+        'trx_id': 'EXCEPTION', 'amount_minor': 150000}, headers={'Idempotency-Key': 'clerk-rotated-replay'})
+    assert replay_clerk.status_code == 409, replay_clerk.text
+    assert replay_clerk.json()['error']['code'] == 'PAYMENT_USED'
 
 
 async def test_unresolved_claim_preserves_shared_receipt_then_deletes_when_eligible(postgres_buyer):
@@ -165,7 +178,9 @@ async def test_missing_marker_key_blocks_import_preview_and_cleanup(postgres_buy
     client, connection, sessions, _ = postgres_buyer
     order, receipt = await confirm_case(client)
     monkeypatch.setattr(settings, 'DATABASE_URL', 'postgresql://postgres@127.0.0.1:55447/postgres')
-    monkeypatch.setattr(settings, 'CLERK_SECRET_KEY', '')
+    monkeypatch.setattr(settings, 'PAYMENT_MARKER_SECRET', '')
+    monkeypatch.setattr(settings, 'PAYMENT_IDENTITY_SECRET', '')
+    monkeypatch.setattr(settings, 'CLERK_SECRET_KEY', 'sk_live_valid_clerk_key')
     imported = await client.post('/api/seller/transactions', json={'payment_account_id': receipt['payment_account_id'],
         'provider': 'bkash', 'trx_id': 'FRESH', 'amount_minor': 100})
     assert imported.status_code == 503, imported.text

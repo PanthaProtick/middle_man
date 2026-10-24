@@ -20,7 +20,9 @@ from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
 from app.core.config import settings
 from app.core.database import DurableStorageUnavailableError, check_database_readiness
+from app.core.tokens import check_link_encryption_readiness
 from app.models.seller import ErrorBody, ErrorFieldItem, StandardErrorResponse
+from app.services.payment_marker_protection import check_payment_marker_readiness
 
 logging.basicConfig(
     level=logging.INFO if settings.DEBUG else logging.WARNING,
@@ -42,6 +44,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 message=f"Durable storage initialization failed: {readiness.diagnostic}"
             )
         logger.info("Durable storage verified: database connection and schema inventory are ready.")
+        await check_link_encryption_readiness()
+        logger.info("Order link encryption verified: application key and existing record compatibility are ready.")
+        await check_payment_marker_readiness()
+        logger.info("Payment marker protection verified: dedicated secret and marker bindings are ready.")
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME}...")
 

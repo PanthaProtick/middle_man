@@ -4,14 +4,14 @@
 
 **Blocked by:** 01: Fail explicitly when durable storage is unavailable.
 
-**Status:** ready-for-agent
+**Status:** completed
 
 ## Acceptance criteria
 
-- [ ] An order link created with the application key remains recoverable after Clerk credential changes and application restart.
-- [ ] Missing or incompatible encryption keys fail explicitly in integration mode, without a fixed fallback or disclosure of key material.
-- [ ] Existing encrypted records are inspected before changing key sources; preserve their recoverability or require an explicit verified compatibility step, never reset data silently.
-- [ ] Record focused verification results and remaining gaps; for code/tooling changes, run the required final root verification gate and record its result.
+- [x] An order link created with the application key remains recoverable after Clerk credential changes and application restart.
+- [x] Missing or incompatible encryption keys fail explicitly in integration mode, without a fixed fallback or disclosure of key material.
+- [x] Existing encrypted records are inspected before changing key sources; preserve their recoverability or require an explicit verified compatibility step, never reset data silently.
+- [x] Record focused verification results and remaining gaps; for code/tooling changes, run the required final root verification gate and record its result.
 
 ## Bounded context
 
@@ -35,3 +35,15 @@ Reserve context for diagnosis, focused verification and the final gate. Before a
 ## Comments
 
 Published from the user-approved 22-ticket breakdown on 2026-10-24. Implementation has not started.
+
+- 2026-10-25: Agreed testing seams (Configuration/Cipher, Token Encryption/Decryption, Compatibility Inspection, Order Persistence & Recovery) and architectural decisions saved to `.scratch/phase-1-self-test/ticket-02-handover.md`. Baseline test suite clean (245 passed, 65 skipped). Ready for TDD vertical slice 1 upon resume.
+- 2026-10-25: Completed TDD implementation across all 4 agreed seams:
+  - Seam 1 (Configuration & Cipher): Added `ORDER_LINK_ENCRYPTION_KEY` and `is_order_link_encryption_configured` in `backend/app/core/config.py`. Added fail-closed validation and diagnostic masking in `backend/app/core/tokens.py`.
+  - Seam 2 (Token Encryption & Decryption): Decoupled token cipher from `CLERK_SECRET_KEY`. Catch `InvalidToken` and raise `LinkEncryptionKeyIncompatibleError` (status 503, code `LINK_ENCRYPTION_KEY_INCOMPATIBLE`).
+  - Seam 3 (Compatibility Inspection): Implemented `inspect_link_encryption_compatibility` and `check_link_encryption_readiness`, hooked into `app.main.lifespan` in durable mode to verify database records decrypt successfully with the active key.
+  - Seam 4 (Order Persistence & Recovery): Added AC04 / AC39 tests in `test_link_encryption.py` (unit) and `test_durable_postgres.py` (PostgreSQL) verifying recovery across Clerk rotation, restart, and explicit 503 on incompatible key without data resetting.
+  - Verification:
+    - `npm run test:backend`: 263 passed, 66 skipped (0 failures).
+    - `npm run test:frontend`: 114 passed (26 test files).
+    - `npm run typecheck`: backend (86 files) and frontend (tsc) 0 errors.
+    - Final root verification gate `npm run check`: ALL PASS (`.cache/checks/check-CvmUdc/result.json`).

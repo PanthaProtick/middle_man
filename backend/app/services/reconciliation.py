@@ -34,13 +34,23 @@ from app.services.reconciliation_store import (
 )
 
 
-def compute_payment_digest(shop_id: str, provider: str, trx_id: str) -> str:
-    key = settings.CLERK_SECRET_KEY.strip()
+def _is_placeholder_key(key: str) -> bool:
+    indicators = ["your-marker-secret", "placeholder", "<", ">"]
+    return any(ind in key.lower() for ind in indicators)
+
+
+def compute_payment_digest(
+    shop_id: str, provider: str, trx_id: str, secret: Optional[str] = None
+) -> str:
+    key = secret.strip() if secret is not None else settings.effective_payment_marker_secret
     if not key:
-        if settings.is_database_configured:
+        if settings.is_database_configured or settings.is_durable_mode:
             # Enforce fail-closed security in configured database environments
             raise RuntimeError("Missing payment marker protection secret: failing closed")
         key = "standby-dev-marker-secret-seed"
+    elif _is_placeholder_key(key):
+        if settings.is_database_configured or settings.is_durable_mode:
+            raise RuntimeError("Placeholder payment marker protection secret: failing closed")
     message = f"{shop_id}:{provider.lower().strip()}:{trx_id.strip()}"
     return hmac.new(key.encode("utf-8"), message.encode("utf-8"), hashlib.sha256).hexdigest()
 
