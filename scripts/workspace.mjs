@@ -47,7 +47,9 @@ const tasks = {
   setup: () => runSteps([
     () => run('uv', ['sync', '--locked', '--all-groups'], { cwd: path.join(root, 'backend'), env: backendEnvironment() }),
     () => frontend(['ci']),
+    () => run('git', ['config', 'core.hooksPath', '.githooks']),
   ]),
+  prepare: () => run('git', ['config', 'core.hooksPath', '.githooks']),
   check: () => checkRun(task, [['Tooling tests', testTooling], ...backendChecks, ...frontendChecks, ['HTTP smoke', smoke]]),
   smoke,
   'check:backend': () => checkRun(task, backendChecks),

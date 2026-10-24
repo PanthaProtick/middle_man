@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+# Middle Man: Pre-commit CI verification gate
+# Runs the full CI test & verification suite before any commit is accepted.
+
+echo ""
+echo "========================================="
+echo "  Running Pre-Commit CI Verification...  "
+echo "========================================="
+echo ""
+
+npm run check
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo ""
+  echo "❌ CI verification check failed (exit code $status)."
+  echo "Commit aborted. Please fix errors before committing."
+  echo ""
+  exit $status
+fi
+
+echo ""
+echo "✓ Pre-commit CI check passed."
+echo ""
+exit 0

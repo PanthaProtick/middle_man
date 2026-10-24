@@ -5,6 +5,7 @@
   "description": "React and FastAPI development template for agent-assisted full-stack prototyping",
   "engines": { "node": ">=22.12.0" },
   "scripts": {
+    "prepare": "git config core.hooksPath .githooks",
     "doctor": "node scripts/workspace.mjs doctor",
     "context": "node scripts/workspace.mjs context",
     "setup": "node scripts/workspace.mjs setup",
