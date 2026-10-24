@@ -2,6 +2,8 @@
 
 This directory houses **deep, on-demand reference documentation**. 
 
+[Session context investigation](session-context-investigation.md) measures repository-linked Codex and Antigravity sessions against a preferred 100k-token context budget, with per-call and per-response evidence. Read it when investigating agent context usage or environment optimization.
+
 ### For AI Coding Agents:
 * Do **NOT** load every document in this directory into your initial context prompt.
 * Read specific files only when working on a relevant domain:

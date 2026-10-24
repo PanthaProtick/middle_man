@@ -1,0 +1,3471 @@
+{
+  "cutoff_utc": "2026-10-24T05:14:37.677Z",
+  "scan": {
+    "metadata_files": 106,
+    "metadata_errors": 0,
+    "selected_parse_errors": []
+  },
+  "estimate": "plaintext characters / 4; body-only proxy, not model tokenizer; images and ciphertext excluded",
+  "provider_contracts": {
+    "Codex": "input includes cached_input_tokens; reasoning is part of output",
+    "Antigravity": "raw input_tokens and cache_read_tokens have unverified semantics; their sum is a conditional context proxy; max_input/first_input/last_input are raw input field only"
+  },
+  "sessions": [
+    {
+      "id": "01a16927-275e-7f30-97d3-06d15974aef3",
+      "provider": "Codex",
+      "role": "parent",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\23\\rollout-2026-10-23T20-25-36-01a16927-275e-7f30-97d3-06d15974aef3.jsonl",
+      "sha256": "d471bd80356cad729d9d6a8e42ee872a42ee20cea0bb10f4a968b1192b09b430",
+      "bytes": 2576093,
+      "start": "2026-10-23T14:25:36.188Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 1,
+      "inherited_records": 0,
+      "assistant_chars": 44973,
+      "user_chars": 16500,
+      "developer_chars": 69903,
+      "agent_message_chars": 4132,
+      "reasoning_cipher_chars": 272700,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8103,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a16927-2f11-7a90-9f02-66cd314a3683",
+          "first_input": 35979,
+          "last_input": 47049
+        },
+        {
+          "line": 56,
+          "turn_id": "01a1692b-34d1-7fc2-aaa7-edb8b055665c",
+          "first_input": 47747,
+          "last_input": 52559
+        },
+        {
+          "line": 88,
+          "turn_id": "01a16937-4d1e-7e42-be4f-166018f10e94",
+          "first_input": 53265,
+          "last_input": 56030
+        },
+        {
+          "line": 114,
+          "turn_id": "01a16939-9de5-7733-86cc-31968cfc067d",
+          "first_input": 56476,
+          "last_input": 58449
+        },
+        {
+          "line": 140,
+          "turn_id": "01a1693d-6149-7d12-8bb3-33a143483f29",
+          "first_input": 59069,
+          "last_input": 60764
+        },
+        {
+          "line": 164,
+          "turn_id": "01a1693f-67a2-7832-ba7c-7943825c1402",
+          "first_input": 61012,
+          "last_input": 63674
+        },
+        {
+          "line": 188,
+          "turn_id": "01a1694d-bc3c-7a13-a214-7903ca28990f",
+          "first_input": 64286,
+          "last_input": 66798
+        },
+        {
+          "line": 214,
+          "turn_id": "01a16954-6cc8-7660-a467-ad616f1fc66c",
+          "first_input": 67265,
+          "last_input": 70099
+        },
+        {
+          "line": 242,
+          "turn_id": "01a16959-5bab-7150-8a81-c4df1453c323",
+          "first_input": 70609,
+          "last_input": 72403
+        },
+        {
+          "line": 266,
+          "turn_id": "01a1695c-0b23-7fd0-a071-f19c6d27292f",
+          "first_input": 72674,
+          "last_input": 75293
+        },
+        {
+          "line": 290,
+          "turn_id": "01a16962-f929-70e3-ba93-89ef4b105c24",
+          "first_input": 75650,
+          "last_input": 78410
+        },
+        {
+          "line": 318,
+          "turn_id": "01a16965-beef-7ab0-8aad-ab473e675aa5",
+          "first_input": 78825,
+          "last_input": 81540
+        },
+        {
+          "line": 353,
+          "turn_id": "01a16968-7076-7343-8ae5-a44bc224f1aa",
+          "first_input": 81953,
+          "last_input": 101452
+        },
+        {
+          "line": 412,
+          "turn_id": "01a1696c-3d4b-76d0-a4d6-9d8015b8313c",
+          "first_input": 101693,
+          "last_input": 139758
+        },
+        {
+          "line": 520,
+          "turn_id": "01a16976-b538-7a63-9b74-13fa7ef14fe7",
+          "first_input": 139934,
+          "last_input": 139934
+        },
+        {
+          "line": 530,
+          "turn_id": "01a16979-60e0-7470-833f-6850bf3764bf",
+          "first_input": 41315,
+          "last_input": 58123
+        },
+        {
+          "line": 570,
+          "turn_id": "01a1697e-c045-75e0-b338-545814f94ce8",
+          "first_input": 59767,
+          "last_input": 59767
+        },
+        {
+          "line": 582,
+          "turn_id": "01a1697f-fd8e-71a3-9f9a-5c11a004f388",
+          "first_input": 60357,
+          "last_input": 60357
+        },
+        {
+          "line": 594,
+          "turn_id": "01a16981-12f6-7970-8732-5f5b2599f368",
+          "first_input": 61674,
+          "last_input": 81778
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 53,
+      "tool_counts": {
+        "exec": 48,
+        "collaboration.spawn_agent": 2,
+        "collaboration.list_agents": 2,
+        "request_user_input_async": 1
+      },
+      "category_counts": {
+        "read/search/diff": 26,
+        "delegation": 2,
+        "other/mixed": 4,
+        "write/edit": 18,
+        "mixed-batch": 2,
+        "full-check": 1
+      },
+      "body_chars": {
+        "args_chars": 161329,
+        "output_chars": 374493
+      },
+      "usage_sums": {
+        "input_tokens": 5614557,
+        "cached_input_tokens": 5426560,
+        "cache_read_tokens": null,
+        "output_tokens": 60961,
+        "reasoning_output_tokens": 13551,
+        "total_tokens": 5675518
+      },
+      "response_count": 73,
+      "max_input": 139934,
+      "first_input": 35979,
+      "last_input": 81778,
+      "crossings": {
+        "100000": {
+          "line": 402,
+          "input": 101230,
+          "response_index": 46
+        },
+        "150000": null
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 2,
+      "duplicate_output_chars": 400
+    },
+    {
+      "id": "01a16927-65bf-7711-969b-b40d8f482a24",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16927-275e-7f30-97d3-06d15974aef3",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\23\\rollout-2026-10-23T20-25-52-01a16927-65bf-7711-969b-b40d8f482a24.jsonl",
+      "sha256": "e0ad11db965afacf87b4bbc8aba62fa7077801cb0788bdd1caafbe173ecb94c9",
+      "bytes": 428696,
+      "start": "2026-10-23T14:25:52.147Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 2362,
+      "user_chars": 8103,
+      "developer_chars": 69157,
+      "agent_message_chars": 108,
+      "reasoning_cipher_chars": 3356,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8103,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16927-2f11-7a90-9f02-66cd314a3683",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 18,
+          "turn_id": "01a16927-66a3-7e50-a01c-d9b86cd4996b",
+          "first_input": 36126,
+          "last_input": 51372
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 5,
+      "tool_counts": {
+        "exec": 4,
+        "collaboration.send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 4,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 1360,
+        "output_chars": 63207
+      },
+      "usage_sums": {
+        "input_tokens": 270227,
+        "cached_input_tokens": 251008,
+        "cache_read_tokens": null,
+        "output_tokens": 1126,
+        "reasoning_output_tokens": 24,
+        "total_tokens": 271353
+      },
+      "response_count": 6,
+      "max_input": 51372,
+      "first_input": 36126,
+      "last_input": 51372,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 1,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16966-34ab-7660-93b1-13df01da115c",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16927-275e-7f30-97d3-06d15974aef3",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\23\\rollout-2026-10-23T21-34-28-01a16966-34ab-7660-93b1-13df01da115c.jsonl",
+      "sha256": "056975b73bceff6e9548e4438f24716d460324294b0b3380d1dfc555ec91084c",
+      "bytes": 507797,
+      "start": "2026-10-23T15:34:28.358Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 24540,
+      "user_chars": 9800,
+      "developer_chars": 69157,
+      "agent_message_chars": 117,
+      "reasoning_cipher_chars": 1848,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9800,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16927-2f11-7a90-9f02-66cd314a3683",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 19,
+          "turn_id": "01a1692b-34d1-7fc2-aaa7-edb8b055665c",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 24,
+          "turn_id": "01a16937-4d1e-7e42-be4f-166018f10e94",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 29,
+          "turn_id": "01a16939-9de5-7733-86cc-31968cfc067d",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 34,
+          "turn_id": "01a1693d-6149-7d12-8bb3-33a143483f29",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 39,
+          "turn_id": "01a1693f-67a2-7832-ba7c-7943825c1402",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 44,
+          "turn_id": "01a1694d-bc3c-7a13-a214-7903ca28990f",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 49,
+          "turn_id": "01a16954-6cc8-7660-a467-ad616f1fc66c",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 54,
+          "turn_id": "01a16959-5bab-7150-8a81-c4df1453c323",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 59,
+          "turn_id": "01a1695c-0b23-7fd0-a071-f19c6d27292f",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 64,
+          "turn_id": "01a16962-f929-70e3-ba93-89ef4b105c24",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 69,
+          "turn_id": "01a16965-beef-7ab0-8aad-ab473e675aa5",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 74,
+          "turn_id": "01a16966-3581-7e72-9563-f3c2d334940a",
+          "first_input": 41178,
+          "last_input": 59053
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 3,
+      "tool_counts": {
+        "exec": 3
+      },
+      "category_counts": {
+        "other/mixed": 3
+      },
+      "body_chars": {
+        "args_chars": 666,
+        "output_chars": 66615
+      },
+      "usage_sums": {
+        "input_tokens": 206837,
+        "cached_input_tokens": 182400,
+        "cache_read_tokens": null,
+        "output_tokens": 563,
+        "reasoning_output_tokens": 27,
+        "total_tokens": 207400
+      },
+      "response_count": 4,
+      "max_input": 59053,
+      "first_input": 41178,
+      "last_input": 59053,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a169ca-7337-7651-a90d-d67def5a7be5",
+      "provider": "Codex",
+      "role": "parent",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\23\\rollout-2026-10-23T23-23-57-01a169ca-7337-7651-a90d-d67def5a7be5.jsonl",
+      "sha256": "f61a5e19ea0f74c389f1b2680d57b1c578957570a941da2469cd28afe4659bad",
+      "bytes": 3391359,
+      "start": "2026-10-23T17:23:57.970Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 8025,
+      "user_chars": 14727,
+      "developer_chars": 62811,
+      "agent_message_chars": 4540,
+      "reasoning_cipher_chars": 348152,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 14666,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a169ca-794b-7241-a7ed-f7a5100adc28",
+          "first_input": 36673,
+          "last_input": 78089
+        },
+        {
+          "line": 117,
+          "turn_id": "01a169cd-8679-78b1-88f0-d1759b615654",
+          "first_input": 78885,
+          "last_input": 217842
+        },
+        {
+          "line": 694,
+          "turn_id": "01a169e5-d3d4-7551-adfb-aa2f73b6e970",
+          "first_input": 218509,
+          "last_input": 222334
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 90,
+      "tool_counts": {
+        "exec": 62,
+        "collaboration.spawn_agent": 2,
+        "collaboration.send_message": 2,
+        "mcp__cua_repl.js": 24
+      },
+      "category_counts": {
+        "read/search/diff": 29,
+        "delegation": 4,
+        "full-check": 4,
+        "mixed-batch": 18,
+        "other/mixed": 8,
+        "write/edit": 1,
+        "focused-check": 2,
+        "browser/web/media": 24
+      },
+      "body_chars": {
+        "args_chars": 129401,
+        "output_chars": 491325
+      },
+      "usage_sums": {
+        "input_tokens": 14476212,
+        "cached_input_tokens": 14263680,
+        "cache_read_tokens": null,
+        "output_tokens": 53285,
+        "reasoning_output_tokens": 16421,
+        "total_tokens": 14529497
+      },
+      "response_count": 93,
+      "max_input": 222334,
+      "first_input": 36673,
+      "last_input": 222334,
+      "crossings": {
+        "100000": {
+          "line": 149,
+          "input": 105636,
+          "response_index": 17
+        },
+        "150000": {
+          "line": 325,
+          "input": 156671,
+          "response_index": 38
+        }
+      },
+      "truncated_outputs": 8,
+      "encrypted_spans": 19,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a169ca-e76d-7632-847a-85af9ed00c1a",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a169ca-7337-7651-a90d-d67def5a7be5",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\23\\rollout-2026-10-23T23-24-27-01a169ca-e76d-7632-847a-85af9ed00c1a.jsonl",
+      "sha256": "43aa8345180dc49f5fa200f20e77f9b711074ec8aa494f18addc8464a695d7ce",
+      "bytes": 499849,
+      "start": "2026-10-23T17:24:27.718Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1610,
+      "user_chars": 14666,
+      "developer_chars": 62963,
+      "agent_message_chars": 103,
+      "reasoning_cipher_chars": 9720,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 14666,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a169ca-794b-7241-a7ed-f7a5100adc28",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 18,
+          "turn_id": "01a169ca-e842-7be1-ab47-68a5b4730937",
+          "first_input": 37195,
+          "last_input": 61968
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 7,
+      "tool_counts": {
+        "exec": 6,
+        "collaboration.send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 6,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 1909,
+        "output_chars": 90550
+      },
+      "usage_sums": {
+        "input_tokens": 400227,
+        "cached_input_tokens": 369280,
+        "cache_read_tokens": null,
+        "output_tokens": 1268,
+        "reasoning_output_tokens": 253,
+        "total_tokens": 401495
+      },
+      "response_count": 8,
+      "max_input": 61968,
+      "first_input": 37195,
+      "last_input": 61968,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 1,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a169cb-0355-7f43-83d1-99581378f6bb",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a169ca-7337-7651-a90d-d67def5a7be5",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\23\\rollout-2026-10-23T23-24-34-01a169cb-0355-7f43-83d1-99581378f6bb.jsonl",
+      "sha256": "1c19093e5b0428608931c395f9969bea8ab7e59e9b3e8590c69158641b765fbe",
+      "bytes": 550821,
+      "start": "2026-10-23T17:24:34.856Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 2582,
+      "user_chars": 14666,
+      "developer_chars": 62963,
+      "agent_message_chars": 195,
+      "reasoning_cipher_chars": 8932,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 14666,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a169ca-794b-7241-a7ed-f7a5100adc28",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 19,
+          "turn_id": "01a169cb-0428-7431-9fe6-bae8737cb7bd",
+          "first_input": 36969,
+          "last_input": 66614
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 8,
+      "tool_counts": {
+        "exec": 7,
+        "collaboration.send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 7,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 2959,
+        "output_chars": 110772
+      },
+      "usage_sums": {
+        "input_tokens": 485160,
+        "cached_input_tokens": 457216,
+        "cache_read_tokens": null,
+        "output_tokens": 1679,
+        "reasoning_output_tokens": 122,
+        "total_tokens": 486839
+      },
+      "response_count": 9,
+      "max_input": 66614,
+      "first_input": 36969,
+      "last_input": 66614,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 1,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a169ce-aeb8-7321-b6bd-7b98fc821800",
+      "provider": "Codex",
+      "role": "guardian",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\23\\rollout-2026-10-23T23-28-35-01a169ce-aeb8-7321-b6bd-7b98fc821800.jsonl",
+      "sha256": "0e7f23b0e72cdd343ac1a6ca3fd9c47e52d31a893ebdb85adee63b1c10626239",
+      "bytes": 455430,
+      "start": "2026-10-23T17:28:35.360Z",
+      "models": [
+        "codex-auto-review"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1949,
+      "user_chars": 228690,
+      "developer_chars": 22360,
+      "agent_message_chars": 199,
+      "reasoning_cipher_chars": 17668,
+      "additional_tools_chars": 13080,
+      "initial_user_chars": 228690,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a169ce-af6d-75b2-bb62-1b239910edce",
+          "first_input": 22378,
+          "last_input": 22378
+        },
+        {
+          "line": 25,
+          "turn_id": "01a169d8-de46-7453-a537-8e9db6423100",
+          "first_input": 33520,
+          "last_input": 33520
+        },
+        {
+          "line": 36,
+          "turn_id": "01a169da-c0c8-7b32-bf87-4b1e36efc43b",
+          "first_input": 41270,
+          "last_input": 41270
+        },
+        {
+          "line": 47,
+          "turn_id": "01a169e1-0df4-7892-863f-68670021fa2f",
+          "first_input": 52823,
+          "last_input": 52823
+        },
+        {
+          "line": 58,
+          "turn_id": "01a169e5-0602-7342-b88a-13a3f85f2c16",
+          "first_input": 60453,
+          "last_input": 60453
+        },
+        {
+          "line": 69,
+          "turn_id": "01a169e6-461a-7d43-85c8-1f14d7fa6c72",
+          "first_input": 64597,
+          "last_input": 64597
+        },
+        {
+          "line": 80,
+          "turn_id": "01a169e6-559f-7e13-8755-af4ccec4df05",
+          "first_input": 65112,
+          "last_input": 65112
+        },
+        {
+          "line": 92,
+          "turn_id": "01a169e6-7309-7b80-9247-e3a1934ed1b9",
+          "first_input": 66610,
+          "last_input": 66610
+        }
+      ],
+      "windows": [
+        258400
+      ],
+      "unmatched_calls": 0,
+      "call_count": 0,
+      "tool_counts": {},
+      "category_counts": {},
+      "body_chars": {
+        "args_chars": 0,
+        "output_chars": 0
+      },
+      "usage_sums": {
+        "input_tokens": 406763,
+        "cached_input_tokens": 344832,
+        "cache_read_tokens": null,
+        "output_tokens": 877,
+        "reasoning_output_tokens": 396,
+        "total_tokens": 407640
+      },
+      "response_count": 8,
+      "max_input": 66610,
+      "first_input": 22378,
+      "last_input": 66610,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a34-7b8b-79e0-9935-3f91a3454073",
+      "provider": "Codex",
+      "role": "parent",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-19-47-01a16a34-7b8b-79e0-9935-3f91a3454073.jsonl",
+      "sha256": "a62763a4d7cae9c1582d128522371a848a7e455fefd301192e73617dba92b7e0",
+      "bytes": 2619212,
+      "start": "2026-10-23T19:19:47.002Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 5714,
+      "user_chars": 9584,
+      "developer_chars": 63079,
+      "agent_message_chars": 3468,
+      "reasoning_cipher_chars": 153436,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8490,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a16a34-8389-7853-91e3-beb5feab1273",
+          "first_input": 35289,
+          "last_input": 169002
+        },
+        {
+          "line": 537,
+          "turn_id": "01a16a45-a63c-7d93-82b2-226e96bc0bf5",
+          "first_input": 169521,
+          "last_input": 170792
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 73,
+      "tool_counts": {
+        "exec": 50,
+        "request_user_input_async": 2,
+        "mcp__cua_repl.js": 16,
+        "collaboration.spawn_agent": 2,
+        "collaboration.followup_task": 2,
+        "clock.sleep": 1
+      },
+      "category_counts": {
+        "read/search/diff": 24,
+        "other/mixed": 10,
+        "focused-check": 14,
+        "browser/web/media": 16,
+        "full-check": 4,
+        "delegation": 4,
+        "wait/status": 1
+      },
+      "body_chars": {
+        "args_chars": 76231,
+        "output_chars": 387987
+      },
+      "usage_sums": {
+        "input_tokens": 9696082,
+        "cached_input_tokens": 9540352,
+        "cache_read_tokens": null,
+        "output_tokens": 26090,
+        "reasoning_output_tokens": 4007,
+        "total_tokens": 9722172
+      },
+      "response_count": 76,
+      "max_input": 170792,
+      "first_input": 35289,
+      "last_input": 170792,
+      "crossings": {
+        "100000": {
+          "line": 156,
+          "input": 100165,
+          "response_index": 20
+        },
+        "150000": {
+          "line": 350,
+          "input": 151418,
+          "response_index": 47
+        }
+      },
+      "truncated_outputs": 7,
+      "encrypted_spans": 4,
+      "duplicate_output_chars": 17
+    },
+    {
+      "id": "01a16a3a-be5c-7960-9079-5b9a4fa2b5b5",
+      "provider": "Codex",
+      "role": "guardian",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-26-37-01a16a3a-be5c-7960-9079-5b9a4fa2b5b5.jsonl",
+      "sha256": "dcc4a033fd21b185fab0132e56dfe8720737bfdc64e056624bb2fa6c6d2b4b9d",
+      "bytes": 327158,
+      "start": "2026-10-23T19:26:37.269Z",
+      "models": [
+        "codex-auto-review"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 984,
+      "user_chars": 144824,
+      "developer_chars": 22360,
+      "agent_message_chars": 317,
+      "reasoning_cipher_chars": 15404,
+      "additional_tools_chars": 13080,
+      "initial_user_chars": 144824,
+      "turns": [
+        {
+          "line": 11,
+          "turn_id": "01a16a3a-bfae-7dc1-9fee-1a9171761cdf",
+          "first_input": 21654,
+          "last_input": 21654
+        },
+        {
+          "line": 23,
+          "turn_id": "01a16a40-d256-7780-b54f-7077191e37f8",
+          "first_input": 36575,
+          "last_input": 36575
+        },
+        {
+          "line": 40,
+          "turn_id": "01a16a42-b7ec-7f33-ada2-2b4b5e6b5247",
+          "first_input": 45005,
+          "last_input": 45005
+        },
+        {
+          "line": 51,
+          "turn_id": "01a16a42-d309-7c23-a2fd-955107fc31b9",
+          "first_input": 45876,
+          "last_input": 45876
+        },
+        {
+          "line": 63,
+          "turn_id": "01a16a45-cdcc-7bd3-905c-7bfdc939af74",
+          "first_input": 48849,
+          "last_input": 48849
+        }
+      ],
+      "windows": [
+        258400
+      ],
+      "unmatched_calls": 0,
+      "call_count": 0,
+      "tool_counts": {},
+      "category_counts": {},
+      "body_chars": {
+        "args_chars": 0,
+        "output_chars": 0
+      },
+      "usage_sums": {
+        "input_tokens": 197959,
+        "cached_input_tokens": 154496,
+        "cache_read_tokens": null,
+        "output_tokens": 823,
+        "reasoning_output_tokens": 565,
+        "total_tokens": 198782
+      },
+      "response_count": 5,
+      "max_input": 48849,
+      "first_input": 21654,
+      "last_input": 48849,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a3c-fae4-7653-8ce0-05ca52416723",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16a34-7b8b-79e0-9935-3f91a3454073",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-29-03-01a16a3c-fae4-7653-8ce0-05ca52416723.jsonl",
+      "sha256": "bc9b8438f191e84e96875b5b56942b14d6cb172c06d64c5724843d608a0bf922",
+      "bytes": 454250,
+      "start": "2026-10-23T19:29:03.818Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1280,
+      "user_chars": 9032,
+      "developer_chars": 62963,
+      "agent_message_chars": 220,
+      "reasoning_cipher_chars": 4720,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9032,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16a34-8389-7853-91e3-beb5feab1273",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 19,
+          "turn_id": "01a16a3c-fbea-75b3-b643-74cde8cddc91",
+          "first_input": 35789,
+          "last_input": 51961
+        },
+        {
+          "line": 65,
+          "turn_id": "01a16a3f-0c21-77f0-81ef-5903dcc14832",
+          "first_input": 52204,
+          "last_input": 55052
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 7,
+      "tool_counts": {
+        "exec": 6,
+        "collaboration.send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 6,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 1913,
+        "output_chars": 71590
+      },
+      "usage_sums": {
+        "input_tokens": 420320,
+        "cached_input_tokens": 396160,
+        "cache_read_tokens": null,
+        "output_tokens": 962,
+        "reasoning_output_tokens": 118,
+        "total_tokens": 421282
+      },
+      "response_count": 9,
+      "max_input": 55052,
+      "first_input": 35789,
+      "last_input": 55052,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 1,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a3d-1dff-70a1-8d4b-06fc42ed1c5e",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16a34-7b8b-79e0-9935-3f91a3454073",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-29-12-01a16a3d-1dff-70a1-8d4b-06fc42ed1c5e.jsonl",
+      "sha256": "fd35be59bba1829b04ebc948a336ac3c4b75ed1152eb0139e551628ca8811875",
+      "bytes": 552603,
+      "start": "2026-10-23T19:29:12.815Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1545,
+      "user_chars": 9032,
+      "developer_chars": 62963,
+      "agent_message_chars": 210,
+      "reasoning_cipher_chars": 12504,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9032,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16a34-8389-7853-91e3-beb5feab1273",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 20,
+          "turn_id": "01a16a3d-1f29-7711-8b31-e2c6c341e314",
+          "first_input": 35672,
+          "last_input": 58997
+        },
+        {
+          "line": 91,
+          "turn_id": "01a16a3e-f979-7cb1-b7f3-466b0fbe65d6",
+          "first_input": 59328,
+          "last_input": 61825
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 10,
+      "tool_counts": {
+        "exec": 8,
+        "collaboration.send_message": 2
+      },
+      "category_counts": {
+        "read/search/diff": 8,
+        "delegation": 2
+      },
+      "body_chars": {
+        "args_chars": 3288,
+        "output_chars": 101104
+      },
+      "usage_sums": {
+        "input_tokens": 627048,
+        "cached_input_tokens": 597760,
+        "cache_read_tokens": null,
+        "output_tokens": 1768,
+        "reasoning_output_tokens": 332,
+        "total_tokens": 628816
+      },
+      "response_count": 12,
+      "max_input": 61825,
+      "first_input": 35672,
+      "last_input": 61825,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 2,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a47-4d75-7fb1-9bc6-ec87806e63ff",
+      "provider": "Codex",
+      "role": "parent",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-40-20-01a16a47-4d75-7fb1-9bc6-ec87806e63ff.jsonl",
+      "sha256": "f9dd01c6fdb35b9fe7e578ed52b6cff1c27b4c6ae72577bc3c9a738bf8aad156",
+      "bytes": 2512888,
+      "start": "2026-10-23T19:40:20.304Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 3200,
+      "user_chars": 8522,
+      "developer_chars": 62811,
+      "agent_message_chars": 3717,
+      "reasoning_cipher_chars": 142396,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8522,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a16a47-5467-7492-b3c2-c2c456781626",
+          "first_input": 35288,
+          "last_input": 175137
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 58,
+      "tool_counts": {
+        "exec": 42,
+        "collaboration.spawn_agent": 2,
+        "mcp__cua_repl.js": 12,
+        "collaboration.followup_task": 2
+      },
+      "category_counts": {
+        "read/search/diff": 20,
+        "focused-check": 13,
+        "write/edit": 1,
+        "mixed-batch": 2,
+        "full-check": 4,
+        "delegation": 4,
+        "browser/web/media": 12,
+        "other/mixed": 2
+      },
+      "body_chars": {
+        "args_chars": 90052,
+        "output_chars": 427467
+      },
+      "usage_sums": {
+        "input_tokens": 7504136,
+        "cached_input_tokens": 7349760,
+        "cache_read_tokens": null,
+        "output_tokens": 28005,
+        "reasoning_output_tokens": 3555,
+        "total_tokens": 7532141
+      },
+      "response_count": 59,
+      "max_input": 175137,
+      "first_input": 35288,
+      "last_input": 175137,
+      "crossings": {
+        "100000": {
+          "line": 124,
+          "input": 100509,
+          "response_index": 15
+        },
+        "150000": {
+          "line": 278,
+          "input": 150052,
+          "response_index": 35
+        }
+      },
+      "truncated_outputs": 15,
+      "encrypted_spans": 4,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a4e-7d6b-7ec3-b2c0-8eedf4b2f363",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16a47-4d75-7fb1-9bc6-ec87806e63ff",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-48-11-01a16a4e-7d6b-7ec3-b2c0-8eedf4b2f363.jsonl",
+      "sha256": "c4261e77479da7e8cf3a10e19702283759d0336c4d1c0f27780bc527f1d6e0af",
+      "bytes": 560266,
+      "start": "2026-10-23T19:48:11.337Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1583,
+      "user_chars": 8522,
+      "developer_chars": 62963,
+      "agent_message_chars": 210,
+      "reasoning_cipher_chars": 14776,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8522,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16a47-5467-7492-b3c2-c2c456781626",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 18,
+          "turn_id": "01a16a4e-7e44-7e51-8002-0fdc318bf1de",
+          "first_input": 35504,
+          "last_input": 61302
+        },
+        {
+          "line": 80,
+          "turn_id": "01a16a53-02eb-7493-a1d6-f7b3e06549f0",
+          "first_input": 61787,
+          "last_input": 65282
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 9,
+      "tool_counts": {
+        "exec": 8,
+        "collaboration.send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 8,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 2713,
+        "output_chars": 113227
+      },
+      "usage_sums": {
+        "input_tokens": 578764,
+        "cached_input_tokens": 535936,
+        "cache_read_tokens": null,
+        "output_tokens": 1526,
+        "reasoning_output_tokens": 385,
+        "total_tokens": 580290
+      },
+      "response_count": 11,
+      "max_input": 65282,
+      "first_input": 35504,
+      "last_input": 65282,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 1,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a4e-9cf0-7980-b336-cf37521d316d",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16a47-4d75-7fb1-9bc6-ec87806e63ff",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-48-19-01a16a4e-9cf0-7980-b336-cf37521d316d.jsonl",
+      "sha256": "676ce301b0e0c7555777122097ff4619e6e4d70bf7af5a921e7d30ed59045ce4",
+      "bytes": 459834,
+      "start": "2026-10-23T19:48:19.428Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1704,
+      "user_chars": 8522,
+      "developer_chars": 62963,
+      "agent_message_chars": 220,
+      "reasoning_cipher_chars": 2764,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8522,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16a47-5467-7492-b3c2-c2c456781626",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 19,
+          "turn_id": "01a16a4e-9df6-7fc2-930e-4d81be30d5b0",
+          "first_input": 35619,
+          "last_input": 51775
+        },
+        {
+          "line": 54,
+          "turn_id": "01a16a53-17eb-7fe2-b093-9450766c36dd",
+          "first_input": 52147,
+          "last_input": 55976
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 6,
+      "tool_counts": {
+        "exec": 6
+      },
+      "category_counts": {
+        "read/search/diff": 6
+      },
+      "body_chars": {
+        "args_chars": 2135,
+        "output_chars": 76616
+      },
+      "usage_sums": {
+        "input_tokens": 382281,
+        "cached_input_tokens": 360704,
+        "cache_read_tokens": null,
+        "output_tokens": 1066,
+        "reasoning_output_tokens": 88,
+        "total_tokens": 383347
+      },
+      "response_count": 8,
+      "max_input": 55976,
+      "first_input": 35619,
+      "last_input": 55976,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a50-03e1-7522-9e15-bfc30972bbbd",
+      "provider": "Codex",
+      "role": "guardian",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-49-51-01a16a50-03e1-7522-9e15-bfc30972bbbd.jsonl",
+      "sha256": "fe10d155beca3c74ab476c638300171029681eae5a2f5649d89f536f19c50746",
+      "bytes": 236258,
+      "start": "2026-10-23T19:49:51.313Z",
+      "models": [
+        "codex-auto-review"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 751,
+      "user_chars": 98291,
+      "developer_chars": 22360,
+      "agent_message_chars": 104,
+      "reasoning_cipher_chars": 9596,
+      "additional_tools_chars": 13080,
+      "initial_user_chars": 98291,
+      "turns": [
+        {
+          "line": 11,
+          "turn_id": "01a16a50-0517-7f53-bd94-5a5df52648b0",
+          "first_input": 20987,
+          "last_input": 20987
+        },
+        {
+          "line": 25,
+          "turn_id": "01a16a54-9e0f-7461-a786-e2ddb3280199",
+          "first_input": 33476,
+          "last_input": 33476
+        },
+        {
+          "line": 36,
+          "turn_id": "01a16a54-a884-7bc1-8945-0caad38f9189",
+          "first_input": 33968,
+          "last_input": 33968
+        }
+      ],
+      "windows": [
+        258400
+      ],
+      "unmatched_calls": 0,
+      "call_count": 0,
+      "tool_counts": {},
+      "category_counts": {},
+      "body_chars": {
+        "args_chars": 0,
+        "output_chars": 0
+      },
+      "usage_sums": {
+        "input_tokens": 88431,
+        "cached_input_tokens": 60288,
+        "cache_read_tokens": null,
+        "output_tokens": 537,
+        "reasoning_output_tokens": 358,
+        "total_tokens": 88968
+      },
+      "response_count": 3,
+      "max_input": 33968,
+      "first_input": 20987,
+      "last_input": 33968,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a55-a6d2-72c0-bb9e-06c0df7fac26",
+      "provider": "Codex",
+      "role": "parent",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T01-56-00-01a16a55-a6d2-72c0-bb9e-06c0df7fac26.jsonl",
+      "sha256": "b724e673d6ae934e727c823f7b3cd28aa3d1a3a7a7a94e5be0e5c4d6e885b4e1",
+      "bytes": 3054270,
+      "start": "2026-10-23T19:56:00.676Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 4318,
+      "user_chars": 9029,
+      "developer_chars": 62811,
+      "agent_message_chars": 1914,
+      "reasoning_cipher_chars": 134312,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8512,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a16a55-ad12-7633-8de7-368cb0fff58c",
+          "first_input": 35295,
+          "last_input": 160583
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 71,
+      "tool_counts": {
+        "exec": 49,
+        "request_user_input_async": 1,
+        "wait": 1,
+        "collaboration.spawn_agent": 2,
+        "mcp__cua_repl.js": 17,
+        "collaboration.followup_task": 1
+      },
+      "category_counts": {
+        "read/search/diff": 20,
+        "other/mixed": 2,
+        "wait/status": 1,
+        "mixed-batch": 24,
+        "write/edit": 2,
+        "full-check": 2,
+        "delegation": 3,
+        "browser/web/media": 17
+      },
+      "body_chars": {
+        "args_chars": 83143,
+        "output_chars": 365656
+      },
+      "usage_sums": {
+        "input_tokens": 8343853,
+        "cached_input_tokens": 8221312,
+        "cache_read_tokens": null,
+        "output_tokens": 26598,
+        "reasoning_output_tokens": 2878,
+        "total_tokens": 8370451
+      },
+      "response_count": 72,
+      "max_input": 160583,
+      "first_input": 35295,
+      "last_input": 160583,
+      "crossings": {
+        "100000": {
+          "line": 175,
+          "input": 101254,
+          "response_index": 22
+        },
+        "150000": {
+          "line": 489,
+          "input": 150740,
+          "response_index": 62
+        }
+      },
+      "truncated_outputs": 13,
+      "encrypted_spans": 3,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a5b-bc3d-76b1-bf0f-6c2eb7661b5e",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16a55-a6d2-72c0-bb9e-06c0df7fac26",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T02-02-39-01a16a5b-bc3d-76b1-bf0f-6c2eb7661b5e.jsonl",
+      "sha256": "1007a4edd0e60bfa46eb6839a0fc1b81b667549214701439d153dab550963455",
+      "bytes": 416072,
+      "start": "2026-10-23T20:02:39.379Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 411,
+      "user_chars": 9029,
+      "developer_chars": 62963,
+      "agent_message_chars": 110,
+      "reasoning_cipher_chars": 4380,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9029,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16a55-ad12-7633-8de7-368cb0fff58c",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 19,
+          "turn_id": "01a16a5b-bd18-7660-9330-10923e09e0da",
+          "first_input": 35767,
+          "last_input": 51905
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 6,
+      "tool_counts": {
+        "exec": 6
+      },
+      "category_counts": {
+        "read/search/diff": 6
+      },
+      "body_chars": {
+        "args_chars": 1962,
+        "output_chars": 60647
+      },
+      "usage_sums": {
+        "input_tokens": 310699,
+        "cached_input_tokens": 290688,
+        "cache_read_tokens": null,
+        "output_tokens": 698,
+        "reasoning_output_tokens": 89,
+        "total_tokens": 311397
+      },
+      "response_count": 7,
+      "max_input": 51905,
+      "first_input": 35767,
+      "last_input": 51905,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a5b-d72c-7aa1-92ad-77cf4ad18f65",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16a55-a6d2-72c0-bb9e-06c0df7fac26",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T02-02-46-01a16a5b-d72c-7aa1-92ad-77cf4ad18f65.jsonl",
+      "sha256": "b6d6b045a29c553fc800bfd95280d66b7aafb80d5de8afffdcbc7091101fd251",
+      "bytes": 570365,
+      "start": "2026-10-23T20:02:46.293Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1053,
+      "user_chars": 9029,
+      "developer_chars": 62963,
+      "agent_message_chars": 210,
+      "reasoning_cipher_chars": 11332,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9029,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16a55-ad12-7633-8de7-368cb0fff58c",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 20,
+          "turn_id": "01a16a5b-d81e-7bf2-bab4-a102f236dbc6",
+          "first_input": 35645,
+          "last_input": 63112
+        },
+        {
+          "line": 87,
+          "turn_id": "01a16a5f-762e-7702-938e-804f6519c3a7",
+          "first_input": 63350,
+          "last_input": 66932
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 10,
+      "tool_counts": {
+        "exec": 8,
+        "collaboration.send_message": 2
+      },
+      "category_counts": {
+        "read/search/diff": 8,
+        "delegation": 2
+      },
+      "body_chars": {
+        "args_chars": 3074,
+        "output_chars": 118341
+      },
+      "usage_sums": {
+        "input_tokens": 668358,
+        "cached_input_tokens": 635648,
+        "cache_read_tokens": null,
+        "output_tokens": 1454,
+        "reasoning_output_tokens": 250,
+        "total_tokens": 669812
+      },
+      "response_count": 12,
+      "max_input": 66932,
+      "first_input": 35645,
+      "last_input": 66932,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 2,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16a5d-7bc3-75c1-9485-f8d8daf0bbe3",
+      "provider": "Codex",
+      "role": "guardian",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T02-04-33-01a16a5d-7bc3-75c1-9485-f8d8daf0bbe3.jsonl",
+      "sha256": "69b1a6b8a9cbcd8558bf66cdd6dbdc855580db52b486f7bd215adb4ed5382ec5",
+      "bytes": 250457,
+      "start": "2026-10-23T20:04:33.991Z",
+      "models": [
+        "codex-auto-review"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 534,
+      "user_chars": 104624,
+      "developer_chars": 22360,
+      "agent_message_chars": 208,
+      "reasoning_cipher_chars": 9532,
+      "additional_tools_chars": 13080,
+      "initial_user_chars": 104624,
+      "turns": [
+        {
+          "line": 11,
+          "turn_id": "01a16a5d-7d72-7590-8120-0895bb9b6378",
+          "first_input": 22623,
+          "last_input": 22623
+        },
+        {
+          "line": 27,
+          "turn_id": "01a16a62-57b1-7692-878e-1275101ac405",
+          "first_input": 34738,
+          "last_input": 34738
+        },
+        {
+          "line": 38,
+          "turn_id": "01a16a62-86f3-7c01-85aa-e674df0dd1ef",
+          "first_input": 36388,
+          "last_input": 36388
+        }
+      ],
+      "windows": [
+        258400
+      ],
+      "unmatched_calls": 0,
+      "call_count": 0,
+      "tool_counts": {},
+      "category_counts": {},
+      "body_chars": {
+        "args_chars": 0,
+        "output_chars": 0
+      },
+      "usage_sums": {
+        "input_tokens": 93749,
+        "cached_input_tokens": 63104,
+        "cache_read_tokens": null,
+        "output_tokens": 492,
+        "reasoning_output_tokens": 353,
+        "total_tokens": 94241
+      },
+      "response_count": 3,
+      "max_input": 36388,
+      "first_input": 22623,
+      "last_input": 36388,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16c25-897a-7361-b40b-2de37670fedc",
+      "provider": "Codex",
+      "role": "parent",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-22-41-01a16c25-897a-7361-b40b-2de37670fedc.jsonl",
+      "sha256": "6f2308e873d353828eda3e3ba733ac148e208c1e0b2610ff0a195cd2782a1c71",
+      "bytes": 2494623,
+      "start": "2026-10-24T04:22:41.922Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 3289,
+      "user_chars": 9390,
+      "developer_chars": 62811,
+      "agent_message_chars": 3699,
+      "reasoning_cipher_chars": 161544,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8526,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a16c25-90d1-7521-b4dc-eccba122876f",
+          "first_input": 35269,
+          "last_input": 172434
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 60,
+      "tool_counts": {
+        "exec": 44,
+        "request_user_input_async": 2,
+        "mcp__cua_repl.js": 10,
+        "collaboration.spawn_agent": 2,
+        "collaboration.followup_task": 2
+      },
+      "category_counts": {
+        "read/search/diff": 18,
+        "other/mixed": 2,
+        "mixed-batch": 25,
+        "full-check": 1,
+        "browser/web/media": 10,
+        "delegation": 4
+      },
+      "body_chars": {
+        "args_chars": 107709,
+        "output_chars": 391696
+      },
+      "usage_sums": {
+        "input_tokens": 7637748,
+        "cached_input_tokens": 7513216,
+        "cache_read_tokens": null,
+        "output_tokens": 33992,
+        "reasoning_output_tokens": 4502,
+        "total_tokens": 7671740
+      },
+      "response_count": 63,
+      "max_input": 172434,
+      "first_input": 35269,
+      "last_input": 172434,
+      "crossings": {
+        "100000": {
+          "line": 141,
+          "input": 101397,
+          "response_index": 18
+        },
+        "150000": {
+          "line": 350,
+          "input": 152046,
+          "response_index": 47
+        }
+      },
+      "truncated_outputs": 5,
+      "encrypted_spans": 4,
+      "duplicate_output_chars": 17
+    },
+    {
+      "id": "01a16c2c-667b-7f50-9b87-fdc3b0d665c9",
+      "provider": "Codex",
+      "role": "guardian",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-30-11-01a16c2c-667b-7f50-9b87-fdc3b0d665c9.jsonl",
+      "sha256": "569b7d6b0e4f6b256c82d404f420cff67f121631887decdba95cb56d1c55b65e",
+      "bytes": 310492,
+      "start": "2026-10-24T04:30:11.689Z",
+      "models": [
+        "codex-auto-review"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1178,
+      "user_chars": 141112,
+      "developer_chars": 22360,
+      "agent_message_chars": 104,
+      "reasoning_cipher_chars": 12196,
+      "additional_tools_chars": 13080,
+      "initial_user_chars": 141112,
+      "turns": [
+        {
+          "line": 11,
+          "turn_id": "01a16c2c-67ab-72a1-b8c7-a16d63c2f5c4",
+          "first_input": 21219,
+          "last_input": 21219
+        },
+        {
+          "line": 23,
+          "turn_id": "01a16c2e-2734-72e1-809a-8bfc0699b31d",
+          "first_input": 32370,
+          "last_input": 32370
+        },
+        {
+          "line": 34,
+          "turn_id": "01a16c2e-3358-7f92-956d-1a27ebb3160f",
+          "first_input": 32932,
+          "last_input": 32932
+        },
+        {
+          "line": 46,
+          "turn_id": "01a16c32-e298-7e60-b99d-b030c8867505",
+          "first_input": 45562,
+          "last_input": 45562
+        },
+        {
+          "line": 59,
+          "turn_id": "01a16c32-ea45-7f33-a603-8801d3bbabe0",
+          "first_input": 46000,
+          "last_input": 46000
+        }
+      ],
+      "windows": [
+        258400
+      ],
+      "unmatched_calls": 0,
+      "call_count": 0,
+      "tool_counts": {},
+      "category_counts": {},
+      "body_chars": {
+        "args_chars": 0,
+        "output_chars": 0
+      },
+      "usage_sums": {
+        "input_tokens": 178083,
+        "cached_input_tokens": 137472,
+        "cache_read_tokens": null,
+        "output_tokens": 723,
+        "reasoning_output_tokens": 438,
+        "total_tokens": 178806
+      },
+      "response_count": 5,
+      "max_input": 46000,
+      "first_input": 21219,
+      "last_input": 46000,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16c2e-6336-73a2-b448-de0fc8a29c08",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16c25-897a-7361-b40b-2de37670fedc",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-32-21-01a16c2e-6336-73a2-b448-de0fc8a29c08.jsonl",
+      "sha256": "c80481cdeb86c2bdd2b372775bb32a7b4493a3ac335edfdd0ce4c8e1e0145861",
+      "bytes": 515304,
+      "start": "2026-10-24T04:32:21.921Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1168,
+      "user_chars": 9390,
+      "developer_chars": 62963,
+      "agent_message_chars": 220,
+      "reasoning_cipher_chars": 7380,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9390,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16c25-90d1-7521-b4dc-eccba122876f",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 20,
+          "turn_id": "01a16c2e-6420-70a0-9c1b-ea51d00554cf",
+          "first_input": 35876,
+          "last_input": 57737
+        },
+        {
+          "line": 51,
+          "turn_id": "01a16c31-cd7a-7ef3-896c-e6984a09e349",
+          "first_input": 58119,
+          "last_input": 62005
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 4,
+      "tool_counts": {
+        "exec": 4
+      },
+      "category_counts": {
+        "read/search/diff": 4
+      },
+      "body_chars": {
+        "args_chars": 1203,
+        "output_chars": 101225
+      },
+      "usage_sums": {
+        "input_tokens": 305302,
+        "cached_input_tokens": 275456,
+        "cache_read_tokens": null,
+        "output_tokens": 735,
+        "reasoning_output_tokens": 193,
+        "total_tokens": 306037
+      },
+      "response_count": 6,
+      "max_input": 62005,
+      "first_input": 35876,
+      "last_input": 62005,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16c2e-7f86-7521-9df6-a2bc1a4327dd",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16c25-897a-7361-b40b-2de37670fedc",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-32-29-01a16c2e-7f86-7521-9df6-a2bc1a4327dd.jsonl",
+      "sha256": "036089b793cbf3a4c0d0dc5da0705aa282014e83ea4d8578bf5d300c12cdfdac",
+      "bytes": 564152,
+      "start": "2026-10-24T04:32:29.147Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 2101,
+      "user_chars": 9390,
+      "developer_chars": 62963,
+      "agent_message_chars": 210,
+      "reasoning_cipher_chars": 13584,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9390,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16c25-90d1-7521-b4dc-eccba122876f",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 21,
+          "turn_id": "01a16c2e-805f-71f0-8d5a-57c9a2ebf652",
+          "first_input": 35750,
+          "last_input": 59700
+        },
+        {
+          "line": 76,
+          "turn_id": "01a16c31-b4fb-70f0-b860-c0aa9040ca8e",
+          "first_input": 60238,
+          "last_input": 64342
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 10,
+      "tool_counts": {
+        "exec": 9,
+        "collaboration.send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 9,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 2910,
+        "output_chars": 109519
+      },
+      "usage_sums": {
+        "input_tokens": 628231,
+        "cached_input_tokens": 598144,
+        "cache_read_tokens": null,
+        "output_tokens": 1615,
+        "reasoning_output_tokens": 300,
+        "total_tokens": 629846
+      },
+      "response_count": 12,
+      "max_input": 64342,
+      "first_input": 35750,
+      "last_input": 64342,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 2,
+      "encrypted_spans": 1,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16c38-c9a2-7a00-a516-d535ea93fd23",
+      "provider": "Codex",
+      "role": "parent",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-43-43-01a16c38-c9a2-7a00-a516-d535ea93fd23.jsonl",
+      "sha256": "3a3a4166c5d37a27bb530146e07889b343e8fdd52b02ec9b79e703bc4eb257b0",
+      "bytes": 2789702,
+      "start": "2026-10-24T04:43:43.471Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 3299,
+      "user_chars": 9031,
+      "developer_chars": 69005,
+      "agent_message_chars": 3875,
+      "reasoning_cipher_chars": 154684,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 8520,
+      "turns": [
+        {
+          "line": 2,
+          "turn_id": "01a16c38-cec5-75e3-b720-1ec9ea6759d6",
+          "first_input": 36002,
+          "last_input": 183379
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 63,
+      "tool_counts": {
+        "exec": 42,
+        "request_user_input_async": 1,
+        "mcp__cua_repl.js": 16,
+        "collaboration.spawn_agent": 2,
+        "collaboration.followup_task": 2
+      },
+      "category_counts": {
+        "read/search/diff": 24,
+        "other/mixed": 6,
+        "focused-check": 11,
+        "browser/web/media": 16,
+        "delegation": 4,
+        "full-check": 2
+      },
+      "body_chars": {
+        "args_chars": 90645,
+        "output_chars": 421444
+      },
+      "usage_sums": {
+        "input_tokens": 8653399,
+        "cached_input_tokens": 8513792,
+        "cache_read_tokens": null,
+        "output_tokens": 28815,
+        "reasoning_output_tokens": 4265,
+        "total_tokens": 8682214
+      },
+      "response_count": 65,
+      "max_input": 183379,
+      "first_input": 36002,
+      "last_input": 183379,
+      "crossings": {
+        "100000": {
+          "line": 120,
+          "input": 101352,
+          "response_index": 16
+        },
+        "150000": {
+          "line": 236,
+          "input": 150214,
+          "response_index": 33
+        }
+      },
+      "truncated_outputs": 7,
+      "encrypted_spans": 4,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16c3c-db29-7722-a5c7-9f1c75164b03",
+      "provider": "Codex",
+      "role": "guardian",
+      "parent": null,
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-48-10-01a16c3c-db29-7722-a5c7-9f1c75164b03.jsonl",
+      "sha256": "548dff276049f058a9a092e2d18cfc1edaca2bcd952fc3e5d5c1249087a637e6",
+      "bytes": 303900,
+      "start": "2026-10-24T04:48:10.106Z",
+      "models": [
+        "codex-auto-review"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 955,
+      "user_chars": 139295,
+      "developer_chars": 22360,
+      "agent_message_chars": 322,
+      "reasoning_cipher_chars": 10268,
+      "additional_tools_chars": 13080,
+      "initial_user_chars": 139295,
+      "turns": [
+        {
+          "line": 11,
+          "turn_id": "01a16c3c-dc2e-7203-ab0b-de0415543372",
+          "first_input": 20799,
+          "last_input": 20799
+        },
+        {
+          "line": 23,
+          "turn_id": "01a16c41-ab31-7712-9360-b54eb7ee5eda",
+          "first_input": 34518,
+          "last_input": 34518
+        },
+        {
+          "line": 40,
+          "turn_id": "01a16c43-aa32-7252-a6a7-5b763fa5d98e",
+          "first_input": 43347,
+          "last_input": 43347
+        },
+        {
+          "line": 51,
+          "turn_id": "01a16c43-ed32-7ea1-b612-744004a4f11c",
+          "first_input": 45466,
+          "last_input": 45466
+        }
+      ],
+      "windows": [
+        258400
+      ],
+      "unmatched_calls": 0,
+      "call_count": 0,
+      "tool_counts": {},
+      "category_counts": {},
+      "body_chars": {
+        "args_chars": 0,
+        "output_chars": 0
+      },
+      "usage_sums": {
+        "input_tokens": 144130,
+        "cached_input_tokens": 104192,
+        "cache_read_tokens": null,
+        "output_tokens": 534,
+        "reasoning_output_tokens": 301,
+        "total_tokens": 144664
+      },
+      "response_count": 4,
+      "max_input": 45466,
+      "first_input": 20799,
+      "last_input": 45466,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16c3e-0e0d-7691-82ee-3cccee36b4ee",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16c38-c9a2-7a00-a516-d535ea93fd23",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-49-28-01a16c3e-0e0d-7691-82ee-3cccee36b4ee.jsonl",
+      "sha256": "6d52be00caea992d80c8693b92796a9c10a3ac3349b9d5918207d1c80f0546e3",
+      "bytes": 630939,
+      "start": "2026-10-24T04:49:28.680Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1763,
+      "user_chars": 9031,
+      "developer_chars": 69157,
+      "agent_message_chars": 210,
+      "reasoning_cipher_chars": 14044,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9031,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16c38-cec5-75e3-b720-1ec9ea6759d6",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 19,
+          "turn_id": "01a16c3e-0ee8-7d33-8592-f00ce6a0caf5",
+          "first_input": 36345,
+          "last_input": 65589
+        },
+        {
+          "line": 96,
+          "turn_id": "01a16c40-946c-7222-8241-0f2016ce854d",
+          "first_input": 65957,
+          "last_input": 71726
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 13,
+      "tool_counts": {
+        "exec": 12,
+        "collaboration.send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 12,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 4414,
+        "output_chars": 133232
+      },
+      "usage_sums": {
+        "input_tokens": 826976,
+        "cached_input_tokens": 787712,
+        "cache_read_tokens": null,
+        "output_tokens": 1937,
+        "reasoning_output_tokens": 237,
+        "total_tokens": 828913
+      },
+      "response_count": 15,
+      "max_input": 71726,
+      "first_input": 36345,
+      "last_input": 71726,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 1,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01a16c3e-2629-7142-908c-0d67a557e587",
+      "provider": "Codex",
+      "role": "child",
+      "parent": "01a16c38-c9a2-7a00-a516-d535ea93fd23",
+      "path": "C:\\Users\\Administrator\\.codex\\sessions\\2026\\10\\24\\rollout-2026-10-24T10-49-34-01a16c3e-2629-7142-908c-0d67a557e587.jsonl",
+      "sha256": "c9638e77572789a3daa18695961f6d709545ae01e7a6feaee213764edc847c92",
+      "bytes": 523450,
+      "start": "2026-10-24T04:49:34.849Z",
+      "models": [
+        "gpt-6.1-sol"
+      ],
+      "compactions": 0,
+      "inherited_records": 0,
+      "assistant_chars": 1464,
+      "user_chars": 9031,
+      "developer_chars": 69157,
+      "agent_message_chars": 220,
+      "reasoning_cipher_chars": 7272,
+      "additional_tools_chars": 133153,
+      "initial_user_chars": 9031,
+      "turns": [
+        {
+          "line": 3,
+          "turn_id": "01a16c38-cec5-75e3-b720-1ec9ea6759d6",
+          "first_input": null,
+          "last_input": null
+        },
+        {
+          "line": 20,
+          "turn_id": "01a16c3e-26f3-7bc1-a14d-80eb91d2f042",
+          "first_input": 36460,
+          "last_input": 55285
+        },
+        {
+          "line": 61,
+          "turn_id": "01a16c40-a374-7073-99f0-a5016b72bfa1",
+          "first_input": 55577,
+          "last_input": 62579
+        }
+      ],
+      "windows": [
+        475000
+      ],
+      "unmatched_calls": 0,
+      "call_count": 8,
+      "tool_counts": {
+        "exec": 6,
+        "collaboration.send_message": 2
+      },
+      "category_counts": {
+        "read/search/diff": 6,
+        "delegation": 2
+      },
+      "body_chars": {
+        "args_chars": 2054,
+        "output_chars": 98140
+      },
+      "usage_sums": {
+        "input_tokens": 516619,
+        "cached_input_tokens": 488704,
+        "cache_read_tokens": null,
+        "output_tokens": 1230,
+        "reasoning_output_tokens": 184,
+        "total_tokens": 517849
+      },
+      "response_count": 10,
+      "max_input": 62579,
+      "first_input": 36460,
+      "last_input": 62579,
+      "crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 2,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "57f3c876-ecfa-4bf0-af6e-05ac95b70b02",
+      "provider": "Antigravity",
+      "role": "parent",
+      "title": "Implement Seller Workspace Issue",
+      "parent": "",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\57f3c876-ecfa-4bf0-af6e-05ac95b70b02\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "a12aef85718c866efd2bcd45dbe7558301e5dd786ae3994842c2051bd654dc72",
+      "bytes": 478427,
+      "start": "2026-10-23T16:11:59Z",
+      "assistant_chars": 6604,
+      "thinking_chars": 24521,
+      "user_chars": 1668,
+      "system_chars": 17945,
+      "initial_user_chars": 1535,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 658444,
+      "cache_field_sum": 13695027,
+      "max_input_plus_cache": 154655,
+      "max_input_field": 128651,
+      "planner_responses": 148,
+      "unmatched_calls": 0,
+      "call_count": 147,
+      "tool_counts": {
+        "read_file": 33,
+        "run_command": 56,
+        "manage_task": 3,
+        "write_file": 21,
+        "edit_file": 31,
+        "invoke_subagent": 2,
+        "manage_subagents": 1
+      },
+      "category_counts": {
+        "read": 33,
+        "other/mixed": 13,
+        "read/search/diff": 7,
+        "wait/status": 4,
+        "full-check": 4,
+        "write/edit": 52,
+        "focused-check": 32,
+        "delegation": 2
+      },
+      "body_chars": {
+        "args_chars": 144436,
+        "output_chars": 223520
+      },
+      "usage_sums": {
+        "input_tokens": 658444,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 13695027,
+        "output_tokens": 69246,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 148,
+      "max_input": 128651,
+      "first_input": 11052,
+      "last_input": 2177,
+      "raw_input_field_crossings": {
+        "100000": {
+          "line": 225,
+          "input": 128651,
+          "response_index": 110
+        },
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": {
+          "line": 152,
+          "input_plus_cache": 102641,
+          "response_index": 74
+        },
+        "150000": {
+          "line": 289,
+          "input_plus_cache": 150869,
+          "response_index": 142
+        }
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "1052e073-46e6-4284-b4e9-893282ffb440",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "57f3c876-ecfa-4bf0-af6e-05ac95b70b02",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\1052e073-46e6-4284-b4e9-893282ffb440\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "ba4f83eef0ceb1f7ecf6e58c95319d48424c4de7cdef6dfc50ea0ad4ca06fd91",
+      "bytes": 154576,
+      "start": "2026-10-23T16:28:16Z",
+      "assistant_chars": 152,
+      "thinking_chars": 16387,
+      "user_chars": 0,
+      "system_chars": 904,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 107860,
+      "cache_field_sum": 635226,
+      "max_input_plus_cache": 64098,
+      "max_input_field": 16880,
+      "planner_responses": 23,
+      "unmatched_calls": 0,
+      "call_count": 22,
+      "tool_counts": {
+        "view_file": 15,
+        "run_command": 6,
+        "send_message": 1
+      },
+      "category_counts": {
+        "read": 15,
+        "read/search/diff": 3,
+        "other/mixed": 3,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 7197,
+        "output_chars": 118744
+      },
+      "usage_sums": {
+        "input_tokens": 107860,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 635226,
+        "output_tokens": 16322,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 23,
+      "max_input": 16880,
+      "first_input": 11214,
+      "last_input": 13296,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "4989d8bc-d6a0-404f-9b05-4f80796b03db",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "57f3c876-ecfa-4bf0-af6e-05ac95b70b02",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\4989d8bc-d6a0-404f-9b05-4f80796b03db\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "d6f191fdbf99013ddd4c6a3ea204a9f5fe2836baf49a5b544f551b26bc950d55",
+      "bytes": 74672,
+      "start": "2026-10-23T16:28:16Z",
+      "assistant_chars": 86,
+      "thinking_chars": 10329,
+      "user_chars": 0,
+      "system_chars": 2669,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 129943,
+      "cache_field_sum": 335784,
+      "max_input_plus_cache": 38170,
+      "max_input_field": 18236,
+      "planner_responses": 20,
+      "unmatched_calls": 0,
+      "call_count": 19,
+      "tool_counts": {
+        "run_command": 8,
+        "view_file": 10,
+        "send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 4,
+        "other/mixed": 4,
+        "read": 10,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 6622,
+        "output_chars": 46603
+      },
+      "usage_sums": {
+        "input_tokens": 129943,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 335784,
+        "output_tokens": 12870,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 20,
+      "max_input": 18236,
+      "first_input": 11593,
+      "last_input": 3890,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "35c8a50e-1b96-47cc-b581-79d08089523f",
+      "provider": "Antigravity",
+      "role": "parent",
+      "title": "Implement Order Links Feature",
+      "parent": "",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\35c8a50e-1b96-47cc-b581-79d08089523f\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "c9dac0e84eb690c80db4673e8ae23c82a3f47cf0e0a864ec03c5fee7a39d6b20",
+      "bytes": 489445,
+      "start": "2026-10-23T16:37:34Z",
+      "assistant_chars": 5741,
+      "thinking_chars": 19231,
+      "user_chars": 1541,
+      "system_chars": 7582,
+      "initial_user_chars": 1541,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 494469,
+      "cache_field_sum": 10995470,
+      "max_input_plus_cache": 160227,
+      "max_input_field": 41005,
+      "planner_responses": 114,
+      "unmatched_calls": 0,
+      "call_count": 120,
+      "tool_counts": {
+        "read_file": 36,
+        "run_command": 38,
+        "write_file": 27,
+        "edit_file": 14,
+        "invoke_subagent": 2,
+        "manage_task": 1,
+        "manage_subagents": 2
+      },
+      "category_counts": {
+        "read": 36,
+        "other/mixed": 9,
+        "read/search/diff": 7,
+        "full-check": 7,
+        "write/edit": 41,
+        "focused-check": 15,
+        "delegation": 2,
+        "wait/status": 3
+      },
+      "body_chars": {
+        "args_chars": 210686,
+        "output_chars": 196723
+      },
+      "usage_sums": {
+        "input_tokens": 494469,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 10995470,
+        "output_tokens": 81833,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 114,
+      "max_input": 41005,
+      "first_input": 12166,
+      "last_input": 2179,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": {
+          "line": 116,
+          "input_plus_cache": 101927,
+          "response_index": 53
+        },
+        "150000": {
+          "line": 213,
+          "input_plus_cache": 150350,
+          "response_index": 101
+        }
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "d9013dc9-b857-43c4-b5ab-8ef990c97e06",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "35c8a50e-1b96-47cc-b581-79d08089523f",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\d9013dc9-b857-43c4-b5ab-8ef990c97e06\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "13ef7c9bd9c07e9f0cd3f4eee74f8a7972ef5280603792934fe06887bc2d593c",
+      "bytes": 164281,
+      "start": "2026-10-23T16:49:32Z",
+      "assistant_chars": 164,
+      "thinking_chars": 9528,
+      "user_chars": 0,
+      "system_chars": 885,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 112863,
+      "cache_field_sum": 605600,
+      "max_input_plus_cache": 65093,
+      "max_input_field": 18072,
+      "planner_responses": 20,
+      "unmatched_calls": 0,
+      "call_count": 19,
+      "tool_counts": {
+        "run_command": 3,
+        "view_file": 15,
+        "send_message": 1
+      },
+      "category_counts": {
+        "other/mixed": 1,
+        "read": 15,
+        "read/search/diff": 2,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 6463,
+        "output_chars": 136913
+      },
+      "usage_sums": {
+        "input_tokens": 112863,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 605600,
+        "output_tokens": 12027,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 20,
+      "max_input": 18072,
+      "first_input": 11192,
+      "last_input": 3885,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "f2b7603d-1c24-4f16-96d1-b440a3405624",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "35c8a50e-1b96-47cc-b581-79d08089523f",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\f2b7603d-1c24-4f16-96d1-b440a3405624\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "f13ab6f200b673194fcfde84eb743ca11b431d22b15da6521e2ed6d88245e360",
+      "bytes": 97563,
+      "start": "2026-10-23T16:49:32Z",
+      "assistant_chars": 177,
+      "thinking_chars": 4330,
+      "user_chars": 0,
+      "system_chars": 1200,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 109660,
+      "cache_field_sum": 387200,
+      "max_input_plus_cache": 42389,
+      "max_input_field": 17151,
+      "planner_responses": 19,
+      "unmatched_calls": 0,
+      "call_count": 18,
+      "tool_counts": {
+        "run_command": 7,
+        "view_file": 10,
+        "send_message": 1
+      },
+      "category_counts": {
+        "other/mixed": 3,
+        "read/search/diff": 4,
+        "read": 10,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 6920,
+        "output_chars": 76277
+      },
+      "usage_sums": {
+        "input_tokens": 109660,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 387200,
+        "output_tokens": 6562,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 19,
+      "max_input": 17151,
+      "first_input": 11269,
+      "last_input": 3168,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "01455f39-7ef7-4ed9-9e3b-2a1105ed2d0d",
+      "provider": "Antigravity",
+      "role": "parent",
+      "title": "Implement Manual Buyer Submission",
+      "parent": "",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\01455f39-7ef7-4ed9-9e3b-2a1105ed2d0d\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "3b629b5b96e77b458ec2ed18c93cb688e90e1d05b4b3b8234417f426e0dfa059",
+      "bytes": 585585,
+      "start": "2026-10-23T16:58:29Z",
+      "assistant_chars": 8686,
+      "thinking_chars": 26597,
+      "user_chars": 1693,
+      "system_chars": 28086,
+      "initial_user_chars": 1556,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 558690,
+      "cache_field_sum": 21484539,
+      "max_input_plus_cache": 193042,
+      "max_input_field": 17692,
+      "planner_responses": 182,
+      "unmatched_calls": 0,
+      "call_count": 182,
+      "tool_counts": {
+        "run_command": 34,
+        "read_file": 54,
+        "write_file": 25,
+        "edit_file": 22,
+        "invoke_subagent": 2,
+        "schedule": 22,
+        "manage_subagents": 23
+      },
+      "category_counts": {
+        "other/mixed": 13,
+        "read": 54,
+        "read/search/diff": 2,
+        "full-check": 5,
+        "write/edit": 47,
+        "focused-check": 14,
+        "delegation": 2,
+        "wait/status": 45
+      },
+      "body_chars": {
+        "args_chars": 180699,
+        "output_chars": 261771
+      },
+      "usage_sums": {
+        "input_tokens": 558690,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 21484539,
+        "output_tokens": 82559,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 182,
+      "max_input": 17692,
+      "first_input": 12162,
+      "last_input": 2178,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": {
+          "line": 123,
+          "input_plus_cache": 101006,
+          "response_index": 61
+        },
+        "150000": {
+          "line": 227,
+          "input_plus_cache": 150763,
+          "response_index": 113
+        }
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "98dff25e-7a26-4d2d-b18d-851b174db301",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "01455f39-7ef7-4ed9-9e3b-2a1105ed2d0d",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\98dff25e-7a26-4d2d-b18d-851b174db301\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "0df058d2480458fabfe0412128a2147071da9742a35b480cbab0c82538c60eda",
+      "bytes": 120218,
+      "start": "2026-10-23T17:18:17Z",
+      "assistant_chars": 252,
+      "thinking_chars": 3911,
+      "user_chars": 0,
+      "system_chars": 1946,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 110096,
+      "cache_field_sum": 581594,
+      "max_input_plus_cache": 50893,
+      "max_input_field": 16603,
+      "planner_responses": 24,
+      "unmatched_calls": 0,
+      "call_count": 22,
+      "tool_counts": {
+        "run_command": 8,
+        "view_file": 13,
+        "send_message": 1
+      },
+      "category_counts": {
+        "other/mixed": 2,
+        "read/search/diff": 5,
+        "read": 13,
+        "full-check": 1,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 10426,
+        "output_chars": 91378
+      },
+      "usage_sums": {
+        "input_tokens": 110096,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 581594,
+        "output_tokens": 7988,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 24,
+      "max_input": 16603,
+      "first_input": 11213,
+      "last_input": 4148,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "7e287a63-8d8b-4a3e-9d03-2c2fe2ce992f",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "01455f39-7ef7-4ed9-9e3b-2a1105ed2d0d",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\7e287a63-8d8b-4a3e-9d03-2c2fe2ce992f\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "3b0862841e35a61af91d234251ee8a1b1036fd519ec26c051d91a2d2bc27a81e",
+      "bytes": 227290,
+      "start": "2026-10-23T17:18:17Z",
+      "assistant_chars": 0,
+      "thinking_chars": 9201,
+      "user_chars": 0,
+      "system_chars": 1632,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 264163,
+      "cache_field_sum": 1105200,
+      "max_input_plus_cache": 76750,
+      "max_input_field": 76750,
+      "planner_responses": 32,
+      "unmatched_calls": 0,
+      "call_count": 32,
+      "tool_counts": {
+        "run_command": 4,
+        "view_file": 27,
+        "send_message": 1
+      },
+      "category_counts": {
+        "other/mixed": 1,
+        "read/search/diff": 2,
+        "read": 27,
+        "full-check": 1,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 20288,
+        "output_chars": 178791
+      },
+      "usage_sums": {
+        "input_tokens": 264163,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 1105200,
+        "output_tokens": 15592,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 32,
+      "max_input": 76750,
+      "first_input": 11390,
+      "last_input": 76750,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "229eac0d-47fe-4eb6-b38e-f8fb54a6fb40",
+      "provider": "Antigravity",
+      "role": "parent",
+      "title": "Implement Manual Received Payments",
+      "parent": "",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\229eac0d-47fe-4eb6-b38e-f8fb54a6fb40\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "a9bb29c7d4cf15c06103f8d600118de7115101af32c66b59e3fa4fbf29487d81",
+      "bytes": 618387,
+      "start": "2026-10-23T17:55:28Z",
+      "assistant_chars": 6592,
+      "thinking_chars": 31099,
+      "user_chars": 1696,
+      "system_chars": 9077,
+      "initial_user_chars": 1559,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 563425,
+      "cache_field_sum": 20633197,
+      "max_input_plus_cache": 196394,
+      "max_input_field": 20586,
+      "planner_responses": 179,
+      "unmatched_calls": 0,
+      "call_count": 176,
+      "tool_counts": {
+        "run_command": 64,
+        "read_file": 42,
+        "manage_task": 3,
+        "write_file": 15,
+        "edit_file": 49,
+        "invoke_subagent": 2,
+        "manage_subagents": 1
+      },
+      "category_counts": {
+        "other/mixed": 19,
+        "read": 42,
+        "read/search/diff": 11,
+        "focused-check": 28,
+        "full-check": 6,
+        "wait/status": 4,
+        "write/edit": 64,
+        "delegation": 2
+      },
+      "body_chars": {
+        "args_chars": 227242,
+        "output_chars": 271938
+      },
+      "usage_sums": {
+        "input_tokens": 563425,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 20633197,
+        "output_tokens": 91914,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 179,
+      "max_input": 20586,
+      "first_input": 12158,
+      "last_input": 2180,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": {
+          "line": 140,
+          "input_plus_cache": 100005,
+          "response_index": 69
+        },
+        "150000": {
+          "line": 240,
+          "input_plus_cache": 150116,
+          "response_index": 119
+        }
+      },
+      "truncated_outputs": 1,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "ee6770f5-cc0b-4843-8206-28c7e51556fe",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "229eac0d-47fe-4eb6-b38e-f8fb54a6fb40",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\ee6770f5-cc0b-4843-8206-28c7e51556fe\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "a79637b23815dac3ae71f531325e332fcb0dde900630709f8cd1b5cdc95bb740",
+      "bytes": 141120,
+      "start": "2026-10-23T18:17:17Z",
+      "assistant_chars": 96,
+      "thinking_chars": 6493,
+      "user_chars": 0,
+      "system_chars": 2626,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 192598,
+      "cache_field_sum": 1053381,
+      "max_input_plus_cache": 57137,
+      "max_input_field": 20460,
+      "planner_responses": 37,
+      "unmatched_calls": 0,
+      "call_count": 36,
+      "tool_counts": {
+        "run_command": 14,
+        "view_file": 21,
+        "send_message": 1
+      },
+      "category_counts": {
+        "read/search/diff": 6,
+        "other/mixed": 8,
+        "read": 21,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 11642,
+        "output_chars": 104634
+      },
+      "usage_sums": {
+        "input_tokens": 192598,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 1053381,
+        "output_tokens": 10533,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 37,
+      "max_input": 20460,
+      "first_input": 11667,
+      "last_input": 4034,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "c0d2193a-5473-473e-a1ba-54c2f2492694",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "229eac0d-47fe-4eb6-b38e-f8fb54a6fb40",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\c0d2193a-5473-473e-a1ba-54c2f2492694\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "88c66a2d02eb97500a8e71552c0d55e395de04be4127bf94838e6b5be9f4a6ac",
+      "bytes": 211396,
+      "start": "2026-10-23T18:17:28Z",
+      "assistant_chars": 81,
+      "thinking_chars": 14286,
+      "user_chars": 0,
+      "system_chars": 2378,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 210878,
+      "cache_field_sum": 1364802,
+      "max_input_plus_cache": 82268,
+      "max_input_field": 69427,
+      "planner_responses": 36,
+      "unmatched_calls": 0,
+      "call_count": 35,
+      "tool_counts": {
+        "run_command": 3,
+        "view_file": 31,
+        "send_message": 1
+      },
+      "category_counts": {
+        "other/mixed": 1,
+        "read": 31,
+        "read/search/diff": 2,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 10187,
+        "output_chars": 167845
+      },
+      "usage_sums": {
+        "input_tokens": 210878,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 1364802,
+        "output_tokens": 17045,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 36,
+      "max_input": 69427,
+      "first_input": 11517,
+      "last_input": 3664,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "e88d99f6-e21d-4bea-bd46-53fc81ea2459",
+      "provider": "Antigravity",
+      "role": "parent",
+      "title": "Implement Order Confirmation Issue",
+      "parent": "",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\e88d99f6-e21d-4bea-bd46-53fc81ea2459\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "cfe0f67c6f2e11959ae1a539b6906fcdef9d1aa382d30260d8e88278d5ad337e",
+      "bytes": 715514,
+      "start": "2026-10-23T18:34:18Z",
+      "assistant_chars": 7506,
+      "thinking_chars": 29600,
+      "user_chars": 1574,
+      "system_chars": 10205,
+      "initial_user_chars": 1574,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 682452,
+      "cache_field_sum": 29887541,
+      "max_input_plus_cache": 237248,
+      "max_input_field": 16914,
+      "planner_responses": 220,
+      "unmatched_calls": 0,
+      "call_count": 214,
+      "tool_counts": {
+        "run_command": 57,
+        "read_file": 94,
+        "write_file": 15,
+        "edit_file": 46,
+        "invoke_subagent": 2
+      },
+      "category_counts": {
+        "other/mixed": 24,
+        "read": 94,
+        "full-check": 14,
+        "read/search/diff": 2,
+        "focused-check": 17,
+        "write/edit": 61,
+        "delegation": 2
+      },
+      "body_chars": {
+        "args_chars": 215074,
+        "output_chars": 362399
+      },
+      "usage_sums": {
+        "input_tokens": 682452,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 29887541,
+        "output_tokens": 100214,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 220,
+      "max_input": 16914,
+      "first_input": 12163,
+      "last_input": 2172,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": {
+          "line": 131,
+          "input_plus_cache": 100147,
+          "response_index": 65
+        },
+        "150000": {
+          "line": 229,
+          "input_plus_cache": 150027,
+          "response_index": 114
+        }
+      },
+      "truncated_outputs": 3,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "46598f47-72cc-46a6-9c6f-6f21c10c7551",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "e88d99f6-e21d-4bea-bd46-53fc81ea2459",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\46598f47-72cc-46a6-9c6f-6f21c10c7551\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "a772d3f0f476eb4abe9e59d332ff691b66f231af90e27193f34025c9635a645e",
+      "bytes": 85613,
+      "start": "2026-10-23T18:55:50Z",
+      "assistant_chars": 88,
+      "thinking_chars": 3945,
+      "user_chars": 0,
+      "system_chars": 1942,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 84120,
+      "cache_field_sum": 290449,
+      "max_input_plus_cache": 39958,
+      "max_input_field": 17236,
+      "planner_responses": 15,
+      "unmatched_calls": 0,
+      "call_count": 14,
+      "tool_counts": {
+        "run_command": 7,
+        "view_file": 6,
+        "send_message": 1
+      },
+      "category_counts": {
+        "other/mixed": 1,
+        "read/search/diff": 6,
+        "read": 6,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 7389,
+        "output_chars": 65151
+      },
+      "usage_sums": {
+        "input_tokens": 84120,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 290449,
+        "output_tokens": 6986,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 15,
+      "max_input": 17236,
+      "first_input": 11449,
+      "last_input": 3566,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "5f7e771c-0712-4840-8cee-6a9c0be3d019",
+      "provider": "Antigravity",
+      "role": "reviewer",
+      "title": "",
+      "parent": "e88d99f6-e21d-4bea-bd46-53fc81ea2459",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\5f7e771c-0712-4840-8cee-6a9c0be3d019\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "d4a63248665933a233bb8d0127b80e2114de43fdc4b675f3094140430d36104d",
+      "bytes": 175531,
+      "start": "2026-10-23T18:55:50Z",
+      "assistant_chars": 200,
+      "thinking_chars": 15367,
+      "user_chars": 0,
+      "system_chars": 1421,
+      "initial_user_chars": 0,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 130916,
+      "cache_field_sum": 971552,
+      "max_input_plus_cache": 70905,
+      "max_input_field": 17411,
+      "planner_responses": 26,
+      "unmatched_calls": 0,
+      "call_count": 25,
+      "tool_counts": {
+        "run_command": 10,
+        "view_file": 14,
+        "send_message": 1
+      },
+      "category_counts": {
+        "other/mixed": 4,
+        "read/search/diff": 6,
+        "read": 14,
+        "delegation": 1
+      },
+      "body_chars": {
+        "args_chars": 8724,
+        "output_chars": 137505
+      },
+      "usage_sums": {
+        "input_tokens": 130916,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 971552,
+        "output_tokens": 17331,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 26,
+      "max_input": 17411,
+      "first_input": 11384,
+      "last_input": 4536,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "2c037272-173f-412a-824c-cd2318e4f0ee",
+      "provider": "Antigravity",
+      "role": "analysis",
+      "title": "Analyze Tool Call Performance",
+      "parent": "",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\2c037272-173f-412a-824c-cd2318e4f0ee\\.system_generated\\logs\\transcript_full.jsonl",
+      "sha256": "ff624730f7e34c3a7fb691207b04c184608ed662989d775be486b3f319d3f30f",
+      "bytes": 192372,
+      "start": "2026-10-23T19:17:42Z",
+      "assistant_chars": 1617,
+      "thinking_chars": 13975,
+      "user_chars": 646,
+      "system_chars": 0,
+      "initial_user_chars": 646,
+      "compactions": null,
+      "windows": [],
+      "turns": [],
+      "input_field_sum": 218154,
+      "cache_field_sum": 2095487,
+      "max_input_plus_cache": 86930,
+      "max_input_field": 16606,
+      "planner_responses": 51,
+      "unmatched_calls": 0,
+      "call_count": 50,
+      "tool_counts": {
+        "run_command": 31,
+        "write_file": 16,
+        "edit_file": 1,
+        "read_file": 1,
+        "manage_task": 1
+      },
+      "category_counts": {
+        "other/mixed": 28,
+        "read/search/diff": 2,
+        "write/edit": 17,
+        "read": 1,
+        "full-check": 1,
+        "wait/status": 1
+      },
+      "body_chars": {
+        "args_chars": 92008,
+        "output_chars": 63447
+      },
+      "usage_sums": {
+        "input_tokens": 218154,
+        "cached_input_tokens": null,
+        "cache_read_tokens": 2095487,
+        "output_tokens": 46466,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 51,
+      "max_input": 16606,
+      "first_input": 11914,
+      "last_input": 2217,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    },
+    {
+      "id": "3004b6ea-567d-408a-a879-02f889f51452",
+      "provider": "Antigravity",
+      "role": "unavailable",
+      "title": "",
+      "parent": "",
+      "path": "C:\\Users\\Administrator\\.gemini\\antigravity-cli\\brain\\3004b6ea-567d-408a-a879-02f889f51452\\.system_generated\\logs\\transcript_full.jsonl",
+      "call_count": 0,
+      "tool_counts": {},
+      "category_counts": {},
+      "body_chars": {
+        "args_chars": 0,
+        "output_chars": 0
+      },
+      "usage_sums": {
+        "input_tokens": null,
+        "cached_input_tokens": null,
+        "cache_read_tokens": null,
+        "output_tokens": null,
+        "reasoning_output_tokens": null,
+        "total_tokens": null
+      },
+      "response_count": 0,
+      "max_input": 0,
+      "first_input": 0,
+      "last_input": 0,
+      "raw_input_field_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "conditional_input_plus_cache_crossings": {
+        "100000": null,
+        "150000": null
+      },
+      "truncated_outputs": 0,
+      "encrypted_spans": 0,
+      "duplicate_output_chars": 0
+    }
+  ]
+}
