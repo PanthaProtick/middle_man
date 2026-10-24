@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Copy, Check, Clock, AlertTriangle, Eye } from 'lucide-react';
+import { Clock, AlertTriangle, Eye } from 'lucide-react';
 import type { OrderLifecycle, SellerOrder } from './types';
 import { formatBangladeshTime, formatRemainingCod } from './api';
 import { OrderDetailModal } from './OrderDetailModal';
 import { OrderExport } from './OrderExport';
+import { BuyerLinkCopy } from './BuyerLinkCopy';
 
 interface OrderListProps {
   token?: string;
@@ -32,20 +33,7 @@ export function OrderList({
   nextCursor,
   onLoadMore,
 }: OrderListProps): React.JSX.Element {
-  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
-
-  const handleCopyLink = async (order: SellerOrder) => {
-    const fullUrl = `${window.location.origin}${order.portal_url}`;
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      setCopiedId(order.id);
-      setTimeout(() => setCopiedId(null), 2000);
-    } catch {
-      setCopiedId(order.id);
-      setTimeout(() => setCopiedId(null), 2000);
-    }
-  };
 
   const confirmedCount = orders.filter((o) => o.lifecycle === 'confirmed').length;
   const exceptionCount = orders.filter((o) => o.lifecycle === 'pending' && o.review_reasons?.length > 0).length;
@@ -144,23 +132,7 @@ export function OrderList({
                       <Eye size={13} />
                       <span>Inspect</span>
                     </button>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => handleCopyLink(ord)}
-                      title="Copy buyer link to clipboard"
-                    >
-                      {copiedId === ord.id ? (
-                        <>
-                          <Check size={13} color="#34d399" />
-                          <span style={{ color: '#34d399' }}>Copied!</span>
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={13} />
-                          <span>Copy Link</span>
-                        </>
-                      )}
-                    </button>
+                    <BuyerLinkCopy key={ord.portal_url} portalUrl={ord.portal_url} />
                   </div>
                 </div>
 

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Copy, Check, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { X, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { SellerOrder } from './types';
 import { formatBangladeshTime, formatRemainingCod } from './api';
 import { BuyerCorrection } from './BuyerCorrection';
@@ -8,6 +8,7 @@ import { PaymentHistory } from './PaymentHistory';
 import { OrderOutcomes } from './OrderOutcomes';
 import { EvidenceViewer } from './EvidenceViewer';
 import { OrderExport } from './OrderExport';
+import { BuyerLinkCopy } from './BuyerLinkCopy';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -18,19 +19,6 @@ interface OrderDetailModalProps {
 
 export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected }: OrderDetailModalProps): React.JSX.Element {
   const [order, setOrder] = useState(initialOrder);
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    const fullUrl = `${window.location.origin}${order.portal_url}`;
-    try {
-      await navigator.clipboard.writeText(fullUrl);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
 
   const isExpired = order.lifecycle === 'expired';
   const isConfirmed = order.lifecycle === 'confirmed';
@@ -225,19 +213,7 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button className="btn btn-primary" onClick={handleCopy}>
-              {copied ? (
-                <>
-                  <Check size={14} color="#34d399" />
-                  <span style={{ color: '#34d399' }}>Copied Buyer Link</span>
-                </>
-              ) : (
-                <>
-                  <Copy size={14} />
-                  <span>Copy Buyer Link</span>
-                </>
-              )}
-            </button>
+            <BuyerLinkCopy key={order.portal_url} portalUrl={order.portal_url} detail />
             <a
               href={order.portal_url}
               target="_blank"

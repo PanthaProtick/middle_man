@@ -5,6 +5,8 @@ import { OrderList } from './OrderList';
 import { OrderDetailModal } from './OrderDetailModal';
 import type { SellerOrder } from './types';
 
+const originalClipboard = Object.getOwnPropertyDescriptor(navigator, 'clipboard');
+
 describe('Order Reconciliation and Review UI', () => {
   let container: HTMLDivElement;
   let root: Root;
@@ -59,6 +61,27 @@ describe('Order Reconciliation and Review UI', () => {
     completed_at: null,
   };
 
+  it.each([
+    ['list', 'denied'], ['detail', 'denied'], ['list', 'missing'], ['detail', 'missing'],
+  ])('reports %s buyer-link clipboard failure (%s) and permits retry', async (surface, failure) => {
+    const writeText = vi.fn().mockRejectedValue(new Error('Clipboard denied'));
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: failure === 'missing' ? undefined : { writeText } });
+    await act(async () => root.render(surface === 'list'
+      ? <OrderList orders={[confirmedOrder]} statusFilter="" onFilterChange={() => {}} nextCursor={null} onLoadMore={() => {}} />
+      : <OrderDetailModal order={confirmedOrder} onClose={() => {}} />));
+    const copyButton = () => Array.from(container.querySelectorAll('button')).find(button => /Copy (Buyer )?Link/.test(button.textContent ?? ''))!;
+    await act(async () => copyButton().click());
+    expect(container.textContent).not.toContain('Copied');
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain('Could not copy');
+    expect(container.querySelector<HTMLInputElement>('input[readonly]')?.value).toBe(`${window.location.origin}${confirmedOrder.portal_url}`);
+    writeText.mockResolvedValue(undefined);
+    Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText } });
+    await act(async () => copyButton().click());
+    expect(writeText).toHaveBeenLastCalledWith(`${window.location.origin}${confirmedOrder.portal_url}`);
+    expect(container.textContent).toContain('Copied');
+    expect(container.querySelector('[role="alert"]')).toBeNull();
+  });
+
   beforeEach(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -69,6 +92,8 @@ describe('Order Reconciliation and Review UI', () => {
   afterEach(async () => {
     await act(async () => root.unmount());
     container.remove();
+    if (originalClipboard) Object.defineProperty(navigator, 'clipboard', originalClipboard);
+    else Reflect.deleteProperty(navigator, 'clipboard');
   });
 
   it('renders confirmed order in OrderList with Confirmed badge and Actual COD', async () => {
