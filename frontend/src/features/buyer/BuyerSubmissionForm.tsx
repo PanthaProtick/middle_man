@@ -3,6 +3,7 @@ import { Send, AlertCircle, User, Phone, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import { PaymentClaimFields } from './PaymentClaimFields';
 import { EvidenceUploadField } from './EvidenceUploadField';
+import { PaymentAssistance } from './PaymentAssistance';
 import { AddressAssistance } from './AddressAssistance';
 import { canonicalizeBdPhone } from '../seller/api';
 import { parseClaimedAmount } from './api';
@@ -229,6 +230,9 @@ export function BuyerSubmissionForm({
           disabled={isSubmitting || isLocked}
         />
       )}
+
+      {portalToken && draft.evidence_id && <PaymentAssistance portalToken={portalToken} draft={draft}
+        onUse={patch => onDraftChange({ ...draft, ...patch })} disabled={isSubmitting || isLocked} />}
 
       <PaymentClaimFields
         order={order}

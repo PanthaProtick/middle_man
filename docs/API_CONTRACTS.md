@@ -1,5 +1,47 @@
 # API Contracts & Data Flow Guide
 
+## Optional screenshot extraction
+
+`POST /api/public/orders/{token}/payment-extraction` requires `Idempotency-Key`
+and `{evidence_id, ai_opt_in: true}` (literal JSON boolean). The public-access gate
+and unsubmitted/unexpired checks apply to new requests and replay. Only a retained,
+staged screenshot owned by that order/shop is eligible; rejection happens before
+private storage reads or Gemini calls.
+
+Responses include `available`, `evidence_id`, nullable typed `suggestions`,
+`review_required: true`, and `message`. Suggestions contain nullable
+`is_payment_screenshot`, `provider` (`bkash`/`nagad`), `trx_id`, `amount_minor`,
+`sender_number`, `receiver_number`, `occurred_at` (timezone-qualified ISO time),
+and an explicit `unreadable_fields` list. Unexpected fields/types fail closed to
+manual entry. Suggestions cannot create seller receipts, submit or confirm orders.
+The buyer explicitly applies reviewed fields to the ordinary form; receiver/time
+remain review context and cannot change the designated seller account. Manual
+form validation still applies. Edits to payment fields, evidence replacement,
+submission, and navigation invalidate late output.
+
+The tool-free backend Gemini adapter has a five-second HTTP timeout, a six-second
+total provider deadline, bounded response bytes, no automatic retries, and no SMS
+entry point. Five distinct attempts per order are allowed. PostgreSQL commits a
+`pending` budget reservation before external work, then rechecks order/evidence
+eligibility and holds the order/evidence locks during the bounded call. This
+trades up to six seconds of contention for serialization with submission.
+Committed results (including expected failures) replay without another call.
+An unfinished reservation returns 409 `EXTRACTION_OUTCOME_UNKNOWN`; retrying that
+key never calls Gemini again. Other keys still consume the five-attempt budget.
+A database failure returns 503 with same-key recovery guidance. This bounds
+lost-response retries and does not promise exactly-once provider billing.
+
+Migration `0014_payment_extractions.sql` stores consent through the explicit
+request contract plus mutation fingerprint, protected order/shop/evidence ownership,
+structured replay outcomes, and optional raw model output. Collection/deletion
+times inherit the screenshot's original deadline; processing never restarts it.
+`purge_payment_raw_evidence` clears due raw output inside the caller's transaction.
+Ticket 16 owns scheduling/overdue reporting and completed-order cleanup; backup
+and provider-side deletion remain launch gates. Structured suggestions remain
+personal data under the completed-order policy, never permanent audit/log content.
+Actual Gemini image/model behavior and service data terms require separate live
+acceptance; unit tests and the browser harness use explicit offline adapters.
+
 ## Optional address assistance
 
 `POST /api/public/orders/{token}/address-extraction` requires `Idempotency-Key`

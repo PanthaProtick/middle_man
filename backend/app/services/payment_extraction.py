@@ -1,0 +1,197 @@
+import asyncio
+import datetime
+import hashlib
+import uuid
+from collections.abc import Callable
+
+import httpx
+from sqlalchemy import func, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.core.tokens import get_utc_now
+from app.models.entities import OrderEvidenceTable, OrderTable
+from app.models.payment_entities import PaymentExtractionTable
+from app.models.payment_extraction import PaymentExtractionRequest, PaymentExtractionResponse, PaymentSuggestions
+from app.services.buyer_service import _require_unsubmitted
+from app.services.evidence_service import _memory_order_evidence
+from app.services.evidence_store import StorageOutageError, read_evidence_file
+from app.services.order_service import _check_and_apply_expiry, _memory_orders, _memory_orders_by_digest
+from app.services.payment_provider import PaymentProvider
+from app.services.seller_service import IdempotencyConflictError, NotFoundError, SellerDomainException
+
+_memory: dict[tuple[str, str], PaymentExtractionTable] = {}
+_locks: dict[str, asyncio.Lock] = {}
+
+
+def reset_payment_memory() -> None:
+    _memory.clear()
+    _locks.clear()
+
+
+class PaymentExtraction:
+    def __init__(
+        self, db: AsyncSession | None, provider: PaymentProvider, clock: Callable[[], datetime.datetime] = get_utc_now
+    ):
+        self.db, self.provider, self.clock = db, provider, clock
+
+    async def extract(self, token: str, payload: PaymentExtractionRequest, key: str) -> PaymentExtractionResponse:
+        digest = hashlib.sha256(token.strip().encode()).hexdigest()
+        if self.db is None:
+            async with _locks.setdefault(digest, asyncio.Lock()):
+                return await self._extract(digest, payload, key)
+        return await self._extract(digest, payload, key)
+
+    async def _extract(self, digest: str, payload: PaymentExtractionRequest, key: str) -> PaymentExtractionResponse:
+        db = self.db
+        now = self.clock()
+        if db is not None:
+            order = await db.scalar(
+                select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update()
+            )
+            if order is None:
+                raise NotFoundError("Order not found")
+            now = self.clock()  # Time must be sampled after waiting for the lock.
+            order_id, shop_id = order.id, order.shop_id
+            _check_and_apply_expiry(order, now)
+            if order.lifecycle == "expired":
+                await db.commit()
+            _require_unsubmitted(order.lifecycle)
+            prior = await db.scalar(
+                select(PaymentExtractionTable).where(
+                    PaymentExtractionTable.order_id == order_id, PaymentExtractionTable.mutation_key == key
+                )
+            )
+            count = (
+                await db.scalar(
+                    select(func.count())
+                    .select_from(PaymentExtractionTable)
+                    .where(PaymentExtractionTable.order_id == order_id)
+                )
+                or 0
+            )
+        else:
+            order_id = _memory_orders_by_digest.get(digest, "")
+            raw = _memory_orders.get(order_id)
+            if raw is None:
+                raise NotFoundError("Order not found")
+            shop_id = str(raw["shop_id"])
+            _check_and_apply_expiry(raw, now)
+            _require_unsubmitted(str(raw["lifecycle"]))
+            prior = _memory.get((order_id, key))
+            count = sum(1 for oid, _ in _memory if oid == order_id)
+        if db is not None:
+            evidence = await db.scalar(
+                select(OrderEvidenceTable)
+                .where(
+                    OrderEvidenceTable.id == payload.evidence_id,
+                    OrderEvidenceTable.order_id == order_id,
+                    OrderEvidenceTable.shop_id == shop_id,
+                )
+                .with_for_update()
+            )
+        else:
+            item = _memory_order_evidence.get(payload.evidence_id)
+            evidence = OrderEvidenceTable(**item) if item else None
+        if evidence is None or evidence.order_id != order_id or evidence.shop_id != shop_id:
+            raise SellerDomainException(422, "FOREIGN_EVIDENCE_REFERENCE", "Screenshot must belong to this order.")
+        if evidence.status != "staged" or evidence.deleted_at is not None or evidence.delete_after <= now:
+            raise SellerDomainException(
+                410, "EVIDENCE_UNAVAILABLE", "Screenshot unavailable. Enter payment details manually."
+            )
+        fingerprint = hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+        if prior is not None:
+            if prior.payload_hash != fingerprint:
+                raise IdempotencyConflictError()
+            if prior.state == "pending":
+                raise SellerDomainException(
+                    409,
+                    "EXTRACTION_OUTCOME_UNKNOWN",
+                    "Extraction outcome unknown. Retry the same key later or enter payment details manually.",
+                )
+            return PaymentExtractionResponse.model_validate_json(prior.result_json)
+        if count >= 5:
+            raise SellerDomainException(
+                429, "PAYMENT_EXTRACTION_LIMIT", "Screenshot extraction limit reached. Enter payment details manually."
+            )
+        result = PaymentExtractionResponse(
+            evidence_id=payload.evidence_id,
+            available=False,
+            message="Screenshot extraction unavailable. Enter payment details manually.",
+        )
+        record = PaymentExtractionTable(
+            id=str(uuid.uuid4()),
+            shop_id=shop_id,
+            order_id=order_id,
+            mutation_key=key,
+            payload_hash=fingerprint,
+            result_json=result.model_dump_json(),
+            evidence_id=evidence.id,
+            state="pending",
+            raw_response=None,
+            collected_at=evidence.collected_at,
+            delete_after=evidence.delete_after,
+        )
+        if db is not None:
+            # Reserve budget durably before external work. A lost/crashed attempt is never re-billed by replay.
+            db.add(record)
+            await db.commit()
+            order = await db.scalar(
+                select(OrderTable)
+                .where(OrderTable.id == order_id)
+                .with_for_update()
+                .execution_options(populate_existing=True)
+            )
+            assert order is not None
+            _check_and_apply_expiry(order, self.clock())
+            _require_unsubmitted(order.lifecycle)
+            evidence = await db.scalar(
+                select(OrderEvidenceTable)
+                .where(OrderEvidenceTable.id == payload.evidence_id)
+                .with_for_update()
+                .execution_options(populate_existing=True)
+            )
+            if (
+                evidence is None
+                or evidence.status != "staged"
+                or evidence.deleted_at is not None
+                or evidence.delete_after <= self.clock()
+            ):
+                raise SellerDomainException(
+                    410, "EVIDENCE_UNAVAILABLE", "Screenshot unavailable. Enter payment details manually."
+                )
+        response_text = None
+        try:
+            image = read_evidence_file(evidence.storage_key)
+            if image is None:
+                raise ValueError("Screenshot unavailable")
+            # Order lock serializes extraction/replay and submission. Hard bound limits contention.
+            async with asyncio.timeout(6):
+                response_text = await self.provider.extract(image, evidence.media_type)
+            if len(response_text) > 8192:
+                response_text = None
+                raise ValueError("Oversized extraction")
+            suggestions = PaymentSuggestions.model_validate_json(response_text)
+            result = PaymentExtractionResponse(
+                evidence_id=payload.evidence_id,
+                available=True,
+                suggestions=suggestions,
+                message="Review and edit suggestions before using them.",
+            )
+        except (StorageOutageError, TimeoutError, httpx.HTTPError, ValueError, KeyError, IndexError, TypeError):
+            pass  # Never log private input, provider output or provider exception bodies.
+        record.state = "complete"
+        record.result_json = result.model_dump_json()
+        # Never create an expired raw copy if the deadline passed during provider work.
+        record.raw_response = response_text if self.clock() < evidence.delete_after else None
+        if db is not None:
+            assert order is not None
+            db.add(record)
+            _check_and_apply_expiry(order, self.clock())
+            await db.commit()
+            _require_unsubmitted(order.lifecycle)
+        else:
+            assert raw is not None
+            _memory[(order_id, key)] = record
+            _check_and_apply_expiry(raw, self.clock())
+            _require_unsubmitted(str(raw["lifecycle"]))
+        return result
