@@ -59,6 +59,8 @@ class SellerOrder(BaseModel):
     updated_at: datetime
     expires_at: datetime
     completed_at: Optional[datetime] = None
+    predecessor_order_id: Optional[str] = None
+    replaced_by_order_id: Optional[str] = None
 
 
 class SellerOrderListResponse(BaseModel):

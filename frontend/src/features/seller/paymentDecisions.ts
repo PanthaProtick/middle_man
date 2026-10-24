@@ -31,10 +31,45 @@ export interface PaymentDecision {
   reason: string;
 }
 
+export interface CancelDecision {
+  action: 'cancel';
+  expected_version: number;
+  reason: string;
+}
+
+export interface RejectDecision {
+  action: 'reject';
+  expected_version: number;
+  reason: string;
+}
+
+export interface OrderReplacementInput {
+  expected_version: number;
+  reason: string;
+  order: {
+    product_name: string;
+    total_minor: number;
+    required_advance_minor: number;
+    payment_account_id: string;
+  };
+}
+
 export function previewPayment(orderId: string, receiptId: string, token: string): Promise<PaymentPreview> {
   return requestJson(`/api/seller/orders/${orderId}/payment-preview?transaction_id=${encodeURIComponent(receiptId)}`, {}, token);
 }
 
 export function acceptPayment(orderId: string, payload: PaymentDecision, key: string, token: string): Promise<SellerOrder> {
-  return requestJson(`/api/seller/orders/${orderId}/decisions`, {method:'POST',body:JSON.stringify(payload)}, token, key);
+  return requestJson(`/api/seller/orders/${orderId}/decisions`, { method: 'POST', body: JSON.stringify(payload) }, token, key);
+}
+
+export function cancelOrder(orderId: string, payload: CancelDecision, key: string, token: string): Promise<SellerOrder> {
+  return requestJson(`/api/seller/orders/${orderId}/decisions`, { method: 'POST', body: JSON.stringify(payload) }, token, key);
+}
+
+export function rejectOrder(orderId: string, payload: RejectDecision, key: string, token: string): Promise<SellerOrder> {
+  return requestJson(`/api/seller/orders/${orderId}/decisions`, { method: 'POST', body: JSON.stringify(payload) }, token, key);
+}
+
+export function replaceOrder(orderId: string, payload: OrderReplacementInput, key: string, token: string): Promise<SellerOrder> {
+  return requestJson(`/api/seller/orders/${orderId}/replacement`, { method: 'POST', body: JSON.stringify(payload) }, token, key);
 }
