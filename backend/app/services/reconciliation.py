@@ -206,42 +206,9 @@ async def _reconcile_order_memory(order_id: str, now: datetime.datetime) -> bool
                 })
         return False
 
-    alloc_id = str(uuid.uuid4())
-    _memory_allocations[alloc_id] = {
-        "id": alloc_id,
-        "shop_id": order["shop_id"],
-        "order_id": order_id,
-        "transaction_id": candidate_tx["id"],
-        "accepted_amount_minor": int(candidate_tx["amount_minor"]),
-        "basis": "automatic",
-        "actor": "system",
-        "reason": None,
-        "created_at": now,
-    }
-    _memory_order_allocations[order_id] = alloc_id
-    _memory_transaction_allocations[candidate_tx["id"]] = alloc_id
-    _memory_used_payment_markers.update(markers)
-    _memory_audit_events.append({
-        "id": str(uuid.uuid4()),
-        "shop_id": order["shop_id"],
-        "aggregate_type": "order",
-        "aggregate_id": order_id,
-        "actor": "system",
-        "action": "order_confirmed_automatic",
-        "details": f"Automatically confirmed with transaction {candidate_tx['id']} for amount {candidate_tx['amount_minor']}",
-        "created_at": now,
-    })
-
-    order["lifecycle"] = "confirmed"
-    order["completed_at"] = now
-    order["updated_at"] = now
-    order["version"] = int(order.get("version", 1)) + 1
-
-    candidate_tx["reconciliation_state"] = "used"
-    candidate_tx["updated_at"] = now
-    candidate_tx["version"] = int(candidate_tx.get("version", 1)) + 1
-
-    _memory_order_review_reasons.pop(order_id, None)
+    from app.services.allocation import allocate_memory
+    allocate_memory(order, candidate_tx, markers, now, basis="automatic", actor="system", reason=None,
+        details=f"Automatically confirmed with transaction {candidate_tx['id']} for amount {candidate_tx['amount_minor']}")
     return True
 
 

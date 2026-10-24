@@ -117,3 +117,26 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   idempotent result atomically. Pending review reasons describe the latest check.
 - Migration `0008_claim_acceptance_time.sql` backfills existing revisions from their
   creation time. No shared or hosted migration is implied by local verification.
+
+
+## Seller payment exception acceptance
+
+- GET `/api/seller/orders/{id}/payment-preview?transaction_id=...` compares the active
+  claim with an existing same-shop receipt and returns exception codes, hard blockers,
+  actual COD and both order/receipt versions. Excessive payments have null COD.
+- POST `/api/seller/orders/{id}/decisions` currently supports `action: confirm` only.
+  Require `expected_version`, `expected_transaction_version`, `transaction_id`,
+  strict positive `accepted_amount_minor`, nonblank `reason`, and `Idempotency-Key`.
+  The accepted amount must equal the full recorded receipt and cannot exceed total.
+  This slice does not implement rejection, cancellation, refunds or reassignment.
+- Missing authority/ownership returns 401/404; invalid input or partial allocation
+  returns 422; stale evidence and allocation blockers return 409. Same-key replay
+  returns the committed snapshot; changed payload returns 409. Database write
+  failure returns explicit 503 with same-payload/key retry guidance, never fallback
+  confirmation. Seller responses remain private/no-store.
+- GET `/api/seller/orders/{id}/payment-decisions` exposes owning-seller manual decision
+  history: actual advance/COD, exceptions, reason, actor and time. Public buyer
+  projections continue hiding receipt details, exception codes and seller reasons.
+- GET `/api/seller/payment-summary` returns only confirmed/manual/exception order
+  counts for the owning shop. Migration 0010 stores these without personal data,
+  receipt/order identifiers or reasons; shared allocation writes counters atomically.

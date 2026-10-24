@@ -88,3 +88,13 @@ history uses existing audit records and retention rules; raw SMS is not copied.
 Indexed observation identity lookup also prevents reimporting an original identity
 as another payment after correction. All retained identities are consumed as minimal
 used-payment markers at allocation; matching checks each marker before acceptance.
+
+
+Manual payment approval binds order and receipt versions to a server-derived preview.
+The shared allocator writes full receipt allocation, retained-identity markers,
+confirmation, audit and anonymous shop counters inside the existing shop lock.
+Manual approval never overrides unresolved evidence, competing/held claims, prior
+use or the total cap. The enclosing transaction also persists the idempotent result;
+rollback and replay cannot increase counters independently. Migration 0010 backfills
+counts from existing allocations. Private decision history remains separate from
+aggregate-only metrics and public buyer projections.

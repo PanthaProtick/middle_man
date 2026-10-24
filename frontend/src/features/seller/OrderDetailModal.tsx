@@ -3,6 +3,8 @@ import { X, Copy, Check, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2
 import type { SellerOrder } from './types';
 import { formatBangladeshTime, formatRemainingCod } from './api';
 import { BuyerCorrection } from './BuyerCorrection';
+import { PaymentException } from './PaymentException';
+import { PaymentHistory } from './PaymentHistory';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -192,7 +194,10 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
           </div>
         </div>
 
-        {token && order.buyer_revision && <BuyerCorrection key={order.id} orderId={order.id} token={token} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
+        {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
+        {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
+          onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
+        {token && order.buyer_revision && <BuyerCorrection key={`${order.id}-${order.version}`} orderId={order.id} token={token} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button className="btn btn-primary" onClick={handleCopy}>

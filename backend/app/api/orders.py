@@ -1,6 +1,7 @@
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, Query, Response
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import SellerIdentity, get_seller_identity
@@ -13,9 +14,13 @@ from app.models.order import (
     SellerOrder,
     SellerOrderListResponse,
 )
+from app.models.payment_decision import PaymentDecision, PaymentDecisionEvent, PaymentPreview, PaymentSummary
 from app.services.buyer_correction import correct, history
 from app.services.order_service import OrderService
-from app.services.seller_service import NotFoundError, SellerService
+from app.services.payment_decision import accept_payment
+from app.services.payment_history import payment_history, payment_summary
+from app.services.payment_preview import payment_preview
+from app.services.seller_service import NotFoundError, SellerDomainException, SellerService
 
 router = APIRouter(prefix="/seller", tags=["seller-orders"])
 
@@ -131,3 +136,58 @@ async def resolve_order_link(
     order_svc = OrderService(db)
     order_id = await order_svc.resolve_portal_token(shop_id=shop.id, portal_token=payload.portal_token)
     return ResolveOrderLinkResponse(order_id=order_id)
+
+
+@router.get('/orders/{order_id}/payment-preview', response_model=PaymentPreview)
+async def preview_payment(
+    order_id: str, response: Response, transaction_id: str = Query(..., min_length=1, max_length=36),
+    seller: SellerIdentity = Depends(get_seller_identity), db: Optional[AsyncSession] = Depends(get_db),
+) -> PaymentPreview:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError()
+    return await payment_preview(db, shop.id, order_id, transaction_id)
+
+
+@router.post('/orders/{order_id}/decisions', response_model=SellerOrder)
+async def decide_payment(
+    order_id: str, payload: PaymentDecision, response: Response,
+    idempotency_key: str = Header(..., alias='Idempotency-Key', min_length=1, max_length=64),
+    seller: SellerIdentity = Depends(get_seller_identity), db: Optional[AsyncSession] = Depends(get_db),
+) -> SellerOrder:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError()
+    try:
+        return await accept_payment(db, shop.id, seller.owner_id, order_id, payload, idempotency_key)
+    except SQLAlchemyError:
+        if db is not None:
+            await db.rollback()
+        raise SellerDomainException(503, 'DATABASE_UNAVAILABLE',
+            'Approval outcome unknown. Retry the same payload and key, then refresh.') from None
+
+
+@router.get('/orders/{order_id}/payment-decisions', response_model=list[PaymentDecisionEvent])
+async def read_payment_history(
+    order_id: str, response: Response, seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> list[PaymentDecisionEvent]:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError()
+    return await payment_history(db, shop.id, order_id)
+
+
+@router.get('/payment-summary', response_model=PaymentSummary)
+async def read_payment_summary(
+    response: Response, seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> PaymentSummary:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError()
+    return await payment_summary(db, shop.id)

@@ -201,46 +201,9 @@ async def _reconcile_order_db_attempt(
     if ord_alloc is not None:
         return False
 
-    alloc_id = str(uuid.uuid4())
-    db.add(AllocationTable(
-        id=alloc_id,
-        shop_id=order.shop_id,
-        order_id=order.id,
-        transaction_id=candidate_tx.id,
-        accepted_amount_minor=candidate_tx.amount_minor,
-        basis="automatic",
-        actor="system",
-        reason=None,
-        created_at=now,
-    ))
-    for identity_provider, digest in digests:
-        db.add(UsedPaymentMarkerTable(
-            id=str(uuid.uuid4()), shop_id=order.shop_id, provider=identity_provider,
-            transaction_digest=digest, created_at=now,
-        ))
-    db.add(AuditEventTable(
-        id=str(uuid.uuid4()),
-        shop_id=order.shop_id,
-        aggregate_type="order",
-        aggregate_id=order.id,
-        actor="system",
-        action="order_confirmed_automatic",
-        details=f"Automatically confirmed with transaction {candidate_tx.id} for amount {candidate_tx.amount_minor}",
-        created_at=now,
-    ))
-
-    order.lifecycle = "confirmed"
-    order.completed_at = now
-    order.updated_at = now
-    order.version = int(order.version) + 1
-
-    candidate_tx.reconciliation_state = "used"
-    candidate_tx.updated_at = now
-    candidate_tx.version = int(candidate_tx.version) + 1
-
-    await clear_order_review_reasons_db(db, order_id)
-    # Callers project the accepted amount before committing the enclosing mutation.
-    await db.flush()
+    from app.services.allocation import allocate_db
+    await allocate_db(db, order, candidate_tx, digests, now, basis="automatic", actor="system", reason=None,
+        details=f"Automatically confirmed with transaction {candidate_tx.id} for amount {candidate_tx.amount_minor}")
     return True
 
 
