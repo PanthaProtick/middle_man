@@ -6,9 +6,11 @@ from app.core.tokens import decrypt_token
 from app.models.entities import OrderTable
 from app.models.order import SellerOrder
 from app.services.reconciliation_rules import AllocationRecord
+from app.services.retention_access import require_retained_record
 
 
 def check_and_apply_expiry(record: Any, now: datetime.datetime) -> bool:
+    require_retained_record(record)
     if isinstance(record, OrderTable):
         if record.lifecycle == "awaiting_buyer" and now >= record.expires_at:
             record.lifecycle = "expired"
@@ -34,6 +36,7 @@ def to_seller_order(
     alloc: Optional[AllocationRecord] = None,
     review_reasons: Optional[List[str]] = None,
 ) -> SellerOrder:
+    require_retained_record(row)
     decrypted_token = decrypt_token(row.encrypted_portal_token)
     actual_cod = (
         (int(row.total_minor) - alloc.accepted_amount_minor)
@@ -74,6 +77,7 @@ def to_seller_order_from_dict(
     alloc: Optional[AllocationRecord] = None,
     review_reasons: Optional[List[str]] = None,
 ) -> SellerOrder:
+    require_retained_record(raw)
     d = dict(raw)
     d["actual_cod_minor"] = (
         (int(raw["total_minor"]) - alloc.accepted_amount_minor)

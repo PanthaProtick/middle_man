@@ -15,6 +15,7 @@ from app.api.public_orders import router as public_orders_router
 from app.api.routes import router as api_router
 from app.api.seller import router as seller_router
 from app.api.sms import router as sms_router
+from app.api.structured_retention import router as structured_retention_router
 from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
 from app.core.config import settings
@@ -112,6 +113,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Include routes
 app.include_router(api_router, prefix=settings.API_PREFIX)
 app.include_router(seller_router, prefix=settings.API_PREFIX)
+app.include_router(structured_retention_router, prefix=settings.API_PREFIX)
 app.include_router(order_export_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
 # Literal SMS paths must precede the receipt-ID route.

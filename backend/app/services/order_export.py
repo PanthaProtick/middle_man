@@ -23,6 +23,9 @@ def money(value: int) -> str:
 
 async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                     filters: ExportFilters, order_id: str | None = None) -> list[OrderSummary]:
+    if order_id:
+        from app.services.order_service import OrderService
+        await OrderService(db).get_order(shop_id, order_id)
     now = get_utc_now()
     if db is not None:
         await db.execute(text("SET LOCAL statement_timeout = '5s'"))
@@ -45,7 +48,8 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
             BuyerRevisionTable, (BuyerRevisionTable.order_id == OrderTable.id)
             & (BuyerRevisionTable.revision_number == OrderTable.buyer_revision)
         ).outerjoin(AllocationTable, (AllocationTable.order_id == OrderTable.id)
-                    & (AllocationTable.shop_id == OrderTable.shop_id)).where(OrderTable.shop_id == shop_id)
+                    & (AllocationTable.shop_id == OrderTable.shop_id)).where(
+                        OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None))
         if filters.status:
             query = query.where(lifecycle == filters.status)
         if order_id:
@@ -73,7 +77,7 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
         _memory_attempts[shop_id] = [*recent, now.timestamp()]
         selected = []
         for raw in _memory_orders.values():
-            if raw['shop_id'] != shop_id:
+            if raw['shop_id'] != shop_id or raw.get('retained_at'):
                 continue
             _check_and_apply_expiry(raw, now)
             if (not filters.status or raw['lifecycle'] == filters.status) and (not order_id or raw['id'] == order_id):

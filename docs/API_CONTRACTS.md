@@ -231,3 +231,42 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   acknowledgement or marking records deleted until required copies are removed.
 - External storage bucket version history, database backup retention lifecycles, and
   third-party AI provider logging terms remain explicit launch gates, not false deletion claims.
+
+## Completed structured record retention (Ticket 19)
+
+- GET `/api/seller/retention/structured` returns typed `checked_at`, `overdue`,
+  `failed`, `removed` and `standby`. POST `/api/seller/retention/structured/cleanup`
+  retries the owning shop's due records using server time. Neither accepts a shop
+  identifier or deletion clock from the caller. The integrated seller panel reloads
+  orders and receipts after cleanup. Database outages return unavailable, never a
+  successful deletion response. `standby` identifies the explicit offline adapter.
+- `purge_completed_orders(db, now, shop_id)` is the maintenance seam: invoke it
+  repeatedly from an operator/scheduler with its own database session. Due work is
+  discovered from durable completion timestamps; per-order attempts and safe failure
+  codes survive restart. A failed order is rolled back independently and retried.
+  Hosting/scheduling this maintenance is a deployment gate; no hosted scheduler has
+  been installed. Run the raw-evidence worker separately at its 30-day deadline.
+- The deletion date is the first completion plus 12 calendar months, clamping leap
+  day to February's last day. Cancellation and later corrections preserve the first
+  completion. Unopened awaiting-buyer records use their original expiry as completion.
+- Remove buyer revisions, structured AI suggestions, matching review reasons,
+  order audits, token-open measurements and personal replay-cache results. Shared
+  receipt observations/audits remain while any unresolved or not-yet-due order
+  needs their historic identities. Standalone unmatched receipts have no new period.
+  Raw SMS, images and raw AI copies retain their separate original 30-day deadlines.
+- Order tombstones preserve shop/ID, token lookup digest, lifecycle, completion and
+  replacement links. Remove recoverable portal tokens and commercial snapshot text.
+  Owning seller detail/history/summary and buyer reads return 410 `RECORD_UNAVAILABLE`;
+  order lists and CSV exports omit tombstones. Historical confirmations do not become
+  expired. Replay caches return unavailable rather than replaying personal responses.
+- Consumed receipts retain a nonspendable allocation/receipt skeleton to preserve
+  relational uniqueness, with readable TrxID/sender, amounts and decision text removed.
+  Independent shop/provider keyed identity markers survive. The existing HMAC uses
+  `CLERK_SECRET_KEY`; migration 0017 binds a per-shop key fingerprint. A changed or
+  missing key blocks receipt ingestion, reconciliation, manual acceptance and
+  structured cleanup. Legacy bindings require all existing markers to verify against
+  retained identities first. Restore the original key to recover; key rotation requires
+  a separately reviewed migration, never silently rebinding after details are removed.
+- Account deletion, standalone unmatched structured-receipt retention, storage version
+  history, backup purge and provider/log copies remain unsettled launch gates. These
+  endpoints and local checks do not establish real-data readiness or deploy anything.

@@ -250,7 +250,7 @@ class TransactionService:
     ) -> Tuple[List[ReceiptView], Optional[str]]:
         if self.db is not None:
             query = select(ReceivedTransactionTable).where(
-                ReceivedTransactionTable.shop_id == shop_id
+                ReceivedTransactionTable.shop_id == shop_id, ReceivedTransactionTable.retained_at.is_(None)
             ).order_by(desc(ReceivedTransactionTable.created_at), desc(ReceivedTransactionTable.id))
 
             res = await self.db.execute(query)
@@ -280,7 +280,7 @@ class TransactionService:
             return views, next_cursor
 
         # In-memory listing
-        all_raw = [t for t in _memory_transactions.values() if t["shop_id"] == shop_id]
+        all_raw = [t for t in _memory_transactions.values() if t["shop_id"] == shop_id and not t.get('retained_at')]
         all_raw.sort(key=lambda x: (x["created_at"], x["id"]), reverse=True)
         filtered_raw = [
             t for t in all_raw

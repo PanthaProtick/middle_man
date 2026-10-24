@@ -15,6 +15,8 @@ from app.services.seller_service import SellerDomainException
 
 
 async def payment_preview(db: AsyncSession | None, shop_id: str, order_id: str, receipt_id: str) -> PaymentPreview:
+    from app.services.payment_marker_protection import verify_marker_key
+    await verify_marker_key(db, shop_id)
     order = await OrderService(db).get_order(shop_id, order_id)
     comparison = await compare_receipt(db, shop_id, receipt_id)
     receipt = comparison.receipt

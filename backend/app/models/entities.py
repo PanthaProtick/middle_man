@@ -81,6 +81,9 @@ class OrderTable(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     completed_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    retained_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    retention_attempted_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    retention_error: Mapped[str | None] = mapped_column(String(64), nullable=True)
     predecessor_order_id: Mapped[str | None] = mapped_column(
         String(36), ForeignKey("orders.id"), nullable=True, index=True
     )
@@ -186,6 +189,7 @@ class ReceivedTransactionTable(Base):
     )
     provider: Mapped[str] = mapped_column(String(32), nullable=False)
     trx_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    retained_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
     sender_number_raw: Mapped[str | None] = mapped_column(String(32), nullable=True)
     sender_number_canonical: Mapped[str | None] = mapped_column(String(20), nullable=True)

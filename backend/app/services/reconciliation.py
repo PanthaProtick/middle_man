@@ -82,6 +82,10 @@ async def reconcile_order(
     now = clock()
     if db is not None:
         return await reconcile_order_db(db, order_id, now, compute_payment_digest)
+    from app.services.order_service import _memory_orders
+    from app.services.payment_marker_protection import verify_marker_key
+    if order_id in _memory_orders:
+        await verify_marker_key(None, _memory_orders[order_id]['shop_id'])
     return await _reconcile_order_memory(order_id, now)
 
 

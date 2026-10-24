@@ -189,7 +189,7 @@ class OrderService:
         limit = max(1, min(limit, 100))
 
         if self.db is not None:
-            query = select(OrderTable).where(OrderTable.shop_id == shop_id)
+            query = select(OrderTable).where(OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None))
             if status_filter:
                 query = query.where(OrderTable.lifecycle == status_filter)
             query = query.order_by(desc(OrderTable.created_at), desc(OrderTable.id))
@@ -219,7 +219,7 @@ class OrderService:
                 res_orders.append(_to_seller_order(o, alloc, reasons))
             return res_orders, next_cursor
 
-        all_raw = [o for o in _memory_orders.values() if o["shop_id"] == shop_id]
+        all_raw = [o for o in _memory_orders.values() if o["shop_id"] == shop_id and not o.get('retained_at')]
         for raw in all_raw:
             _check_and_apply_expiry(raw, now)
 
@@ -250,9 +250,13 @@ class OrderService:
             ))).scalar_one_or_none()
             if not order:
                 raise NotFoundError("Order not found")
+            from app.services.retention_access import require_retained_record
+            require_retained_record(order)
             return str(order.id)
 
         order_id = _memory_orders_by_digest.get(digest)
         if not order_id or order_id not in _memory_orders or _memory_orders[order_id]["shop_id"] != shop_id:
             raise NotFoundError("Order not found")
+        from app.services.retention_access import require_retained_record
+        require_retained_record(_memory_orders[order_id])
         return order_id

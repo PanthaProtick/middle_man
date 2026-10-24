@@ -144,8 +144,9 @@ async def test_identity_correction_rechecks_old_and_new_claims(postgres_buyer):
         'trx_id': receipt['trx_id'], 'amount_minor': receipt['amount_minor'],
         'sender_number': receipt['sender_number_raw'], 'occurred_at': receipt['occurred_at']},
         headers={'Idempotency-Key': 'reimport-after-evidence-purge'})
-    assert after_purge.status_code == 201, after_purge.text
-    assert after_purge.json()['reconciliation_state'] == 'unmatched'
+    assert after_purge.status_code == 409, after_purge.text
+    assert after_purge.json()['error']['code'] == 'PAYMENT_USED'
     old = (await client.get(f"/api/seller/orders/{order['id']}")).json()
-    assert old['lifecycle'] == 'pending' and 'PAYMENT_USED' in old['review_reasons']
+    assert old['lifecycle'] == 'pending'
+    assert await connection.fetchval('SELECT count(*) FROM received_transactions') == 1
     assert await connection.fetchval('SELECT count(*) FROM allocations') == 1

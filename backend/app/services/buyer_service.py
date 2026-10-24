@@ -18,6 +18,7 @@ from app.services.evidence_service import EvidenceService, reset_memory_evidence
 from app.services.evidence_store import reset_evidence_file_store
 from app.services.order_service import _check_and_apply_expiry, _memory_orders, _memory_orders_by_digest
 from app.services.reconciliation import get_order_allocation, reconcile_order
+from app.services.retention_access import require_retained_record
 from app.services.seller_service import NotFoundError, SellerDomainException, compute_payload_hash
 
 
@@ -67,6 +68,7 @@ class BuyerService:
             order = await self.db.scalar(select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update())
             if order is None:
                 raise NotFoundError("Order not found")
+            require_retained_record(order)
             now = self.clock()
             if order.first_submitted_at is None:
                 await record_measurement(self.db, digest, "open", now, is_bot)
@@ -81,6 +83,7 @@ class BuyerService:
         if not order_id or order_id not in _memory_orders:
             raise NotFoundError("Order not found")
         raw = _memory_orders[order_id]
+        require_retained_record(raw)
         now = self.clock()
         if raw.get("first_submitted_at") is None:
             await record_measurement(None, digest, "open", now, is_bot)
@@ -100,6 +103,7 @@ class BuyerService:
             order = await self.db.scalar(select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update())
             if order is None:
                 raise NotFoundError("Order not found")
+            require_retained_record(order)
             # Recheck replay after acquiring the lock: another worker may have just committed.
             cached = await check_idempotency_record(self.db, idempotency_key, digest, "buyer_submission", payload_hash)
             if cached:
@@ -144,6 +148,7 @@ class BuyerService:
         if not order_id or order_id not in _memory_orders:
             raise NotFoundError("Order not found")
         raw = _memory_orders[order_id]
+        require_retained_record(raw)
         now = self.clock()
         _check_and_apply_expiry(raw, now)
         _require_unsubmitted(str(raw["lifecycle"]))

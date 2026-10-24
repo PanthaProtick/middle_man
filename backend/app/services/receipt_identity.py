@@ -10,6 +10,8 @@ from app.services.transaction_store import _memory_observations, _memory_transac
 async def find_receipt_identity(db: AsyncSession | None, shop_id: str, provider: str,
                                 trx_id: str, *, exclude: str | None = None) -> str | None:
     # Callers hold the shop lock: absent identities and identity changes serialize.
+    from app.services.payment_marker_protection import verify_marker_key
+    await verify_marker_key(db, shop_id)
     if db is not None:
         historical = exists(select(TransactionObservationTable.id).where(
             TransactionObservationTable.transaction_id == ReceivedTransactionTable.id,
@@ -23,9 +25,12 @@ async def find_receipt_identity(db: AsyncSession | None, shop_id: str, provider:
     else:
         ids = [str(t['id']) for t in _memory_transactions.values() if t['shop_id'] == shop_id and t['id'] != exclude
             and ((t['provider'], t['trx_id']) == (provider, trx_id) or any(
-                (o['provider'], o['trx_id']) == (provider, trx_id) for o in _memory_observations[str(t['id'])]))]
+                (o['provider'], o['trx_id']) == (provider, trx_id) for o in _memory_observations.get(str(t['id']), [])))]
     if len(ids) > 1:
         raise SellerDomainException(409, "RECEIPT_IDENTITY_COLLISION", "Multiple retained identities require explicit seller review.")
+    if not ids:
+        from app.services.payment_marker_protection import reject_used_identity
+        await reject_used_identity(db, shop_id, provider, trx_id)
     return ids[0] if ids else None
 
 

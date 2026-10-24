@@ -5,6 +5,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.models.buyer import PublicOrder
 from app.models.entities import OrderTable
+from app.services.retention_access import require_retained_record
 
 
 class PublicTerms(BaseModel):
@@ -44,6 +45,7 @@ def to_public_order(
     shop_display_name: str,
     accepted_amount_minor: Optional[int] = None,
 ) -> PublicOrder:
+    require_retained_record(order)
     terms = PublicTerms.model_validate(order)
     actual_cod = (
         terms.total_minor - accepted_amount_minor

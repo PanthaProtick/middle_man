@@ -25,6 +25,21 @@ async function requestJson<T>(
   return res.json() as Promise<T>;
 }
 
+export interface StructuredRetentionStatus {
+  checked_at: string;
+  overdue: number;
+  failed: number;
+  removed: number;
+  standby: boolean;
+}
+
+export async function structuredRetention(token?: string, cleanup = false): Promise<StructuredRetentionStatus> {
+  return requestJson<StructuredRetentionStatus>(
+    `/api/seller/retention/structured${cleanup ? '/cleanup' : ''}`,
+    { method: cleanup ? 'POST' : 'GET' }, token,
+  );
+}
+
 export async function fetchRetentionStatus(token?: string): Promise<RetentionStatusResponse> {
   return requestJson<RetentionStatusResponse>('/api/seller/retention/status', {}, token);
 }

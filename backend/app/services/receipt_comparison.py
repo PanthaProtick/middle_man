@@ -23,6 +23,9 @@ async def compare_receipt(db: AsyncSession | None, shop_id: str, receipt_id: str
             ReceivedTransactionTable.id == receipt_id, ReceivedTransactionTable.shop_id == shop_id))
         if tx is None:
             raise NotFoundError()
+        if tx.retained_at:
+            from app.services.retention_access import unavailable_record
+            raise unavailable_record()
         observations = list((await db.scalars(select(TransactionObservationTable).where(
             TransactionObservationTable.transaction_id == receipt_id,
         ).order_by(TransactionObservationTable.created_at, TransactionObservationTable.id))).all())
@@ -48,6 +51,9 @@ async def compare_receipt(db: AsyncSession | None, shop_id: str, receipt_id: str
         raw = _memory_transactions.get(receipt_id)
         if raw is None or raw["shop_id"] != shop_id:
             raise NotFoundError()
+        if raw.get('retained_at'):
+            from app.services.retention_access import unavailable_record
+            raise unavailable_record()
         receipt = to_receipt_view(raw, _memory_observations[receipt_id])
         claims = []
         for order_id, revisions in _memory_buyer_revisions.items():

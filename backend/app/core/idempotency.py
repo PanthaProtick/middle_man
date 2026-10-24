@@ -36,6 +36,9 @@ async def check_idempotency_record(
         result = await db.execute(stmt)
         record = result.scalar_one_or_none()
         if record:
+            if json.loads(record.response_json) == {'record_unavailable': True}:
+                from app.services.retention_access import unavailable_record
+                raise unavailable_record()
             if record.payload_hash != payload_hash:
                 from app.services.seller_service import IdempotencyConflictError
                 raise IdempotencyConflictError()
@@ -43,6 +46,9 @@ async def check_idempotency_record(
     else:
         rec = _memory_idempotency_store.get(composite_key)
         if rec:
+            if rec['data'] == {'record_unavailable': True}:
+                from app.services.retention_access import unavailable_record
+                raise unavailable_record()
             if rec["payload_hash"] != payload_hash:
                 from app.services.seller_service import IdempotencyConflictError
                 raise IdempotencyConflictError()

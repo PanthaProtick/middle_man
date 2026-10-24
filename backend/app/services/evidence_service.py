@@ -26,6 +26,7 @@ from app.services.order_service import (
     _memory_orders,
     _memory_orders_by_digest,
 )
+from app.services.retention_access import require_retained_record
 from app.services.seller_service import (
     NotFoundError,
     SellerDomainException,
@@ -68,6 +69,7 @@ class EvidenceService:
             )
             if order is None:
                 raise NotFoundError("Order not found")
+            require_retained_record(order)
 
             cached = await check_idempotency_record(
                 self.db, idempotency_key, digest, "buyer_evidence_upload", payload_hash
