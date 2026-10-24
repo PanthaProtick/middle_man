@@ -82,3 +82,18 @@ it('validates sender and timezone locally and reports permission denial without 
   expect(ui.container.textContent).toContain('Seller sign-in required'); expect(ui.onCorrected).not.toHaveBeenCalled();
   await ui.cleanup();
 });
+
+it('shows loading, freezes edits and prevents duplicate writes until the outcome arrives', async () => {
+  let finish: (response: Response) => void = () => {};
+  const spy = vi.spyOn(globalThis, 'fetch').mockImplementationOnce(() => new Promise<Response>(resolve => { finish = resolve; }));
+  const ui = await mount(); await ui.change('Correction reason', 'Checked receipt');
+  await ui.submit();
+  expect(ui.container.textContent).toContain('Saving correction');
+  expect(ui.container.querySelector('fieldset')?.disabled).toBe(true);
+  expect(ui.onPending).toHaveBeenCalledWith(true);
+  await ui.submit(); expect(spy).toHaveBeenCalledOnce();
+  await act(async () => finish(new Response(JSON.stringify({receipt, allocated_order_id: null}))));
+  expect(ui.onPending).toHaveBeenLastCalledWith(false);
+  expect(ui.onCorrected).toHaveBeenCalledOnce();
+  await ui.cleanup();
+});

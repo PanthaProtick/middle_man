@@ -4,17 +4,17 @@
 
 **Blocked by:** [07: Resolve conflicting evidence and competing claims](07-resolve-evidence-conflicts.md)
 
-**Status:** in-progress
+**Status:** completed
 
 ## Acceptance criteria
 
-- [ ] Require owning-shop authority, expected version and reason; retain original and corrected observations rather than overwriting evidence.
-- [ ] Correct only unallocated receipt fields; allocated accepted fields stay locked and later contradictions remain alerts.
-- [ ] Identity changes colliding with an existing shop/provider/TrxID require explicit conflict resolution; do not silently merge or clone spendable funds.
-- [ ] Reconcile all affected pending claims after consistent correction using the existing transaction boundary and known-claim rules.
-- [ ] Show before/after fields, related outcomes, history and actionable stale/collision errors. Unknown outcomes reuse the original key/payload.
-- [ ] Concurrent receipt correction, conflict resolution and allocation produce one valid serialized result; no stale accepted evidence or double allocation.
-- [ ] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
+- [x] Require owning-shop authority, expected version and reason; retain original and corrected observations rather than overwriting evidence.
+- [x] Correct only unallocated receipt fields; allocated accepted fields stay locked and later contradictions remain alerts.
+- [x] Identity changes colliding with an existing shop/provider/TrxID require explicit conflict resolution; do not silently merge or clone spendable funds.
+- [x] Reconcile all affected pending claims after consistent correction using the existing transaction boundary and known-claim rules.
+- [x] Show before/after fields, related outcomes, history and actionable stale/collision errors. Unknown outcomes reuse the original key/payload.
+- [x] Concurrent receipt correction, conflict resolution and allocation produce one valid serialized result; no stale accepted evidence or double allocation.
+- [x] Complete this behavior through durable PostgreSQL records, typed FastAPI contracts and the integrated React UI; include loading, validation, permissions and failure behavior. Preserve meaningful starter behavior (AC50).
 
 ## Contract and acceptance references
 
@@ -56,21 +56,22 @@ Implement only this approved slice and its required seams; blockers must complet
   API and PostgreSQL tests; frontend seller correction component/client/types/tests,
   inbox/workspace integration; architecture and API documentation.
 
-### Verification so far
+### Verification
 
-- Focused receipt HTTP tests: PASS, 16; first red test returned 405 for missing PATCH;
+- Focused receipt HTTP tests: PASS, 17; first red test returned 405 for missing PATCH;
   identity preservation regression initially failed for missing observation identity.
-- Disposable real PostgreSQL: PASS, 6 focused tests, including same/different-key
+- Disposable real PostgreSQL: PASS, 7 focused tests, including same/different-key
   corrections, resolution and claim-correction contention, rollback at idempotency
   persistence, durable replay/refetch, and old/new identity claim reconciliation.
   Verified target data directory `E:/middle_man/.cache/resolution-pg`, loopback
   `127.0.0.1:55447`; actual migrations run in unique disposable test schemas.
-- React correction tests: PASS, 3; existing resolution tests: PASS, 3. Unstructured
+- React correction tests: PASS, 4; existing resolution tests: PASS, 3. Unstructured
   503 regression caught dropped retry state, fixed by preserving HTTP status on
   typed API errors. Typechecking and backend lint: PASS.
-- Root `npm run check`: PASS, all eight stages, **161 backend / 52 frontend tests**
+- Root `npm run check`: PASS, all eight stages, **163 backend / 53 frontend tests**
   with `BUYER_TEST_POSTGRES_URL` set to that disposable PostgreSQL target.
-  Fresh result: `.cache/checks/check-fxGjhY/result.json`.
+  Final fresh result: `.cache/checks/check-itYIsO/result.json` (after review fixes).
+  Earlier full run `.cache/checks/check-fxGjhY/result.json` also passed.
 - Browser: PASS, built React UI on `127.0.0.1:8049/index.html` with a unique disposable
   PostgreSQL schema and explicit synthetic seller/public adapters. Invalid sender
   remained editable with error, consistent correction confirmed pending order with
@@ -80,7 +81,17 @@ Implement only this approved slice and its required seams; blockers must complet
   evidence establishes validation, integrated success and persistence.
 - Configured/live identity/payment providers, hosted migration and deployment: NOT RUN.
   Existing public-access, deletion/retention and launch gates remain binding.
-- Independent standards/spec review: pending against user-confirmed base `fc1e91a`.
+- Standards review against user-confirmed base `fc1e91a`: no actionable findings,
+  including a follow-up of the review fix. Spec review found one P1: original-identity
+  replay after correction could create duplicate spendable funds. A real PG regression
+  reproduced the second allocation. Fixed ingestion/correction lookup to include
+  indexed retained observation identities; original-identity replay now adds a conflict
+  to the same receipt. Allocation checks and stores used markers for all retained
+  identities. Regression also proves old-identity reimport cannot allocate after
+  structured observations are removed from the disposable schema. Simultaneous
+  corrections into one absent identity yield one success/one explicit collision.
+  Spec follow-up: P1 resolved, no remaining actionable findings or scope creep.
 
-Next action: complete two-axis review, address findings, record final checks and commit.
+Next action: proceed to the next approved unblocked ticket. No hosted migration,
+deployment or real-data pilot was performed; launch gates above remain open.
 

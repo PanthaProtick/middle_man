@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.tokens import get_utc_now
 from app.models.buyer import clean_trx_id
+from app.services.receipt_identity import receipt_identities
 from app.services.reconciliation_db import (
     clear_order_review_reasons_db,
     get_order_allocation_db,
@@ -160,8 +161,9 @@ async def _reconcile_order_memory(order_id: str, now: datetime.datetime) -> bool
         return False
     competing_order_ids = [oid for oid in competing_order_ids if _memory_buyer_revisions[oid][-1]["id"] not in rejected]
     is_allocated = candidate_tx["id"] in _memory_transaction_allocations or candidate_tx.get("reconciliation_state") in ("used", "allocated")
-    digest = compute_payment_digest(order["shop_id"], provider, trx_id)
-    marker_exists = (order["shop_id"], provider, digest) in _memory_used_payment_markers
+    identities = await receipt_identities(None, order["shop_id"], candidate_tx['id'], provider, trx_id)
+    markers = {(order['shop_id'], p, compute_payment_digest(order['shop_id'], p, t)) for p, t in identities}
+    marker_exists = bool(markers & _memory_used_payment_markers)
 
     reasons = evaluate_candidate_match(
         order_account_id=str(order["payment_account_id"]),
@@ -218,7 +220,7 @@ async def _reconcile_order_memory(order_id: str, now: datetime.datetime) -> bool
     }
     _memory_order_allocations[order_id] = alloc_id
     _memory_transaction_allocations[candidate_tx["id"]] = alloc_id
-    _memory_used_payment_markers.add((order["shop_id"], provider, digest))
+    _memory_used_payment_markers.update(markers)
     _memory_audit_events.append({
         "id": str(uuid.uuid4()),
         "shop_id": order["shop_id"],

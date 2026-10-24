@@ -35,6 +35,31 @@ async def test_correction_rollback_replay_and_restart(postgres_buyer):
     assert await connection.fetchval('SELECT count(*) FROM used_payment_markers') == 1
 
 
+async def test_two_receipts_cannot_correct_into_one_identity(postgres_buyer):
+    client, connection, _, _ = postgres_buyer
+    order, receipt = await conflict_case(client)
+    second = (await client.post('/api/seller/transactions', json={
+        'payment_account_id': order['payment_account_id'], 'provider': 'bkash',
+        'trx_id': 'SECOND', 'amount_minor': 200000}, headers={'Idempotency-Key': 'second'})).json()
+    await connection.execute('BEGIN')
+    await connection.execute('SELECT id FROM shops WHERE id=$1 FOR UPDATE', order['shop_id'])
+    tasks = [asyncio.create_task(client.patch(f"/api/seller/transactions/{r['id']}", json={
+        'expected_version': r['version'], 'reason': 'Checked identity in app', 'trx_id': 'RENAMED'},
+        headers={'Idempotency-Key': f"rename-{r['id']}"})) for r in [receipt, second]]
+    try:
+        await wait_for_order_waiters(connection, 2)
+    finally:
+        await connection.execute('COMMIT')
+        results = await asyncio.gather(*tasks)
+    assert sorted(r.status_code for r in results) == [200, 409], [r.text for r in results]
+    loser = next(r for r in results if r.status_code == 409)
+    assert loser.json()['error']['code'] == 'RECEIPT_IDENTITY_COLLISION'
+    assert await connection.fetchval("SELECT count(*) FROM received_transactions WHERE trx_id='RENAMED'") == 1
+    assert await connection.fetchval('SELECT count(*) FROM received_transactions') == 2
+    assert await connection.fetchval("SELECT count(*) FROM audit_events WHERE action='receipt_corrected'") == 1
+    assert await connection.fetchval('SELECT count(*) FROM allocations') == 0
+
+
 @pytest.mark.parametrize('rival', ['correction', 'same-key', 'resolution', 'allocation'])
 async def test_correction_serializes_against_other_writers(postgres_buyer, rival):
     client, connection, _, _ = postgres_buyer
@@ -81,7 +106,7 @@ async def test_correction_serializes_against_other_writers(postgres_buyer, rival
 
 
 async def test_identity_correction_rechecks_old_and_new_claims(postgres_buyer):
-    client, _, _, _ = postgres_buyer
+    client, connection, _, _ = postgres_buyer
     order, receipt = await conflict_case(client)
     target = (await client.post('/api/seller/orders', json={'product_name': 'Correct identity order',
         'total_minor': 1200000, 'required_advance_minor': 200000, 'payment_account_id': order['payment_account_id']},
@@ -99,3 +124,28 @@ async def test_identity_correction_rechecks_old_and_new_claims(postgres_buyer):
     assert old['lifecycle'] == 'pending'
     assert old['review_reasons'] == []
     assert (await client.get(path)).json() == result.json()
+    original = await client.post('/api/seller/transactions', json={
+        'payment_account_id': receipt['payment_account_id'], 'provider': receipt['provider'],
+        'trx_id': receipt['trx_id'], 'amount_minor': receipt['amount_minor'],
+        'sender_number': receipt['sender_number_raw'], 'occurred_at': receipt['occurred_at']},
+        headers={'Idempotency-Key': 'original-reimport'})
+    assert original.status_code == 200, original.text
+    assert original.json()['id'] == receipt['id']
+    assert original.json()['reconciliation_state'] == 'used'
+    assert original.json()['has_conflict'] is True
+    assert (await client.get(f"/api/seller/orders/{order['id']}")).json()['lifecycle'] == 'pending'
+    assert (await client.get(f"/api/seller/orders/{target['id']}")).json()['lifecycle'] == 'confirmed'
+    assert await connection.fetchval('SELECT count(*) FROM allocations') == 1
+    # Both known identities remain consumed even after personal evidence is purged.
+    assert await connection.fetchval('SELECT count(*) FROM used_payment_markers') == 2
+    await connection.execute('DELETE FROM transaction_observations WHERE transaction_id=$1', receipt['id'])
+    after_purge = await client.post('/api/seller/transactions', json={
+        'payment_account_id': receipt['payment_account_id'], 'provider': receipt['provider'],
+        'trx_id': receipt['trx_id'], 'amount_minor': receipt['amount_minor'],
+        'sender_number': receipt['sender_number_raw'], 'occurred_at': receipt['occurred_at']},
+        headers={'Idempotency-Key': 'reimport-after-evidence-purge'})
+    assert after_purge.status_code == 201, after_purge.text
+    assert after_purge.json()['reconciliation_state'] == 'unmatched'
+    old = (await client.get(f"/api/seller/orders/{order['id']}")).json()
+    assert old['lifecycle'] == 'pending' and 'PAYMENT_USED' in old['review_reasons']
+    assert await connection.fetchval('SELECT count(*) FROM allocations') == 1

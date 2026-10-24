@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Callable, List, Optional
 
-from sqlalchemy import delete, select
+from sqlalchemy import delete, select, tuple_
 from sqlalchemy.exc import DBAPIError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +17,7 @@ from app.models.entities import (
     ShopTable,
     UsedPaymentMarkerTable,
 )
+from app.services.receipt_identity import receipt_identities
 from app.services.reconciliation_rules import (
     COMPETING_CLAIMS,
     PAYMENT_USED,
@@ -141,12 +142,12 @@ async def _reconcile_order_db_attempt(
     alloc_stmt = select(AllocationTable).where(AllocationTable.transaction_id == candidate_tx.id)
     is_allocated = (await db.execute(alloc_stmt)).scalar_one_or_none() is not None or candidate_tx.reconciliation_state in ("used", "allocated")
 
-    digest = digest_calculator(order.shop_id, provider, trx_id)
+    identities = await receipt_identities(db, order.shop_id, candidate_tx.id, provider, trx_id)
+    digests = [(p, digest_calculator(order.shop_id, p, t)) for p, t in sorted(identities)]
     marker_stmt = select(UsedPaymentMarkerTable).where(
         UsedPaymentMarkerTable.shop_id == order.shop_id,
-        UsedPaymentMarkerTable.provider == provider,
-        UsedPaymentMarkerTable.transaction_digest == digest,
-    )
+        tuple_(UsedPaymentMarkerTable.provider, UsedPaymentMarkerTable.transaction_digest).in_(digests),
+    ).limit(1)
     marker_exists = (await db.execute(marker_stmt)).scalar_one_or_none() is not None
 
     from app.services.resolution_history import rejected_revisions
@@ -212,13 +213,11 @@ async def _reconcile_order_db_attempt(
         reason=None,
         created_at=now,
     ))
-    db.add(UsedPaymentMarkerTable(
-        id=str(uuid.uuid4()),
-        shop_id=order.shop_id,
-        provider=provider,
-        transaction_digest=digest,
-        created_at=now,
-    ))
+    for identity_provider, digest in digests:
+        db.add(UsedPaymentMarkerTable(
+            id=str(uuid.uuid4()), shop_id=order.shop_id, provider=identity_provider,
+            transaction_digest=digest, created_at=now,
+        ))
     db.add(AuditEventTable(
         id=str(uuid.uuid4()),
         shop_id=order.shop_id,

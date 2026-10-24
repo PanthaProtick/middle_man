@@ -94,6 +94,10 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   observation as evidence for a corrected identity (`OBSERVATION_IDENTITY_CHANGED`).
   Same-key replay precedes version checks; unknown outcomes retain the exact payload
   and key. Stale versions require refresh before a new correction.
+- Retained observation identities also guard ingestion and later corrections. An
+  original-identity reimport attaches as conflicting evidence to the same receipt,
+  preserving any accepted allocation. Allocation writes minimal used markers for
+  every retained identity, so later evidence deletion cannot free an old identity.
 
 ## Seller buyer corrections
 

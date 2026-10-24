@@ -6,3 +6,4 @@ SET provider = receipt.provider, trx_id = receipt.trx_id
 FROM received_transactions AS receipt WHERE receipt.id = observation.transaction_id;
 ALTER TABLE transaction_observations ALTER COLUMN provider SET NOT NULL;
 ALTER TABLE transaction_observations ALTER COLUMN trx_id SET NOT NULL;
+CREATE INDEX ix_observation_identity ON transaction_observations (shop_id, provider, trx_id, transaction_id);

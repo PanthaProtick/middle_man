@@ -21,6 +21,7 @@ from app.models.transaction import (
     ParseState,
     ReceiptView,
 )
+from app.services.receipt_identity import find_receipt_identity
 from app.services.reconciliation import reconcile_receipt
 from app.services.seller_service import (
     NotFoundError,
@@ -87,10 +88,9 @@ class TransactionService:
         parse_state: ParseState = "incomplete" if (payload.sender_number is None or payload.occurred_at is None) else "valid"
 
         if self.db is not None:
+            existing_id = await find_receipt_identity(self.db, shop_id, payload.provider, trx_id_clean)
             stmt = select(ReceivedTransactionTable).where(
-                ReceivedTransactionTable.shop_id == shop_id,
-                ReceivedTransactionTable.provider == payload.provider,
-                ReceivedTransactionTable.trx_id == trx_id_clean,
+                ReceivedTransactionTable.id == existing_id,
             ).with_for_update()
             res = await self.db.execute(stmt)
             existing = res.scalar_one_or_none()
@@ -116,7 +116,7 @@ class TransactionService:
                 status_code = 201
                 conflict_state: ConflictState = "none"
             else:
-                if is_observation_identical(
+                if (existing.provider, existing.trx_id) == (payload.provider, trx_id_clean) and is_observation_identical(
                     payload.payment_account_id, payload.amount_minor, canonical_sender, payload.occurred_at,
                     str(existing.payment_account_id), int(existing.amount_minor), existing.sender_number_canonical, existing.occurred_at
                 ):
@@ -168,11 +168,7 @@ class TransactionService:
             return receipt_view, status_code
 
         # In-memory execution
-        existing_id = next(
-            (t_id for t_id, t in _memory_transactions.items()
-             if t["shop_id"] == shop_id and t["provider"] == payload.provider and t["trx_id"] == trx_id_clean),
-            None
-        )
+        existing_id = await find_receipt_identity(None, shop_id, payload.provider, trx_id_clean)
 
         if not existing_id:
             tx_id = str(uuid.uuid4())
@@ -199,7 +195,7 @@ class TransactionService:
             target_id = tx_id
         else:
             tx_data = _memory_transactions[existing_id]
-            if is_observation_identical(
+            if (tx_data['provider'], tx_data['trx_id']) == (payload.provider, trx_id_clean) and is_observation_identical(
                 payload.payment_account_id, payload.amount_minor, canonical_sender, payload.occurred_at,
                 str(tx_data["payment_account_id"]), int(str(tx_data["amount_minor"])),
                 tx_data.get("sender_number_canonical"), tx_data.get("occurred_at")

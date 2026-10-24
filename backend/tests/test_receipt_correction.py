@@ -132,3 +132,28 @@ async def test_correction_requires_owning_seller_and_key(client):
     assert (await client.patch(path, json=payload, headers={'Idempotency-Key': 'foreign'})).status_code == 404
     app.dependency_overrides.pop(get_seller_identity)
     assert (await client.patch(path, json=payload, headers={'Idempotency-Key': 'anonymous'})).status_code == 401
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures('seller_identity')
+async def test_historical_identity_reimport_and_collision_cannot_clone_payment(client):
+    _, receipt = await conflict_case(client, competing=True)
+    path = f"/api/seller/transactions/{receipt['id']}"
+    corrected = await client.patch(path, json={'expected_version': receipt['version'],
+        'reason': 'Fix transaction ID', 'trx_id': 'RENAMED'}, headers={'Idempotency-Key': 'rename'})
+    assert corrected.status_code == 200
+    replay = await client.post('/api/seller/transactions', json={
+        'payment_account_id': receipt['payment_account_id'], 'provider': 'bkash', 'trx_id': 'RESOLVE',
+        'amount_minor': 200000, 'sender_number': receipt['sender_number_raw'], 'occurred_at': receipt['occurred_at']},
+        headers={'Idempotency-Key': 'reimport-original'})
+    assert replay.status_code == 200
+    assert replay.json()['id'] == receipt['id']
+    assert replay.json()['has_conflict']
+    assert len((await client.get('/api/seller/transactions')).json()['items']) == 1
+    other = (await client.post('/api/seller/transactions', json={'payment_account_id': receipt['payment_account_id'],
+        'provider': 'bkash', 'trx_id': 'OTHER', 'amount_minor': 200000})).json()
+    collision = await client.patch(f"/api/seller/transactions/{other['id']}", json={
+        'expected_version': other['version'], 'reason': 'Conflicts with retained original', 'trx_id': 'RESOLVE'},
+        headers={'Idempotency-Key': 'alias-collision'})
+    assert collision.status_code == 409
+    assert collision.json()['error']['code'] == 'RECEIPT_IDENTITY_COLLISION'

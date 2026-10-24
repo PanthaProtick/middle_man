@@ -85,3 +85,6 @@ creating funds. Migration `0009_observation_identity.sql` backfills immutable ob
 provider/TrxID snapshots before receipt identities can change. Historic observations
 from a different identity cannot be selected by resolution. Structured correction
 history uses existing audit records and retention rules; raw SMS is not copied.
+Indexed observation identity lookup also prevents reimporting an original identity
+as another payment after correction. All retained identities are consumed as minimal
+used-payment markers at allocation; matching checks each marker before acceptance.

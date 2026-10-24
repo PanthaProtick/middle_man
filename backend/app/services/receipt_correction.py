@@ -13,6 +13,7 @@ from app.models.receipt_correction import ReceiptCorrection, ReceiptCorrectionEv
 from app.models.resolution import ReceiptComparison
 from app.models.transaction import ManualReceipt
 from app.services.receipt_comparison import compare_receipt
+from app.services.receipt_identity import find_receipt_identity
 from app.services.reconciliation import compute_payment_digest, reconcile_order, reconcile_receipt
 from app.services.reconciliation_db import reconcile_order_db
 from app.services.reconciliation_store import _memory_audit_events
@@ -56,13 +57,7 @@ async def _correct(db: AsyncSession | None, shop_id: str, actor: str, receipt_id
     except ValidationError:
         raise SellerDomainException(422, "INVALID_RECEIPT", "Check TrxID, sender and corrected receipt fields.") from None
     await TransactionService(db).verify_account(shop_id, corrected.payment_account_id, corrected.provider)
-    if db is not None:
-        collision = await db.scalar(select(ReceivedTransactionTable.id).where(
-            ReceivedTransactionTable.shop_id == shop_id, ReceivedTransactionTable.provider == corrected.provider,
-            ReceivedTransactionTable.trx_id == corrected.trx_id, ReceivedTransactionTable.id != receipt_id))
-    else:
-        collision = next((t["id"] for t in _memory_transactions.values() if t["shop_id"] == shop_id
-            and t["provider"] == corrected.provider and t["trx_id"] == corrected.trx_id and t["id"] != receipt_id), None)
+    collision = await find_receipt_identity(db, shop_id, corrected.provider, corrected.trx_id, exclude=receipt_id)
     if collision:
         raise SellerDomainException(409, "RECEIPT_IDENTITY_COLLISION",
             "This shop/provider/TrxID already exists. Compare and explicitly resolve the existing receipt; correction cannot merge funds.")
