@@ -4,6 +4,12 @@ Language for collecting delivery advances and confirming chat-negotiated orders.
 
 ## Language
 
+**Phase 1 self-test**:
+A private exercise in which the project owner acts as seller and buyer using synthetic orders and payment evidence. It does not involve real seller operations or establish pilot readiness.
+
+**Buyer link**:
+An order-specific link whose possession permits viewing public order terms and status and making the initial buyer submission. It does not establish the holder's identity or grant seller authority or access to private buyer details and evidence.
+
 **Delivery advance**:
 A payment collected before dispatch toward the agreed order total, leaving a remaining amount payable on delivery.
 

@@ -1,13 +1,71 @@
 # Phase 1 readiness and next-phase exit plan
 
-Prepared: 2026-10-24. Status: execution checklist; approval and completion are pending.
+Prepared: 2026-10-24. Status: consolidated plan confirmed; specification authorized; implementation and verification pending.
 
 ## Goal and scope
 
-Finish Phase 1 as a reliable seller-assisted order-confirmation workflow before
-expanding the product. This plan treats “next phase” as broader product development
-after a controlled pilot. If the next milestone is only a private demonstration,
-use synthetic data and report the remaining gates explicitly.
+The immediate milestone is a private Phase 1 self-test: the project owner exercises
+both seller and buyer workflows using synthetic orders and payment evidence. No
+real sellers, real orders or real payment data are in scope for this milestone.
+The project owner is the operator and may pause testing when failures occur.
+
+Gemini features are disabled for the initial self-test. A later, separately scoped
+test will evaluate Gemini assistance; interest in that test does not establish AI
+readiness.
+
+### Settled self-test requirements (2026-10-24 review)
+
+- Run the first self-test locally, before a separate hosted-deployment stage.
+- Use real Clerk sessions and a dedicated Neon development database with synthetic
+  order data. Mock identities and memory storage do not satisfy this milestone.
+- Include optional screenshot uploads using generated payment images; verify
+  restart persistence and rejection of unauthorized reads.
+- Require repeatable happy-path and failure evidence, including uncertain retries,
+  competing payment claims, cross-shop access attempts, restart and database failure.
+- Treat durable-database startup/configuration failure as part of outage acceptance;
+  it must not silently produce successful memory-only writes.
+- Buyer-link possession grants order terms/status viewing and initial submission,
+  without buyer sign-in or OTP. Public responses exclude buyer personal details,
+  screenshots and seller transaction records; buyer corrections remain seller-only.
+  Forwarding can expose public terms or allow someone else to submit first; this
+  risk is accepted for the seller-assisted workflow.
+- Store generated screenshots in a persistent repository-local folder excluded
+  through `.gitignore`. Serve files through authorized endpoints, never a public
+  static directory. Verify the ignore rule before creating files; ignoring a path
+  does not untrack existing files or provide access control.
+- A future Drive-based storage solution may be evaluated if needed. No provider
+  is selected; assess private access, durable identifiers, deletion/retention,
+  outages and recovery before adopting it. Local results do not prove hosted storage.
+- Use dedicated stable secrets for token encryption and payment-reuse protection,
+  independent of Clerk credentials. Missing or incompatible secrets fail explicitly;
+  test Clerk credential changes without losing saved links or replay protection.
+- The 48-hour deadline applies to the first completed submission, not subsequent
+  status viewing. Submitted pending orders do not expire automatically. While the
+  record is retained and access remains valid, permit status viewing and retries
+  of the original submission, but no new buyer submission or buyer correction.
+- Replacement leaves the old link showing only its predecessor's terminal status.
+  It cannot submit, upload or reveal/redirect to the replacement link; the seller
+  shares the new link explicitly. Preserve consumed-payment protection.
+- The owning seller can revoke buyer-link access independently of cancellation.
+  Revocation blocks public reads and writes without changing order state, seller
+  access or payment allocation.
+- The owning seller can reissue a link for the same order, permanently invalidating
+  the prior link. Preserve terms, allocation and the original submission deadline;
+  do not reopen submission or revive expired/cancelled/replaced orders. Audit reissue
+  and make retries idempotent. A revoked link cannot replay a prior public mutation.
+- Completion requires the [local self-test checklist](phase-1-self-test.md), two
+  Clerk test identities, actual PostgreSQL concurrency tests, controlled-time
+  expiry/retention tests, local browser evidence and a final root `npm run check`.
+
+The user confirmed the consolidated plan and requested specification publication.
+These decisions describe requirements, not evidence of implementation or permission
+to deploy, migrate an unverified database target or collect real order data.
+The [implementation specification](../.scratch/phase-1-self-test/spec.md) is published
+to the local tracker with status `ready-for-agent`.
+
+The gates below retain the longer-term path to a controlled real-seller pilot and
+broader product development. Self-test completion does not satisfy pilot admission
+or demonstrate seller benefit. Pilot recruitment and measurement are deferred.
 
 The approved [Phase 1 design](phase-1-design.md) and
 [acceptance cases](../.scratch/phase-1-order-confirmation/acceptance.md) remain the
@@ -32,7 +90,9 @@ the evidence record.
 
 ## Execution order
 
-Complete gates 1–3 before exercising the hosted buyer workflow. Gate 4 must pass
+Follow the [self-test sequence](phase-1-self-test.md) for the immediate milestone.
+The following sequence describes the later pilot-readiness path, not approval to
+execute it. Complete gates 1–3 before exercising the hosted buyer workflow. Gate 4 must pass
 before collecting real screenshots or other raw evidence. Complete gates 5–7
 before inviting pilot users, then gate 8 before beginning the next product phase.
 Assign one accountable owner to each gate and record completion evidence below.
@@ -77,7 +137,7 @@ cannot read or mutate it. Clerk key availability alone does not satisfy this gat
 ### 3. Decide and implement public buyer access
 
 Current [public access gate](../backend/app/core/public_gate.py) denies requests.
-Configured provider keys also disqualify the synthetic demo override.
+Configured database or Clerk settings also disqualify the synthetic demo override.
 
 - [ ] Approve an access/projection policy: what possession of the buyer link grants,
   which fields are visible before/after submission, and whether extra verification
