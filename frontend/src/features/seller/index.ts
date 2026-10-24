@@ -1,4 +1,4 @@
-export { SellerWorkspace } from './SellerWorkspace';
+export { SellerWorkspace, type WorkspaceSection } from './SellerWorkspace';
 export { ShopMetricsBar } from './ShopMetricsBar';
 export { ManualTransactionModal } from './ManualTransactionModal';
 export { TransactionInbox } from './TransactionInbox';

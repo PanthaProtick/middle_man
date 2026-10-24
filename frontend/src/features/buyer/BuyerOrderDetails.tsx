@@ -26,8 +26,8 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
       {/* Shop & Product Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <Store size={20} color="#6366f1" />
-          <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#f8fafc' }}>{order.shop_display_name}</h3>
+          <Store size={20} color="var(--primary-accent)" />
+          <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)' }}>{order.shop_display_name}</h3>
         </div>
         <span
           style={{
@@ -35,17 +35,17 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
             padding: '4px 10px',
             borderRadius: '12px',
             background: 'rgba(99, 102, 241, 0.15)',
-            color: '#a5b4fc',
+            color: 'var(--primary-accent)',
             border: '1px solid rgba(99, 102, 241, 0.3)',
           }}
         >
-          Secure Order Portal
+          Your order / আপনার অর্ডার
         </span>
       </div>
 
       <div className="buyer-order-item" style={{ marginBottom: '16px' }}>
-        <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Item / পণ্য:</div>
-        <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#f1f5f9', marginTop: '2px' }}>
+        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Item / পণ্য:</div>
+        <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
           {order.product_name}
         </div>
       </div>
@@ -60,22 +60,22 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
         }}
       >
         <div className="buyer-order-item">
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Total / মোট মূল্য</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#e2e8f0', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Total / মোট মূল্য</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
             {formatBDT(order.total_minor)}
           </div>
         </div>
 
-        <div className="buyer-order-item" style={{ borderLeft: '3px solid #818cf8' }}>
-          <div style={{ fontSize: '0.75rem', color: '#818cf8' }}>Advance Due / অগ্রিম</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#c7d2fe', marginTop: '2px' }}>
+        <div className="buyer-order-item" style={{ borderLeft: '3px solid var(--primary-accent)' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--primary-accent)' }}>Advance Due / অগ্রিম</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-accent)', marginTop: '2px' }}>
             {formatBDT(order.required_advance_minor)}
           </div>
         </div>
 
         <div className="buyer-order-item">
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Expected COD / বাকি COD</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#94a3b8', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Expected COD / বাকি COD</div>
+          <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '2px' }}>
             {formatBDT(order.expected_cod_minor)}
           </div>
         </div>
@@ -84,21 +84,21 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
       {/* Receiving Account Box */}
       <div className="buyer-payment-destination" style={{ marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#a5b4fc', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--primary-accent)', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ShieldCheck size={16} />
-            <span>Send Advance Money to Official Account / অগ্রিম পাঠানোর নাম্বার:</span>
+            <span>Send advance to the seller’s account / অগ্রিম পাঠানোর নাম্বার:</span>
           </div>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: '#c7d2fe' }}>
+          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--primary-accent)' }}>
             {order.account_provider}
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
           <div>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px', color: '#ffffff' }}>
+            <div style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px', color: 'var(--text-primary)' }}>
               {order.account_receiving_number}
             </div>
-            <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
               {order.account_label} ({order.account_provider.toUpperCase()})
             </div>
           </div>
@@ -112,8 +112,8 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
           >
             {copied ? (
               <>
-                <Check size={16} color="#10b981" />
-                <span style={{ color: '#10b981' }}>Copied / কপি হয়েছে</span>
+                <Check size={16} color="var(--emerald-accent)" />
+                <span style={{ color: 'var(--emerald-accent)' }}>Copied / কপি হয়েছে</span>
               </>
             ) : (
               <>
@@ -126,7 +126,7 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
       </div>
 
       {/* Expiry time notice */}
-      {order.lifecycle === 'awaiting_buyer' && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
+      {order.lifecycle === 'awaiting_buyer' && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
         <Clock size={14} />
         <span>Valid until / মেয়াদ: {formatBangladeshTime(order.expires_at)}</span>
       </div>}

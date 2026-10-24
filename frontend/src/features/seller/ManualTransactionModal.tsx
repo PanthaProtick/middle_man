@@ -15,10 +15,10 @@ interface ManualTransactionModalProps {
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '8px 12px',
-  background: 'rgba(10, 14, 23, 0.6)',
+  background: 'var(--bg-surface)',
   border: '1px solid var(--border-subtle)',
   borderRadius: '6px',
-  color: '#fff',
+  color: 'var(--text-primary)',
 };
 
 const labelStyle: React.CSSProperties = {
@@ -140,7 +140,7 @@ export function ManualTransactionModal({
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-          <h3 style={{ margin: 0, color: '#c7d2fe', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h3 style={{ margin: 0, color: 'var(--primary-accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Smartphone size={20} /> Record Received Payment
           </h3>
           <button
@@ -159,7 +159,7 @@ export function ManualTransactionModal({
               background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '6px',
-              color: '#fca5a5',
+              color: 'var(--rose-accent)',
               fontSize: '0.85rem',
               marginBottom: '16px',
               display: 'flex',
@@ -179,7 +179,7 @@ export function ManualTransactionModal({
               value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
               disabled={submitting || activeAccounts.length === 0}
-              style={{ ...inputStyle, border: fieldErrors.accountId ? '1px solid #ef4444' : inputStyle.border }}
+              style={{ ...inputStyle, border: fieldErrors.accountId ? '1px solid var(--rose-accent)' : inputStyle.border }}
             >
               {activeAccounts.length === 0 ? (
                 <option value="">No active receiving accounts available</option>
@@ -192,7 +192,7 @@ export function ManualTransactionModal({
               )}
             </select>
             {fieldErrors.accountId && (
-              <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
+              <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
                 {fieldErrors.accountId}
               </span>
             )}
@@ -208,12 +208,12 @@ export function ManualTransactionModal({
               disabled={submitting}
               style={{
                 ...inputStyle,
-                border: fieldErrors.trxId ? '1px solid #ef4444' : inputStyle.border,
+                border: fieldErrors.trxId ? '1px solid var(--rose-accent)' : inputStyle.border,
                 fontFamily: 'monospace',
               }}
             />
             {fieldErrors.trxId && (
-              <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
+              <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
                 {fieldErrors.trxId}
               </span>
             )}
@@ -231,11 +231,11 @@ export function ManualTransactionModal({
               disabled={submitting}
               style={{
                 ...inputStyle,
-                border: fieldErrors.amount ? '1px solid #ef4444' : inputStyle.border,
+                border: fieldErrors.amount ? '1px solid var(--rose-accent)' : inputStyle.border,
               }}
             />
             {fieldErrors.amount && (
-              <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
+              <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
                 {fieldErrors.amount}
               </span>
             )}
@@ -253,11 +253,11 @@ export function ManualTransactionModal({
               disabled={submitting}
               style={{
                 ...inputStyle,
-                border: fieldErrors.sender_number ? '1px solid #ef4444' : inputStyle.border,
+                border: fieldErrors.sender_number ? '1px solid var(--rose-accent)' : inputStyle.border,
               }}
             />
             {fieldErrors.sender_number && (
-              <span style={{ color: '#ef4444', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
+              <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
                 {fieldErrors.sender_number}
               </span>
             )}

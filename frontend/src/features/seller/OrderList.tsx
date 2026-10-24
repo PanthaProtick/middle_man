@@ -17,12 +17,12 @@ interface OrderListProps {
 }
 
 const LIFECYCLE_BADGES: Record<OrderLifecycle, { label: string; bg: string; color: string }> = {
-  awaiting_buyer: { label: 'Awaiting Buyer', bg: 'rgba(245, 158, 11, 0.15)', color: '#fbbf24' },
-  pending: { label: 'Pending Verification', bg: 'rgba(59, 130, 246, 0.15)', color: '#60a5fa' },
-  confirmed: { label: 'Confirmed', bg: 'rgba(16, 185, 129, 0.15)', color: '#34d399' },
-  rejected: { label: 'Rejected', bg: 'rgba(239, 68, 68, 0.15)', color: '#f87171' },
-  cancelled: { label: 'Cancelled', bg: 'rgba(107, 114, 128, 0.2)', color: '#9ca3af' },
-  expired: { label: 'Expired', bg: 'rgba(239, 68, 68, 0.15)', color: '#fca5a5' },
+  awaiting_buyer: { label: 'Awaiting Buyer', bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--amber-accent)' },
+  pending: { label: 'Pending Verification', bg: 'rgba(59, 130, 246, 0.15)', color: 'var(--primary-accent)' },
+  confirmed: { label: 'Confirmed', bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-accent)' },
+  rejected: { label: 'Rejected', bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
+  cancelled: { label: 'Cancelled', bg: 'rgba(107, 114, 128, 0.2)', color: 'var(--text-secondary)' },
+  expired: { label: 'Expired', bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
 };
 
 export function OrderList({
@@ -42,27 +42,28 @@ export function OrderList({
     <div style={{ marginTop: '24px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
         <div>
-          <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', margin: 0 }}>
+          <h4 style={{ color: 'var(--primary-accent)', fontSize: '0.95rem', margin: 0 }}>
             Orders & Active Buyer Links ({orders.length})
           </h4>
           <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', marginTop: '4px' }}>
-            <span style={{ color: '#34d399' }}>✓ Confirmed: {confirmedCount}</span>
-            {exceptionCount > 0 && <span style={{ color: '#fca5a5' }}>⚠ Review Exceptions: {exceptionCount}</span>}
+            <span style={{ color: 'var(--emerald-accent)' }}>✓ Confirmed: {confirmedCount}</span>
+            {exceptionCount > 0 && <span style={{ color: 'var(--rose-accent)' }}>⚠ Review Exceptions: {exceptionCount}</span>}
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <label style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status:</label>
+          <label htmlFor="order-status-filter" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status:</label>
           <select
+            id="order-status-filter"
             value={statusFilter}
             onChange={(e) => onFilterChange(e.target.value)}
             style={{
               padding: '4px 8px',
               fontSize: '0.8rem',
-              background: 'rgba(10, 14, 23, 0.6)',
+              background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
               borderRadius: '4px',
-              color: '#fff',
+              color: 'var(--text-primary)',
             }}
           >
             <option value="">All Statuses</option>
@@ -78,7 +79,7 @@ export function OrderList({
 
       <OrderExport key={statusFilter} status={statusFilter} token={token} />
       {orders.length === 0 ? (
-        <div style={{ padding: '24px', textAlign: 'center', background: 'rgba(10, 14, 23, 0.4)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
+        <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
             No orders found. Click &quot;Create Order Link&quot; above to create an order and share its link with a buyer.
           </p>
@@ -86,7 +87,7 @@ export function OrderList({
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {orders.map((ord) => {
-            const badge = LIFECYCLE_BADGES[ord.lifecycle] || { label: ord.lifecycle, bg: 'rgba(255,255,255,0.1)', color: '#fff' };
+            const badge = LIFECYCLE_BADGES[ord.lifecycle] || { label: ord.lifecycle, bg: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)' };
             const isAwaiting = ord.lifecycle === 'awaiting_buyer';
             const isExpired = ord.lifecycle === 'expired';
 
@@ -95,14 +96,14 @@ export function OrderList({
                 key={ord.id}
                 style={{
                   padding: '14px 16px',
-                  background: 'rgba(10, 14, 23, 0.5)',
+                  background: 'var(--bg-surface)',
                   border: '1px solid var(--border-subtle)',
                   borderRadius: '8px',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
                   <div>
-                    <span style={{ fontWeight: 600, color: '#f8fafc', fontSize: '0.95rem', marginRight: '8px' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem', marginRight: '8px' }}>
                       {ord.product_name}
                     </span>
                     <span
@@ -139,23 +140,23 @@ export function OrderList({
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginBottom: '10px', fontSize: '0.825rem' }}>
                   <div>
                     <span style={{ color: 'var(--text-secondary)' }}>Total: </span>
-                    <span style={{ color: '#e2e8f0', fontWeight: 500 }}>BDT {(ord.total_minor / 100).toLocaleString()}</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>BDT {(ord.total_minor / 100).toLocaleString()}</span>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-secondary)' }}>Advance: </span>
-                    <span style={{ color: '#38bdf8', fontWeight: 500 }}>BDT {(ord.required_advance_minor / 100).toLocaleString()}</span>
+                    <span style={{ color: 'var(--cyan-accent)', fontWeight: 500 }}>BDT {(ord.required_advance_minor / 100).toLocaleString()}</span>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-secondary)' }}>
                       {ord.lifecycle === 'confirmed' ? 'Actual COD: ' : 'Expected COD: '}
                     </span>
-                    <span style={{ color: ord.lifecycle === 'confirmed' ? '#34d399' : '#a5b4fc', fontWeight: 600 }}>
+                    <span style={{ color: ord.lifecycle === 'confirmed' ? 'var(--emerald-accent)' : 'var(--primary-accent)', fontWeight: 600 }}>
                       {formatRemainingCod(ord)}
                     </span>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-secondary)' }}>Account: </span>
-                    <span style={{ color: '#f1f5f9' }}>
+                    <span style={{ color: 'var(--text-primary)' }}>
                       {ord.account_provider.toUpperCase()} ({ord.account_receiving_number})
                     </span>
                   </div>
@@ -163,7 +164,7 @@ export function OrderList({
 
                 {ord.lifecycle === 'pending' && ord.review_reasons && ord.review_reasons.length > 0 && (
                   <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.725rem', color: '#fca5a5', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                    <span style={{ fontSize: '0.725rem', color: 'var(--rose-accent)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                       <AlertTriangle size={11} /> Review:
                     </span>
                     {ord.review_reasons.map((r) => (
@@ -174,7 +175,7 @@ export function OrderList({
                           padding: '1px 6px',
                           background: 'rgba(239, 68, 68, 0.2)',
                           border: '1px solid rgba(239, 68, 68, 0.3)',
-                          color: '#fca5a5',
+                          color: 'var(--rose-accent)',
                           borderRadius: '4px',
                           fontFamily: 'monospace',
                         }}
@@ -185,9 +186,9 @@ export function OrderList({
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: '#94a3b8', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '6px' }}>
                   <div>Created: {formatBangladeshTime(ord.created_at)}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isExpired ? '#fca5a5' : isAwaiting ? '#fbbf24' : '#94a3b8' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isExpired ? 'var(--rose-accent)' : isAwaiting ? 'var(--amber-accent)' : 'var(--text-secondary)' }}>
                     <Clock size={12} />
                     <span>
                       {isExpired ? 'Expired at: ' : 'Deadline (BST): '}

@@ -25,9 +25,9 @@ export function PaymentClaimFields({
         <div className="form-group">
           <label
             htmlFor="payment_provider"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
           >
-            <CreditCard size={15} color="#818cf8" />
+            <CreditCard size={15} color="var(--primary-accent)" />
             <span>Method / মাধ্যম</span>
           </label>
           <select
@@ -46,7 +46,7 @@ export function PaymentClaimFields({
         <div className="form-group">
           <label
             htmlFor="claimed_advance_bdt"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
           >
             <span>Amount (BDT) / টাকা</span>
           </label>
@@ -63,11 +63,11 @@ export function PaymentClaimFields({
             className="form-control"
             style={{ marginTop: '6px', width: '100%' }}
           />
-          <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
             Expected: {formatBDT(order.required_advance_minor)}
           </div>
           {fieldErrors.claimed_advance_bdt && (
-            <div id="claimed_advance_bdt-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
+            <div id="claimed_advance_bdt-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
               {fieldErrors.claimed_advance_bdt}
             </div>
           )}
@@ -78,10 +78,10 @@ export function PaymentClaimFields({
       <div className="form-group" style={{ marginBottom: '14px' }}>
         <label
           htmlFor="payment_sender"
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
         >
-          <Phone size={15} color="#818cf8" />
-          <span>Payment Sender Number / টাকা পাঠানোর বিকাশ/নগদ নাম্বার <span style={{ color: '#ef4444' }}>*</span></span>
+          <Phone size={15} color="var(--primary-accent)" />
+          <span>Payment Sender Number / টাকা পাঠানোর বিকাশ/নগদ নাম্বার <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
           id="payment_sender"
@@ -96,11 +96,11 @@ export function PaymentClaimFields({
           className="form-control"
           style={{ marginTop: '6px', width: '100%' }}
         />
-        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
           Can be different if a friend, relative, or agent paid for you (আলাদা নাম্বার হতে পারে)
         </div>
         {fieldErrors.payment_sender && (
-          <div id="payment_sender-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
+          <div id="payment_sender-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
             {fieldErrors.payment_sender}
           </div>
         )}
@@ -110,10 +110,10 @@ export function PaymentClaimFields({
       <div className="form-group" style={{ marginBottom: '18px' }}>
         <label
           htmlFor="payment_trx_id"
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}
+          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
         >
-          <Hash size={15} color="#818cf8" />
-          <span>Transaction ID (TrxID) / ট্রানজেকশন আইডি <span style={{ color: '#ef4444' }}>*</span></span>
+          <Hash size={15} color="var(--primary-accent)" />
+          <span>Transaction ID (TrxID) / ট্রানজেকশন আইডি <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
           id="payment_trx_id"
@@ -129,7 +129,7 @@ export function PaymentClaimFields({
           style={{ marginTop: '6px', width: '100%' }}
         />
         {fieldErrors.payment_trx_id && (
-          <div id="payment_trx_id-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>
+          <div id="payment_trx_id-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
             {fieldErrors.payment_trx_id}
           </div>
         )}

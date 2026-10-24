@@ -1,24 +1,41 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { Store, AlertCircle, RefreshCw, Smartphone, Plus } from 'lucide-react';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 import type { PaymentAccount, ReceiptView, SellerOrder, Shop } from './types';
 import { fetchShop, createShop, fetchPaymentAccounts, fetchOrders, fetchTransactions } from './api';
-import { PaymentAccountList } from './PaymentAccountList';
-import { AddAccountForm } from './AddAccountForm';
 import { OrderList } from './OrderList';
 import { CreateOrderModal } from './CreateOrderModal';
-import { TransactionInbox } from './TransactionInbox';
-import { SmsImportPanel } from './SmsImportPanel';
 import { ManualTransactionModal } from './ManualTransactionModal';
 import { BuyerCorrection } from './BuyerCorrection';
-import { EvidenceRetentionPanel } from './EvidenceRetentionPanel';
-import { StructuredRetentionPanel } from './StructuredRetentionPanel';
 import { ShopMetricsBar } from './ShopMetricsBar';
+import { WorkspaceHeader } from './WorkspaceHeader';
+import { ShopSetupForm } from './ShopSetupForm';
+import { WorkspaceSectionNav } from './WorkspaceSectionNav';
+import { WorkspaceAccountsSummary } from './WorkspaceAccountsSummary';
+import { PaymentsSection } from './PaymentsSection';
+import { AccountsSection } from './AccountsSection';
+import { RetentionSection } from './RetentionSection';
+
+export type WorkspaceSection = 'orders' | 'payments' | 'accounts' | 'retention';
 
 interface SellerWorkspaceProps {
   token?: string;
+  activeSection?: WorkspaceSection;
+  onSectionChange?: (section: WorkspaceSection) => void;
 }
 
-export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspaceProps): React.JSX.Element {
+export function SellerWorkspace({
+  token = 'mock-seller-token',
+  activeSection,
+  onSectionChange,
+}: SellerWorkspaceProps): React.JSX.Element {
+  const [internalSection, setInternalSection] = useState<WorkspaceSection>('orders');
+  const currentSection = activeSection ?? internalSection;
+
+  const handleSectionSelect = (section: WorkspaceSection) => {
+    setInternalSection(section);
+    onSectionChange?.(section);
+  };
+
   const [loading, setLoading] = useState<boolean>(true);
   const [shop, setShop] = useState<Shop | null>(null);
   const [setupNeeded, setSetupNeeded] = useState<boolean>(false);
@@ -43,11 +60,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
     async (status?: string, cursor?: string) => {
       try {
         const res = await fetchOrders({ status: status || undefined, cursor }, token);
-        if (cursor) {
-          setOrders((prev) => [...prev, ...res.items]);
-        } else {
-          setOrders(res.items);
-        }
+        setOrders((prev) => (cursor ? [...prev, ...res.items] : res.items));
         setOrdersNextCursor(res.next_cursor);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load orders');
@@ -60,21 +73,11 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
     async (filterKey?: string, cursor?: string) => {
       setTransactionsLoading(true);
       try {
-        let review: string | undefined;
-        let parse: string | undefined;
-        let used: string | undefined;
-
-        if (filterKey === 'conflicted') review = 'conflicted';
-        else if (filterKey === 'incomplete') parse = 'incomplete';
-        else if (filterKey === 'unmatched') used = 'unmatched';
-        else if (filterKey === 'used') used = 'used';
-
+        const review = filterKey === 'conflicted' ? 'conflicted' : undefined;
+        const parse = filterKey === 'incomplete' ? 'incomplete' : undefined;
+        const used = filterKey === 'unmatched' || filterKey === 'used' ? filterKey : undefined;
         const res = await fetchTransactions({ review, parse, used, cursor }, token);
-        if (cursor) {
-          setTransactions((prev) => [...prev, ...res.items]);
-        } else {
-          setTransactions(res.items);
-        }
+        setTransactions((prev) => (cursor ? [...prev, ...res.items] : res.items));
         setTransactionsNextCursor(res.next_cursor || null);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load received payments');
@@ -98,12 +101,8 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
         }
         setError(null);
       })
-      .catch((err) => {
-        setError(err instanceof Error ? err.message : 'Failed to load shop workspace');
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load shop workspace'))
+      .finally(() => setLoading(false));
   }, [token, ordersFilter, transactionsFilter, loadOrders, loadTransactions]);
 
   useEffect(() => {
@@ -117,10 +116,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
 
   const handleCreateShop = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!shopName.trim()) {
-      setError('Shop display name cannot be blank');
-      return;
-    }
+    if (!shopName.trim()) return setError('Shop display name cannot be blank');
     setSetupSubmitting(true);
     setError(null);
     try {
@@ -140,7 +136,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
   if (loading) {
     return (
       <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
-        <RefreshCw size={28} className="spin" style={{ color: '#6366f1', margin: '0 auto 12px' }} />
+        <RefreshCw size={28} className="spin" style={{ color: 'var(--primary-accent)', margin: '0 auto 12px' }} />
         <p style={{ color: 'var(--text-secondary)' }}>Loading shop workspace...</p>
       </div>
     );
@@ -149,8 +145,8 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
   if (error && !shop && !setupNeeded) {
     return (
       <div className="card" style={{ padding: '36px', textAlign: 'center' }}>
-        <AlertCircle size={32} style={{ color: '#ef4444', margin: '0 auto 12px' }} />
-        <h4 style={{ color: '#fca5a5', marginBottom: '8px' }}>Workspace Error</h4>
+        <AlertCircle size={32} style={{ color: 'var(--rose-accent)', margin: '0 auto 12px' }} />
+        <h4 style={{ color: 'var(--rose-accent)', marginBottom: '8px' }}>Workspace Error</h4>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>{error}</p>
         <button className="btn btn-primary btn-sm" onClick={() => { setLoading(true); loadData(); }}>
           <RefreshCw size={14} /> Retry
@@ -161,139 +157,112 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
 
   return (
     <div className="card">
-      <div className="card-header">
-        <div>
-          <div className="card-title">
-            <Store size={22} color="#f59e0b" />
-            <span>{setupNeeded ? 'Shop Setup' : (shop?.display_name || 'Seller Workspace')}</span>
-          </div>
-          <p className="card-subtitle">
-            {setupNeeded
-              ? 'Create an isolated pilot shop workspace to manage chat-negotiated orders and delivery advances.'
-              : 'Manage delivery advances, snapshot commercial terms, and record received payment observations.'}
-          </p>
-        </div>
-        {!setupNeeded && (
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <button className="btn btn-secondary btn-sm" onClick={() => setIsRecordModalOpen(true)}>
-              <Smartphone size={14} /> Record Payment
-            </button>
-            <button className="btn btn-primary btn-sm" onClick={() => setIsCreateModalOpen(true)}>
-              <Plus size={14} /> Create Order Link
-            </button>
-            <button className="btn btn-secondary btn-sm" onClick={() => { setLoading(true); loadData(); }}>
-              <RefreshCw size={14} /> Refresh
-            </button>
-          </div>
-        )}
-      </div>
+      <WorkspaceHeader
+        displayTitle={setupNeeded ? 'Shop Setup' : (shop?.display_name || 'Seller Workspace')}
+        setupNeeded={setupNeeded}
+        onOpenRecordModal={() => setIsRecordModalOpen(true)}
+        onOpenCreateModal={() => setIsCreateModalOpen(true)}
+        onRefresh={() => { setLoading(true); loadData(); }}
+      />
 
       {error && (
-        <div role="alert" style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div role="alert" style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: 'var(--rose-accent)', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
       {setupNeeded ? (
-        <form onSubmit={handleCreateShop} style={{ marginTop: '20px' }}>
-          <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
-            Shop Display Name
-          </label>
-          <div style={{ display: 'flex', gap: '10px', maxWidth: '520px', flexWrap: 'wrap' }}>
-            <input
-              type="text"
-              name="displayName"
-              placeholder="e.g. Dhaka Gadget Hub"
-              value={shopName}
-              onChange={(e) => setShopName(e.target.value)}
-              className="text-input"
-              style={{ flex: 1, minWidth: '220px' }}
-              disabled={setupSubmitting}
-            />
-            <button type="submit" className="btn btn-primary" disabled={setupSubmitting || !shopName.trim()}>
-              {setupSubmitting ? 'Creating...' : 'Set Up Shop'}
-            </button>
-          </div>
-        </form>
+        <ShopSetupForm
+          shopName={shopName}
+          setupSubmitting={setupSubmitting}
+          onShopNameChange={setShopName}
+          onSubmit={handleCreateShop}
+        />
       ) : (
         <div style={{ marginTop: '16px' }}>
           <ShopMetricsBar orders={orders} transactionsCount={transactions.length} />
 
-          {new URLSearchParams(window.location.search).get('order-link') && (
-            <BuyerCorrection
-              portalToken={new URLSearchParams(window.location.search).get('order-link')!}
+          <WorkspaceSectionNav
+            currentSection={currentSection}
+            onSelectSection={handleSectionSelect}
+            ordersCount={orders.length}
+            transactionsCount={transactions.length}
+            accountsCount={accounts.length}
+          />
+
+          {currentSection === 'orders' && (
+            <section aria-labelledby="section-orders-title">
+              <WorkspaceAccountsSummary
+                accounts={accounts}
+                onManageAccounts={() => handleSectionSelect('accounts')}
+              />
+
+              {new URLSearchParams(window.location.search).get('order-link') && (
+                <BuyerCorrection
+                  portalToken={new URLSearchParams(window.location.search).get('order-link')!}
+                  token={token}
+                  onCorrected={() => { void loadOrders(ordersFilter); }}
+                />
+              )}
+
+              <OrderList
+                token={token}
+                onCorrected={() => { void loadOrders(ordersFilter); }}
+                orders={orders}
+                statusFilter={ordersFilter}
+                onFilterChange={handleFilterChange}
+                nextCursor={ordersNextCursor}
+                onLoadMore={() => ordersNextCursor && loadOrders(ordersFilter, ordersNextCursor)}
+              />
+            </section>
+          )}
+
+          {currentSection === 'payments' && (
+            <PaymentsSection
+              accounts={accounts}
               token={token}
-              onCorrected={() => { void loadOrders(ordersFilter); }}
+              transactions={transactions}
+              transactionsLoading={transactionsLoading}
+              transactionsFilter={transactionsFilter}
+              transactionsNextCursor={transactionsNextCursor}
+              onOpenRecordModal={(id) => {
+                setManualAccountId(id);
+                setIsRecordModalOpen(true);
+              }}
+              onRefreshTransactions={loadTransactions}
+              onTransactionsChanged={() => {
+                void loadTransactions(transactionsFilter);
+                void loadOrders(ordersFilter);
+              }}
+              onFilterChange={(f) => {
+                setTransactionsFilter(f);
+                loadTransactions(f);
+              }}
+              onLoadMore={() => transactionsNextCursor && loadTransactions(transactionsFilter, transactionsNextCursor)}
             />
           )}
 
-          <OrderList
-            token={token}
-            onCorrected={() => { void loadOrders(ordersFilter); }}
-            orders={orders}
-            statusFilter={ordersFilter}
-            onFilterChange={handleFilterChange}
-            nextCursor={ordersNextCursor}
-            onLoadMore={() => ordersNextCursor && loadOrders(ordersFilter, ordersNextCursor)}
-          />
+          {currentSection === 'accounts' && (
+            <AccountsSection
+              accounts={accounts}
+              token={token}
+              onAccountUpdated={(updated) => setAccounts((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
+              onAccountCreated={(created) => setAccounts((prev) => [...prev, created])}
+              onError={setError}
+              onReload={loadData}
+            />
+          )}
 
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border-subtle)', margin: '28px 0 20px' }} />
-
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
-            <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Smartphone size={16} /> Received Payments Inbox
-            </h4>
-            <button className="btn btn-secondary btn-sm" onClick={() => setIsRecordModalOpen(true)}>
-              <Plus size={14} /> Record Payment
-            </button>
-          </div>
-
-          <SmsImportPanel
-            accounts={accounts}
-            token={token}
-            onManual={(id) => { setManualAccountId(id); setIsRecordModalOpen(true); }}
-            onImported={() => { void loadTransactions(transactionsFilter); void loadOrders(ordersFilter); }}
-          />
-
-          <TransactionInbox
-            accounts={accounts}
-            token={token}
-            onResolved={() => { void loadTransactions(transactionsFilter); void loadOrders(ordersFilter); }}
-            transactions={transactions}
-            loading={transactionsLoading}
-            filter={transactionsFilter}
-            onFilterChange={(f) => {
-              setTransactionsFilter(f);
-              loadTransactions(f);
-            }}
-            nextCursor={transactionsNextCursor}
-            onLoadMore={() => transactionsNextCursor && loadTransactions(transactionsFilter, transactionsNextCursor)}
-            onRefresh={() => loadTransactions(transactionsFilter)}
-          />
-
-          <hr style={{ border: 'none', borderTop: '1px solid var(--border-subtle)', margin: '28px 0 20px' }} />
-
-          <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Smartphone size={16} /> Designated Receiving Accounts
-          </h4>
-
-          <PaymentAccountList
-            accounts={accounts}
-            token={token}
-            onAccountUpdated={(updated) => setAccounts((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
-            onError={setError}
-            onReload={loadData}
-          />
-
-          <AddAccountForm
-            token={token}
-            onAccountCreated={(created) => setAccounts((prev) => [...prev, created])}
-            onError={setError}
-          />
-
-          <EvidenceRetentionPanel token={token} />
-          <StructuredRetentionPanel token={token} onCleaned={() => { void loadOrders(ordersFilter); void loadTransactions(transactionsFilter); }} />
+          {currentSection === 'retention' && (
+            <RetentionSection
+              token={token}
+              onCleaned={() => {
+                void loadOrders(ordersFilter);
+                void loadTransactions(transactionsFilter);
+              }}
+            />
+          )}
         </div>
       )}
 
@@ -314,15 +283,11 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
           token={token}
           onClose={() => { setIsRecordModalOpen(false); setManualAccountId(undefined); }}
           onTransactionRecorded={(newTx) => {
-            setTransactions((prev) => {
-              const idx = prev.findIndex((t) => t.id === newTx.id);
-              if (idx >= 0) {
-                const updated = [...prev];
-                updated[idx] = newTx;
-                return updated;
-              }
-              return [newTx, ...prev];
-            });
+            setTransactions((prev) =>
+              prev.some((t) => t.id === newTx.id)
+                ? prev.map((t) => (t.id === newTx.id ? newTx : t))
+                : [newTx, ...prev],
+            );
           }}
           onError={setError}
         />

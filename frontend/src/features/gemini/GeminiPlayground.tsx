@@ -79,7 +79,7 @@ export default function GeminiPlayground(): React.JSX.Element {
         <div className="card-header">
           <div>
             <div className="card-title">
-              <Sparkles size={18} color="#6366f1" />
+              <Sparkles size={18} color="var(--primary-accent)" />
               <span>Gemini AI Chat Loop</span>
             </div>
             <p className="card-subtitle">Fast multimodal responses via FastAPI backend</p>

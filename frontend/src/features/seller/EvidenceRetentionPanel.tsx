@@ -66,7 +66,7 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
 
   if (loading && !status) {
     return (
-      <div style={{ padding: '16px', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '8px', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+      <div style={{ padding: '16px', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
         <p role="status">Loading evidence retention status…</p>
       </div>
     );
@@ -80,14 +80,14 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
       aria-label="Raw evidence retention and cleanup"
       style={{
         padding: '16px',
-        background: 'rgba(15, 23, 42, 0.4)',
+        background: 'var(--bg-surface)',
         borderRadius: '8px',
         border: '1px solid var(--border-subtle)',
         marginTop: '20px',
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <h4 style={{ color: 'var(--primary-accent)', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
           <Shield size={16} /> 30-Day Raw Evidence Retention
         </h4>
         <div style={{ display: 'flex', gap: '8px' }}>
@@ -120,13 +120,13 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
       </p>
 
       {error && (
-        <div role="alert" style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', color: '#fca5a5', fontSize: '0.85rem', marginBottom: '12px' }}>
+        <div role="alert" style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', color: 'var(--rose-accent)', fontSize: '0.85rem', marginBottom: '12px' }}>
           {error}
         </div>
       )}
 
       {feedback && (
-        <div role="status" style={{ padding: '8px 12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '6px', color: '#6ee7b7', fontSize: '0.85rem', marginBottom: '12px' }}>
+        <div role="status" style={{ padding: '8px 12px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', borderRadius: '6px', color: 'var(--emerald-accent)', fontSize: '0.85rem', marginBottom: '12px' }}>
           {feedback}
         </div>
       )}
@@ -134,21 +134,21 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
       {status && (
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ padding: '10px', background: 'rgba(10, 14, 23, 0.6)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Screenshots</span>
-              <strong style={{ fontSize: '0.9rem', color: '#fff' }}>
+              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                 {status.counts.screenshots_active} retained / {status.counts.screenshots_deleted} purged
               </strong>
             </div>
-            <div style={{ padding: '10px', background: 'rgba(10, 14, 23, 0.6)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Raw SMS</span>
-              <strong style={{ fontSize: '0.9rem', color: '#fff' }}>
+              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                 {status.counts.sms_active} retained / {status.counts.sms_purged} purged
               </strong>
             </div>
-            <div style={{ padding: '10px', background: 'rgba(10, 14, 23, 0.6)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>AI Prompts/Outputs</span>
-              <strong style={{ fontSize: '0.9rem', color: '#fff' }}>
+              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                 {status.counts.ai_extractions_active} retained / {status.counts.ai_extractions_purged} purged
               </strong>
             </div>
@@ -156,13 +156,13 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
             {hasOverdue || hasFailed ? (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#f59e0b' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--amber-accent)' }}>
                 <AlertTriangle size={15} />
                 <strong>{status.overdue_count} raw evidence items overdue</strong>
                 {hasFailed && <span>({status.failed_count} storage failure)</span>}
               </span>
             ) : (
-              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981' }}>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--emerald-accent)' }}>
                 <CheckCircle2 size={15} />
                 <strong>Raw evidence clean</strong> (0 overdue)
               </span>
@@ -176,10 +176,10 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
 
           {status.overdue_items.length > 0 && (
             <div style={{ marginTop: '12px', padding: '10px', background: 'rgba(245, 158, 11, 0.05)', borderRadius: '6px', border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#fbbf24', display: 'block', marginBottom: '6px' }}>
+              <span style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--amber-accent)', display: 'block', marginBottom: '6px' }}>
                 Pending Deletions ({status.overdue_items.length}):
               </span>
-              <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.78rem', color: '#fde68a' }}>
+              <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.78rem', color: 'var(--amber-accent)' }}>
                 {status.overdue_items.map((item) => (
                   <li key={item.evidence_id} style={{ marginBottom: '4px' }}>
                     <strong>{item.evidence_type}</strong> (ID: {item.evidence_id}) — Deadline: {new Date(item.delete_after).toLocaleDateString()} — {item.error}

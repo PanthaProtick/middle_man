@@ -93,13 +93,26 @@ describe('ShopMetricsBar Component', () => {
       root.render(<ShopMetricsBar orders={mockOrders} transactionsCount={5} />);
     });
 
-    expect(container.textContent).toContain('Total Orders');
+    expect(container.textContent).toContain('Loaded Orders');
     expect(container.textContent).toContain('3');
     expect(container.textContent).toContain('Confirmed');
     expect(container.textContent).toContain('1');
     expect(container.textContent).toContain('Awaiting Buyer');
     expect(container.textContent).toContain('Pending Review');
-    expect(container.textContent).toContain('Received Payments');
+    expect(container.textContent).toContain('Loaded Payments');
     expect(container.textContent).toContain('5');
+    const metrics = Array.from(container.querySelectorAll('.metric-chip')).map(chip => ({
+      label: chip.querySelector('.metric-lbl')?.textContent,
+      value: chip.querySelector('.metric-val')?.textContent,
+    }));
+    expect(metrics).toEqual([
+      { label: 'Loaded Orders', value: '3' },
+      { label: 'Confirmed', value: '1' },
+      { label: 'Awaiting Buyer', value: '1' },
+      { label: 'Pending Review', value: '1' },
+      { label: 'Loaded Payments', value: '5' },
+    ]);
+    await act(async () => root.unmount());
+    container.remove();
   });
 });

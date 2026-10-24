@@ -108,13 +108,13 @@ export default function DataExplorer(): React.JSX.Element {
               key={item.id}
               style={{
                 padding: '14px',
-                background: 'rgba(10, 14, 23, 0.6)',
+                background: 'var(--bg-surface)',
                 borderRadius: 'var(--radius-sm)',
                 border: '1px solid var(--border-subtle)'
               }}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#f8fafc' }}>{item.title}</h4>
+                <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>{item.title}</h4>
                 <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>
                   {new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                 </span>

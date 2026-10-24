@@ -151,18 +151,18 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: Orde
   };
 
   return (
-    <div style={{ marginTop: '16px', background: 'rgba(10, 14, 23, 0.6)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+    <div style={{ marginTop: '16px', background: 'var(--bg-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#f1f5f9' }}>Order Outcomes</span>
+        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Order Outcomes</span>
         {isReplaced && (
-          <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
-            Replaced by <code style={{ color: '#818cf8' }}>{order.replaced_by_order_id?.slice(0, 8)}</code>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+            Replaced by <code style={{ color: 'var(--primary-accent)' }}>{order.replaced_by_order_id?.slice(0, 8)}</code>
           </span>
         )}
       </div>
 
       {error && (
-        <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid #ef4444', borderRadius: '6px', color: '#fca5a5', fontSize: '0.8rem' }}>
+        <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--rose-accent)', borderRadius: '6px', color: 'var(--rose-accent)', fontSize: '0.8rem' }}>
           {error}
         </div>
       )}
@@ -170,24 +170,24 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: Orde
       {activeAction === 'none' && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
           {!isTerminal && (
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: '#f87171' }} onClick={() => { setError(null); setActiveAction('cancel'); }}>
+            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--rose-accent)' }} onClick={() => { setError(null); setActiveAction('cancel'); }}>
               <Ban size={14} style={{ marginRight: '4px' }} /> Cancel Order
             </button>
           )}
 
           {order.lifecycle === 'pending' && !isAllocated && (
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: '#fb923c' }} onClick={() => { setError(null); setActiveAction('reject'); }}>
+            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--amber-accent)' }} onClick={() => { setError(null); setActiveAction('reject'); }}>
               <XCircle size={14} style={{ marginRight: '4px' }} /> Reject Submission
             </button>
           )}
 
           {!isReplaced && (
             isAllocated ? (
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <AlertTriangle size={12} color="#fbbf24" /> Allocated orders require payment resolution before replacement
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                <AlertTriangle size={12} color="var(--amber-accent)" /> Allocated orders require payment resolution before replacement
               </span>
             ) : (
-              <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: '#818cf8' }} onClick={() => { setError(null); setActiveAction('replace'); }}>
+              <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--primary-accent)' }} onClick={() => { setError(null); setActiveAction('replace'); }}>
                 <RefreshCw size={14} style={{ marginRight: '4px' }} /> Replace Order
               </button>
             )
@@ -197,13 +197,13 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: Orde
 
       {activeAction === 'cancel' && (
         <form onSubmit={handleCancel} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#f87171', fontWeight: 600 }}>Cancel Order #{order.id.slice(0, 8)}</div>
+          <div style={{ fontSize: '0.8rem', color: 'var(--rose-accent)', fontWeight: 600 }}>Cancel Order #{order.id.slice(0, 8)}</div>
           {isAllocated && (
-            <div style={{ fontSize: '0.75rem', color: '#fcd34d', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 8px', borderRadius: '4px' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--amber-accent)', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 8px', borderRadius: '4px' }}>
               Confirmed payment allocation is preserved and will not be refunded.
             </div>
           )}
-          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for cancellation (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: '#1e293b', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }} />
+          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for cancellation (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
             <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting}>Dismiss</button>
             <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#dc2626' }} disabled={isSubmitting}>{isSubmitting ? 'Cancelling...' : 'Confirm Cancellation'}</button>
@@ -213,8 +213,8 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: Orde
 
       {activeAction === 'reject' && (
         <form onSubmit={handleReject} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#fb923c', fontWeight: 600 }}>Reject Order #{order.id.slice(0, 8)}</div>
-          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for rejection (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: '#1e293b', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }} />
+          <div style={{ fontSize: '0.8rem', color: 'var(--amber-accent)', fontWeight: 600 }}>Reject Order #{order.id.slice(0, 8)}</div>
+          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for rejection (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
             <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting}>Dismiss</button>
             <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#ea580c' }} disabled={isSubmitting}>{isSubmitting ? 'Rejecting...' : 'Confirm Rejection'}</button>
@@ -224,23 +224,23 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: Orde
 
       {activeAction === 'replace' && (
         <form onSubmit={handleReplace} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: '#818cf8', fontWeight: 600 }}>Replace Order #{order.id.slice(0, 8)}</div>
-          <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--primary-accent)', fontWeight: 600 }}>Replace Order #{order.id.slice(0, 8)}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
             Predecessor will be cancelled. A new order with fresh link and terms will be created.
           </div>
-          <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" style={{ padding: '6px 8px', background: '#1e293b', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }} />
+          <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <input type="number" value={totalBdt} onChange={(e) => setTotalBdt(e.target.value)} placeholder="Total BDT" style={{ padding: '6px 8px', background: '#1e293b', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }} />
-            <input type="number" value={advanceBdt} onChange={(e) => setAdvanceBdt(e.target.value)} placeholder="Advance BDT" style={{ padding: '6px 8px', background: '#1e293b', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }} />
+            <input type="number" value={totalBdt} onChange={(e) => setTotalBdt(e.target.value)} placeholder="Total BDT" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
+            <input type="number" value={advanceBdt} onChange={(e) => setAdvanceBdt(e.target.value)} placeholder="Advance BDT" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
           </div>
           {accounts.length > 0 && (
-            <select value={selectedAccountId} onChange={(e) => setSelectedAccountId(e.target.value)} style={{ padding: '6px 8px', background: '#1e293b', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }}>
+            <select value={selectedAccountId} onChange={(e) => setSelectedAccountId(e.target.value)} style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }}>
               {accounts.map((a) => (
                 <option key={a.id} value={a.id}>{a.label} ({a.provider.toUpperCase()} - {a.receiving_number})</option>
               ))}
             </select>
           )}
-          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Replacement reason (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: '#1e293b', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff', fontSize: '0.8rem' }} />
+          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Replacement reason (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
             <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting}>Dismiss</button>
             <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px' }} disabled={isSubmitting}>{isSubmitting ? 'Creating...' : 'Create Replacement'}</button>

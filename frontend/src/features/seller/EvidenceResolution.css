@@ -21,7 +21,7 @@
   max-width: 100%;
   min-width: 0;
   color: var(--text-primary);
-  background: var(--bg-secondary, #111827);
+  background: var(--bg-secondary, var(--bg-input));
   border: 1px solid var(--border-subtle);
   border-radius: 6px;
   padding: 8px;

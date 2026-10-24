@@ -1,20 +1,15 @@
 import React from 'react';
-import { Database, Sparkles, ShieldCheck, ShoppingBag } from 'lucide-react';
+import { Sparkles, ShoppingBag } from 'lucide-react';
 import type { HealthStatus } from '../services/api';
 
 interface HeaderProps {
   health: HealthStatus | null;
+  onOpenDemo?: () => void;
+  isDemoActive?: boolean;
 }
 
-export default function Header({ health }: HeaderProps): React.JSX.Element {
+export default function Header({ health, onOpenDemo, isDemoActive }: HeaderProps): React.JSX.Element {
   const isHealthy = health?.status === 'healthy';
-  const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
-  const isClerkFrontendReady = Boolean(
-    clerkPublishableKey &&
-    clerkPublishableKey.startsWith('pk_') &&
-    !clerkPublishableKey.includes('your_clerk')
-  );
-  const isClerkReady = health?.clerk_configured || isClerkFrontendReady;
 
   return (
     <header className="navbar" role="banner">
@@ -23,43 +18,29 @@ export default function Header({ health }: HeaderProps): React.JSX.Element {
           <ShoppingBag size={21} aria-hidden="true" />
         </div>
         <div className="brand-text">
-          <h1>middleman<sup>®</sup></h1>
-          <p>Order confirmation desk</p>
+          <h1>middleman</h1>
+          <p>Your everyday order desk</p>
         </div>
       </div>
 
       <div className="status-badges" aria-label="System Integration Status">
         <div
           className={`badge ${isHealthy ? 'online' : 'offline'}`}
-          title="Backend FastAPI Runtime Status"
+          title={isHealthy ? 'Core commerce API operational' : 'Attempting connection to backend service'}
         >
           <span className="badge-dot" aria-hidden="true"></span>
-          <span>API: {isHealthy ? 'Live (8000)' : 'Offline'}</span>
+          <span>{isHealthy ? 'Connected' : 'Connecting'}</span>
         </div>
 
-        <div
-          className={`badge ${health?.database_configured ? 'online' : 'info'}`}
-          title="Neon Serverless PostgreSQL Connectivity"
+        <button
+          type="button"
+          onClick={onOpenDemo}
+          className={`demo-pill-btn ${isDemoActive ? 'active' : ''}`}
+          title="Open interactive Gemini AI playground, database explorer, and diagnostic tools"
         >
-          <Database size={12} aria-hidden="true" />
-          <span>Neon: {health?.database_configured ? 'Connected' : 'Standby'}</span>
-        </div>
-
-        <div
-          className={`badge ${isClerkReady ? 'online' : 'info'}`}
-          title="Clerk Authentication Provider Status"
-        >
-          <ShieldCheck size={12} aria-hidden="true" />
-          <span>Clerk: {isClerkReady ? 'Connected' : 'Standby'}</span>
-        </div>
-
-        <div
-          className={`badge ${health?.gemini_configured ? 'online' : 'active'}`}
-          title="Google Gemini AI Vision & Extraction Engine"
-        >
-          <Sparkles size={12} aria-hidden="true" />
-          <span>Gemini: {health?.gemini_configured ? 'Ready' : 'Mock Mode'}</span>
-        </div>
+          <Sparkles size={13} color="var(--primary-accent)" aria-hidden="true" />
+          <span>{isDemoActive ? 'Back to shop' : 'Demo & tools'}</span>
+        </button>
       </div>
     </header>
   );

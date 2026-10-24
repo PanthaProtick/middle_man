@@ -112,10 +112,10 @@ export function BuyerSubmissionForm({
   return (
     <form onSubmit={handleSubmit} className="card" style={{ border: '1px solid var(--border-subtle)' }} noValidate>
       <div style={{ marginBottom: '16px' }}>
-        <h3 style={{ margin: 0, fontSize: '1.05rem', color: '#f8fafc' }}>
+        <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-primary)' }}>
           Delivery & Payment Confirmation / ডেলিভারি ও পেমেন্ট তথ্য
         </h3>
-        <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+        <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
           Please fill in your details accurately to confirm this order.
         </p>
       </div>
@@ -128,7 +128,7 @@ export function BuyerSubmissionForm({
             borderRadius: '6px',
             background: 'rgba(239, 68, 68, 0.1)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
-            color: '#fca5a5',
+            color: 'var(--rose-accent)',
             fontSize: '0.85rem',
             marginBottom: '16px',
             display: 'flex',
@@ -144,9 +144,9 @@ export function BuyerSubmissionForm({
       <fieldset disabled={isSubmitting || isLocked} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
       {/* Buyer Name */}
       <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label htmlFor="buyer_name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}>
-          <User size={15} color="#818cf8" />
-          <span>Your Full Name / আপনার নাম <span style={{ color: '#ef4444' }}>*</span></span>
+        <label htmlFor="buyer_name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+          <User size={15} color="var(--primary-accent)" />
+          <span>Your Full Name / আপনার নাম <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
           id="buyer_name"
@@ -162,15 +162,15 @@ export function BuyerSubmissionForm({
           style={{ marginTop: '6px', width: '100%' }}
         />
         {fieldErrors.buyer_name && (
-          <div id="buyer_name-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.buyer_name}</div>
+          <div id="buyer_name-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.buyer_name}</div>
         )}
       </div>
 
       {/* Contact Number */}
       <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label htmlFor="contact_number" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}>
-          <Phone size={15} color="#818cf8" />
-          <span>Your Contact Number / যোগাযোগের ফোন নাম্বার <span style={{ color: '#ef4444' }}>*</span></span>
+        <label htmlFor="contact_number" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+          <Phone size={15} color="var(--primary-accent)" />
+          <span>Your Contact Number / যোগাযোগের ফোন নাম্বার <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
           id="contact_number"
@@ -185,19 +185,19 @@ export function BuyerSubmissionForm({
           className="form-control"
           style={{ marginTop: '6px', width: '100%' }}
         />
-        <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '2px' }}>
+        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
           For courier call & delivery updates (কুরিয়ার কলের জন্য)
         </div>
         {fieldErrors.contact_number && (
-          <div id="contact_number-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
+          <div id="contact_number-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
         )}
       </div>
 
       {/* Delivery Address */}
       <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: '#e2e8f0' }}>
-          <MapPin size={15} color="#818cf8" />
-          <span>Full Delivery Address / সম্পূর্ণ ডেলিভারি ঠিকানা <span style={{ color: '#ef4444' }}>*</span></span>
+        <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+          <MapPin size={15} color="var(--primary-accent)" />
+          <span>Full Delivery Address / সম্পূর্ণ ডেলিভারি ঠিকানা <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <textarea
           id="address_raw"
@@ -213,7 +213,7 @@ export function BuyerSubmissionForm({
           style={{ marginTop: '6px', width: '100%', resize: 'vertical' }}
         />
         {fieldErrors.address_raw && (
-          <div id="address_raw-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
+          <div id="address_raw-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
         )}
       </div>
 

@@ -25,7 +25,7 @@ export function TransactionCard({
   return (
     <div
       style={{
-        background: 'rgba(15, 23, 42, 0.6)',
+        background: 'var(--bg-surface)',
         border: tx.has_conflict
           ? '1px solid rgba(239, 68, 68, 0.4)'
           : isIncomplete
@@ -55,15 +55,15 @@ export function TransactionCard({
               fontWeight: 600,
               textTransform: 'uppercase',
               background: tx.provider === 'bkash' ? '#e2136e' : '#f7941d',
-              color: '#fff',
+              color: 'var(--text-primary)',
             }}
           >
             {tx.provider}
           </span>
-          <span style={{ fontFamily: 'monospace', fontWeight: 600, color: '#c7d2fe' }}>
+          <span style={{ fontFamily: 'monospace', fontWeight: 600, color: 'var(--primary-accent)' }}>
             {tx.trx_id}
           </span>
-          <span style={{ fontWeight: 600, color: '#fff' }}>
+          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
             ৳{(tx.amount_minor / 100).toFixed(2)}
           </span>
 
@@ -78,7 +78,7 @@ export function TransactionCard({
                 borderRadius: '4px',
                 fontSize: '0.75rem',
                 background: 'rgba(239, 68, 68, 0.2)',
-                color: '#fca5a5',
+                color: 'var(--rose-accent)',
                 border: '1px solid rgba(239, 68, 68, 0.4)',
               }}
             >
@@ -96,7 +96,7 @@ export function TransactionCard({
                 borderRadius: '4px',
                 fontSize: '0.75rem',
                 background: 'rgba(245, 158, 11, 0.2)',
-                color: '#fcd34d',
+                color: 'var(--amber-accent)',
                 border: '1px solid rgba(245, 158, 11, 0.4)',
               }}
             >
@@ -114,7 +114,7 @@ export function TransactionCard({
                 borderRadius: '4px',
                 fontSize: '0.75rem',
                 background: 'rgba(16, 185, 129, 0.2)',
-                color: '#6ee7b7',
+                color: 'var(--emerald-accent)',
               }}
             >
               <CheckCircle size={12} /> {tx.reconciliation_state}
@@ -143,19 +143,19 @@ export function TransactionCard({
       >
         <div>
           Sender:{' '}
-          <span style={{ color: tx.sender_number_canonical ? '#fff' : '#f59e0b' }}>
+          <span style={{ color: tx.sender_number_canonical ? 'var(--text-primary)' : 'var(--amber-accent)' }}>
             {tx.sender_number_canonical || 'Unknown (Incomplete)'}
           </span>
         </div>
         <div>
           Occurred At:{' '}
-          <span style={{ color: tx.occurred_at ? '#fff' : '#f59e0b' }}>
+          <span style={{ color: tx.occurred_at ? 'var(--text-primary)' : 'var(--amber-accent)' }}>
             {tx.occurred_at ? formatBangladeshTime(tx.occurred_at) : 'Unknown (Incomplete)'}
           </span>
         </div>
         <div>
           Recorded:{' '}
-          <span style={{ color: '#fff' }}>{formatBangladeshTime(tx.created_at)}</span>
+          <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshTime(tx.created_at)}</span>
         </div>
       </div>
 
@@ -168,7 +168,7 @@ export function TransactionCard({
             borderTop: '1px solid var(--border-subtle)',
           }}
         >
-          <h5 style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: '#c7d2fe' }}>
+          <h5 style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: 'var(--primary-accent)' }}>
             Recorded Observations ({tx.observations.length})
           </h5>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -190,17 +190,17 @@ export function TransactionCard({
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                  <span style={{ fontWeight: 600, color: '#fff' }}>
+                  <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
                     Observation #{idx + 1} ({obs.source.toUpperCase()})
                   </span>
                   <span
                     style={{
                       color:
                         obs.conflict_state === 'conflicting'
-                          ? '#fca5a5'
+                          ? 'var(--rose-accent)'
                           : obs.conflict_state === 'identical'
-                          ? '#93c5fd'
-                          : '#86efac',
+                          ? 'var(--primary-accent)'
+                          : 'var(--emerald-accent)',
                       fontWeight: 500,
                     }}
                   >
@@ -210,10 +210,10 @@ export function TransactionCard({
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '4px' }}>
                   <div>Amount: ৳{(obs.amount_minor / 100).toFixed(2)}</div>
                   <div>
-                    Sender: {obs.sender_number_canonical || <span style={{ color: '#f59e0b' }}>Unknown</span>}
+                    Sender: {obs.sender_number_canonical || <span style={{ color: 'var(--amber-accent)' }}>Unknown</span>}
                   </div>
                   <div>
-                    Time: {obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : <span style={{ color: '#f59e0b' }}>Unknown</span>}
+                    Time: {obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : <span style={{ color: 'var(--amber-accent)' }}>Unknown</span>}
                   </div>
                   <div>Actor: {obs.actor}</div>
                   <div>Recorded: {formatBangladeshTime(obs.created_at)}</div>

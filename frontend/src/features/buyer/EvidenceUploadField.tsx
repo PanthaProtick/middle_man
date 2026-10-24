@@ -62,7 +62,7 @@ export function EvidenceUploadField({
       style={{
         marginBottom: '16px',
         padding: '12px',
-        background: 'rgba(15, 23, 42, 0.4)',
+        background: 'var(--bg-surface)',
         border: '1px dashed var(--border-subtle)',
         borderRadius: '8px',
       }}
@@ -74,13 +74,13 @@ export function EvidenceUploadField({
           alignItems: 'center',
           gap: '6px',
           fontSize: '0.85rem',
-          color: '#e2e8f0',
+          color: 'var(--text-primary)',
           marginBottom: '6px',
         }}
       >
-        <Image size={15} color="#818cf8" />
+        <Image size={15} color="var(--primary-accent)" />
         <span>Payment Screenshot / পেমেন্টের স্ক্রিনশট</span>
-        <span style={{ fontSize: '0.75rem', color: '#94a3b8' }}>(Optional / ঐচ্ছিক)</span>
+        <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>(Optional / ঐচ্ছিক)</span>
       </label>
 
       {uploadError && (
@@ -91,7 +91,7 @@ export function EvidenceUploadField({
             borderRadius: '6px',
             background: 'rgba(239, 68, 68, 0.1)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
-            color: '#fca5a5',
+            color: 'var(--rose-accent)',
             fontSize: '0.8rem',
             marginBottom: '10px',
             display: 'flex',
@@ -117,8 +117,8 @@ export function EvidenceUploadField({
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-            <CheckCircle2 size={16} color="#4ade80" />
-            <div style={{ fontSize: '0.85rem', color: '#86efac', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
+            <CheckCircle2 size={16} color="var(--emerald-accent)" />
+            <div style={{ fontSize: '0.85rem', color: 'var(--emerald-accent)', textOverflow: 'ellipsis', overflow: 'hidden', whiteSpace: 'nowrap' }}>
               {fileName || 'Screenshot attached / স্ক্রিনশট যুক্ত হয়েছে'}
             </div>
           </div>
@@ -129,7 +129,7 @@ export function EvidenceUploadField({
             style={{
               background: 'none',
               border: 'none',
-              color: '#f87171',
+              color: 'var(--rose-accent)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -171,7 +171,7 @@ export function EvidenceUploadField({
               style={{ display: 'none' }}
             />
           </div>
-          <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginTop: '6px' }}>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
             JPEG/PNG up to 5 MiB. Optional — manual submission works without a screenshot.
           </div>
         </div>

@@ -92,7 +92,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
     {!order && !error && <p role="status">Loading buyer information…</p>}
     {order && <p role="status">{order.lifecycle} — {order.review_reasons.join(', ') || 'No private review reasons'}</p>}
     {isConfirmed && (
-      <div className="courier-notice" role="note" style={{marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: '#fef08a'}}>
+      <div className="courier-notice" role="note" style={{marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: 'var(--amber-accent)'}}>
         Portal corrections do not update courier bookings. Update courier parcels separately if already booked. / পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। কুরিয়ারে বুকিং করা থাকলে আলাদাভাবে আপডেট করুন।
       </div>
     )}
@@ -108,7 +108,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
         <label>Delivery address<textarea required maxLength={2000} value={draft.address.raw_text} onChange={e => setDraft({...draft, address: {...draft.address, raw_text: e.target.value}})} /></label>
         <fieldset disabled={isConfirmed}><legend>Payment claim</legend>
           {isConfirmed && (
-            <p className="payment-locked-note" style={{fontSize: '0.8rem', color: '#94a3b8', margin: '4px 0 8px'}}>
+            <p className="payment-locked-note" style={{fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '4px 0 8px'}}>
               Payment terms and accepted advance are locked on confirmed orders. / কনফার্মড অর্ডারে পেমেন্ট ও অগ্রিমের তথ্য অপরিবর্তনশীল।
             </p>
           )}

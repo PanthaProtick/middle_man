@@ -1,0 +1,100 @@
+/* Buyer portal: a focused, mobile-first confirmation flow. */
+.portal-shell {
+  max-width: 560px;
+  min-height: 100vh;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+
+.portal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 18px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.portal-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.portal-main {
+  display: grid;
+  gap: 16px;
+}
+
+.portal-notice {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.portal-notice--warning { border-color: rgba(234, 179, 8, 0.45); }
+.portal-notice--error { border-color: rgba(239, 68, 68, 0.45); }
+
+.portal-loading {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.portal-footer-action {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.buyer-section-title {
+  margin: 4px 0 12px;
+  color: #c7d2fe;
+  font-family: var(--font-heading);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.buyer-help {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.buyer-order-summary {
+  display: grid;
+  gap: 12px;
+}
+
+.buyer-order-item {
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+}
+
+.buyer-payment-destination {
+  padding: 16px;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  border-radius: var(--radius-md);
+  background: rgba(99, 102, 241, 0.09);
+}
+

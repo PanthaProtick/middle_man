@@ -88,7 +88,7 @@ export function PaymentAccountList({
             justifyContent: 'space-between',
             alignItems: 'center',
             padding: '12px',
-            background: 'rgba(10, 14, 23, 0.6)',
+            background: 'var(--bg-surface)',
             border: '1px solid var(--border-subtle)',
             borderRadius: '6px',
           }}
@@ -101,7 +101,7 @@ export function PaymentAccountList({
                 fontSize: '0.75rem',
                 fontWeight: 600,
                 background: acc.provider === 'bkash' ? 'rgba(216, 27, 96, 0.2)' : 'rgba(245, 124, 0, 0.2)',
-                color: acc.provider === 'bkash' ? '#f472b6' : '#fb923c',
+                color: acc.provider === 'bkash' ? 'var(--rose-accent)' : 'var(--amber-accent)',
               }}
             >
               {acc.provider.toUpperCase()}
@@ -115,10 +115,10 @@ export function PaymentAccountList({
                     onChange={(e) => setEditLabel(e.target.value)}
                     style={{
                       padding: '4px 8px',
-                      background: '#0a0e17',
+                      background: 'var(--bg-input)',
                       border: '1px solid var(--border-subtle)',
                       borderRadius: '4px',
-                      color: '#fff',
+                      color: 'var(--text-primary)',
                       fontSize: '0.85rem',
                     }}
                   />
@@ -131,7 +131,7 @@ export function PaymentAccountList({
                 </div>
               ) : (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <span style={{ fontWeight: 500, color: '#e0e7ff', fontSize: '0.9rem' }}>{acc.label}</span>
+                  <span style={{ fontWeight: 500, color: 'var(--primary-accent)', fontSize: '0.9rem' }}>{acc.label}</span>
                   <button
                     className="btn btn-secondary btn-sm"
                     style={{ padding: '2px 4px' }}
@@ -148,7 +148,7 @@ export function PaymentAccountList({
             </div>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontSize: '0.75rem', color: acc.is_active ? '#34d399' : '#94a3b8' }}>
+            <span style={{ fontSize: '0.75rem', color: acc.is_active ? 'var(--emerald-accent)' : 'var(--text-secondary)' }}>
               {acc.is_active ? 'Active' : 'Inactive'}
             </span>
             <button className="btn btn-secondary btn-sm" onClick={() => handleToggleActive(acc)}>

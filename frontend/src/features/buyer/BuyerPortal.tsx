@@ -34,7 +34,7 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   if (loading) {
     return (
       <div className="portal-loading" role="status">
-        <Loader2 size={36} className="spin" color="#818cf8" aria-hidden="true" />
+        <Loader2 size={36} className="spin" color="var(--primary-accent)" aria-hidden="true" />
         <div>Loading order details / অর্ডার লোড হচ্ছে...</div>
       </div>
     );
@@ -43,9 +43,9 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   if (gateDisabledMessage) {
     return (
       <div className="portal-notice portal-notice--warning" role="alert">
-        <ShieldAlert size={24} color="#facc15" aria-hidden="true" />
+        <ShieldAlert size={24} color="var(--amber-accent)" aria-hidden="true" />
         <div>
-          <h2 style={{ margin: '0 0 4px', color: '#fef08a', fontSize: '1.05rem' }}>Public Access Disabled</h2>
+          <h2 style={{ margin: '0 0 4px', color: 'var(--amber-accent)', fontSize: '1.05rem' }}>Public Access Disabled</h2>
           <p style={{ margin: 0, lineHeight: 1.5 }}>
             {gateDisabledMessage}
           </p>
@@ -57,9 +57,9 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   if (error || !order) {
     return (
       <div className="portal-notice portal-notice--error" role="alert">
-        <AlertCircle size={24} color="#fb7185" aria-hidden="true" />
+        <AlertCircle size={24} color="var(--rose-accent)" aria-hidden="true" />
         <div>
-          <h2 style={{ margin: '0 0 4px', color: '#fecdd3', fontSize: '1.05rem' }}>Unable to Load Order / অর্ডার দেখা যাচ্ছে না</h2>
+          <h2 style={{ margin: '0 0 4px', color: 'var(--rose-accent)', fontSize: '1.05rem' }}>Unable to Load Order / অর্ডার দেখা যাচ্ছে না</h2>
           <p style={{ margin: '0 0 14px', lineHeight: 1.5 }}>
             {error || 'The requested order could not be loaded.'}
           </p>

@@ -132,7 +132,7 @@ export function CreateOrderModal({
         style={{
           width: '100%',
           maxWidth: '520px',
-          background: 'rgba(15, 23, 42, 0.95)',
+          background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
           borderRadius: '16px',
           padding: '24px',
@@ -141,13 +141,13 @@ export function CreateOrderModal({
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShoppingBag size={20} color="#f59e0b" />
-            <h3 id="create-order-dialog-title" style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontFamily: 'var(--font-heading)' }}>Create Order & Buyer Link</h3>
+            <ShoppingBag size={20} color="var(--amber-accent)" />
+            <h3 id="create-order-dialog-title" style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>Create Order & Buyer Link</h3>
           </div>
           <button
             onClick={onClose}
             aria-label="Close dialog"
-            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', borderRadius: '4px', display: 'flex' }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', borderRadius: '4px', display: 'flex' }}
           >
             <X size={20} />
           </button>
@@ -160,7 +160,7 @@ export function CreateOrderModal({
               background: 'rgba(239, 68, 68, 0.1)',
               border: '1px solid rgba(239, 68, 68, 0.3)',
               borderRadius: '6px',
-              color: '#fca5a5',
+              color: 'var(--rose-accent)',
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
@@ -175,8 +175,8 @@ export function CreateOrderModal({
 
         {activeAccounts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <AlertCircle size={32} style={{ color: '#f59e0b', margin: '0 auto 12px' }} />
-            <p style={{ color: '#cbd5e1', marginBottom: '16px' }}>
+            <AlertCircle size={32} style={{ color: 'var(--amber-accent)', margin: '0 auto 12px' }} />
+            <p style={{ color: 'var(--text-primary)', marginBottom: '16px' }}>
               No active payment accounts available. Please add or activate a bKash or Nagad receiving account first.
             </p>
             <button className="btn btn-secondary" onClick={onClose}>
@@ -197,7 +197,7 @@ export function CreateOrderModal({
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 required
-                style={{ width: '100%', padding: '8px 12px', background: 'rgba(10, 14, 23, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff' }}
+                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
               />
             </div>
 
@@ -215,7 +215,7 @@ export function CreateOrderModal({
                   value={totalBdt}
                   onChange={(e) => setTotalBdt(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '8px 12px', background: 'rgba(10, 14, 23, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff' }}
+                  style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
                 />
               </div>
 
@@ -232,7 +232,7 @@ export function CreateOrderModal({
                   value={advanceBdt}
                   onChange={(e) => setAdvanceBdt(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '8px 12px', background: 'rgba(10, 14, 23, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff' }}
+                  style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
                 />
               </div>
             </div>
@@ -251,7 +251,7 @@ export function CreateOrderModal({
               }}
             >
               <span style={{ color: 'var(--text-secondary)' }}>Expected Remaining COD:</span>
-              <span style={{ fontWeight: 600, color: '#a5b4fc', fontSize: '1rem' }}>
+              <span style={{ fontWeight: 600, color: 'var(--primary-accent)', fontSize: '1rem' }}>
                 BDT {expectedCod.toLocaleString()}
               </span>
             </div>
@@ -264,7 +264,7 @@ export function CreateOrderModal({
                 name="paymentAccountId"
                 value={selectedAccountId}
                 onChange={(e) => setSelectedAccountId(e.target.value)}
-                style={{ width: '100%', padding: '8px 12px', background: 'rgba(10, 14, 23, 0.8)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff' }}
+                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
               >
                 {activeAccounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
@@ -272,7 +272,7 @@ export function CreateOrderModal({
                   </option>
                 ))}
               </select>
-              <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '4px' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
                 This account destination will be permanently snapshotted to the buyer link.
               </p>
             </div>

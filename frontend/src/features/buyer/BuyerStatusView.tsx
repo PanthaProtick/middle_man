@@ -34,12 +34,12 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
               margin: '0 auto 12px auto',
             }}
           >
-            <Clock size={28} color="#eab308" />
+            <Clock size={28} color="var(--amber-accent)" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fef08a' }}>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--amber-accent)' }}>
             Pending Seller Review / তথ্য জমা হয়েছে
           </h3>
-          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             Your details and payment claim have been recorded for seller review. Submitted orders do not expire automatically. / জমা দেওয়া অর্ডারের মেয়াদ স্বয়ংক্রিয়ভাবে শেষ হয় না।
           </p>
         </div>
@@ -60,12 +60,12 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
               margin: '0 auto 12px auto',
             }}
           >
-            <CheckCircle2 size={28} color="#22c55e" />
+            <CheckCircle2 size={28} color="var(--emerald-accent)" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#86efac' }}>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--emerald-accent)' }}>
             Order Confirmed / অর্ডার নিশ্চিত হয়েছে!
           </h3>
-          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             The seller has confirmed your advance payment and your order is in progress.
           </p>
         </div>
@@ -86,12 +86,12 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
               margin: '0 auto 12px auto',
             }}
           >
-            <AlertTriangle size={28} color="#ef4444" />
+            <AlertTriangle size={28} color="var(--rose-accent)" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#fca5a5' }}>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--rose-accent)' }}>
             Order Link Expired / অর্ডারের মেয়াদ শেষ
           </h3>
-          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             This link was not completed before the 48-hour deadline. Please contact the seller for a new link.
           </p>
         </div>
@@ -112,12 +112,12 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
               margin: '0 auto 12px auto',
             }}
           >
-            <XCircle size={28} color="#94a3b8" />
+            <XCircle size={28} color="var(--text-secondary)" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#cbd5e1' }}>
+          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)' }}>
             {isRejected ? 'Order Declined / অর্ডার গ্রহণ করা হয়নি' : 'Order Cancelled / অর্ডার বাতিল করা হয়েছে'}
           </h3>
-          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
+          <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             Please contact the seller on Facebook/Messenger for further details.
           </p>
         </div>
@@ -130,10 +130,10 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
             display: 'inline-block',
             padding: '6px 14px',
             borderRadius: '16px',
-            background: 'rgba(15, 23, 42, 0.8)',
+            background: 'var(--bg-surface)',
             border: '1px solid var(--border-subtle)',
             fontSize: '0.8rem',
-            color: '#c7d2fe',
+            color: 'var(--primary-accent)',
             marginBottom: '18px',
           }}
         >
@@ -146,7 +146,7 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
         style={{
           padding: '16px',
           borderRadius: '8px',
-          background: 'rgba(30, 41, 59, 0.4)',
+          background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
           marginBottom: '20px',
           textAlign: 'left',
@@ -155,13 +155,13 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
         {isConfirmed && order.actual_cod_minor !== null && (
           <p>Accepted advance / গৃহীত অগ্রিম: {formatBDT(order.total_minor - order.actual_cod_minor)}</p>
         )}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', color: '#94a3b8' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           <span>Product / পণ্য:</span>
-          <span style={{ fontWeight: 500, color: '#f1f5f9' }}>{order.product_name}</span>
+          <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{order.product_name}</span>
         </div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', color: '#94a3b8' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           <span>Total / মোট মূল্য:</span>
-          <span style={{ fontWeight: 500, color: '#f1f5f9' }}>{formatBDT(order.total_minor)}</span>
+          <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{formatBDT(order.total_minor)}</span>
         </div>
         <div
           style={{
@@ -171,7 +171,7 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
             borderTop: '1px dashed var(--border-subtle)',
             fontSize: '0.95rem',
             fontWeight: 600,
-            color: isConfirmed ? '#86efac' : '#cbd5e1',
+            color: isConfirmed ? 'var(--emerald-accent)' : 'var(--text-primary)',
           }}
         >
           <span>{isConfirmed ? 'Remaining COD / ডেলিভারির সময় প্রদেয়:' : 'Expected COD / আনুমানিক প্রদেয়:'}</span>
@@ -192,7 +192,7 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
             <RefreshCw size={14} className={isRefreshing ? 'spin' : ''} />
             <span>{isRefreshing ? 'Checking / চেক করা হচ্ছে...' : 'Refresh Status / স্ট্যাটাস রিফ্রেশ'}</span>
           </button>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '8px' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>
             Checks every 30 seconds while visible; retries may take longer. / পেজ খোলা থাকলে প্রতি ৩০ সেকেন্ডে চেক হয়।
           </div>
         </div>

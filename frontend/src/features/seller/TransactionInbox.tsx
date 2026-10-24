@@ -55,10 +55,10 @@ export function TransactionInbox({
             onChange={(e) => onFilterChange(e.target.value)}
             style={{
               padding: '6px 10px',
-              background: 'rgba(10, 14, 23, 0.6)',
+              background: 'var(--bg-surface)',
               border: '1px solid var(--border-subtle)',
               borderRadius: '6px',
-              color: '#fff',
+              color: 'var(--text-primary)',
               fontSize: '0.85rem',
             }}
           >
