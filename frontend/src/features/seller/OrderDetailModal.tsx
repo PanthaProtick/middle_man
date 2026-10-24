@@ -5,6 +5,7 @@ import { formatBangladeshTime, formatRemainingCod } from './api';
 import { BuyerCorrection } from './BuyerCorrection';
 import { PaymentException } from './PaymentException';
 import { PaymentHistory } from './PaymentHistory';
+import { OrderOutcomes } from './OrderOutcomes';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -73,6 +74,11 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         </div>
 
         <div style={{ marginBottom: '16px' }}>
+          {order.predecessor_order_id && (
+            <div style={{ fontSize: '0.75rem', color: '#818cf8', marginBottom: '4px' }}>
+              Replaces predecessor order: #{order.predecessor_order_id.slice(0, 8)}
+            </div>
+          )}
           <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Product Name</div>
           <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#f8fafc' }}>{order.product_name}</div>
         </div>
@@ -198,6 +204,21 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
           onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
         {token && order.buyer_revision && <BuyerCorrection key={`${order.id}-${order.version}`} orderId={order.id} token={token} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
+        {token && (
+          <OrderOutcomes
+            key={`outcomes-${order.id}-${order.version}`}
+            order={order}
+            token={token}
+            onUpdated={(fresh) => {
+              setOrder(fresh);
+              onCorrected?.(fresh);
+            }}
+            onReplaced={(newOrder) => {
+              setOrder(newOrder);
+              onCorrected?.(newOrder);
+            }}
+          />
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <button className="btn btn-primary" onClick={handleCopy}>

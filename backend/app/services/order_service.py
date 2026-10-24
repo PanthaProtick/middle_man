@@ -13,19 +13,26 @@ from app.core.idempotency import (
     save_idempotency_record,
 )
 from app.core.tokens import (
-    decrypt_token,
     generate_portal_token_materials,
     get_utc_now,
 )
 from app.models.entities import OrderTable, PaymentAccountTable
 from app.models.order import OrderInput, SellerOrder
+from app.services.order_mapping import (
+    check_and_apply_expiry,
+    to_seller_order,
+    to_seller_order_from_dict,
+)
 from app.services.reconciliation import get_order_allocation, get_order_review_reasons
-from app.services.reconciliation_rules import AllocationRecord
 from app.services.seller_service import (
     NotFoundError,
     SellerDomainException,
     compute_payload_hash,
 )
+
+_check_and_apply_expiry = check_and_apply_expiry
+_to_seller_order = to_seller_order
+_to_seller_order_from_dict = to_seller_order_from_dict
 
 
 class InactiveAccountError(SellerDomainException):
@@ -42,74 +49,11 @@ def reset_order_memory_store() -> None:
     _memory_orders_by_digest.clear()
     reset_shared_idempotency_store()
     from app.services.buyer_service import reset_buyer_memory_store
+
     reset_buyer_memory_store()
     from app.services.reconciliation_store import reset_reconciliation_memory_store
+
     reset_reconciliation_memory_store()
-
-
-def _check_and_apply_expiry(record: Any, now: datetime.datetime) -> bool:
-    if isinstance(record, OrderTable):
-        if record.lifecycle == "awaiting_buyer" and now >= record.expires_at:
-            record.lifecycle = "expired"
-            record.completed_at = record.expires_at
-            record.updated_at = now
-            record.version = int(record.version) + 1
-            return True
-        return False
-
-    if record["lifecycle"] == "awaiting_buyer" and now >= record["expires_at"]:
-        record["lifecycle"] = "expired"
-        record["completed_at"] = record["expires_at"]
-        record["updated_at"] = now
-        record["version"] = int(record.get("version", 1)) + 1
-        return True
-    return False
-
-
-def _to_seller_order(
-    row: OrderTable,
-    alloc: Optional[AllocationRecord] = None,
-    review_reasons: Optional[List[str]] = None,
-) -> SellerOrder:
-    decrypted_token = decrypt_token(row.encrypted_portal_token)
-    actual_cod = (int(row.total_minor) - alloc.accepted_amount_minor) if (row.lifecycle == "confirmed" and alloc) else None
-    basis = alloc.basis if (row.lifecycle == "confirmed" and alloc) else None
-    return SellerOrder(
-        id=str(row.id),
-        shop_id=str(row.shop_id),
-        payment_account_id=str(row.payment_account_id),
-        product_name=str(row.product_name),
-        total_minor=int(row.total_minor),
-        required_advance_minor=int(row.required_advance_minor),
-        expected_cod_minor=int(row.total_minor) - int(row.required_advance_minor),
-        actual_cod_minor=actual_cod,
-        account_provider=str(row.account_provider),
-        account_receiving_number=str(row.account_receiving_number),
-        account_label=str(row.account_label),
-        lifecycle=str(row.lifecycle),  # type: ignore[arg-type]
-        version=int(row.version),
-        review_reasons=review_reasons or [],
-        buyer_revision=row.buyer_revision,
-        allocation_basis=basis,
-        portal_token=decrypted_token,
-        portal_url=f"/orders/{decrypted_token}",
-        created_at=row.created_at,
-        updated_at=row.updated_at,
-        expires_at=row.expires_at,
-        completed_at=row.completed_at,
-    )
-
-
-def _to_seller_order_from_dict(
-    raw: dict[str, Any],
-    alloc: Optional[AllocationRecord] = None,
-    review_reasons: Optional[List[str]] = None,
-) -> SellerOrder:
-    d = dict(raw)
-    d["actual_cod_minor"] = (int(raw["total_minor"]) - alloc.accepted_amount_minor) if (raw.get("lifecycle") == "confirmed" and alloc) else None
-    d["allocation_basis"] = alloc.basis if (raw.get("lifecycle") == "confirmed" and alloc) else None
-    d["review_reasons"] = review_reasons or []
-    return SellerOrder(**d)
 
 
 class OrderService:
@@ -135,48 +79,74 @@ class OrderService:
         return str(raw_acc["provider"]), str(raw_acc["receiving_number"]), str(raw_acc["label"])
 
     async def create_order(
-        self, shop_id: str, owner_id: str, input_data: OrderInput, idempotency_key: Optional[str]
+        self, shop_id: str, owner_id: str, input_data: OrderInput, idempotency_key: Optional[str] = None
     ) -> Tuple[SellerOrder, int]:
         payload_hash = compute_payload_hash(input_data.model_dump())
-        cached = await check_idempotency_record(self.db, idempotency_key, owner_id, "create_order", payload_hash)
+        cached = await check_idempotency_record(
+            self.db, idempotency_key, owner_id, "create_order", payload_hash
+        )
         if cached:
-            status_code, data = cached
-            return SellerOrder(**data), status_code
+            return SellerOrder.model_validate(cached[1]), cached[0]
 
-        acc_prov, acc_num, acc_lbl = await self._get_account_snapshot(shop_id, input_data.payment_account_id)
-        now = get_utc_now()
-        expires_at = now + datetime.timedelta(hours=48)
-        order_id = str(uuid.uuid4())
-        portal_token, digest, encrypted_token = generate_portal_token_materials()
-
-        order_obj = SellerOrder(
-            id=order_id, shop_id=shop_id, payment_account_id=input_data.payment_account_id,
-            product_name=input_data.product_name, total_minor=input_data.total_minor,
-            required_advance_minor=input_data.required_advance_minor,
-            expected_cod_minor=input_data.total_minor - input_data.required_advance_minor,
-            actual_cod_minor=None, account_provider=acc_prov, account_receiving_number=acc_num,
-            account_label=acc_lbl, lifecycle="awaiting_buyer", version=1, review_reasons=[],
-            buyer_revision=None, allocation_basis=None, portal_token=portal_token,
-            portal_url=f"/orders/{portal_token}", created_at=now, updated_at=now,
-            expires_at=expires_at, completed_at=None,
+        provider, receiving_number, label = await self._get_account_snapshot(
+            shop_id, input_data.payment_account_id
         )
 
+        order_id = str(uuid.uuid4())
+        raw_token, digest, encrypted = generate_portal_token_materials()
+        now = get_utc_now()
+        expires_at = now + datetime.timedelta(hours=48)
+
         if self.db is not None:
-            self.db.add(OrderTable(
-                id=order_id, shop_id=shop_id, payment_account_id=input_data.payment_account_id,
-                token_lookup_digest=digest, encrypted_portal_token=encrypted_token,
-                product_name=input_data.product_name, total_minor=input_data.total_minor,
+            order_table = OrderTable(
+                id=order_id,
+                shop_id=shop_id,
+                payment_account_id=input_data.payment_account_id,
+                token_lookup_digest=digest,
+                encrypted_portal_token=encrypted,
+                product_name=input_data.product_name,
+                total_minor=input_data.total_minor,
                 required_advance_minor=input_data.required_advance_minor,
-                account_provider=acc_prov, account_receiving_number=acc_num, account_label=acc_lbl,
-                lifecycle="awaiting_buyer", version=1, created_at=now, updated_at=now,
-                expires_at=expires_at, completed_at=None,
-            ))
+                account_provider=provider,
+                account_receiving_number=receiving_number,
+                account_label=label,
+                lifecycle="awaiting_buyer",
+                version=1,
+                created_at=now,
+                updated_at=now,
+                expires_at=expires_at,
+                completed_at=None,
+            )
+            self.db.add(order_table)
             await self.db.commit()
+            order_obj = _to_seller_order(order_table)
         else:
-            raw_record = order_obj.model_dump()
-            raw_record.update({"encrypted_portal_token": encrypted_token, "token_lookup_digest": digest})
-            _memory_orders[order_id] = raw_record
+            raw_dict = {
+                "id": order_id,
+                "shop_id": shop_id,
+                "payment_account_id": input_data.payment_account_id,
+                "token_lookup_digest": digest,
+                "encrypted_portal_token": encrypted,
+                "product_name": input_data.product_name,
+                "total_minor": input_data.total_minor,
+                "required_advance_minor": input_data.required_advance_minor,
+                "expected_cod_minor": input_data.total_minor - input_data.required_advance_minor,
+                "actual_cod_minor": None,
+                "account_provider": provider,
+                "account_receiving_number": receiving_number,
+                "account_label": label,
+                "lifecycle": "awaiting_buyer",
+                "version": 1,
+                "portal_token": raw_token,
+                "portal_url": f"/orders/{raw_token}",
+                "created_at": now,
+                "updated_at": now,
+                "expires_at": expires_at,
+                "completed_at": None,
+            }
+            _memory_orders[order_id] = raw_dict
             _memory_orders_by_digest[digest] = order_id
+            order_obj = _to_seller_order_from_dict(raw_dict)
 
         await save_idempotency_record(
             self.db, idempotency_key, owner_id, "create_order", payload_hash, status.HTTP_201_CREATED, order_obj.model_dump()
@@ -194,7 +164,7 @@ class OrderService:
             if _check_and_apply_expiry(order, now):
                 await self.db.commit()
                 await self.db.refresh(order)
-            alloc = await get_order_allocation(self.db, order.id) if order.lifecycle == "confirmed" else None
+            alloc = await get_order_allocation(self.db, order.id) if order.lifecycle in ("confirmed", "cancelled") else None
             reasons = await get_order_review_reasons(self.db, order.id) if order.lifecycle == "pending" else []
             return _to_seller_order(order, alloc, reasons)
 
@@ -203,7 +173,7 @@ class OrderService:
             raise NotFoundError("Order not found")
 
         _check_and_apply_expiry(raw, now)
-        alloc = await get_order_allocation(None, order_id) if raw.get("lifecycle") == "confirmed" else None
+        alloc = await get_order_allocation(None, order_id) if raw.get("lifecycle") in ("confirmed", "cancelled") else None
         reasons = await get_order_review_reasons(None, order_id) if raw.get("lifecycle") == "pending" else []
         return _to_seller_order_from_dict(raw, alloc, reasons)
 
@@ -219,20 +189,24 @@ class OrderService:
         limit = max(1, min(limit, 100))
 
         if self.db is not None:
-            stmt = select(OrderTable).where(OrderTable.shop_id == shop_id).order_by(desc(OrderTable.created_at), desc(OrderTable.id)).with_for_update()
-            all_orders = list((await self.db.execute(stmt)).scalars().all())
+            query = select(OrderTable).where(OrderTable.shop_id == shop_id)
+            if status_filter:
+                query = query.where(OrderTable.lifecycle == status_filter)
+            query = query.order_by(desc(OrderTable.created_at), desc(OrderTable.id))
 
-            updated = False
-            for order in all_orders:
-                updated = _check_and_apply_expiry(order, now) or updated
-            if updated:
-                await self.db.commit()
+            orders = (await self.db.scalars(query)).all()
+            for o in orders:
+                if _check_and_apply_expiry(o, now):
+                    await self.db.commit()
 
-            filtered = [o for o in all_orders if (status_filter is None or o.lifecycle == status_filter)]
+            filtered = [
+                o for o in orders if (status_filter is None or o.lifecycle == status_filter)
+            ]
+
             start_idx = 0
             if cursor:
-                for idx, o in enumerate(filtered):
-                    if o.id == cursor:
+                for idx, item in enumerate(filtered):
+                    if item.id == cursor:
                         start_idx = idx + 1
                         break
 
@@ -240,7 +214,7 @@ class OrderService:
             next_cursor = page[-1].id if (start_idx + limit < len(filtered) and len(page) > 0) else None
             res_orders: List[SellerOrder] = []
             for o in page:
-                alloc = await get_order_allocation(self.db, o.id) if o.lifecycle == "confirmed" else None
+                alloc = await get_order_allocation(self.db, o.id) if o.lifecycle in ("confirmed", "cancelled") else None
                 reasons = await get_order_review_reasons(self.db, o.id) if o.lifecycle == "pending" else []
                 res_orders.append(_to_seller_order(o, alloc, reasons))
             return res_orders, next_cursor
@@ -263,7 +237,7 @@ class OrderService:
         next_cursor = page_raw[-1]["id"] if (start_idx + limit < len(filtered_raw) and len(page_raw) > 0) else None
         res_orders_mem: List[SellerOrder] = []
         for raw_item in page_raw:
-            alloc = await get_order_allocation(None, raw_item["id"]) if raw_item.get("lifecycle") == "confirmed" else None
+            alloc = await get_order_allocation(None, raw_item["id"]) if raw_item.get("lifecycle") in ("confirmed", "cancelled") else None
             reasons = await get_order_review_reasons(None, raw_item["id"]) if raw_item.get("lifecycle") == "pending" else []
             res_orders_mem.append(_to_seller_order_from_dict(raw_item, alloc, reasons))
         return res_orders_mem, next_cursor

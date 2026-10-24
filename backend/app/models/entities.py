@@ -24,9 +24,7 @@ class ShopTable(Base):
         nullable=False,
     )
 
-    accounts: Mapped[list["PaymentAccountTable"]] = relationship(
-        "PaymentAccountTable", back_populates="shop"
-    )
+    accounts: Mapped[list["PaymentAccountTable"]] = relationship("PaymentAccountTable", back_populates="shop")
     orders: Mapped[list["OrderTable"]] = relationship("OrderTable", back_populates="shop")
 
 
@@ -60,7 +58,9 @@ class OrderTable(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
-    payment_account_id: Mapped[str] = mapped_column(String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True)
+    payment_account_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True
+    )
     token_lookup_digest: Mapped[str] = mapped_column(String(64), unique=True, nullable=False, index=True)
     encrypted_portal_token: Mapped[str] = mapped_column(Text, nullable=False)
 
@@ -81,12 +81,22 @@ class OrderTable(Base):
     updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     expires_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     completed_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    predecessor_order_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("orders.id"), nullable=True, index=True
+    )
+    replaced_by_order_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("orders.id"), nullable=True, index=True
+    )
 
     shop: Mapped["ShopTable"] = relationship("ShopTable", back_populates="orders")
     payment_account: Mapped["PaymentAccountTable"] = relationship("PaymentAccountTable")
     revisions: Mapped[list["BuyerRevisionTable"]] = relationship("BuyerRevisionTable", back_populates="order")
-    allocation: Mapped["AllocationTable | None"] = relationship("AllocationTable", back_populates="order", uselist=False)
-    review_reasons: Mapped[list["OrderReviewReasonTable"]] = relationship("OrderReviewReasonTable", back_populates="order")
+    allocation: Mapped["AllocationTable | None"] = relationship(
+        "AllocationTable", back_populates="order", uselist=False
+    )
+    review_reasons: Mapped[list["OrderReviewReasonTable"]] = relationship(
+        "OrderReviewReasonTable", back_populates="order"
+    )
 
 
 class BuyerRevisionTable(Base):
@@ -149,13 +159,13 @@ class IdempotencyRecordTable(Base):
 
 class ReceivedTransactionTable(Base):
     __tablename__ = "received_transactions"
-    __table_args__ = (
-        UniqueConstraint("shop_id", "provider", "trx_id", name="uq_received_transactions_identity"),
-    )
+    __table_args__ = (UniqueConstraint("shop_id", "provider", "trx_id", name="uq_received_transactions_identity"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
-    payment_account_id: Mapped[str] = mapped_column(String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True)
+    payment_account_id: Mapped[str] = mapped_column(
+        String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True
+    )
     provider: Mapped[str] = mapped_column(String(32), nullable=False)
     trx_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
@@ -255,9 +265,7 @@ class AuditEventTable(Base):
 
 class OrderReviewReasonTable(Base):
     __tablename__ = "order_review_reasons"
-    __table_args__ = (
-        UniqueConstraint("order_id", "reason", name="uq_order_review_reason"),
-    )
+    __table_args__ = (UniqueConstraint("order_id", "reason", name="uq_order_review_reason"),)
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
     order_id: Mapped[str] = mapped_column(String(36), ForeignKey("orders.id"), nullable=False, index=True)
@@ -265,5 +273,3 @@ class OrderReviewReasonTable(Base):
     created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
     order: Mapped["OrderTable"] = relationship("OrderTable", back_populates="review_reasons")
-
-

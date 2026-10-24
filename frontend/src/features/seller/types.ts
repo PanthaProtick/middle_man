@@ -66,6 +66,8 @@ export interface SellerOrder {
   updated_at: string;
   expires_at: string;
   completed_at: string | null;
+  predecessor_order_id?: string | null;
+  replaced_by_order_id?: string | null;
 }
 
 export interface OrderInput {
@@ -145,4 +147,3 @@ export interface ReceiptListResponse {
   items: ReceiptView[];
   next_cursor?: string | null;
 }
-
