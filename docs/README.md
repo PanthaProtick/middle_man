@@ -2,7 +2,11 @@
 
 This directory houses **deep, on-demand reference documentation**. 
 
+[Codex ticket tool-call analysis](codex-ticket-tool-call-analysis.md) ranks tool output, command duration, failures and review costs across all six locally discoverable Codex ticket chats and twelve reviewers, with audit data and environment benchmark priorities.
+
 [Session context investigation](session-context-investigation.md) measures repository-linked Codex and Antigravity sessions against a preferred 100k-token context budget, with per-call and per-response evidence. Read it when investigating agent context usage or environment optimization.
+
+[Tool call analysis & environment optimization](tool-call-analysis-and-environment-optimization.md) provides an empirical analysis of 1,599 tool calls across all 21 Antigravity ticket implementation sessions (Tickets 01–05, 11), identifying execution latency, command bottlenecks, shell spawn overhead, and concrete optimizations.
 
 ### For AI Coding Agents:
 * Do **NOT** load every document in this directory into your initial context prompt.

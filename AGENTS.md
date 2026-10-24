@@ -40,6 +40,20 @@
   changed paths, exact checks/results, unresolved risks, and the next action.
   Resume by checking the current diff and evidence; summaries are not ground truth.
 
+## Execution and orchestration guardrails
+
+- Subagents: Pass base commit, changed paths, and acceptance targets, then yield
+  the turn. Never run sleep timers (`schedule`) or status polling loops waiting for
+  subagents; both Codex and Antigravity resume automatically upon completion.
+- Windows PowerShell: Use PowerShell-compatible syntax (comma-separated lists
+  `file1, file2` instead of bash braces `{file1,file2}`). Write scratch Python to
+  `.scratch/` with UTF-8 instead of nested inline quotes (`-c "..."`).
+- Context and diffs: Run `git diff --stat` before full diffs; scope diffs to
+  target files. Bound large reads with `npm run context` to avoid truncation.
+- Testing tier: Use focused test commands (`npm run test:backend`,
+  `npm run test:frontend`) during inner iteration; run root `npm run check` strictly
+  as the final pre-handoff verification gate.
+
 ## Commands (workspace root)
 
 Use root wrappers to preserve cache and lockfile handling:
