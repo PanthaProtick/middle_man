@@ -19,6 +19,7 @@ from app.api.structured_retention import router as structured_retention_router
 from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
 from app.core.config import settings
+from app.core.database import check_database_readiness
 from app.models.seller import ErrorBody, ErrorFieldItem, StandardErrorResponse
 
 logging.basicConfig(
@@ -30,7 +31,15 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    logger.info(f"Starting {settings.PROJECT_NAME} in {settings.ENV} mode...")
+    logger.info(
+        f"Starting {settings.PROJECT_NAME} in {settings.ENV} mode (durable_storage={settings.is_durable_mode})..."
+    )
+    if settings.is_durable_mode:
+        readiness = await check_database_readiness()
+        if not readiness.is_ready:
+            logger.error(f"Durable storage startup check failed: {readiness.diagnostic}")
+        else:
+            logger.info("Durable storage verified: database connection and schema inventory are ready.")
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME}...")
 

@@ -6,6 +6,7 @@ from typing import Any, Optional, Tuple
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models.entities import IdempotencyRecordTable
 
 # Standby in-memory store for idempotency records when database is unconfigured
@@ -44,6 +45,11 @@ async def check_idempotency_record(
                 raise IdempotencyConflictError()
             return int(record.status_code), json.loads(str(record.response_json))
     else:
+        if settings.is_durable_mode:
+            from app.core.database import DurableStorageUnavailableError
+            raise DurableStorageUnavailableError(
+                "Durable storage is required in integration mode. Process memory idempotency store is disabled."
+            )
         rec = _memory_idempotency_store.get(composite_key)
         if rec:
             if rec['data'] == {'record_unavailable': True}:
@@ -86,6 +92,11 @@ async def save_idempotency_record(
         else:
             await db.flush()
     else:
+        if settings.is_durable_mode:
+            from app.core.database import DurableStorageUnavailableError
+            raise DurableStorageUnavailableError(
+                "Durable storage is required in integration mode. Process memory idempotency store is disabled."
+            )
         _memory_idempotency_store[composite_key] = {
             "payload_hash": payload_hash,
             "status_code": status_code,

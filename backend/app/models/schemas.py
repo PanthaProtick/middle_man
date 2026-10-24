@@ -10,6 +10,7 @@ class HealthStatus(BaseModel):
     database_configured: bool
     gemini_configured: bool
     clerk_configured: bool = False
+    durable_mode: bool = False
     version: str = "1.0.0"
 
 

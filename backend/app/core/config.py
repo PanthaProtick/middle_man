@@ -11,6 +11,11 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     API_PREFIX: str = "/api"
 
+    # Operating & verification mode
+    SELF_TEST_MODE: bool = False
+    APP_MODE: str = "offline"  # "offline", "self-test", "integration"
+    REQUIRE_DURABLE_STORAGE: bool = False
+
     # Database (Neon Serverless Postgres)
     DATABASE_URL: str = ""
     DIRECT_URL: str = ""
@@ -71,6 +76,21 @@ class Settings(BaseSettings):
         if any(indicator in url for indicator in placeholder_indicators):
             return False
         return True
+
+    @property
+    def is_durable_mode(self) -> bool:
+        """Determines whether durable persistence is strictly required.
+
+        In offline development, memory fallbacks are allowed.
+        In self-test integration mode or production, durable persistence is required.
+        """
+        if self.ENV == "production":
+            return True
+        if self.SELF_TEST_MODE or self.REQUIRE_DURABLE_STORAGE:
+            return True
+        if self.APP_MODE and self.APP_MODE.lower() in ("self-test", "integration"):
+            return True
+        return False
 
     @property
     def is_clerk_configured(self) -> bool:

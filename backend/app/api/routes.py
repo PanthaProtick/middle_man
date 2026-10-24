@@ -48,6 +48,7 @@ async def health_check() -> HealthStatus:
         database_configured=settings.is_database_configured,
         gemini_configured=gemini_service.is_configured(),
         clerk_configured=settings.is_clerk_configured,
+        durable_mode=settings.is_durable_mode,
         version="1.0.0",
     )
 
