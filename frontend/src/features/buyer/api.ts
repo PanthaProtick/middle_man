@@ -59,9 +59,11 @@ async function requestJson<T>(
   return res.json();
 }
 
-export async function fetchPublicOrder(portalToken: string): Promise<PublicOrder> {
+export async function fetchPublicOrder(portalToken: string, signal?: AbortSignal): Promise<PublicOrder> {
   return requestJson<PublicOrder>(`/api/public/orders/${encodeURIComponent(portalToken)}`, {
     method: 'GET',
+    signal,
+    cache: 'no-store',
   });
 }
 

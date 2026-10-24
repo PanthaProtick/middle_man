@@ -40,7 +40,7 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
             Pending Seller Review / তথ্য জমা হয়েছে
           </h3>
           <p style={{ margin: '6px 0 0 0', fontSize: '0.85rem', color: '#94a3b8' }}>
-            Your details and payment claim have been recorded. The seller will verify your payment shortly.
+            Your details and payment claim have been recorded for seller review. Submitted orders do not expire automatically. / জমা দেওয়া অর্ডারের মেয়াদ স্বয়ংক্রিয়ভাবে শেষ হয় না।
           </p>
         </div>
       )}
@@ -152,6 +152,9 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
           textAlign: 'left',
         }}
       >
+        {isConfirmed && order.actual_cod_minor !== null && (
+          <p>Accepted advance / গৃহীত অগ্রিম: {formatBDT(order.total_minor - order.actual_cod_minor)}</p>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.85rem', color: '#94a3b8' }}>
           <span>Product / পণ্য:</span>
           <span style={{ fontWeight: 500, color: '#f1f5f9' }}>{order.product_name}</span>
@@ -190,7 +193,7 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
             <span>{isRefreshing ? 'Checking / চেক করা হচ্ছে...' : 'Refresh Status / স্ট্যাটাস রিফ্রেশ'}</span>
           </button>
           <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '8px' }}>
-            Auto-checking every 30 seconds (স্বয়ংক্রিয়ভাবে প্রতি ৩০ সেকেন্ডে চেক করা হচ্ছে)
+            Checks every 30 seconds while visible; retries may take longer. / পেজ খোলা থাকলে প্রতি ৩০ সেকেন্ডে চেক হয়।
           </div>
         </div>
       )}

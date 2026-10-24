@@ -134,10 +134,10 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
       </div>
 
       {/* Expiry time notice */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
+      {order.lifecycle === 'awaiting_buyer' && <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.75rem', color: '#64748b' }}>
         <Clock size={14} />
         <span>Valid until / মেয়াদ: {formatBangladeshTime(order.expires_at)}</span>
-      </div>
+      </div>}
     </div>
   );
 }
