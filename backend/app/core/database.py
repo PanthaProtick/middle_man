@@ -52,6 +52,16 @@ class DurableStorageUnavailableError(HTTPException):
         )
 
 
+def ensure_durable_storage(db: Optional[AsyncSession], component: str = "operation") -> None:
+    """Blocks in-memory fallback when durable storage is required in integration mode."""
+    if db is None and settings.is_durable_mode:
+        valid, diag = validate_database_config(settings)
+        detail = diag if not valid else f"Database engine is not initialized for {component}."
+        raise DurableStorageUnavailableError(
+            message=f"Durable storage is required in integration mode: {detail}"
+        )
+
+
 EXPECTED_SCHEMA_TABLES = [
     "shops",
     "payment_accounts",
@@ -179,8 +189,13 @@ async def get_db() -> AsyncGenerator[AsyncSession | None, None]:
             await session.commit()
         except (SQLAlchemyError, asyncpg.PostgresError, OSError) as e:
             await session.rollback()
+            sanitized = sanitize_db_url(str(e))
+            if "does not exist" in sanitized.lower() or "undefined table" in sanitized.lower():
+                raise DurableStorageUnavailableError(
+                    message=f"Durable storage schema error: database tables are missing or not migrated. ({sanitized})"
+                ) from e
             raise DurableStorageUnavailableError(
-                message="Durable storage outage: database operation failed. Retry with the same mutation key.",
+                message=f"Durable storage outage: database operation failed. Retry with the same mutation key. ({sanitized})",
                 cause=e,
             ) from e
         except Exception:

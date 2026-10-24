@@ -5,19 +5,17 @@ from sqlalchemy.ext.asyncio import async_sessionmaker
 
 from app.core.database import EXPECTED_SCHEMA_TABLES, check_schema_inventory
 from app.models.seller import ShopInput
-from app.services.seller_service import SellerService
+from app.services.seller_service import SellerService, _memory_shops
 
 
 def test_migrations_directory_inventory() -> None:
     migrations_dir = Path(__file__).parents[1] / "migrations"
     migration_files = sorted(migrations_dir.glob("*.sql"))
     assert len(migration_files) == 17
-    # 0001 through 0017
     prefixes = [f.name[:4] for f in migration_files]
     expected_prefixes = [f"{i:04d}" for i in range(1, 18)]
     assert prefixes == expected_prefixes
 
-    # Verify every table mentioned in EXPECTED_SCHEMA_TABLES is present in migrations
     all_sql = "\n".join(f.read_text(encoding="utf-8").lower() for f in migration_files)
     for table_name in EXPECTED_SCHEMA_TABLES:
         assert "create table" in all_sql
@@ -29,7 +27,7 @@ async def test_schema_inventory_and_adapter_restart(postgres_buyer) -> None:
     """Exercises real PostgreSQL adapter queries, schema inventory, and restart durability."""
     client, connection, sessions, order = postgres_buyer
 
-    # 1. Verify schema inventory
+    # 1. Verify schema inventory against real PostgreSQL
     async with sessions() as session:
         all_present, missing = await check_schema_inventory(session)
         assert all_present is True
@@ -59,16 +57,19 @@ async def test_schema_inventory_and_adapter_restart(postgres_buyer) -> None:
         assert persisted_shop.id == created_shop_id
         assert persisted_shop.display_name == "Durable Restart Shop"
 
-    # 4. Outage mid-acceptance / mutation regression:
-    # If session is closed / transaction fails, it raises typed error, never memory fallback
-    from app.core.database import DurableStorageUnavailableError
-    from app.services.seller_service import _memory_shops
-
-    failing_service = SellerService(db=None)
-    with pytest.raises(DurableStorageUnavailableError):
-        await failing_service.create_shop(
-            owner_id="outage_seller",
-            input_data=ShopInput(display_name="Outage Shop"),
-            idempotency_key="outage-key",
+    # 4. Outage mid-acceptance / transaction rollback regression against PostgreSQL:
+    # A failed / rolled-back transaction never writes to memory and never commits
+    async with new_sessions() as outage_session:
+        service_outage = SellerService(db=outage_session)
+        await service_outage.create_shop(
+            owner_id="rolled_back_seller",
+            input_data=ShopInput(display_name="Rolled Back Shop"),
+            idempotency_key="rollback-key",
         )
-    assert len(_memory_shops) == 0
+        await outage_session.rollback()
+
+    async with new_sessions() as verify_session:
+        verify_service = SellerService(db=verify_session)
+        assert await verify_service.get_shop_by_owner("rolled_back_seller") is None
+
+    assert "rolled_back_seller" not in _memory_shops

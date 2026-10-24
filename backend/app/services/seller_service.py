@@ -8,7 +8,7 @@ from fastapi import HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.config import settings
+from app.core.database import ensure_durable_storage
 from app.core.idempotency import (
     check_idempotency_record,
     reset_shared_idempotency_store,
@@ -60,13 +60,6 @@ class SellerService:
     def __init__(self, db: Optional[AsyncSession] = None) -> None:
         self.db = db
 
-    def _require_durable_or_allow_memory(self) -> None:
-        if self.db is None and settings.is_durable_mode:
-            from app.core.database import DurableStorageUnavailableError
-            raise DurableStorageUnavailableError(
-                "Durable storage is required in integration mode. Process memory fallback is disabled."
-            )
-
     async def _check_idempotency(
         self, key: Optional[str], scope: str, operation: str, payload_hash: str
     ) -> Optional[tuple[int, Any]]:
@@ -91,7 +84,7 @@ class SellerService:
                 created_at=shop.created_at,
                 updated_at=shop.updated_at,
             )
-        self._require_durable_or_allow_memory()
+        ensure_durable_storage(self.db, "shop retrieval")
         shop_id = _memory_shops_by_owner.get(owner_id)
         if not shop_id:
             return None
@@ -101,7 +94,7 @@ class SellerService:
     async def create_shop(
         self, owner_id: str, input_data: ShopInput, idempotency_key: Optional[str]
     ) -> tuple[ShopResponse, int]:
-        self._require_durable_or_allow_memory()
+        ensure_durable_storage(self.db, "shop creation")
         payload_hash = compute_payload_hash(input_data.model_dump())
         cached = await self._check_idempotency(idempotency_key, owner_id, "create_shop", payload_hash)
         if cached:
@@ -164,7 +157,7 @@ class SellerService:
                 )
                 for a in accounts
             ]
-        self._require_durable_or_allow_memory()
+        ensure_durable_storage(self.db, "payment account listing")
         return [
             PaymentAccountResponse(**a)
             for a in _memory_accounts.values()
@@ -192,7 +185,7 @@ class SellerService:
                 created_at=acc.created_at,
                 updated_at=acc.updated_at,
             )
-        self._require_durable_or_allow_memory()
+        ensure_durable_storage(self.db, "payment account retrieval")
         raw = _memory_accounts.get(account_id)
         if not raw or raw["shop_id"] != shop_id:
             return None
@@ -201,7 +194,7 @@ class SellerService:
     async def create_payment_account(
         self, shop_id: str, owner_id: str, input_data: AccountInput, idempotency_key: Optional[str]
     ) -> tuple[PaymentAccountResponse, int]:
-        self._require_durable_or_allow_memory()
+        ensure_durable_storage(self.db, "payment account creation")
         payload_hash = compute_payload_hash(input_data.model_dump())
         cached = await self._check_idempotency(idempotency_key, owner_id, "create_account", payload_hash)
         if cached:
@@ -248,7 +241,7 @@ class SellerService:
     async def update_payment_account(
         self, shop_id: str, account_id: str, update_data: AccountUpdateInput
     ) -> PaymentAccountResponse:
-        self._require_durable_or_allow_memory()
+        ensure_durable_storage(self.db, "payment account update")
         now = datetime.datetime.now(datetime.timezone.utc)
         if self.db is not None:
             stmt = select(PaymentAccountTable).where(

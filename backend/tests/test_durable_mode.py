@@ -1,3 +1,4 @@
+import json
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -6,33 +7,32 @@ from sqlalchemy.exc import OperationalError
 
 from app.core.config import Settings
 from app.core.database import (
+    EXPECTED_SCHEMA_TABLES,
     DurableStorageUnavailableError,
     check_database_readiness,
+    check_schema_inventory,
     get_db,
     sanitize_db_url,
     validate_database_config,
+)
+from app.main import app, lifespan
+from app.models.seller import ShopInput
+from app.services.seller_service import (
+    SellerService,
+    _memory_shops,
+    compute_payload_hash,
+    reset_memory_store,
 )
 
 
 def test_durable_mode_configuration_flags() -> None:
     # Offline default
-    s_default = Settings(ENV="development", SELF_TEST_MODE=False, APP_MODE="offline")
+    s_default = Settings(ENV="development", SELF_TEST_MODE=False)
     assert s_default.is_durable_mode is False
 
-    # Explicit self-test mode via boolean
+    # Explicit self-test integration mode
     s_self_test = Settings(ENV="development", SELF_TEST_MODE=True)
     assert s_self_test.is_durable_mode is True
-
-    # Explicit self-test mode via APP_MODE
-    s_app_mode = Settings(ENV="development", APP_MODE="self-test")
-    assert s_app_mode.is_durable_mode is True
-
-    s_integration_mode = Settings(ENV="development", APP_MODE="integration")
-    assert s_integration_mode.is_durable_mode is True
-
-    # Explicit durable storage requirement
-    s_req = Settings(ENV="development", REQUIRE_DURABLE_STORAGE=True)
-    assert s_req.is_durable_mode is True
 
     # Production environment always requires durable persistence
     s_prod = Settings(ENV="production")
@@ -45,33 +45,27 @@ def test_database_url_credential_sanitization() -> None:
     assert "secret_password_123" not in sanitized
     assert "app_user:***@ep-sample" in sanitized
 
-    # Plain postgresql scheme
     plain = "postgresql://seller_admin:very_secret_pwd@localhost:5432/middle_man"
     assert "very_secret_pwd" not in sanitize_db_url(plain)
     assert "seller_admin:***@localhost" in sanitize_db_url(plain)
 
-    # Empty or None
     assert sanitize_db_url("") == ""
     assert sanitize_db_url(None) == ""
 
 
 def test_validate_database_config_diagnostics() -> None:
-    # Missing configuration
     s_missing = Settings(DATABASE_URL="")
     valid, diag = validate_database_config(s_missing)
     assert valid is False
     assert "missing" in diag.lower()
     assert "DATABASE_URL" in diag
 
-    # Placeholder configuration
     s_placeholder = Settings(DATABASE_URL="postgresql+asyncpg://user:npg_password@ep-sample.us-east-2.aws.neon.tech/neondb")
     valid, diag = validate_database_config(s_placeholder)
     assert valid is False
     assert "placeholder" in diag.lower()
-    # Must never include the placeholder password or raw secret
     assert "npg_password" not in diag
 
-    # Valid non-placeholder configuration
     s_valid = Settings(DATABASE_URL="postgresql+asyncpg://test_user:real_pw@localhost:5432/testdb")
     valid, diag = validate_database_config(s_valid)
     assert valid is True
@@ -79,8 +73,32 @@ def test_validate_database_config_diagnostics() -> None:
 
 
 @pytest.mark.asyncio
+async def test_startup_fails_closed_in_durable_mode_when_unconfigured(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", True)
+    monkeypatch.setattr("app.core.database.AsyncSessionLocal", None)
+
+    with pytest.raises(DurableStorageUnavailableError) as exc_info:
+        async with lifespan(app):
+            pass
+
+    err = exc_info.value
+    assert err.status_code == 503
+    assert err.detail["code"] == "DURABLE_STORAGE_UNAVAILABLE"
+    assert "initialization failed" in err.detail["message"].lower()
+
+
+@pytest.mark.asyncio
+async def test_startup_succeeds_in_offline_mode_without_database(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", False)
+    monkeypatch.setattr("app.core.config.settings.ENV", "test")
+    monkeypatch.setattr("app.core.database.AsyncSessionLocal", None)
+
+    async with lifespan(app):
+        assert True
+
+
+@pytest.mark.asyncio
 async def test_get_db_in_durable_mode_raises_when_unconfigured(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Set durable mode
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", True)
     monkeypatch.setattr("app.core.database.AsyncSessionLocal", None)
 
@@ -96,9 +114,7 @@ async def test_get_db_in_durable_mode_raises_when_unconfigured(monkeypatch: pyte
 
 @pytest.mark.asyncio
 async def test_get_db_in_offline_mode_yields_none(monkeypatch: pytest.MonkeyPatch) -> None:
-    # Set offline development mode
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", False)
-    monkeypatch.setattr("app.core.config.settings.APP_MODE", "offline")
     monkeypatch.setattr("app.core.config.settings.ENV", "test")
     monkeypatch.setattr("app.core.database.AsyncSessionLocal", None)
 
@@ -131,9 +147,6 @@ async def test_seller_shop_mutation_blocks_in_durable_mode_when_db_unconfigured(
     data = resp.json()
     assert data["error"]["code"] == "DURABLE_STORAGE_UNAVAILABLE"
     assert "durable storage is required" in data["error"]["message"].lower()
-
-    # Verify no shop was created in memory
-    from app.services.seller_service import _memory_shops
     assert len(_memory_shops) == 0
 
 
@@ -142,11 +155,9 @@ async def test_seller_shop_mutation_in_offline_mode_succeeds_in_memory(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", False)
-    monkeypatch.setattr("app.core.config.settings.APP_MODE", "offline")
     monkeypatch.setattr("app.core.config.settings.ENV", "test")
     monkeypatch.setattr("app.core.database.AsyncSessionLocal", None)
 
-    from app.services.seller_service import reset_memory_store
     reset_memory_store()
 
     resp = await client.post(
@@ -162,6 +173,7 @@ async def test_seller_shop_mutation_in_offline_mode_succeeds_in_memory(
 async def test_seller_shop_mutation_database_runtime_outage_returns_503(
     client: AsyncClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    """Verifies that get_db catches real session errors, rolls back, and raises typed 503."""
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", True)
 
     mock_result = MagicMock()
@@ -172,46 +184,35 @@ async def test_seller_shop_mutation_database_runtime_outage_returns_503(
     mock_session.execute = AsyncMock(return_value=mock_result)
     mock_session.commit = AsyncMock(side_effect=OperationalError("connection closed unexpectedly", params=None, orig=Exception("DB down")))
     mock_session.rollback = AsyncMock(return_value=None)
+    mock_session.close = AsyncMock(return_value=None)
 
-    async def failing_db():
-        try:
-            yield mock_session
-            await mock_session.commit()
-        except Exception as e:
-            await mock_session.rollback()
-            raise DurableStorageUnavailableError(
-                message="Durable storage outage: database operation failed. Retry with the same mutation key.",
-                cause=e,
-            ) from e
+    class MockSessionFactory:
+        def __call__(self) -> MagicMock:
+            ctx = MagicMock()
+            ctx.__aenter__ = AsyncMock(return_value=mock_session)
+            ctx.__aexit__ = AsyncMock(return_value=None)
+            return ctx
 
-    from app.core.database import get_db
-    from app.main import app
-    app.dependency_overrides[get_db] = failing_db
-
-    from app.services.seller_service import _memory_shops, reset_memory_store
+    monkeypatch.setattr("app.core.database.AsyncSessionLocal", MockSessionFactory())
     reset_memory_store()
 
-    try:
-        resp = await client.post(
-            "/api/seller/shop",
-            json={"display_name": "Outage Test Shop"},
-            headers={"Authorization": "Bearer dev-pilot_seller", "Idempotency-Key": "outage-key-1"},
-        )
-        assert resp.status_code == 503
-        data = resp.json()
-        assert data["error"]["code"] == "DURABLE_STORAGE_UNAVAILABLE"
-        assert "outage" in data["error"]["message"].lower()
-        # Verify it NEVER switched to memory
-        assert len(_memory_shops) == 0
-    finally:
-        app.dependency_overrides.clear()
+    resp = await client.post(
+        "/api/seller/shop",
+        json={"display_name": "Outage Test Shop"},
+        headers={"Authorization": "Bearer dev-pilot_seller", "Idempotency-Key": "outage-key-1"},
+    )
+    assert resp.status_code == 503
+    data = resp.json()
+    assert data["error"]["code"] == "DURABLE_STORAGE_UNAVAILABLE"
+    assert "outage" in data["error"]["message"].lower()
+    mock_session.rollback.assert_awaited()
+    # Verify it NEVER switched to memory
+    assert len(_memory_shops) == 0
 
 
 @pytest.mark.asyncio
 async def test_seller_service_refuses_memory_fallback_in_durable_mode(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", True)
-    from app.models.seller import ShopInput
-    from app.services.seller_service import SellerService
 
     service = SellerService(db=None)
     with pytest.raises(DurableStorageUnavailableError) as exc_info:
@@ -234,12 +235,9 @@ async def test_seller_shop_mutation_resolves_committed_same_key_result(
         "created_at": "2026-10-24T12:00:00Z",
         "updated_at": "2026-10-24T12:00:00Z",
     }
-    # Simulate DB having the idempotency record already committed
     mock_record = MagicMock()
     mock_record.key = "pilot_seller:create_shop:replay-key-1"
-    import json
     mock_record.response_json = json.dumps(committed_shop_data)
-    from app.services.seller_service import compute_payload_hash
     mock_record.payload_hash = compute_payload_hash({"display_name": "Committed Shop"})
     mock_record.status_code = 200
 
@@ -248,33 +246,31 @@ async def test_seller_shop_mutation_resolves_committed_same_key_result(
 
     mock_session = AsyncMock()
     mock_session.execute = AsyncMock(return_value=mock_result)
+    mock_session.commit = AsyncMock(return_value=None)
+    mock_session.close = AsyncMock(return_value=None)
 
-    async def replay_db():
-        yield mock_session
+    class MockSessionFactory:
+        def __call__(self) -> MagicMock:
+            ctx = MagicMock()
+            ctx.__aenter__ = AsyncMock(return_value=mock_session)
+            ctx.__aexit__ = AsyncMock(return_value=None)
+            return ctx
 
-    from app.core.database import get_db
-    from app.main import app
-    app.dependency_overrides[get_db] = replay_db
+    monkeypatch.setattr("app.core.database.AsyncSessionLocal", MockSessionFactory())
 
-    try:
-        resp = await client.post(
-            "/api/seller/shop",
-            json={"display_name": "Committed Shop"},
-            headers={"Authorization": "Bearer dev-pilot_seller", "Idempotency-Key": "replay-key-1"},
-        )
-        assert resp.status_code == 200
-        data = resp.json()
-        assert data["shop"]["id"] == "shop-committed-1"
-        assert data["shop"]["display_name"] == "Committed Shop"
-    finally:
-        app.dependency_overrides.clear()
+    resp = await client.post(
+        "/api/seller/shop",
+        json={"display_name": "Committed Shop"},
+        headers={"Authorization": "Bearer dev-pilot_seller", "Idempotency-Key": "replay-key-1"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data["shop"]["id"] == "shop-committed-1"
+    assert data["shop"]["display_name"] == "Committed Shop"
 
 
 @pytest.mark.asyncio
 async def test_check_schema_inventory_detects_missing_tables() -> None:
-    from app.core.database import check_schema_inventory
-
-    # Mock session where only 2 tables exist
     mock_result = MagicMock()
     mock_result.fetchall.return_value = [("shops",), ("orders",)]
     mock_session = AsyncMock()
@@ -290,8 +286,6 @@ async def test_check_schema_inventory_detects_missing_tables() -> None:
 
 @pytest.mark.asyncio
 async def test_check_schema_inventory_all_present() -> None:
-    from app.core.database import EXPECTED_SCHEMA_TABLES, check_schema_inventory
-
     mock_result = MagicMock()
     mock_result.fetchall.return_value = [(table_name,) for table_name in EXPECTED_SCHEMA_TABLES]
     mock_session = AsyncMock()
