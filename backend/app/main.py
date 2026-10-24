@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.middleware.base import RequestResponseEndpoint
 
+from app.api.order_export import router as order_export_router
 from app.api.orders import router as orders_router
 from app.api.public_orders import router as public_orders_router
 from app.api.routes import router as api_router
@@ -111,6 +112,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # Include routes
 app.include_router(api_router, prefix=settings.API_PREFIX)
 app.include_router(seller_router, prefix=settings.API_PREFIX)
+app.include_router(order_export_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
 # Literal SMS paths must precede the receipt-ID route.
 app.include_router(sms_router, prefix=settings.API_PREFIX)

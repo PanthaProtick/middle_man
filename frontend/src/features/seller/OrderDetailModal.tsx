@@ -7,6 +7,7 @@ import { PaymentException } from './PaymentException';
 import { PaymentHistory } from './PaymentHistory';
 import { OrderOutcomes } from './OrderOutcomes';
 import { EvidenceViewer } from './EvidenceViewer';
+import { OrderExport } from './OrderExport';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -61,6 +62,7 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
           overflowY: 'auto',
         }}
       >
+        <OrderExport orderId={order.id} token={token} />
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Package size={20} color="#6366f1" />

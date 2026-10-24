@@ -3,6 +3,7 @@ import { Copy, Check, Clock, AlertTriangle, Eye } from 'lucide-react';
 import type { OrderLifecycle, SellerOrder } from './types';
 import { formatBangladeshTime, formatRemainingCod } from './api';
 import { OrderDetailModal } from './OrderDetailModal';
+import { OrderExport } from './OrderExport';
 
 interface OrderListProps {
   token?: string;
@@ -80,12 +81,14 @@ export function OrderList({
             <option value="awaiting_buyer">Awaiting Buyer</option>
             <option value="pending">Pending</option>
             <option value="confirmed">Confirmed</option>
+            <option value="rejected">Rejected</option>
             <option value="expired">Expired</option>
             <option value="cancelled">Cancelled</option>
           </select>
         </div>
       </div>
 
+      <OrderExport key={statusFilter} status={statusFilter} token={token} />
       {orders.length === 0 ? (
         <div style={{ padding: '24px', textAlign: 'center', background: 'rgba(10, 14, 23, 0.4)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
