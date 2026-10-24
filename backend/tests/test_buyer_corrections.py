@@ -145,3 +145,122 @@ async def test_changing_claim_identity_removes_obsolete_review_reasons(client):
             'sender_number': '01822222222', 'amount_minor': 200000}}, headers={'Idempotency-Key': 'new-identity'})
     assert result.status_code == 200
     assert result.json()['review_reasons'] == []
+
+
+@pytest.mark.asyncio
+@pytest.mark.usefixtures('seller_identity')
+async def test_confirmed_delivery_correction_comprehensive_invariants(client):
+    from test_resolution import conflict_case
+    order, receipt = await conflict_case(client)
+    comparison = (await client.get(f"/api/seller/transactions/{receipt['id']}")).json()
+    res = await client.post(
+        f"/api/seller/transactions/{receipt['id']}/resolve",
+        json={
+            'expected_version': comparison['receipt']['version'],
+            'selected_observation_id': receipt['observations'][0]['id'],
+            'reason': 'Select exact receipt',
+        },
+        headers={'Idempotency-Key': 'resolve-for-invariants'},
+    )
+    assert res.status_code == 200
+
+    path = f"/api/seller/orders/{order['id']}"
+    confirmed = (await client.get(path)).json()
+    assert confirmed['lifecycle'] == 'confirmed'
+    assert confirmed['completed_at'] is not None
+
+    receipt_before = (await client.get(f"/api/seller/transactions/{receipt['id']}")).json()['receipt']
+
+    # 1. Delivery-only correction: updates name, contact, address
+    delivery = await client.patch(
+        path + '/buyer-details',
+        json={
+            'expected_version': confirmed['version'],
+            'reason': 'Customer requested new shipping address',
+            'buyer_name': 'Updated Recipient',
+            'contact_number': '01922222222',
+            'address': {'raw_text': 'House 10, Road 5, Dhanmondi, Dhaka', 'district': 'Dhaka'},
+        },
+        headers={'Idempotency-Key': 'delivery-correction-1'},
+    )
+    assert delivery.status_code == 200
+    updated = delivery.json()
+
+    # Commercial terms, balance, allocation, and completion time are strictly unchanged
+    assert updated['lifecycle'] == 'confirmed'
+    assert updated['total_minor'] == confirmed['total_minor']
+    assert updated['required_advance_minor'] == confirmed['required_advance_minor']
+    assert updated['expected_cod_minor'] == confirmed['expected_cod_minor']
+    assert updated['actual_cod_minor'] == confirmed['actual_cod_minor']
+    assert updated['allocation_basis'] == confirmed['allocation_basis']
+    assert updated['completed_at'] == confirmed['completed_at']
+    assert updated['version'] == confirmed['version'] + 1
+    assert updated['buyer_revision'] == confirmed['buyer_revision'] + 1
+
+    # Receipt allocation/version remains untouched on delivery-only correction
+    receipt_after = (await client.get(f"/api/seller/transactions/{receipt['id']}")).json()['receipt']
+    assert receipt_after['version'] == receipt_before['version']
+
+    # 2. History verification
+    history_resp = await client.get(path + '/history')
+    assert history_resp.status_code == 200
+    items = history_resp.json()['items']
+    assert len(items) == 2
+    rev1, rev2 = items[0], items[1]
+    assert rev2['revision_number'] == 2
+    assert rev2['buyer_name'] == 'Updated Recipient'
+    assert rev2['contact_number'] == '01922222222'
+    assert rev2['address']['raw_text'] == 'House 10, Road 5, Dhanmondi, Dhaka'
+    assert rev2['address']['district'] == 'Dhaka'
+    assert rev2['reason'] == 'Customer requested new shipping address'
+    assert rev2['claim_accepted_at'] == rev1['claim_accepted_at']
+    assert rev2['payment_claim'] == rev1['payment_claim']
+
+    # 3. Public projection privacy: no personal fields leaked, status remains confirmed
+    public_resp = await client.get(f"/api/public/orders/{confirmed['portal_token']}")
+    assert public_resp.status_code == 200
+    pub_data = public_resp.json()
+    assert pub_data['lifecycle'] == 'confirmed'
+    assert pub_data['actual_cod_minor'] == confirmed['actual_cod_minor']
+    assert 'buyer_name' not in pub_data
+    assert 'contact_number' not in pub_data
+    assert 'address' not in pub_data
+    assert 'payment_claim' not in pub_data
+
+    # 4. Public re-submission rejected on confirmed order
+    sub_resp = await client.post(
+        f"/api/public/orders/{confirmed['portal_token']}/submission",
+        json={
+            'buyer_name': 'Hacker',
+            'contact_number': '01700000000',
+            'address': {'raw_text': 'Nowhere'},
+            'payment_claim': {
+                'provider': 'bkash',
+                'trx_id': 'FAKE',
+                'sender_number': '01800000000',
+                'amount_minor': 200000,
+            },
+        },
+        headers={'Idempotency-Key': 'public-resubmit-attempt'},
+    )
+    assert sub_resp.status_code == 409
+    assert sub_resp.json()['error']['code'] == 'ORDER_ALREADY_SUBMITTED'
+
+    # 5. Extra/forbidden fields rejected with 422
+    for forbidden in [
+        {'courier_booking_id': 'PATHAO-123'},
+        {'courier_status': 'dispatched'},
+        {'actual_cod_minor': 50000},
+        {'total_minor': 500000},
+    ]:
+        bad_req = await client.patch(
+            path + '/buyer-details',
+            json={
+                'expected_version': updated['version'],
+                'reason': 'Forbidden extra field attempt',
+                'buyer_name': 'Another Name',
+                **forbidden,
+            },
+            headers={'Idempotency-Key': 'extra-field-attempt'},
+        )
+        assert bad_req.status_code == 422

@@ -60,7 +60,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
       const prior = history?.items.at(-1);
       const input: CorrectionInput = {expected_version: order.version, reason,
         buyer_name: draft.buyer_name, contact_number: draft.contact_number, address: draft.address};
-      if (JSON.stringify(payment) !== JSON.stringify(prior?.payment_claim)) input.payment_claim = payment;
+      if (order.lifecycle !== 'confirmed' && JSON.stringify(payment) !== JSON.stringify(prior?.payment_claim)) input.payment_claim = payment;
       const mutation = pending ?? {key: crypto.randomUUID(), input};
       setPending(mutation);
       const result = await correctBuyer(order.id, mutation.input, mutation.key, token);
@@ -77,14 +77,28 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
     } finally {if (alive.current) setBusy(false);}
   }
 
+  const isConfirmed = order?.lifecycle === 'confirmed';
+  const buttonLabel = busy
+    ? (isConfirmed ? 'Saving delivery correction…' : 'Saving…')
+    : pending
+      ? 'Retry same correction'
+      : isConfirmed
+        ? 'Save delivery correction'
+        : 'Save correction and check again';
+
   return <section className="buyer-correction" aria-label="Seller buyer corrections">
     <h3>Correct buyer information / ক্রেতার তথ্য সংশোধন</h3>
     {error && <p role="alert">{error}</p>}
     {!order && !error && <p role="status">Loading buyer information…</p>}
     {order && <p role="status">{order.lifecycle} — {order.review_reasons.join(', ') || 'No private review reasons'}</p>}
+    {isConfirmed && (
+      <div className="courier-notice" role="note" style={{marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: '#fef08a'}}>
+        Portal corrections do not update courier bookings. Update courier parcels separately if already booked. / পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। কুরিয়ারে বুকিং করা থাকলে আলাদাভাবে আপডেট করুন।
+      </div>
+    )}
     {stale && <button onClick={async () => {
       if (!order) return;
-      try {await load(order.id, true); setStale(false); setError('Review your retained inputs against the refreshed order before saving.');}
+      try {await load(order.id, true); setStale(false); setPending(null); setError('Review your retained inputs against the refreshed order before saving.');}
       catch (err) {setError(err instanceof Error ? err.message : 'Refresh unavailable');}
     }}>Refresh order and retain inputs</button>}
     {draft && order && ['pending', 'confirmed'].includes(order.lifecycle) && <form onSubmit={event => {event.preventDefault(); void submit();}}>
@@ -92,7 +106,12 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
         <label>Buyer name<input required maxLength={200} value={draft.buyer_name} onChange={e => setDraft({...draft, buyer_name: e.target.value})} /></label>
         <label>Contact number<input required maxLength={32} value={draft.contact_number} onChange={e => setDraft({...draft, contact_number: e.target.value})} /></label>
         <label>Delivery address<textarea required maxLength={2000} value={draft.address.raw_text} onChange={e => setDraft({...draft, address: {...draft.address, raw_text: e.target.value}})} /></label>
-        <fieldset disabled={order.lifecycle === 'confirmed'}><legend>Payment claim</legend>
+        <fieldset disabled={isConfirmed}><legend>Payment claim</legend>
+          {isConfirmed && (
+            <p className="payment-locked-note" style={{fontSize: '0.8rem', color: '#94a3b8', margin: '4px 0 8px'}}>
+              Payment terms and accepted advance are locked on confirmed orders. / কনফার্মড অর্ডারে পেমেন্ট ও অগ্রিমের তথ্য অপরিবর্তনশীল।
+            </p>
+          )}
           <label>Provider<select value={draft.payment_claim.provider} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, provider: e.target.value === 'bkash' ? 'bkash' : 'nagad'}})}><option value="bkash">bKash</option><option value="nagad">Nagad</option></select></label>
           <label>Transaction ID<input required maxLength={128} value={draft.payment_claim.trx_id} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, trx_id: e.target.value}})} /></label>
           <label>Payment sender<input required maxLength={32} value={draft.payment_claim.sender_number} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, sender_number: e.target.value}})} /></label>
@@ -100,7 +119,9 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
         </fieldset>
         <label>Correction reason<textarea required maxLength={1000} value={reason} onChange={e => setReason(e.target.value)} /></label>
       </fieldset>
-      <button type="submit" disabled={busy || stale || (!pending && !reason.trim())}>{busy ? 'Saving…' : pending ? 'Retry same correction' : 'Save correction and check again'}</button>
+      <button type="submit" disabled={busy || stale || (!pending && !reason.trim())}>
+        {buttonLabel}
+      </button>
     </form>}
     {history && <details><summary>Buyer revision history ({history.items.length})</summary>
       {history.items.map(item => <article key={item.id}>

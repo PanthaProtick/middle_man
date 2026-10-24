@@ -20,7 +20,7 @@ async def test_manual_rollback_durability_and_replay(postgres_buyer):
         CREATE FUNCTION reject_decision() RETURNS trigger LANGUAGE plpgsql AS $$
         BEGIN RAISE EXCEPTION 'synthetic outage'; END $$;
         CREATE TRIGGER reject_decision BEFORE INSERT ON idempotency_records
-        FOR EACH ROW WHEN (NEW.operation='accept_payment') EXECUTE FUNCTION reject_decision();
+        FOR EACH ROW WHEN (NEW.operation IN ('accept_payment', 'order_decision')) EXECUTE FUNCTION reject_decision();
     """)
     failed = await decision(client,order,receipt)
     assert failed.status_code == 503, failed.text

@@ -5,12 +5,10 @@ import json
 
 from buyer_postgres_support import wait_for_order_waiters
 from test_payment_exceptions import exception_case
-from test_public_order_routes import _create_test_order
 
 
 async def test_postgres_cancellation_and_rejection_durability(postgres_buyer):
-    client, connection, _, _ = postgres_buyer
-    order = await _create_test_order(client)
+    client, connection, _, order = postgres_buyer
     path = f"/api/seller/orders/{order['id']}"
 
     # Cancel awaiting_buyer order
@@ -42,8 +40,7 @@ async def test_postgres_cancellation_and_rejection_durability(postgres_buyer):
 
 
 async def test_postgres_replacement_atomicity_and_links(postgres_buyer):
-    client, connection, _, _ = postgres_buyer
-    order = await _create_test_order(client)
+    client, connection, _, order = postgres_buyer
     path = f"/api/seller/orders/{order['id']}"
 
     replace_res = await client.post(

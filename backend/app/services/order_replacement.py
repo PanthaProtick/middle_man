@@ -112,11 +112,6 @@ async def _replace(
         pred_row = (await db.execute(
             select(OrderTable).where(OrderTable.id == predecessor_id).with_for_update()
         )).scalar_one()
-        pred_row.lifecycle = pred_lifecycle
-        pred_row.version += 1
-        pred_row.completed_at = pred_row.completed_at or now
-        pred_row.replaced_by_order_id = new_order_id
-        pred_row.updated_at = now
 
         new_row = OrderTable(
             id=new_order_id,
@@ -140,6 +135,14 @@ async def _replace(
             replaced_by_order_id=None,
         )
         db.add(new_row)
+        await db.flush()
+
+        pred_row.lifecycle = pred_lifecycle
+        pred_row.version += 1
+        pred_row.completed_at = pred_row.completed_at or now
+        pred_row.replaced_by_order_id = new_order_id
+        pred_row.updated_at = now
+
         db.add(AuditEventTable(
             id=str(uuid.uuid4()), shop_id=shop_id, aggregate_type="order",
             aggregate_id=predecessor_id, actor=actor, action="order_replaced",
@@ -150,6 +153,7 @@ async def _replace(
             aggregate_id=new_order_id, actor=actor, action="order_created_replacement",
             details=new_details, created_at=now,
         ))
+        await db.flush()
     else:
         pred_raw = _memory_orders[predecessor_id]
         pred_raw["lifecycle"] = pred_lifecycle

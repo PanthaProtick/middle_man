@@ -53,3 +53,59 @@ it('retains edits and retries an unknown correction with identical payload and k
   expect(container.textContent).toContain('Buyer revision history (2)');
   await act(async () => root.unmount()); container.remove();
 });
+
+
+it('renders courier notice and locked payment state on confirmed orders', async () => {
+  const order = {id: 'order-conf', version: 3, lifecycle: 'confirmed', review_reasons: []};
+  const revision = {id: 'rev-1', revision_number: 1, buyer_name: 'Original Buyer', contact_number: '01711111111',
+    address: {raw_text: 'House 1, Dhaka'}, payment_claim: {provider: 'bkash', trx_id: 'CONF-PAY', sender_number: '01822222222', amount_minor: 200000},
+    actor: 'buyer', reason: null, created_at: '2026-10-23T00:00:00Z', claim_accepted_at: '2026-10-23T00:00:00Z'};
+  const response = (data: unknown) => new Response(JSON.stringify(data));
+  const requests: RequestInit[] = [];
+  vi.spyOn(globalThis, 'fetch')
+    .mockResolvedValueOnce(response(order))
+    .mockResolvedValueOnce(response({items: [revision], next_cursor: null}))
+    .mockImplementationOnce(async (_url, init) => {requests.push(init!); return response({...order, version: 4});})
+    .mockResolvedValueOnce(response({...order, version: 4}))
+    .mockResolvedValueOnce(response({items: [revision, {...revision, id: 'rev-2', revision_number: 2, buyer_name: 'New Name', reason: 'Fixed name'}], next_cursor: null}));
+
+  const container = document.createElement('div'); document.body.append(container);
+  const root = createRoot(container);
+  await act(async () => root.render(<BuyerCorrection orderId="order-conf" token="seller-tok" />));
+
+  // Courier notice and payment locked notice must be visible
+  expect(container.textContent).toContain('Portal corrections do not update courier bookings');
+  expect(container.textContent).toContain('Payment terms and accepted advance are locked on confirmed orders');
+
+  // Submit button has distinct label for delivery corrections
+  const submitBtn = container.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+  expect(submitBtn.textContent).toBe('Save delivery correction');
+
+  // Payment fieldset must be disabled
+  const paymentFieldset = container.querySelector('fieldset fieldset')!;
+  expect(paymentFieldset.hasAttribute('disabled')).toBe(true);
+
+  // Edit name and submit
+  const nameInput = container.querySelector<HTMLInputElement>('input[value="Original Buyer"]')!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(nameInput, 'New Name');
+    nameInput.dispatchEvent(new Event('input', {bubbles: true}));
+  });
+  const reason = container.querySelector<HTMLTextAreaElement>('label:last-child textarea')!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(reason, 'Fixed name');
+    reason.dispatchEvent(new Event('input', {bubbles: true}));
+  });
+  await act(async () => {
+    container.querySelector('form')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));
+  });
+
+  expect(requests).toHaveLength(1);
+  const sentBody = JSON.parse(requests[0]?.body as string);
+  expect(sentBody.payment_claim).toBeUndefined();
+  expect(sentBody.buyer_name).toBe('New Name');
+  expect(sentBody.reason).toBe('Fixed name');
+  expect(sentBody.expected_version).toBe(3);
+
+  await act(async () => root.unmount()); container.remove();
+});

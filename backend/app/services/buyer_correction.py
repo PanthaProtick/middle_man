@@ -80,7 +80,9 @@ async def _correct(db: AsyncSession | None, shop_id: str, actor: str, order_id: 
         return SellerOrder.model_validate(cached[1])
     if order.version != payload.expected_version:
         raise StaleVersionError('Order changed. Refresh before correcting.')
-    if order.lifecycle not in {'pending', 'confirmed'} or (order.lifecycle == 'confirmed' and 'payment_claim' in payload.model_fields_set):
+    if order.lifecycle not in {'pending', 'confirmed'}:
+        raise SellerDomainException(409, 'INVALID_LIFECYCLE', f'Cannot correct order in {order.lifecycle} status.')
+    if order.lifecycle == 'confirmed' and 'payment_claim' in payload.model_fields_set:
         raise SellerDomainException(409, 'PAYMENT_FIELDS_LOCKED', 'Payment fields are locked after confirmation.')
     if db is not None:
         active = await db.scalar(select(BuyerRevisionTable).where(
@@ -98,8 +100,12 @@ async def _correct(db: AsyncSession | None, shop_id: str, actor: str, order_id: 
     raw = buyer_revision(submission, order_id, now)
     raw.update(revision_number=prior.revision_number + 1, actor=actor, source='seller', reason=payload.reason,
                claim_accepted_at=now if changed_claim else prior.claim_accepted_at)
-    identities = {(prior.payment_claim.provider, prior.payment_claim.trx_id),
-                  (submission.payment_claim.provider, submission.payment_claim.trx_id)}
+    identities = (
+        {(prior.payment_claim.provider, prior.payment_claim.trx_id),
+         (submission.payment_claim.provider, submission.payment_claim.trx_id)}
+        if changed_claim
+        else set()
+    )
     receipt_ids = []
     if db is not None:
         record = await db.get(OrderTable, order_id)
