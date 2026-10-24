@@ -21,12 +21,14 @@ interface SellerWorkspaceProps {
   token?: string;
   activeSection?: WorkspaceSection;
   onSectionChange?: (section: WorkspaceSection) => void;
+  onSignIn?: (token: string) => void;
 }
 
 export function SellerWorkspace({
-  token = 'mock-seller-token',
+  token,
   activeSection,
   onSectionChange,
+  onSignIn,
 }: SellerWorkspaceProps): React.JSX.Element {
   const [internalSection, setInternalSection] = useState<WorkspaceSection>('orders');
   const currentSection = activeSection ?? internalSection;
@@ -36,7 +38,7 @@ export function SellerWorkspace({
     onSectionChange?.(section);
   };
 
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState<boolean>(() => Boolean(token));
   const [shop, setShop] = useState<Shop | null>(null);
   const [setupNeeded, setSetupNeeded] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
@@ -58,6 +60,7 @@ export function SellerWorkspace({
 
   const loadOrders = useCallback(
     async (status?: string, cursor?: string) => {
+      if (!token) return;
       try {
         const res = await fetchOrders({ status: status || undefined, cursor }, token);
         setOrders((prev) => (cursor ? [...prev, ...res.items] : res.items));
@@ -71,6 +74,7 @@ export function SellerWorkspace({
 
   const loadTransactions = useCallback(
     async (filterKey?: string, cursor?: string) => {
+      if (!token) return;
       setTransactionsLoading(true);
       try {
         const review = filterKey === 'conflicted' ? 'conflicted' : undefined;
@@ -89,6 +93,7 @@ export function SellerWorkspace({
   );
 
   const loadData = useCallback(() => {
+    if (!token) return;
     fetchShop(token)
       .then(async (status) => {
         setSetupNeeded(status.setup_needed);
@@ -106,8 +111,9 @@ export function SellerWorkspace({
   }, [token, ordersFilter, transactionsFilter, loadOrders, loadTransactions]);
 
   useEffect(() => {
+    if (!token) return;
     loadData();
-  }, [loadData]);
+  }, [token, loadData]);
 
   const handleFilterChange = (status: string) => {
     setOrdersFilter(status);
@@ -116,6 +122,7 @@ export function SellerWorkspace({
 
   const handleCreateShop = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!token) return setError('Authentication required');
     if (!shopName.trim()) return setError('Shop display name cannot be blank');
     setSetupSubmitting(true);
     setError(null);
@@ -132,6 +139,26 @@ export function SellerWorkspace({
       setSetupSubmitting(false);
     }
   };
+
+  if (!token) {
+    return (
+      <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
+        <div style={{ maxWidth: '420px', margin: '0 auto' }}>
+          <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>Sign in to your shop</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '0.95rem' }}>
+            Please authenticate to manage your orders, receiving accounts, and shop settings.
+          </p>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => onSignIn?.('dev-pilot_seller')}
+          >
+            Sign in
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

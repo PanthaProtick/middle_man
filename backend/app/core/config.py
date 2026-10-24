@@ -108,6 +108,15 @@ class Settings(BaseSettings):
         return True
 
     @property
+    def is_clerk_verifier_configured(self) -> bool:
+        """Checks if Clerk token verifier key or issuer is configured."""
+        if self.CLERK_JWT_KEY and not _has_placeholder(self.CLERK_JWT_KEY, ["your-clerk-jwt-key"]):
+            return True
+        if self.CLERK_ISSUER and not _has_placeholder(self.CLERK_ISSUER, ["clerk.your-domain.com", "your-clerk-issuer"]):
+            return True
+        return False
+
+    @property
     def is_order_link_encryption_configured(self) -> bool:
         """Checks if a dedicated application key for link encryption is provided and not a placeholder."""
         key = self.ORDER_LINK_ENCRYPTION_KEY.strip()
@@ -118,31 +127,34 @@ class Settings(BaseSettings):
     @property
     def effective_payment_marker_secret(self) -> str:
         """Returns the primary marker secret or identity alias."""
-        return self.PAYMENT_MARKER_SECRET.strip() or self.PAYMENT_IDENTITY_SECRET.strip()
+        return self.PAYMENT_MARKER_SECRET or self.PAYMENT_IDENTITY_SECRET
 
     @property
     def is_payment_marker_protection_configured(self) -> bool:
-        """Checks if a dedicated secret for payment marker protection is provided and not a placeholder."""
-        secret = self.effective_payment_marker_secret
+        """Checks if a non-placeholder payment marker secret is configured."""
+        secret = self.effective_payment_marker_secret.strip()
         return bool(secret) and not _has_placeholder(
-            secret,
-            ["your-marker-secret", "your-payment-marker-secret", "your-payment-identity-secret"],
+            secret, ["your-marker-secret", "your-payment-secret"]
         )
 
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
-    def assemble_cors_origins(cls, v: object) -> object:
+    def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
         if isinstance(v, str):
-            v = v.strip()
-            if v.startswith("["):
-                try:
-                    return json.loads(v)
-                except Exception:
-                    pass
-            return [i.strip() for i in v.split(",") if i.strip()]
-        return v
+            if not v.startswith("["):
+                return [i.strip() for i in v.split(",") if i.strip()]
+            parsed = json.loads(v)
+            if isinstance(parsed, list):
+                return [str(item) for item in parsed]
+            return [str(parsed)]
+        return list(v)
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=True,
+        extra="ignore",
+    )
 
 
 settings = Settings()

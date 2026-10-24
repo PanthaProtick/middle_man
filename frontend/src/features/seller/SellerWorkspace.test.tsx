@@ -280,4 +280,121 @@ describe('SellerWorkspace Component', () => {
     expect(container.textContent).toContain('Network offline');
     expect(container.textContent).toContain('Retry');
   });
+
+  it('renders unauthenticated sign-in prompt and does not fetch when token is not provided', async () => {
+    const fetchSpy = vi.spyOn(globalThis, 'fetch');
+
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(SellerWorkspace, {}));
+    });
+
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(container.textContent).toContain('Sign in');
+    expect(container.textContent).not.toContain('Active Shop');
+  });
+
+  it('triggers onSignIn callback when Sign in button is clicked, and clears data on sign out', async () => {
+    const mockOrder: SellerOrder = {
+      id: 'ord-123',
+      shop_id: 's1',
+      payment_account_id: 'acc-1',
+      product_name: 'Wireless Earbuds',
+      total_minor: 250000,
+      required_advance_minor: 50000,
+      expected_cod_minor: 200000,
+      actual_cod_minor: null,
+      account_provider: 'bkash',
+      account_receiving_number: '01711223344',
+      account_label: 'Personal bKash',
+      lifecycle: 'awaiting_buyer',
+      version: 1,
+      review_reasons: [],
+      buyer_revision: null,
+      allocation_basis: null,
+      portal_token: 'tok-xyz-456',
+      portal_url: '/orders/tok-xyz-456',
+      created_at: '2026-10-24T12:00:00Z',
+      updated_at: '2026-10-24T12:00:00Z',
+      expires_at: '2026-10-26T12:00:00Z',
+      completed_at: null,
+    };
+
+    vi.spyOn(globalThis, 'fetch').mockImplementation((input: RequestInfo | URL) => {
+      const urlStr = typeof input === 'string' ? input : input.toString();
+      if (urlStr.includes('/seller/shop')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              shop: { id: 's1', owner_id: 'o1', display_name: 'Active Shop', created_at: '', updated_at: '' },
+              setup_needed: false,
+            }),
+            { status: 200, headers: { 'Content-Type': 'application/json' } },
+          ),
+        );
+      }
+      if (urlStr.includes('/seller/payment-accounts')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify([
+              {
+                id: 'acc-1',
+                shop_id: 's1',
+                provider: 'bkash',
+                receiving_number: '01711223344',
+                label: 'Personal bKash',
+                is_active: true,
+                version: 1,
+                created_at: '',
+                updated_at: '',
+              },
+            ]),
+            { status: 200, headers: { 'Content-Type': 'application/json' } },
+          ),
+        );
+      }
+      if (urlStr.includes('/seller/orders')) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ items: [mockOrder], next_cursor: null }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+          }),
+        );
+      }
+      return Promise.reject(new Error(`Unhandled URL: ${urlStr}`));
+    });
+
+    const onSignIn = vi.fn();
+    const root = createRoot(container);
+
+    // 1. Initially unauthenticated
+    await act(async () => {
+      root.render(React.createElement(SellerWorkspace, { token: undefined, onSignIn }));
+    });
+    expect(container.textContent).toContain('Sign in to your shop');
+
+    const signInBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Sign in'),
+    );
+    expect(signInBtn).toBeDefined();
+    await act(async () => {
+      signInBtn?.click();
+    });
+    expect(onSignIn).toHaveBeenCalled();
+
+    // 2. Sign in with token
+    await act(async () => {
+      root.render(React.createElement(SellerWorkspace, { token: 'valid-test-token', onSignIn }));
+    });
+    expect(container.textContent).toContain('Active Shop');
+
+    // 3. Sign out (token becomes undefined) -> private data cleared
+    await act(async () => {
+      root.render(React.createElement(SellerWorkspace, { token: undefined, onSignIn }));
+    });
+    expect(container.textContent).not.toContain('Active Shop');
+    expect(container.textContent).toContain('Sign in to your shop');
+  });
 });
+
+

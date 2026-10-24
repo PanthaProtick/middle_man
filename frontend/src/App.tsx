@@ -9,10 +9,47 @@ import { BuyerPortal } from './features/buyer';
 import { DemoTools } from './features/demo';
 import { fetchHealth, type HealthStatus } from './services/api';
 
+const SELLER_TOKEN_KEY = 'middleman_seller_token';
+
+function getStoredToken(): string | undefined {
+  try {
+    if (typeof window !== 'undefined' && typeof window.localStorage?.getItem === 'function') {
+      return window.localStorage.getItem(SELLER_TOKEN_KEY) || undefined;
+    }
+  } catch {
+    // Ignore storage errors in testing or restricted environments
+  }
+  return undefined;
+}
+
+function setStoredToken(token?: string): void {
+  try {
+    if (typeof window !== 'undefined' && typeof window.localStorage?.setItem === 'function') {
+      if (token) {
+        window.localStorage.setItem(SELLER_TOKEN_KEY, token);
+      } else {
+        window.localStorage.removeItem(SELLER_TOKEN_KEY);
+      }
+    }
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 export default function App(): React.JSX.Element {
   const [activeTab, setActiveTab] = useState<'orders' | 'demo'>('orders');
   const [health, setHealth] = useState<HealthStatus | null>(null);
+  const [token, setToken] = useState<string | undefined>(getStoredToken);
+
+  const handleSignIn = (newToken: string) => {
+    setToken(newToken);
+    setStoredToken(newToken);
+  };
+
+  const handleSignOut = () => {
+    setToken(undefined);
+    setStoredToken(undefined);
+  };
 
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const isOrderPortal = pathname.startsWith('/orders/');
@@ -67,6 +104,8 @@ export default function App(): React.JSX.Element {
         health={health}
         onOpenDemo={() => setActiveTab(activeTab === 'demo' ? 'orders' : 'demo')}
         isDemoActive={activeTab === 'demo'}
+        isAuthenticated={Boolean(token)}
+        onSignOut={handleSignOut}
       />
 
       <section className="app-masthead" aria-labelledby="workspace-heading">
@@ -89,7 +128,7 @@ export default function App(): React.JSX.Element {
         {activeTab === 'demo' ? (
           <DemoTools health={health} />
         ) : (
-          <SellerWorkspace />
+          <SellerWorkspace token={token} onSignIn={handleSignIn} />
         )}
       </main>
 

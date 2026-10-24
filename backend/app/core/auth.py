@@ -1,31 +1,26 @@
 import uuid
-from dataclasses import dataclass
 from typing import Optional
 
-from fastapi import Header, HTTPException, Request, status
+from fastapi import Header, Request
 
+from app.core.clerk_verifier import (
+    AuthenticationError,
+    AuthenticationUnavailableError,
+    ClerkTokenVerifier,
+    SellerIdentity,
+)
 from app.core.config import settings
 
-
-@dataclass(frozen=True)
-class SellerIdentity:
-    owner_id: str
-
-
-class AuthenticationError(HTTPException):
-    def __init__(self, message: str = "Missing or invalid seller identity") -> None:
-        super().__init__(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail={"code": "UNAUTHORIZED", "message": message},
-        )
-
-
-class AuthenticationUnavailableError(HTTPException):
-    def __init__(self, message: str = "Identity verification unavailable") -> None:
-        super().__init__(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail={"code": "AUTH_UNAVAILABLE", "message": message},
-        )
+__all__ = [
+    "SellerIdentity",
+    "AuthenticationError",
+    "AuthenticationUnavailableError",
+    "ClerkTokenVerifier",
+    "NonLiveDevIdentityAdapter",
+    "get_clerk_verifier",
+    "get_seller_identity",
+    "get_request_id",
+]
 
 
 class NonLiveDevIdentityAdapter:
@@ -44,6 +39,17 @@ class NonLiveDevIdentityAdapter:
 
 
 _dev_identity_adapter = NonLiveDevIdentityAdapter()
+_clerk_verifier: Optional[ClerkTokenVerifier] = None
+
+
+def get_clerk_verifier() -> ClerkTokenVerifier:
+    global _clerk_verifier
+    if _clerk_verifier is None:
+        _clerk_verifier = ClerkTokenVerifier(
+            issuer=settings.CLERK_ISSUER,
+            jwt_key_pem=settings.CLERK_JWT_KEY,
+        )
+    return _clerk_verifier
 
 
 async def get_seller_identity(
@@ -52,7 +58,7 @@ async def get_seller_identity(
 ) -> SellerIdentity:
     """Verifies seller identity.
 
-    Live mode verifies cryptographic bearer token via Clerk or JWT key.
+    Live/durable mode verifies cryptographic bearer token via Clerk or JWT key.
     Raw headers or config flags alone NEVER establish live authentication.
     In testing/offline mode, test suites explicitly inject dependency overrides.
     In development mode, an explicit non-live adapter is used for credential-free work.
@@ -64,19 +70,30 @@ async def get_seller_identity(
     if not token:
         raise AuthenticationError("Empty authentication token")
 
+    # In durable integration mode or production: default mock token never grants access
+    if settings.is_durable_mode and token == "mock-seller-token":
+        raise AuthenticationError("Mock seller token is not permitted in durable mode")
+
+    # In production or when live/integration verifier is configured:
+    if settings.ENV == "production" or settings.is_clerk_verifier_configured or _clerk_verifier is not None:
+        if token.startswith("dev-") or token == "mock-seller-token":
+            raise AuthenticationError("Dev or mock tokens are not permitted when identity verifier is configured")
+
+        if not settings.is_clerk_verifier_configured and _clerk_verifier is None:
+            raise AuthenticationUnavailableError("Live authentication verifier is not configured")
+
+        return get_clerk_verifier().verify_token(token)
+
+    # In offline development or unit testing without configured verifier:
     if settings.ENV in ("development", "test"):
         dev_identity = _dev_identity_adapter.verify(token)
         if dev_identity is not None:
             return dev_identity
+        if "." in token:
+            raise AuthenticationUnavailableError("Identity verification unavailable")
         raise AuthenticationError("Invalid authentication credentials")
 
-    if not settings.is_clerk_configured:
-        # If in live mode but no verifier configured or unreachable:
-        raise AuthenticationUnavailableError("Live authentication verifier is not configured")
-
-    # In production with live Clerk credentials, perform token verification.
-    # Placeholder/unverified tokens in live mode are rejected.
-    raise AuthenticationError("Invalid authentication credentials")
+    raise AuthenticationUnavailableError("Live authentication verifier is not configured")
 
 
 def get_request_id(

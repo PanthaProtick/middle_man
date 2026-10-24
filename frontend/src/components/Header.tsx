@@ -1,14 +1,22 @@
 import React from 'react';
-import { Sparkles, ShoppingBag } from 'lucide-react';
+import { Sparkles, ShoppingBag, LogOut } from 'lucide-react';
 import type { HealthStatus } from '../services/api';
 
 interface HeaderProps {
   health: HealthStatus | null;
   onOpenDemo?: () => void;
   isDemoActive?: boolean;
+  isAuthenticated?: boolean;
+  onSignOut?: () => void;
 }
 
-export default function Header({ health, onOpenDemo, isDemoActive }: HeaderProps): React.JSX.Element {
+export default function Header({
+  health,
+  onOpenDemo,
+  isDemoActive,
+  isAuthenticated,
+  onSignOut,
+}: HeaderProps): React.JSX.Element {
   const isHealthy = health?.status === 'healthy';
 
   return (
@@ -31,6 +39,18 @@ export default function Header({ health, onOpenDemo, isDemoActive }: HeaderProps
           <span className="badge-dot" aria-hidden="true"></span>
           <span>{isHealthy ? 'Connected' : 'Connecting'}</span>
         </div>
+
+        {isAuthenticated && onSignOut && (
+          <button
+            type="button"
+            onClick={onSignOut}
+            className="demo-pill-btn"
+            title="Sign out of seller account"
+          >
+            <LogOut size={13} color="var(--rose-accent)" aria-hidden="true" />
+            <span>Sign out</span>
+          </button>
+        )}
 
         <button
           type="button"
