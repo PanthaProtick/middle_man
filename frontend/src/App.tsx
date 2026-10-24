@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Database, BookOpen, Terminal, CheckCircle2, Store } from 'lucide-react';
+import { Sparkles, Database, BookOpen, Terminal, CheckCircle2, Store, ShieldCheck, ArrowLeft, ArrowUpRight } from 'lucide-react';
 import Header from './components/Header';
-import TechStackBar from './components/TechStackBar';
 import { GeminiPlayground } from './features/gemini';
 import { DataExplorer } from './features/items';
 import { SellerWorkspace } from './features/seller';
@@ -28,39 +27,31 @@ export default function App(): React.JSX.Element {
 
   if (isOrderPortal && portalToken) {
     return (
-      <div className="app-container" style={{ minHeight: '100vh', padding: '16px 8px' }}>
-        <header
-          style={{
-            maxWidth: '480px',
-            margin: '0 auto 16px auto',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            borderBottom: '1px solid var(--border-subtle)',
-            paddingBottom: '12px',
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ fontWeight: 700, fontSize: '0.95rem', color: '#f8fafc' }}>
-              F-Commerce Order Confirmation
-            </span>
+      <div className="portal-shell">
+        <header className="portal-header">
+          <div className="portal-brand">
+            <ShieldCheck size={18} color="#6366f1" />
+            <span>Secure order confirmation</span>
           </div>
           <a
             href="/"
-            style={{
-              fontSize: '0.8rem',
-              color: '#818cf8',
-              textDecoration: 'none',
-              padding: '4px 8px',
-              borderRadius: '4px',
-              background: 'rgba(99, 102, 241, 0.1)',
-            }}
+            className="btn btn-secondary btn-sm"
+            style={{ textDecoration: 'none' }}
           >
-            ← Back to Home
+            <ArrowLeft size={13} /> Back to Home
           </a>
         </header>
         <BuyerPortal portalToken={portalToken} />
-        <p style={{textAlign: 'center'}}><a href={`/?order-link=${encodeURIComponent(portalToken)}`} referrerPolicy="no-referrer">Seller access: correct buyer information</a></p>
+        <div className="portal-footer-action">
+          <a
+            href={`/?order-link=${encodeURIComponent(portalToken)}`}
+            referrerPolicy="no-referrer"
+            className="btn btn-secondary btn-sm"
+            style={{ textDecoration: 'none', color: '#a5b4fc', fontSize: '0.8rem' }}
+          >
+            <Store size={13} /> Seller Access: Correct Buyer Information
+          </a>
+        </div>
       </div>
     );
   }
@@ -70,25 +61,26 @@ export default function App(): React.JSX.Element {
       {/* Navbar with Live Badges */}
       <Header health={health} />
 
-      {/* Hero Header */}
-      <section className="hero">
-        <div className="hero-pill">
-          <span>🚀 Start Building with Dev Template</span>
+      <section className="app-masthead" aria-labelledby="workspace-heading">
+        <div>
+          <p className="eyebrow">Commerce operations / Bangladesh</p>
+          <h2 id="workspace-heading">Orders that <em>hold up.</em></h2>
+          <p className="masthead-copy">
+            Create confirmation links, verify delivery advances, and keep every payment decision traceable.
+          </p>
         </div>
-        <h2>
-          Build Faster with <span className="gradient-text">Gemini & Full-Stack Speed</span>
-        </h2>
-        <p>
-          Instant development scaffolding equipped with React, FastAPI async endpoints, Neon Serverless PostgreSQL, Google Gemini AI integration, and uv package management.
-        </p>
+        <div className="masthead-note">
+          <span className="masthead-note__number">01</span>
+          <span>Start in the seller desk.<br />Everything else is supporting context.</span>
+          <ArrowUpRight size={18} aria-hidden="true" />
+        </div>
       </section>
 
-      {/* Tech Stack Chip Bar */}
-      <TechStackBar />
-
       {/* Navigation Tabs */}
-      <nav className="tabs-nav">
+      <nav className="tabs-nav" role="tablist" aria-label="Main Navigation">
         <button
+          role="tab"
+          aria-selected={activeTab === 'seller'}
           className={`tab-btn ${activeTab === 'seller' ? 'active' : ''}`}
           onClick={() => setActiveTab('seller')}
         >
@@ -97,6 +89,8 @@ export default function App(): React.JSX.Element {
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'gemini'}
           className={`tab-btn ${activeTab === 'gemini' ? 'active' : ''}`}
           onClick={() => setActiveTab('gemini')}
         >
@@ -105,6 +99,8 @@ export default function App(): React.JSX.Element {
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'database'}
           className={`tab-btn ${activeTab === 'database' ? 'active' : ''}`}
           onClick={() => setActiveTab('database')}
         >
@@ -113,6 +109,8 @@ export default function App(): React.JSX.Element {
         </button>
 
         <button
+          role="tab"
+          aria-selected={activeTab === 'setup'}
           className={`tab-btn ${activeTab === 'setup' ? 'active' : ''}`}
           onClick={() => setActiveTab('setup')}
         >
@@ -175,7 +173,7 @@ cd frontend&#10;npm run dev
 
       {/* Footer */}
       <footer className="footer">
-        <p>Dev Template • Built with React, FastAPI, Neon, Google Gemini, and uv</p>
+        <p>Middle Man • F-Commerce Order Confirmation & Advance Verification • Powered by React, FastAPI, Neon, Google Gemini, and uv</p>
       </footer>
     </div>
   );

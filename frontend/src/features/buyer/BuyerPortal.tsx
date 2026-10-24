@@ -33,20 +33,20 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
 
   if (loading) {
     return (
-      <div style={{ maxWidth: '480px', margin: '40px auto', textAlign: 'center', padding: '32px' }}>
-        <Loader2 size={36} className="spin" color="#6366f1" style={{ margin: '0 auto 16px auto' }} />
-        <div style={{ color: '#94a3b8', fontSize: '0.9rem' }}>Loading order details / অর্ডার লোড হচ্ছে...</div>
+      <div className="portal-loading" role="status">
+        <Loader2 size={36} className="spin" color="#818cf8" aria-hidden="true" />
+        <div>Loading order details / অর্ডার লোড হচ্ছে...</div>
       </div>
     );
   }
 
   if (gateDisabledMessage) {
     return (
-      <div style={{ maxWidth: '480px', margin: '40px auto', padding: '0 16px' }}>
-        <div className="card" style={{ border: '1px solid rgba(234, 179, 8, 0.4)', textAlign: 'center', padding: '24px' }}>
-          <ShieldAlert size={40} color="#eab308" style={{ margin: '0 auto 12px auto' }} />
-          <h3 style={{ margin: '0 0 8px 0', color: '#fef08a' }}>Public Access Disabled</h3>
-          <p style={{ fontSize: '0.85rem', color: '#cbd5e1', lineHeight: '1.5' }}>
+      <div className="portal-notice portal-notice--warning" role="alert">
+        <ShieldAlert size={24} color="#facc15" aria-hidden="true" />
+        <div>
+          <h2 style={{ margin: '0 0 4px', color: '#fef08a', fontSize: '1.05rem' }}>Public Access Disabled</h2>
+          <p style={{ margin: 0, lineHeight: 1.5 }}>
             {gateDisabledMessage}
           </p>
         </div>
@@ -56,11 +56,11 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
 
   if (error || !order) {
     return (
-      <div style={{ maxWidth: '480px', margin: '40px auto', padding: '0 16px' }}>
-        <div className="card" style={{ border: '1px solid rgba(239, 68, 68, 0.4)', textAlign: 'center', padding: '24px' }}>
-          <AlertCircle size={40} color="#ef4444" style={{ margin: '0 auto 12px auto' }} />
-          <h3 style={{ margin: '0 0 8px 0', color: '#fca5a5' }}>Unable to Load Order / অর্ডার দেখা যাচ্ছে না</h3>
-          <p style={{ fontSize: '0.85rem', color: '#cbd5e1', marginBottom: '16px' }}>
+      <div className="portal-notice portal-notice--error" role="alert">
+        <AlertCircle size={24} color="#fb7185" aria-hidden="true" />
+        <div>
+          <h2 style={{ margin: '0 0 4px', color: '#fecdd3', fontSize: '1.05rem' }}>Unable to Load Order / অর্ডার দেখা যাচ্ছে না</h2>
+          <p style={{ margin: '0 0 14px', lineHeight: 1.5 }}>
             {error || 'The requested order could not be loaded.'}
           </p>
           <button type="button" onClick={refresh} disabled={isRefreshing} className="btn btn-secondary">
@@ -72,9 +72,9 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   }
 
   return (
-    <div style={{ maxWidth: '480px', margin: '20px auto', padding: '0 16px 40px 16px' }}>
+    <main className="portal-main">
       <BuyerOrderDetails order={order} />
-      {refreshError && <p role="alert">{refreshError}</p>}
+      {refreshError && <div className="portal-notice portal-notice--error" role="alert">{refreshError}</div>}
 
       {order.lifecycle === 'awaiting_buyer' ? (
         <BuyerSubmissionForm
@@ -91,6 +91,6 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
       ) : (
         <BuyerStatusView order={order} onRefresh={refresh} isRefreshing={isRefreshing} />
       )}
-    </div>
+    </main>
   );
 }

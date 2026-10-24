@@ -66,6 +66,30 @@ describe('CreateOrderModal Component', () => {
     expect(select).not.toBeNull();
     expect(select.options.length).toBe(1);
     expect(select.options[0].text).toContain('Main bKash');
+    expect(container.querySelector('[role="dialog"]')?.getAttribute('aria-modal')).toBe('true');
+    expect(document.activeElement).toBe(container.querySelector('input[name="productName"]'));
+  });
+
+  it('closes with Escape when it is not submitting', async () => {
+    const onClose = vi.fn();
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(
+        React.createElement(CreateOrderModal, {
+          accounts: mockAccounts,
+          onClose,
+          onOrderCreated: vi.fn(),
+          onError: vi.fn(),
+        }),
+      );
+    });
+
+    await act(async () => {
+      window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    });
+
+    expect(onClose).toHaveBeenCalledOnce();
+    await act(async () => root.unmount());
   });
 
   it('validates required advance cannot exceed total', async () => {

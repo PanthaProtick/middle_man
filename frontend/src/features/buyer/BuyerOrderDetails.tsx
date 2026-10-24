@@ -43,7 +43,7 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
         </span>
       </div>
 
-      <div style={{ marginBottom: '16px', padding: '12px', background: 'rgba(15, 23, 42, 0.6)', borderRadius: '8px' }}>
+      <div className="buyer-order-item" style={{ marginBottom: '16px' }}>
         <div style={{ fontSize: '0.85rem', color: '#94a3b8' }}>Item / পণ্য:</div>
         <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#f1f5f9', marginTop: '2px' }}>
           {order.product_name}
@@ -59,21 +59,21 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
           marginBottom: '16px',
         }}
       >
-        <div style={{ padding: '10px', background: 'rgba(30, 41, 59, 0.5)', borderRadius: '6px' }}>
+        <div className="buyer-order-item">
           <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Total / মোট মূল্য</div>
           <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#e2e8f0', marginTop: '2px' }}>
             {formatBDT(order.total_minor)}
           </div>
         </div>
 
-        <div style={{ padding: '10px', background: 'rgba(30, 41, 59, 0.5)', borderRadius: '6px', borderLeft: '3px solid #6366f1' }}>
+        <div className="buyer-order-item" style={{ borderLeft: '3px solid #818cf8' }}>
           <div style={{ fontSize: '0.75rem', color: '#818cf8' }}>Advance Due / অগ্রিম</div>
           <div style={{ fontSize: '1.05rem', fontWeight: 700, color: '#c7d2fe', marginTop: '2px' }}>
             {formatBDT(order.required_advance_minor)}
           </div>
         </div>
 
-        <div style={{ padding: '10px', background: 'rgba(30, 41, 59, 0.5)', borderRadius: '6px' }}>
+        <div className="buyer-order-item">
           <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>Expected COD / বাকি COD</div>
           <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#94a3b8', marginTop: '2px' }}>
             {formatBDT(order.expected_cod_minor)}
@@ -82,15 +82,7 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
       </div>
 
       {/* Receiving Account Box */}
-      <div
-        style={{
-          padding: '14px',
-          borderRadius: '8px',
-          background: 'rgba(99, 102, 241, 0.08)',
-          border: '1px solid rgba(99, 102, 241, 0.25)',
-          marginBottom: '14px',
-        }}
-      >
+      <div className="buyer-payment-destination" style={{ marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
           <div style={{ fontSize: '0.8rem', color: '#a5b4fc', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ShieldCheck size={16} />

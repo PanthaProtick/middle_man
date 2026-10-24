@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, ShoppingBag, AlertCircle, ArrowRight } from 'lucide-react';
 import type { PaymentAccount, SellerOrder } from './types';
 import { createOrder } from './api';
@@ -30,6 +30,29 @@ export function CreateOrderModal({
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
+  const productInputRef = useRef<HTMLInputElement>(null);
+  const previouslyFocusedRef = useRef<HTMLElement | null>(null);
+  const submittingRef = useRef(false);
+
+  useEffect(() => {
+    submittingRef.current = submitting;
+  }, [submitting]);
+
+  useEffect(() => {
+    previouslyFocusedRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    productInputRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && !submittingRef.current) {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      previouslyFocusedRef.current?.focus();
+    };
+  }, [onClose]);
 
   const totalNum = parseInt(totalBdt.trim(), 10) || 0;
   const advanceNum = parseInt(advanceBdt.trim(), 10) || 0;
@@ -87,10 +110,13 @@ export function CreateOrderModal({
 
   return (
     <div
+      role="presentation"
       style={{
         position: 'fixed',
         inset: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -100,23 +126,28 @@ export function CreateOrderModal({
     >
       <div
         className="card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="create-order-dialog-title"
         style={{
           width: '100%',
           maxWidth: '520px',
-          background: '#0d131f',
+          background: 'rgba(15, 23, 42, 0.95)',
           border: '1px solid var(--border-subtle)',
-          borderRadius: '12px',
+          borderRadius: '16px',
           padding: '24px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <ShoppingBag size={20} color="#6366f1" />
-            <h3 style={{ margin: 0, fontSize: '1.15rem', color: '#fff' }}>Create Order & Buyer Link</h3>
+            <ShoppingBag size={20} color="#f59e0b" />
+            <h3 id="create-order-dialog-title" style={{ margin: 0, fontSize: '1.2rem', color: '#fff', fontFamily: 'var(--font-heading)' }}>Create Order & Buyer Link</h3>
           </div>
           <button
             onClick={onClose}
-            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer' }}
+            aria-label="Close dialog"
+            style={{ background: 'none', border: 'none', color: '#94a3b8', cursor: 'pointer', padding: '4px', borderRadius: '4px', display: 'flex' }}
           >
             <X size={20} />
           </button>
@@ -160,6 +191,7 @@ export function CreateOrderModal({
               </label>
               <input
                 type="text"
+                ref={productInputRef}
                 name="productName"
                 placeholder="e.g. Leather Laptop Bag (Black)"
                 value={productName}

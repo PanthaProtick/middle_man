@@ -12,6 +12,7 @@ import { ManualTransactionModal } from './ManualTransactionModal';
 import { BuyerCorrection } from './BuyerCorrection';
 import { EvidenceRetentionPanel } from './EvidenceRetentionPanel';
 import { StructuredRetentionPanel } from './StructuredRetentionPanel';
+import { ShopMetricsBar } from './ShopMetricsBar';
 
 interface SellerWorkspaceProps {
   token?: string;
@@ -34,7 +35,6 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
   const [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Shop setup state
   const [shopName, setShopName] = useState<string>('');
   const [setupSubmitting, setSetupSubmitting] = useState<boolean>(false);
   const shopIdempotencyKeyRef = useRef<string>(crypto.randomUUID());
@@ -139,8 +139,8 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
 
   if (loading) {
     return (
-      <div className="card" style={{ padding: '32px', textAlign: 'center' }}>
-        <RefreshCw size={24} className="spin" style={{ color: '#6366f1', margin: '0 auto 12px' }} />
+      <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
+        <RefreshCw size={28} className="spin" style={{ color: '#6366f1', margin: '0 auto 12px' }} />
         <p style={{ color: 'var(--text-secondary)' }}>Loading shop workspace...</p>
       </div>
     );
@@ -148,8 +148,8 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
 
   if (error && !shop && !setupNeeded) {
     return (
-      <div className="card" style={{ padding: '32px', textAlign: 'center' }}>
-        <AlertCircle size={28} style={{ color: '#ef4444', margin: '0 auto 12px' }} />
+      <div className="card" style={{ padding: '36px', textAlign: 'center' }}>
+        <AlertCircle size={32} style={{ color: '#ef4444', margin: '0 auto 12px' }} />
         <h4 style={{ color: '#fca5a5', marginBottom: '8px' }}>Workspace Error</h4>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>{error}</p>
         <button className="btn btn-primary btn-sm" onClick={() => { setLoading(true); loadData(); }}>
@@ -164,7 +164,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
       <div className="card-header">
         <div>
           <div className="card-title">
-            <Store size={20} color="#6366f1" />
+            <Store size={22} color="#f59e0b" />
             <span>{setupNeeded ? 'Shop Setup' : (shop?.display_name || 'Seller Workspace')}</span>
           </div>
           <p className="card-subtitle">
@@ -174,7 +174,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
           </p>
         </div>
         {!setupNeeded && (
-          <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <button className="btn btn-secondary btn-sm" onClick={() => setIsRecordModalOpen(true)}>
               <Smartphone size={14} /> Record Payment
             </button>
@@ -189,25 +189,26 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
       </div>
 
       {error && (
-        <div style={{ margin: '16px 0', padding: '12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <AlertCircle size={16} />
+        <div role="alert" style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: '#fca5a5', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <AlertCircle size={18} />
           <span>{error}</span>
         </div>
       )}
 
       {setupNeeded ? (
-        <form onSubmit={handleCreateShop} style={{ marginTop: '16px' }}>
+        <form onSubmit={handleCreateShop} style={{ marginTop: '20px' }}>
           <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
             Shop Display Name
           </label>
-          <div style={{ display: 'flex', gap: '8px', maxWidth: '500px' }}>
+          <div style={{ display: 'flex', gap: '10px', maxWidth: '520px', flexWrap: 'wrap' }}>
             <input
               type="text"
               name="displayName"
               placeholder="e.g. Dhaka Gadget Hub"
               value={shopName}
               onChange={(e) => setShopName(e.target.value)}
-              style={{ flex: 1, padding: '8px 12px', background: 'rgba(10, 14, 23, 0.6)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: '#fff' }}
+              className="text-input"
+              style={{ flex: 1, minWidth: '220px' }}
               disabled={setupSubmitting}
             />
             <button type="submit" className="btn btn-primary" disabled={setupSubmitting || !shopName.trim()}>
@@ -216,13 +217,20 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
           </div>
         </form>
       ) : (
-        <div style={{ marginTop: '20px' }}>
-          {new URLSearchParams(window.location.search).get('order-link') && <BuyerCorrection
-            portalToken={new URLSearchParams(window.location.search).get('order-link')!} token={token}
-            onCorrected={() => {void loadOrders(ordersFilter);}} />}
+        <div style={{ marginTop: '16px' }}>
+          <ShopMetricsBar orders={orders} transactionsCount={transactions.length} />
+
+          {new URLSearchParams(window.location.search).get('order-link') && (
+            <BuyerCorrection
+              portalToken={new URLSearchParams(window.location.search).get('order-link')!}
+              token={token}
+              onCorrected={() => { void loadOrders(ordersFilter); }}
+            />
+          )}
+
           <OrderList
             token={token}
-            onCorrected={() => {void loadOrders(ordersFilter);}}
+            onCorrected={() => { void loadOrders(ordersFilter); }}
             orders={orders}
             statusFilter={ordersFilter}
             onFilterChange={handleFilterChange}
@@ -232,7 +240,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
 
           <hr style={{ border: 'none', borderTop: '1px solid var(--border-subtle)', margin: '28px 0 20px' }} />
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
             <h4 style={{ color: '#c7d2fe', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Smartphone size={16} /> Received Payments Inbox
             </h4>
@@ -241,9 +249,13 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
             </button>
           </div>
 
-          <SmsImportPanel accounts={accounts} token={token}
+          <SmsImportPanel
+            accounts={accounts}
+            token={token}
             onManual={(id) => { setManualAccountId(id); setIsRecordModalOpen(true); }}
-            onImported={() => { void loadTransactions(transactionsFilter); void loadOrders(ordersFilter); }} />
+            onImported={() => { void loadTransactions(transactionsFilter); void loadOrders(ordersFilter); }}
+          />
+
           <TransactionInbox
             accounts={accounts}
             token={token}
@@ -279,8 +291,9 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
             onAccountCreated={(created) => setAccounts((prev) => [...prev, created])}
             onError={setError}
           />
-      <EvidenceRetentionPanel token={token} />
-      <StructuredRetentionPanel token={token} onCleaned={() => { void loadOrders(ordersFilter); void loadTransactions(transactionsFilter); }} />
+
+          <EvidenceRetentionPanel token={token} />
+          <StructuredRetentionPanel token={token} onCleaned={() => { void loadOrders(ordersFilter); void loadTransactions(transactionsFilter); }} />
         </div>
       )}
 

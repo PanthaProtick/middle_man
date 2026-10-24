@@ -63,8 +63,8 @@ export function TransactionInbox({
             }}
           >
             <option value="">All Transactions</option>
-            <option value="conflicted">⚠️ Conflicted Only</option>
-            <option value="incomplete">ℹ️ Incomplete Only</option>
+            <option value="conflicted">Conflicted Only</option>
+            <option value="incomplete">Incomplete Only</option>
             <option value="unmatched">Unmatched Only</option>
             <option value="used">Used Only</option>
           </select>
