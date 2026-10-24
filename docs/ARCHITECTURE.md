@@ -77,3 +77,11 @@ holds the lock. Resolution audit, allocation and idempotent outcome commit toget
 The memory adapter remains for offline tests. Durable acceptance is separately checked
 against isolated loopback PostgreSQL schemas. Synthetic browser adapters never enable
 public access or establish live authentication readiness for deployment.
+
+Unallocated receipt edits share that shop lock and commit correction audit, appended
+observation, old/new claim reconciliation and idempotent response together. Serialization
+failures retry the whole correction. Identity collisions fail without merging or
+creating funds. Migration `0009_observation_identity.sql` backfills immutable observed
+provider/TrxID snapshots before receipt identities can change. Historic observations
+from a different identity cannot be selected by resolution. Structured correction
+history uses existing audit records and retention rules; raw SMS is not copied.

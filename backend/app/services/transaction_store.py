@@ -69,6 +69,8 @@ def to_observation_view(
             transaction_id=str(raw.transaction_id),
             payment_account_id=str(raw.payment_account_id),
             source=raw.source,
+            provider=raw.provider,
+            trx_id=raw.trx_id,
             actor=raw.actor,
             amount_minor=int(raw.amount_minor),
             sender_number_raw=raw.sender_number_raw,

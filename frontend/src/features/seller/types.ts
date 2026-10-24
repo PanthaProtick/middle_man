@@ -101,6 +101,8 @@ export interface TransactionObservation {
   transaction_id: string;
   payment_account_id: string;
   source: string;
+  provider: string;
+  trx_id: string;
   actor: string;
   amount_minor: number;
   sender_number_raw?: string | null;

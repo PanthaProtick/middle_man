@@ -243,6 +243,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
             onManual={(id) => { setManualAccountId(id); setIsRecordModalOpen(true); }}
             onImported={() => { void loadTransactions(transactionsFilter); void loadOrders(ordersFilter); }} />
           <TransactionInbox
+            accounts={accounts}
             token={token}
             onResolved={() => { void loadTransactions(transactionsFilter); void loadOrders(ordersFilter); }}
             transactions={transactions}

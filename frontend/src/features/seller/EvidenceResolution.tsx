@@ -3,15 +3,18 @@ import { useEffect, useRef, useState } from 'react';
 import { formatBangladeshTime, SellerApiError } from './api';
 import { compareReceipt, resolveReceipt } from './resolution';
 import type { ReceiptComparison, ResolutionInput } from './resolution';
+import type { PaymentAccount } from './types';
+import { ReceiptCorrection } from './ReceiptCorrection';
 
 const formatBdt = (minor: number) => `BDT ${(minor / 100).toFixed(2)}`;
 
-interface Props { receiptId: string; token: string; onResolved: () => void }
+interface Props { receiptId: string; token: string; onResolved: () => void; accounts?: PaymentAccount[] }
 
-export function EvidenceResolution({receiptId, token, onResolved}: Props) {
+export function EvidenceResolution({receiptId, token, onResolved, accounts = []}: Props) {
   const [comparison, setComparison] = useState<ReceiptComparison>();
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [correcting, setCorrecting] = useState(false);
   const [observation, setObservation] = useState('');
   const [order, setOrder] = useState('');
   const [reason, setReason] = useState('');
@@ -35,7 +38,7 @@ export function EvidenceResolution({receiptId, token, onResolved}: Props) {
   }
 
   async function submit() {
-    if (!comparison || busy) return;
+    if (!comparison || busy || correcting) return;
     const mutation = pending ?? {key: crypto.randomUUID(), input: {
       expected_version: comparison.receipt.version, selected_observation_id: observation,
       selected_order_id: order || null, reason: reason.trim(),
@@ -47,7 +50,7 @@ export function EvidenceResolution({receiptId, token, onResolved}: Props) {
     } catch (err) {
       if (!alive.current) return;
       setError(err instanceof Error ? err.message : 'Outcome unknown; retry the same decision');
-      if (err instanceof SellerApiError && ['STALE_VERSION', 'CLAIM_CHANGED', 'PAYMENT_USED', 'INCOMPLETE_EVIDENCE'].includes(err.code)) {
+      if (err instanceof SellerApiError && ['STALE_VERSION', 'CLAIM_CHANGED', 'PAYMENT_USED', 'INCOMPLETE_EVIDENCE', 'OBSERVATION_IDENTITY_CHANGED'].includes(err.code)) {
         setPending(null);
         await refetch();
       }
@@ -69,12 +72,16 @@ export function EvidenceResolution({receiptId, token, onResolved}: Props) {
       {' '}{claim.review_reasons.join(', ')} {claim.held_by_resolution && 'Held by seller decision.'}
     </li>)}</ul>
     {error && <p role="alert">{error}</p>}
-    {!locked && <form onSubmit={event => { event.preventDefault(); void submit(); }}>
-      <fieldset disabled={busy || Boolean(pending)}>
+    {!locked && <ReceiptCorrection key={comparison.receipt.version} receipt={comparison.receipt} accounts={accounts}
+      token={token} disabled={busy || Boolean(pending)} onPending={setCorrecting} onStale={refetch}
+      onCorrected={result => { setComparison(result); setObservation(''); setOrder(''); onResolved(); }} />}
+    {!locked && <form aria-label="Resolve evidence" onSubmit={event => { event.preventDefault(); void submit(); }}>
+      <fieldset disabled={busy || Boolean(pending) || correcting}>
         <label>Received observation{!observation && <small> — select complete evidence to continue.</small>}<select aria-label="Received observation" value={observation} onChange={e => setObservation(e.target.value)}>
           <option value="">Select complete observation</option>
           {comparison.receipt.observations.map(obs => <option key={obs.id} value={obs.id}
-            disabled={obs.parse_state !== 'valid' || !obs.sender_number_canonical || !obs.occurred_at}>
+            disabled={obs.parse_state !== 'valid' || !obs.sender_number_canonical || !obs.occurred_at
+              || (obs.trx_id !== undefined && (obs.provider !== comparison.receipt.provider || obs.trx_id !== comparison.receipt.trx_id))}>
             {obs.source}: {formatBdt(obs.amount_minor)}, {obs.sender_number_canonical ?? 'Unknown sender'},
             {' '}{obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : 'Unknown time'}, account {obs.payment_account_id}
           </option>)}
@@ -86,11 +93,21 @@ export function EvidenceResolution({receiptId, token, onResolved}: Props) {
         </select></label>
         <label>Decision reason{!reason.trim() && <small> — a nonblank reason is required.</small>}<textarea aria-label="Decision reason" required maxLength={2000} value={reason} onChange={e => setReason(e.target.value)} /></label>
       </fieldset>
-      <button className="btn btn-secondary btn-sm" disabled={busy || (!pending && (!observation || !reason.trim()))} type="submit">
+      <button className="btn btn-secondary btn-sm" disabled={busy || correcting || (!pending && (!observation || !reason.trim()))} type="submit">
         {busy ? 'Recording…' : pending ? 'Retry same decision' : 'Record resolution'}
       </button>
     </form>}
-    <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void refetch()}>Refresh comparison</button>
+    <button className="btn btn-secondary btn-sm" disabled={busy || correcting || Boolean(pending)} onClick={() => void refetch()}>Refresh comparison</button>
+    <h5>Correction history</h5>
+    <ul>{comparison.corrections?.map(edit => <li key={edit.observation_id}>
+      {edit.actor}: {edit.reason} — {formatBangladeshTime(edit.created_at)}
+      <p>Before: {edit.before.provider} / {edit.before.trx_id}; {formatBdt(edit.before.amount_minor)};
+        {' '}{edit.before.sender_number ?? 'Unknown sender'}; {edit.before.occurred_at ? formatBangladeshTime(edit.before.occurred_at) : 'Unknown time'};
+        {' '}account {edit.before.payment_account_id}; {edit.before.has_conflict ? 'conflicted' : 'consistent'}.</p>
+      <p>After: {edit.after.provider} / {edit.after.trx_id}; {formatBdt(edit.after.amount_minor)};
+        {' '}{edit.after.sender_number ?? 'Unknown sender'}; {edit.after.occurred_at ? formatBangladeshTime(edit.after.occurred_at) : 'Unknown time'};
+        {' '}account {edit.after.payment_account_id}.</p>
+    </li>)}</ul>
     <h5>Decision history</h5>
     <ul>{comparison.history.map((decision, index) => <li key={index}>
       {decision.actor}: {decision.reason} — observation {decision.selected_observation_id};

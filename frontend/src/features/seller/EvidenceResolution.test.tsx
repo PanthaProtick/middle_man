@@ -30,7 +30,7 @@ async function mount() {
       }
     });
   }
-  const submit = async () => act(async () => { container.querySelector('form')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true})); });
+  const submit = async () => act(async () => { container.querySelector('form[aria-label="Resolve evidence"]')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true})); });
   const cleanup = async () => { await act(async () => root.unmount()); container.remove(); };
   return {container, change, submit, cleanup};
 }

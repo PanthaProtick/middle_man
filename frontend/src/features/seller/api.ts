@@ -94,12 +94,14 @@ export function formatRemainingCod(order: {
 }
 
 export class SellerApiError extends Error {
+  status: number;
   code: string;
   fields?: ApiError['fields'];
 
-  constructor(error: ApiError) {
+  constructor(error: ApiError, status = 0) {
     super(error.message);
     this.name = 'SellerApiError';
+    this.status = status;
     this.code = error.code;
     this.fields = error.fields;
   }
@@ -131,15 +133,15 @@ export async function requestJson<T>(
       throw new SellerApiError({
         code: `HTTP_${res.status}`,
         message: `Request failed with status ${res.status}`,
-      });
+      }, res.status);
     }
     if (errBody.error) {
-      throw new SellerApiError(errBody.error);
+      throw new SellerApiError(errBody.error, res.status);
     }
     throw new SellerApiError({
       code: `HTTP_${res.status}`,
       message: typeof errBody.detail === 'string' ? errBody.detail : 'Request failed',
-    });
+    }, res.status);
   }
 
   return res.json() as Promise<T>;

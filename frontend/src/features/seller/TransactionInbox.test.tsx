@@ -108,6 +108,7 @@ describe('Transaction API & Inbox UI', () => {
         observations: [
           {
             id: 'obs-1',
+            provider: 'bkash', trx_id: 'TRX_COMPLETE',
             transaction_id: 'tx-1',
             payment_account_id: 'acc-1',
             source: 'manual',
@@ -141,6 +142,7 @@ describe('Transaction API & Inbox UI', () => {
         observations: [
           {
             id: 'obs-2',
+            provider: 'nagad', trx_id: 'TRX_CONFLICTED',
             transaction_id: 'tx-2',
             payment_account_id: 'acc-1',
             source: 'manual',
@@ -155,6 +157,7 @@ describe('Transaction API & Inbox UI', () => {
           },
           {
             id: 'obs-3',
+            provider: 'nagad', trx_id: 'TRX_CONFLICTED',
             transaction_id: 'tx-2',
             payment_account_id: 'acc-1',
             source: 'manual',

@@ -187,6 +187,8 @@ class TransactionObservationTable(Base):
         String(36), ForeignKey("payment_accounts.id"), nullable=False, index=True
     )
     source: Mapped[str] = mapped_column(String(32), default="manual", nullable=False)
+    provider: Mapped[str] = mapped_column(String(32), nullable=False)
+    trx_id: Mapped[str] = mapped_column(String(128), nullable=False)
     actor: Mapped[str] = mapped_column(String(128), nullable=False)
     amount_minor: Mapped[int] = mapped_column(BigInteger, nullable=False)
     sender_number_raw: Mapped[str | None] = mapped_column(String(32), nullable=True)

@@ -4,7 +4,7 @@
 
 **Blocked by:** [07: Resolve conflicting evidence and competing claims](07-resolve-evidence-conflicts.md)
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 ## Acceptance criteria
 
@@ -33,4 +33,54 @@ API correction/collision/history tests; real PostgreSQL receipt-edit/allocation 
 ## Boundaries
 
 Implement only this approved slice and its required seams; blockers must complete first. Do not replace the stack, fabricate successful writes or expand into courier/payment-processing features. The shared spec's public-access, account-deletion, standalone-receipt retention and provider/storage/rate-limit/backup launch gates remain binding. Implement gated interfaces without selecting deferred policy or treating a configuration flag as readiness. Publication of this ticket does not authorize deployment, live migrations or real-data pilot operation.
+
+## Implementation record — 2026-10-24
+
+- Added typed owning-seller receipt PATCH with required version, reason and mutation
+  key. Partial edits append a manual observation and structured before/after audit;
+  allocated receipts remain locked. Colliding shop/provider/TrxID edits return an
+  actionable conflict without merging or cloning funds.
+- Shared shop serialization covers correction, resolution and allocation. Old and
+  new affected pending claims are rechecked with existing known-claim rules; the
+  correction, history, allocation and idempotent result commit together. Serialization
+  retries restart the entire correction after rollback.
+- Migration `0009_observation_identity.sql` backfills provider/TrxID on observations,
+  retaining original identities across edits. Resolution rejects selecting historical
+  evidence belonging to a different identity. No hosted migration was performed.
+- Seller inbox now offers validated correction fields, reason, before/after history,
+  related claim outcomes, loading/error handling, stale refresh and exact-key retries
+  after unknown outcomes. Corrections and evidence decisions mutually disable while
+  an operation is pending; used receipts show immutable allocation/history.
+- Changed paths: backend receipt-correction models/service/API, observation model/
+  store/ingestion and identity migration, comparison/resolution history/guard; focused
+  API and PostgreSQL tests; frontend seller correction component/client/types/tests,
+  inbox/workspace integration; architecture and API documentation.
+
+### Verification so far
+
+- Focused receipt HTTP tests: PASS, 16; first red test returned 405 for missing PATCH;
+  identity preservation regression initially failed for missing observation identity.
+- Disposable real PostgreSQL: PASS, 6 focused tests, including same/different-key
+  corrections, resolution and claim-correction contention, rollback at idempotency
+  persistence, durable replay/refetch, and old/new identity claim reconciliation.
+  Verified target data directory `E:/middle_man/.cache/resolution-pg`, loopback
+  `127.0.0.1:55447`; actual migrations run in unique disposable test schemas.
+- React correction tests: PASS, 3; existing resolution tests: PASS, 3. Unstructured
+  503 regression caught dropped retry state, fixed by preserving HTTP status on
+  typed API errors. Typechecking and backend lint: PASS.
+- Root `npm run check`: PASS, all eight stages, **161 backend / 52 frontend tests**
+  with `BUYER_TEST_POSTGRES_URL` set to that disposable PostgreSQL target.
+  Fresh result: `.cache/checks/check-fxGjhY/result.json`.
+- Browser: PASS, built React UI on `127.0.0.1:8049/index.html` with a unique disposable
+  PostgreSQL schema and explicit synthetic seller/public adapters. Invalid sender
+  remained editable with error, consistent correction confirmed pending order with
+  actual COD, three retained observations, audited before/after and locked allocation;
+  reload retained outcome/history. Screenshot: `.cache/receipt-correction-browser.png`.
+  Component tests establish loading/retry/permission/stale/collision states; browser
+  evidence establishes validation, integrated success and persistence.
+- Configured/live identity/payment providers, hosted migration and deployment: NOT RUN.
+  Existing public-access, deletion/retention and launch gates remain binding.
+- Independent standards/spec review: pending against user-confirmed base `fc1e91a`.
+
+Next action: complete two-axis review, address findings, record final checks and commit.
 

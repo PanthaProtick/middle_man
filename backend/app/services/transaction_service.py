@@ -46,7 +46,7 @@ class TransactionService:
     def __init__(self, db: Optional[AsyncSession] = None) -> None:
         self.db = db
 
-    async def _verify_account(self, shop_id: str, account_id: str, provider: str) -> None:
+    async def verify_account(self, shop_id: str, account_id: str, provider: str) -> None:
         seller_svc = SellerService(self.db)
         acc = await seller_svc.get_payment_account(shop_id, account_id)
         if not acc:
@@ -67,7 +67,7 @@ class TransactionService:
     ) -> Tuple[ReceiptView, int]:
         if self.db is not None:
             await self.db.execute(select(ShopTable).where(ShopTable.id == shop_id).with_for_update())
-        await self._verify_account(shop_id, payload.payment_account_id, payload.provider)
+        await self.verify_account(shop_id, payload.payment_account_id, payload.provider)
 
         payload_hash = compute_payload_hash(payload.model_dump())
         scope = f"seller:{actor_id}"
@@ -136,6 +136,8 @@ class TransactionService:
                 transaction_id=existing.id,
                 payment_account_id=payload.payment_account_id,
                 source=source,
+                provider=payload.provider,
+                trx_id=trx_id_clean,
                 actor=actor_id,
                 amount_minor=payload.amount_minor,
                 sender_number_raw=payload.sender_number,
@@ -219,6 +221,8 @@ class TransactionService:
             "transaction_id": target_id,
             "payment_account_id": payload.payment_account_id,
             "source": source,
+            "provider": payload.provider,
+            "trx_id": trx_id_clean,
             "actor": actor_id,
             "amount_minor": payload.amount_minor,
             "sender_number_raw": payload.sender_number,

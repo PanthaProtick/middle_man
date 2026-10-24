@@ -3,6 +3,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
+from app.models.receipt_correction import ReceiptCorrectionEvent
 from app.models.transaction import ReceiptView
 
 
@@ -47,3 +48,4 @@ class ReceiptComparison(BaseModel):
     claims: list[ClaimComparison]
     allocated_order_id: str | None
     history: list[ResolutionDecision]
+    corrections: list[ReceiptCorrectionEvent] = []

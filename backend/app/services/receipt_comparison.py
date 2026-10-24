@@ -12,7 +12,7 @@ from app.models.entities import (
 from app.models.resolution import ClaimComparison, ReceiptComparison
 from app.services.reconciliation import get_order_review_reasons
 from app.services.reconciliation_queries import receipt_order_ids
-from app.services.resolution_history import resolution_history
+from app.services.resolution_history import correction_history, resolution_history
 from app.services.seller_service import NotFoundError
 from app.services.transaction_store import _memory_observations, _memory_transactions, to_receipt_view
 
@@ -68,4 +68,4 @@ async def compare_receipt(db: AsyncSession | None, shop_id: str, receipt_id: str
     receipt.related_claims_count = len(claims)
     allocations = await receipt_order_ids(db, shop_id, receipt_id)
     return ReceiptComparison(receipt=receipt, claims=claims, allocated_order_id=allocations[0] if allocations else None,
-                             history=history)
+                             history=history, corrections=await correction_history(db, shop_id, receipt_id))

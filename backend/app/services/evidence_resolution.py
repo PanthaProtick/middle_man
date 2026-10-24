@@ -48,6 +48,9 @@ async def _resolve(db: AsyncSession | None, shop_id: str, actor: str, receipt_id
     selected = next((o for o in receipt.observations if o.id == payload.selected_observation_id), None)
     if selected is None or selected.parse_state != "valid" or not selected.sender_number_canonical or not selected.occurred_at:
         raise SellerDomainException(422, "INCOMPLETE_EVIDENCE", "Select a complete observation belonging to this receipt.")
+    if (selected.provider, selected.trx_id) != (receipt.provider, receipt.trx_id):
+        raise SellerDomainException(409, "OBSERVATION_IDENTITY_CHANGED",
+            "This observation has a previous identity. Correct the receipt identity explicitly before selecting it.")
     active = [c for c in comparison.claims if c.lifecycle == "pending"]
     if payload.selected_order_id is not None and not any(c.order_id == payload.selected_order_id for c in active):
         raise SellerDomainException(409, "CLAIM_CHANGED", "Selected claim is no longer pending. Refetch and compare.")

@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.database import get_db
+from app.models.receipt_correction import ReceiptCorrection
 from app.models.resolution import ReceiptComparison, ResolutionInput
 from app.models.transaction import (
     ManualReceipt,
@@ -14,10 +15,30 @@ from app.models.transaction import (
 )
 from app.services.evidence_resolution import resolve_evidence
 from app.services.receipt_comparison import compare_receipt
+from app.services.receipt_correction import correct_receipt
 from app.services.seller_service import NotFoundError, SellerDomainException, SellerService
 from app.services.transaction_service import TransactionService
 
 router = APIRouter(prefix="/seller/transactions", tags=["seller-transactions"])
+
+
+@router.patch("/{receipt_id}", response_model=ReceiptComparison)
+async def correct_transaction(
+    receipt_id: str, payload: ReceiptCorrection, response: Response,
+    idempotency_key: str = Header(..., alias="Idempotency-Key", min_length=1, max_length=128),
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> ReceiptComparison:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if shop is None:
+        raise NotFoundError()
+    try:
+        return await correct_receipt(db, shop.id, seller.owner_id, receipt_id, payload, idempotency_key)
+    except SQLAlchemyError:
+        if db is not None:
+            await db.rollback()
+        raise SellerDomainException(503, "DATABASE_UNAVAILABLE", "Correction outcome unknown. Retry the same payload and key, then refresh.") from None
 
 
 def _set_security_headers(response: Response) -> None:

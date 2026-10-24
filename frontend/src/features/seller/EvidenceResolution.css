@@ -15,6 +15,7 @@
   gap: 6px;
 }
 .evidence-resolution select,
+.evidence-resolution input,
 .evidence-resolution textarea {
   width: 100%;
   max-width: 100%;

@@ -49,6 +49,8 @@ class TransactionObservationView(BaseModel):
     transaction_id: str
     payment_account_id: str
     source: str = "manual"
+    provider: str
+    trx_id: str
     actor: str
     amount_minor: int
     sender_number_raw: Optional[str] = None

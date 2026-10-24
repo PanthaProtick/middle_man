@@ -75,6 +75,26 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   headers. Buyer projections expose no decision reasons or competing-claim identities.
 - Literal SMS endpoints are registered before the dynamic receipt-ID endpoint.
 
+## Unallocated receipt corrections
+
+- `PATCH /api/seller/transactions/{id}` requires owning-seller identity,
+  `Idempotency-Key`, `expected_version`, a nonblank `reason` (max 1000), and at
+  least one corrected receipt field. Account/provider/TrxID/amount cannot be null;
+  sender/time can explicitly become unknown. Times require a timezone. Unknown
+  fields, invalid amounts and cross-shop accounts are rejected.
+- Returns `ReceiptComparison` with corrected receipt, related claim outcomes,
+  allocation and resolution history plus `corrections`: typed before/after values,
+  appended observation ID, actor, reason and time. Original observations stay intact.
+- `RECEIPT_IDENTITY_COLLISION` (409) requires comparing and explicitly resolving
+  the existing same-shop/provider/TrxID receipt; PATCH never merges identities or
+  creates a second spendable receipt. `PAYMENT_USED` locks accepted fields.
+- Both old and new pending claims are rechecked with ordinary exact-match rules.
+  Corrections cannot select a competing claim or authorize matching exceptions.
+- Observation provider/TrxID snapshots prevent resolution from treating an old
+  observation as evidence for a corrected identity (`OBSERVATION_IDENTITY_CHANGED`).
+  Same-key replay precedes version checks; unknown outcomes retain the exact payload
+  and key. Stale versions require refresh before a new correction.
+
 ## Seller buyer corrections
 
 - Seller-authenticated link resolution and same-shop order authorization are required;
