@@ -147,3 +147,38 @@ export interface ReceiptListResponse {
   items: ReceiptView[];
   next_cursor?: string | null;
 }
+
+export interface CleanupFailureItem {
+  evidence_type: string;
+  evidence_id: string;
+  order_id?: string | null;
+  delete_after: string;
+  error: string;
+}
+
+export interface RetentionStatusResponse {
+  shop_id: string;
+  checked_at: string;
+  counts: {
+    screenshots_active: number;
+    screenshots_deleted: number;
+    sms_active: number;
+    sms_purged: number;
+    ai_extractions_active: number;
+    ai_extractions_purged: number;
+  };
+  overdue_count: number;
+  failed_count: number;
+  last_cleanup_at?: string | null;
+  overdue_items: CleanupFailureItem[];
+}
+
+export interface RetentionCleanupResponse {
+  shop_id: string;
+  ran_at: string;
+  items_purged: number;
+  items_failed: number;
+  overdue_remaining: number;
+  status: 'clean' | 'partial_failure' | 'failed';
+  failures: CleanupFailureItem[];
+}

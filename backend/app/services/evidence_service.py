@@ -303,7 +303,7 @@ class EvidenceService:
                     OrderEvidenceTable.shop_id == shop_id,
                 )
             )
-            if record is None or record.status != "attached":
+            if record is None or record.status not in ("attached", "deleted"):
                 raise NotFoundError("Evidence not found")
             if record.deleted_at is not None or record.status == "deleted":
                 raise SellerDomainException(
@@ -326,7 +326,7 @@ class EvidenceService:
             return data, record.media_type
 
         item = _memory_order_evidence.get(evidence_id)
-        if not item or item.get("shop_id") != shop_id or item.get("status") != "attached":
+        if not item or item.get("shop_id") != shop_id or item.get("status") not in ("attached", "deleted"):
             raise NotFoundError("Evidence not found")
         if item.get("deleted_at") is not None or item.get("status") == "deleted":
             raise SellerDomainException(

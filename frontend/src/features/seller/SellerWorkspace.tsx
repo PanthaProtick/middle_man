@@ -10,6 +10,7 @@ import { TransactionInbox } from './TransactionInbox';
 import { SmsImportPanel } from './SmsImportPanel';
 import { ManualTransactionModal } from './ManualTransactionModal';
 import { BuyerCorrection } from './BuyerCorrection';
+import { EvidenceRetentionPanel } from './EvidenceRetentionPanel';
 
 interface SellerWorkspaceProps {
   token?: string;
@@ -277,6 +278,7 @@ export function SellerWorkspace({ token = 'mock-seller-token' }: SellerWorkspace
             onAccountCreated={(created) => setAccounts((prev) => [...prev, created])}
             onError={setError}
           />
+          <EvidenceRetentionPanel token={token} />
         </div>
       )}
 

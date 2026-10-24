@@ -5,6 +5,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.database import get_db
+from app.core.tokens import get_utc_now
+from app.models.cleanup import RetentionCleanupResponse, RetentionStatusResponse
 from app.models.seller import (
     AccountInput,
     AccountUpdateInput,
@@ -13,6 +15,7 @@ from app.models.seller import (
     ShopStatusResponse,
 )
 from app.services.evidence_service import EvidenceService
+from app.services.raw_evidence_cleanup import get_retention_status, purge_raw_evidence
 from app.services.seller_service import NotFoundError, SellerService
 
 router = APIRouter(prefix="/seller", tags=["seller"])
@@ -123,3 +126,29 @@ async def get_seller_evidence(
             "X-Content-Type-Options": "nosniff",
         },
     )
+
+
+@router.get("/retention/status", response_model=RetentionStatusResponse, summary="Get evidence retention and overdue cleanup status")
+async def get_seller_retention_status(
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> RetentionStatusResponse:
+    service = SellerService(db)
+    shop = await service.get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError("Shop not found")
+    now = get_utc_now()
+    return await get_retention_status(db, now, shop.id)
+
+
+@router.post("/retention/cleanup", response_model=RetentionCleanupResponse, summary="Run retryable raw evidence cleanup")
+async def run_seller_retention_cleanup(
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> RetentionCleanupResponse:
+    service = SellerService(db)
+    shop = await service.get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError("Shop not found")
+    now = get_utc_now()
+    return await purge_raw_evidence(db, now, shop.id)

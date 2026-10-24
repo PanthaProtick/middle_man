@@ -367,6 +367,46 @@ async def test_seller_evidence_expired_or_deleted_returns_410(client: AsyncClien
 
 
 @pytest.mark.asyncio
+async def test_seller_evidence_deleted_returns_410_unavailable(client: AsyncClient, seller_identity):
+    order = await _create_test_order(client)
+    token = order["portal_token"]
+    png_data = _create_minimal_png(width=20, height=20)
+
+    res = await client.post(
+        f"/api/public/orders/{token}/evidence",
+        content=png_data,
+        headers={"Content-Type": "image/png", "Idempotency-Key": "ev-del-test"},
+    )
+    assert res.status_code == 201
+    ev_id = res.json()["evidence_id"]
+
+    await client.post(
+        f"/api/public/orders/{token}/submission",
+        json={
+            "buyer_name": "Rahim Ahmed",
+            "contact_number": "01799999999",
+            "address": {"raw_text": "Road 1, Dhanmondi, Dhaka"},
+            "payment_claim": {
+                "provider": "bkash",
+                "trx_id": "TRXDEL123",
+                "sender_number": "01788888888",
+                "amount_minor": 100000,
+                "evidence_id": ev_id,
+            },
+        },
+        headers={"Idempotency-Key": "sub-del-test"},
+    )
+
+    from app.services.evidence_service import _memory_order_evidence
+    _memory_order_evidence[ev_id]["status"] = "deleted"
+    _memory_order_evidence[ev_id]["deleted_at"] = datetime.datetime.now(datetime.timezone.utc)
+
+    seller_get = await client.get(f"/api/seller/evidence/{ev_id}")
+    assert seller_get.status_code == 410
+    assert seller_get.json()["error"]["code"] == "EVIDENCE_UNAVAILABLE"
+
+
+@pytest.mark.asyncio
 async def test_public_gate_denies_evidence_upload_when_unapproved(client: AsyncClient, seller_identity):
     app.dependency_overrides.pop(verify_public_access_gate, None)
     res = await client.post(

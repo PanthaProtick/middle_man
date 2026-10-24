@@ -53,6 +53,8 @@ def read_evidence_file(storage_key: str) -> Optional[bytes]:
 
 
 def delete_evidence_file(storage_key: str) -> None:
+    if _injected_fault:
+        raise StorageOutageError("Storage outage: delete rejected")
     if _storage_dir is not None:
         path = _storage_dir / storage_key
         if path.is_file():

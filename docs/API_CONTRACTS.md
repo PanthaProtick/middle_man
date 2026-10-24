@@ -214,3 +214,20 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
 - GET `/api/seller/payment-summary` returns only confirmed/manual/exception order
   counts for the owning shop. Migration 0010 stores these without personal data,
   receipt/order identifiers or reasons; shared allocation writes counters atomically.
+
+
+## Raw evidence retention and cleanup (Ticket 18)
+
+- Raw payment screenshots, raw SMS bodies, and raw AI extraction requests/responses
+  expire 30 days from original collection. Reprocessing/reimport never restarts deadlines.
+- `purge_raw_evidence` deletes raw image files and sets raw columns (`raw_text`,
+  `raw_request`, `raw_response`) to NULL. Structured observations, claims, order status,
+  accepted allocation, COD, and used-payment markers remain intact.
+- Deleted evidence reads via `GET /api/seller/evidence/{id}` return 410 `EVIDENCE_UNAVAILABLE`.
+  Overdue unpurged evidence returns 410 `EVIDENCE_EXPIRED`.
+- `GET /api/seller/retention/status` provides owning-seller visibility into retained vs
+  purged counts, overdue items, and failure history without cross-shop or raw content leaks.
+- `POST /api/seller/retention/cleanup` runs safe, retryable cleanup. Storage outages prevent
+  acknowledgement or marking records deleted until required copies are removed.
+- External storage bucket version history, database backup retention lifecycles, and
+  third-party AI provider logging terms remain explicit launch gates, not false deletion claims.

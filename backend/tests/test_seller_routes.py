@@ -189,3 +189,41 @@ async def test_seller_shop_isolation(client: AsyncClient) -> None:
         assert resp_patch_foreign.json()["error"]["code"] == "NOT_FOUND"
     finally:
         app.dependency_overrides.pop(get_seller_identity, None)
+
+
+@pytest.mark.asyncio
+async def test_seller_retention_status_and_cleanup_routes(client: AsyncClient) -> None:
+    # 1. Unauthenticated -> 401
+    unauth = await client.get("/api/seller/retention/status")
+    assert unauth.status_code == 401
+
+    seller = SellerIdentity(owner_id="seller_retention_routes")
+    app.dependency_overrides[get_seller_identity] = lambda: seller
+    try:
+        # Shop not created yet -> 404
+        no_shop = await client.get("/api/seller/retention/status")
+        assert no_shop.status_code == 404
+
+        # Create shop
+        await client.post(
+            "/api/seller/shop",
+            json={"display_name": "Retention Shop"},
+            headers={"Idempotency-Key": "ret-shop-key"},
+        )
+
+        # GET retention status -> 200
+        res = await client.get("/api/seller/retention/status")
+        assert res.status_code == 200
+        data = res.json()
+        assert "shop_id" in data
+        assert "counts" in data
+        assert data["overdue_count"] == 0
+
+        # POST retention cleanup -> 200
+        cleanup_res = await client.post("/api/seller/retention/cleanup")
+        assert cleanup_res.status_code == 200
+        cleanup_data = cleanup_res.json()
+        assert cleanup_data["status"] == "clean"
+        assert cleanup_data["items_purged"] == 0
+    finally:
+        app.dependency_overrides.pop(get_seller_identity, None)
