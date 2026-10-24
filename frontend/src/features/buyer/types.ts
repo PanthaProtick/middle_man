@@ -50,4 +50,14 @@ export interface BuyerFormDraft {
   payment_sender: string;
   payment_trx_id: string;
   claimed_advance_bdt: string;
+  evidence_id?: string;
+  evidence_file_name?: string;
+}
+
+export interface EvidenceUploadResponse {
+  evidence_id: string;
+  media_type: string;
+  byte_size: number;
+  width: number;
+  height: number;
 }

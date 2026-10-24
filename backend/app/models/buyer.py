@@ -74,9 +74,14 @@ class PaymentClaim(BaseModel):
     @field_validator("evidence_id")
     @classmethod
     def validate_evidence(cls, value: Optional[str]) -> Optional[str]:
-        if value is not None:
-            raise ValueError("Screenshot references are unavailable in the manual-only submission slice")
-        return value
+        if value is None:
+            return None
+        cleaned = value.strip()
+        if not cleaned:
+            return None
+        if len(cleaned) > 64:
+            raise ValueError("Evidence ID exceeds maximum limit of 64 characters")
+        return cleaned
 
 
 class BuyerSubmission(BaseModel):
@@ -126,3 +131,12 @@ class PublicOrder(BaseModel):
     created_at: datetime
     expires_at: datetime
     completed_at: Optional[datetime] = None
+
+
+class EvidenceUploadResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    evidence_id: str
+    media_type: str
+    byte_size: int
+    width: int
+    height: int

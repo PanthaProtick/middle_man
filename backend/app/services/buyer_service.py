@@ -14,6 +14,8 @@ from app.models.entities import BuyerRevisionTable, OrderTable, ReceivedTransact
 from app.services.buyer_measurements import _memory_link_measurements, record_measurement
 from app.services.buyer_projection import to_public_order
 from app.services.buyer_revision import buyer_revision
+from app.services.evidence_service import EvidenceService, reset_memory_evidence
+from app.services.evidence_store import reset_evidence_file_store
 from app.services.order_service import _check_and_apply_expiry, _memory_orders, _memory_orders_by_digest
 from app.services.reconciliation import get_order_allocation, reconcile_order
 from app.services.seller_service import NotFoundError, SellerDomainException, compute_payload_hash
@@ -35,6 +37,8 @@ _memory_buyer_revisions: dict[str, list[dict[str, Any]]] = {}
 def reset_buyer_memory_store() -> None:
     _memory_buyer_revisions.clear()
     _memory_link_measurements.clear()
+    reset_memory_evidence()
+    reset_evidence_file_store()
 
 
 def _require_unsubmitted(lifecycle: str) -> None:
@@ -104,6 +108,10 @@ class BuyerService:
             if _check_and_apply_expiry(order, now):
                 await self.db.commit()
             _require_unsubmitted(order.lifecycle)
+            if submission.payment_claim.evidence_id:
+                await EvidenceService(self.db, self.clock).attach_order_evidence(
+                    order.id, order.shop_id, submission.payment_claim.evidence_id
+                )
             self.db.add(BuyerRevisionTable(**buyer_revision(submission, order.id, now)))
             order.lifecycle = "pending"
             order.buyer_revision = 1
@@ -139,6 +147,10 @@ class BuyerService:
         now = self.clock()
         _check_and_apply_expiry(raw, now)
         _require_unsubmitted(str(raw["lifecycle"]))
+        if submission.payment_claim.evidence_id:
+            await EvidenceService(None, self.clock).attach_order_evidence(
+                order_id, str(raw["shop_id"]), submission.payment_claim.evidence_id
+            )
         _memory_buyer_revisions[order_id] = [buyer_revision(submission, order_id, now)]
         raw.update(lifecycle="pending", buyer_revision=1, first_submitted_at=now, version=int(raw.get("version", 1)) + 1, updated_at=now)
         await record_measurement(None, digest, "submission", now)

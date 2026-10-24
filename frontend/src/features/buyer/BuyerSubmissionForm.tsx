@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Send, AlertCircle, User, Phone, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import { PaymentClaimFields } from './PaymentClaimFields';
+import { EvidenceUploadField } from './EvidenceUploadField';
 import { canonicalizeBdPhone } from '../seller/api';
 import { parseClaimedAmount } from './api';
 
 interface BuyerSubmissionFormProps {
+  portalToken?: string;
   order: PublicOrder;
   draft: BuyerFormDraft;
   onDraftChange: (draft: BuyerFormDraft) => void;
@@ -17,6 +19,7 @@ interface BuyerSubmissionFormProps {
 }
 
 export function BuyerSubmissionForm({
+  portalToken,
   order,
   draft,
   onDraftChange,
@@ -90,6 +93,7 @@ export function BuyerSubmissionForm({
         trx_id: draft.payment_trx_id.trim(),
         sender_number: draft.payment_sender.trim(),
         amount_minor: amountMinor,
+        ...(draft.evidence_id ? { evidence_id: draft.evidence_id } : {}),
       },
     };
 
@@ -210,6 +214,17 @@ export function BuyerSubmissionForm({
           <div id="address_raw-error" role="alert" style={{ color: '#f87171', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
         )}
       </div>
+
+      {portalToken && (
+        <EvidenceUploadField
+          portalToken={portalToken}
+          evidenceId={draft.evidence_id}
+          fileName={draft.evidence_file_name}
+          onUploaded={(id, name) => onDraftChange({ ...draft, evidence_id: id, evidence_file_name: name })}
+          onRemoved={() => onDraftChange({ ...draft, evidence_id: undefined, evidence_file_name: undefined })}
+          disabled={isSubmitting || isLocked}
+        />
+      )}
 
       <PaymentClaimFields
         order={order}

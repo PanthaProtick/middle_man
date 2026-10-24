@@ -12,6 +12,7 @@ from app.models.seller import (
     ShopInput,
     ShopStatusResponse,
 )
+from app.services.evidence_service import EvidenceService
 from app.services.seller_service import NotFoundError, SellerService
 
 router = APIRouter(prefix="/seller", tags=["seller"])
@@ -98,3 +99,27 @@ async def update_payment_account(
         raise NotFoundError("Payment account not found")
 
     return await service.update_payment_account(shop.id, account_id, payload)
+
+
+@router.get("/evidence/{evidence_id}", summary="Download/view short-lived private evidence")
+async def get_seller_evidence(
+    evidence_id: str,
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> Response:
+    service = SellerService(db)
+    shop = await service.get_shop_by_owner(seller.owner_id)
+    if not shop:
+        raise NotFoundError("Evidence not found")
+
+    data, media_type = await EvidenceService(db).get_seller_evidence(shop.id, evidence_id)
+    ext = "png" if media_type == "image/png" else "jpg"
+    return Response(
+        content=data,
+        media_type=media_type,
+        headers={
+            "Cache-Control": "private, no-store, max-age=0",
+            "Content-Disposition": f'inline; filename="evidence_{evidence_id}.{ext}"',
+            "X-Content-Type-Options": "nosniff",
+        },
+    )

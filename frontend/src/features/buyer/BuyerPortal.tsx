@@ -141,6 +141,7 @@ export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Elemen
 
       {order.lifecycle === 'awaiting_buyer' ? (
         <BuyerSubmissionForm
+          portalToken={portalToken}
           order={order}
           draft={draft}
           onDraftChange={setDraft}

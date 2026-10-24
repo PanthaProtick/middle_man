@@ -131,6 +131,24 @@ class BuyerRevisionTable(Base):
     order: Mapped["OrderTable"] = relationship("OrderTable", back_populates="revisions")
 
 
+class OrderEvidenceTable(Base):
+    __tablename__ = "order_evidence"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    shop_id: Mapped[str] = mapped_column(String(36), ForeignKey("shops.id"), nullable=False, index=True)
+    order_id: Mapped[str] = mapped_column(String(36), ForeignKey("orders.id"), nullable=False, index=True)
+    storage_key: Mapped[str] = mapped_column(String(255), nullable=False)
+    media_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    byte_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    width: Mapped[int] = mapped_column(Integer, nullable=False)
+    height: Mapped[int] = mapped_column(Integer, nullable=False)
+    sha256_digest: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), default="staged", nullable=False, index=True)
+    collected_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    delete_after: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), nullable=False, index=True)
+    deleted_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class LinkMeasurementTable(Base):
     __tablename__ = "link_measurements"
 
