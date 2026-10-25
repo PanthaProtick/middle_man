@@ -5,10 +5,11 @@ import { SellerSession } from './SellerSession';
 
 const clerk = vi.hoisted(() => ({
   getToken: vi.fn(), openSignIn: vi.fn(), signOut: vi.fn(),
-  sessionId: 'session-alpha' as string | null, isSignedIn: true,
+  sessionId: 'session-alpha' as string | null | undefined, isSignedIn: true,
+  isLoaded: true,
 }));
 vi.mock('@clerk/react', () => ({
-  useAuth: () => ({ ...clerk, isLoaded: true }),
+  useAuth: () => ({ ...clerk }),
   useClerk: () => clerk,
 }));
 let container: HTMLDivElement;
@@ -16,6 +17,7 @@ let root: Root;
 beforeEach(() => {
   clerk.sessionId = 'session-alpha';
   clerk.isSignedIn = true;
+  clerk.isLoaded = true;
   clerk.getToken.mockReset().mockResolvedValue('signed-session-token');
   clerk.signOut.mockReset().mockResolvedValue(undefined);
   clerk.openSignIn.mockReset().mockResolvedValue(undefined);
@@ -30,6 +32,24 @@ afterEach(async () => {
   await act(async () => root.unmount());
   container.remove();
   vi.unstubAllGlobals();
+});
+it('shows initialization rather than a missing-configuration diagnosis while Clerk loads', async () => {
+  clerk.isLoaded = false;
+  clerk.sessionId = undefined;
+  await act(async () => root.render(<SellerSession />));
+  expect(container.textContent).toContain('Loading seller sign-in');
+  expect(container.textContent).not.toContain('Configure Clerk');
+  expect(container.textContent).not.toContain('Session verification is unavailable');
+  expect(clerk.getToken).not.toHaveBeenCalled();
+});
+it('does not invent a verification failure for an absent signed-out session', async () => {
+  clerk.sessionId = undefined;
+  clerk.isSignedIn = false;
+  await act(async () => root.render(<SellerSession />));
+  expect(container.textContent).not.toContain('Session verification is unavailable');
+  const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Sign in');
+  await act(async () => button?.click());
+  expect(clerk.openSignIn).toHaveBeenCalled();
 });
 it('obtains a Clerk token for shop access and signs out through Clerk', async () => {
   await act(async () => root.render(<SellerSession />));

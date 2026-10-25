@@ -12,7 +12,7 @@ export function SellerSession(): React.JSX.Element {
   const [signingOut, setSigningOut] = useState(false);
   const [signedOutSession, setSignedOutSession] = useState<string | null>();
   const [failure, setFailure] = useState<{ sessionId: string; kind: SessionFailure }>();
-  const blocked = failure?.sessionId === sessionId;
+  const blocked = failure !== undefined && failure.sessionId === sessionId;
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !sessionId || signingOut || sessionId === signedOutSession || blocked) return;
@@ -57,6 +57,8 @@ export function SellerSession(): React.JSX.Element {
       setSigningOut(false);
     }
   };
+
+  if (!isLoaded) return <p role="status">Loading seller sign-in…</p>;
 
   return <>
     {error && <p role="alert">{error}</p>}

@@ -125,6 +125,12 @@ Clerk test session and record dated evidence here.
 
 ## Bounded context
 
+### 2026-10-25 Ticket 20 sign-in regression repair
+
+`SellerSession` treated `failure?.sessionId === sessionId` as a failure when both were absent during Clerk initialization. It also rendered the unconfigured-Clerk workspace while the configured SDK was still loading. Require an actual failure record and show a loading status until Clerk loads. `SellerSession.test.tsx` covers loading, absent signed-out session and real sign-in callback alongside existing session-loss regressions (11 PASS); `npm run typecheck`: PASS.
+
+Actual local in-app browser at `http://localhost:5173/`: observed `Loading seller sign-in…`, then an enabled Sign in button; clicking opened the real Clerk `Sign in to MiddleMan` dialog with email and Google options, marked Development mode. No credentials entered and no identity authenticated. This supersedes the disabled-button diagnosis in Ticket 20; two-identity authentication/ownership acceptance remains pending. Full gate runs via final commit hook; exact result is reported in the handoff.
+
 Read the shared ticket index and only the relevant specification sections first.
 Then trace: Seller application entry, token acquisition, shared backend identity verification and shop setup/read contracts.
 

@@ -7,10 +7,11 @@ import asyncpg
 from fastapi import HTTPException, status
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import Settings, settings
+from app.core.database_engine import create_database_engine
 
 logger = logging.getLogger(__name__)
 
@@ -148,19 +149,8 @@ AsyncSessionLocal = None
 db_url = settings.effective_database_url
 
 if db_url and settings.is_database_configured:
-    if db_url.startswith("postgresql://"):
-        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-    elif db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
-
-    connect_args = {}
-    if "-pooler" in db_url or "pooler" in db_url:
-        connect_args["statement_cache_size"] = 0
-
     try:
-        engine = create_async_engine(
-            db_url, echo=settings.DEBUG, hide_parameters=True, future=True, pool_pre_ping=True, connect_args=connect_args
-        )
+        engine = create_database_engine(db_url, debug=settings.DEBUG)
         AsyncSessionLocal = async_sessionmaker(
             engine, class_=AsyncSession, expire_on_commit=False, autoflush=False
         )

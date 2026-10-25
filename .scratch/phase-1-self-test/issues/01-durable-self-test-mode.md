@@ -34,6 +34,14 @@ Reserve context for diagnosis, focused verification and the final gate. Before a
 
 ## Comments
 
+### 2026-10-25 Ticket 20 startup regression repair
+
+The real startup attempt reproduced `connect() got an unexpected keyword argument 'sslmode'`, then exposed unsupported `channel_binding`. Added `app/core/database_engine.py` and routed engine creation through it: preserve TLS modes while translating libpq options for asyncpg; select the async psycopg/libpq dialect when channel binding is configured, preserving its requirement. Added locked `psycopg[binary]` dependency. Pooler connections disable driver-specific prepared-statement caching. Conflicting TLS options and repeated security options fail explicitly.
+
+`npm run test:backend -- tests/test_database_connection_options.py tests/test_durable_mode.py`: 26 PASS; the regression initially reproduced the unsupported keyword. `npm run typecheck`: PASS. Local startup now passes driver argument handling and reaches the network connection attempt; network sandbox denies outbound PostgreSQL. Automatic approval review rejected escalation because the configured Neon target has not been confirmed as the dedicated development target. No migrations or fixture writes performed. Live connectivity/schema readiness remain unverified; target confirmation is the next action. Full gate runs via the final commit hook; its exact result is reported in the handoff.
+
+Environment repair: copied pytest/uvicorn launchers used the original template's virtual environment. Reinstalled locked pytest/uvicorn/ruff/mypy locally; tests now resolve this checkout's packages. `npm run setup` installed dependencies but failed at Git hook configuration due sandbox permissions (earlier frontend attempt also encountered a running-Vite file lock, resolved by stopping Vite). No application workaround for these local environment faults.
+
 ### Decisions & Implementation
 1. **Mode Configuration (`app.core.config.Settings`)**:
    - Added `SELF_TEST_MODE: bool = False`.

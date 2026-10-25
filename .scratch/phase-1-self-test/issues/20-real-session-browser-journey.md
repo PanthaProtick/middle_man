@@ -6,6 +6,8 @@
 
 **Status:** blocked — attempted setup; real-session journey not completed
 
+2026-10-25 follow-up: startup option compatibility and sign-in UI fixes are recorded in Tickets 01 and 04. Real browser now opens Clerk sign-in. Database verification requires confirmation that the configured Neon target is the dedicated development database; automatic approval review rejected the network escalation pending that prerequisite. Earlier observations below are historical; no full journey completion is claimed.
+
 ## Acceptance criteria
 
 - [ ] Record revision, local URLs, sanitized target identity and dated observations for setup, receiving account, fixed order, link, manual buyer form, optional image and confirmation.
