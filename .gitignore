@@ -59,3 +59,6 @@ tasks/local/
 .mypy_cache/
 .ruff_cache/
 frontend/test-results/
+
+# Durable Private Evidence Storage
+.evidence/

@@ -24,6 +24,7 @@ from app.core.database import DurableStorageUnavailableError, check_database_rea
 from app.core.public_admission import PublicAdmissionMiddleware
 from app.core.tokens import check_link_encryption_readiness
 from app.models.seller import ErrorBody, ErrorFieldItem, StandardErrorResponse
+from app.services.evidence_store import init_evidence_storage
 from app.services.payment_marker_protection import check_payment_marker_readiness
 
 logging.basicConfig(
@@ -50,6 +51,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         logger.info("Order link encryption verified: application key and existing record compatibility are ready.")
         await check_payment_marker_readiness()
         logger.info("Payment marker protection verified: dedicated secret and marker bindings are ready.")
+    if settings.is_durable_mode or settings.ENV == "development":
+        init_evidence_storage()
+        logger.info("Evidence storage verified: durable local folder initialized.")
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME}...")
 

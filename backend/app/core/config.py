@@ -1,5 +1,6 @@
 import json
 import re
+from pathlib import Path
 from typing import List, Literal, Union
 
 from pydantic import Field, field_validator
@@ -26,6 +27,22 @@ class Settings(BaseSettings):
     PUBLIC_UPLOAD_MAX_BYTES: int = Field(default=6 * 1024 * 1024, gt=0)
     PUBLIC_REQUESTS_PER_WINDOW: int = Field(default=600, gt=0)
     PUBLIC_REQUEST_WINDOW_SECONDS: int = Field(default=60, gt=0)
+
+    # Evidence Storage
+    EVIDENCE_STORAGE_DIR: str = ".evidence"
+
+    @property
+    def effective_evidence_storage_path(self) -> Path:
+        """Returns the resolved Path for evidence storage.
+        If relative, anchors to the repository root if running from backend or repository.
+        """
+        p = Path(self.EVIDENCE_STORAGE_DIR)
+        if p.is_absolute():
+            return p
+        repo_root = Path(__file__).resolve().parents[3]
+        if (repo_root / ".git").exists() or (repo_root / "package.json").exists():
+            return (repo_root / p).resolve()
+        return p.resolve()
 
     # Database (Neon Serverless Postgres)
     DATABASE_URL: str = ""
