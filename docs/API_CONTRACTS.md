@@ -247,11 +247,19 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
 - GET `/api/seller/orders/{id}/payment-preview?transaction_id=...` compares the active
   claim with an existing same-shop receipt and returns exception codes, hard blockers,
   actual COD and both order/receipt versions. Excessive payments have null COD.
-- POST `/api/seller/orders/{id}/decisions` currently supports `action: confirm` only.
-  Require `expected_version`, `expected_transaction_version`, `transaction_id`,
-  strict positive `accepted_amount_minor`, nonblank `reason`, and `Idempotency-Key`.
-  The accepted amount must equal the full recorded receipt and cannot exceed total.
-  This slice does not implement rejection, cancellation, refunds or reassignment.
+- POST `/api/seller/orders/{id}/decisions` supports `action: confirm`, `action: cancel`,
+  and `action: reject`.
+  - For `action: confirm`: Requires `expected_version`, `expected_transaction_version`,
+    `transaction_id`, strict positive `accepted_amount_minor`, nonblank `reason`, and
+    `Idempotency-Key`. The accepted amount must equal the full recorded receipt and cannot
+    exceed total.
+  - For `action: cancel`: Requires `expected_version`, nonblank `reason`, and
+    `Idempotency-Key`. Transitions eligible orders to `cancelled`, preserving audit history
+    and locking any existing payment allocation and marker without freeing them.
+  - For `action: reject`: Requires `expected_version`, nonblank `reason`, and
+    `Idempotency-Key`. Available for `pending` orders, projecting a terminal rejected state
+    that blocks buyer resubmission. Confirmed orders cannot be rejected.
+  This slice does not implement refunds or reassignment.
 - Missing authority/ownership returns 401/404; invalid input or partial allocation
   returns 422; stale evidence and allocation blockers return 409. Same-key replay
   returns the committed snapshot; changed payload returns 409. Database write
