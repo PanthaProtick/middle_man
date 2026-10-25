@@ -9,7 +9,8 @@ from app.services.transaction_store import reset_transaction_memory_store
 
 
 @pytest.mark.asyncio
-async def test_postgres_synthetic_conflict_and_recovery_journey(postgres_buyer):
+@pytest.mark.parametrize('order_gap_seconds', [0, 1])
+async def test_postgres_synthetic_conflict_and_recovery_journey(postgres_buyer, monkeypatch, order_gap_seconds):
     """AC19–AC21, AC24–AC30, AC34–AC35, AC38:
 
     Complete synthetic seller-to-buyer conflict and recovery journey on PostgreSQL.
@@ -20,16 +21,22 @@ async def test_postgres_synthetic_conflict_and_recovery_journey(postgres_buyer):
     # -------------------------------------------------------------------------
     # Phase 1: Two orders compete for the same TrxID with conflicting observations (AC19, AC20)
     # -------------------------------------------------------------------------
-    ord1 = (await client.post(
-        "/api/seller/orders",
-        json={"product_name": "Silk Jamdani", "total_minor": 1000000, "required_advance_minor": 200000, "payment_account_id": acc_id},
-        headers={"Idempotency-Key": "rec-ord-1"},
-    )).json()
-    ord2 = (await client.post(
-        "/api/seller/orders",
-        json={"product_name": "Cotton Kurti", "total_minor": 1200000, "required_advance_minor": 200000, "payment_account_id": acc_id},
-        headers={"Idempotency-Key": "rec-ord-2"},
-    )).json()
+    created = datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(seconds=3)
+    # Exercise equal and separated creation times without relying on machine speed.
+    with monkeypatch.context() as clock:
+        clock.setattr('app.services.order_service.get_utc_now', lambda: created)
+        ord1 = (await client.post(
+            "/api/seller/orders",
+            json={"product_name": "Silk Jamdani", "total_minor": 1000000, "required_advance_minor": 200000, "payment_account_id": acc_id},
+            headers={"Idempotency-Key": "rec-ord-1"},
+        )).json()
+        second_created = created + datetime.timedelta(seconds=order_gap_seconds)
+        clock.setattr('app.services.order_service.get_utc_now', lambda: second_created)
+        ord2 = (await client.post(
+            "/api/seller/orders",
+            json={"product_name": "Cotton Kurti", "total_minor": 1200000, "required_advance_minor": 200000, "payment_account_id": acc_id},
+            headers={"Idempotency-Key": "rec-ord-2"},
+        )).json()
 
     # Both buyers submit claims with identical TrxID
     await client.post(
@@ -47,7 +54,7 @@ async def test_postgres_synthetic_conflict_and_recovery_journey(postgres_buyer):
 
     # First observation recorded by seller
     created_at = datetime.datetime.fromisoformat(ord1["created_at"])
-    rec_time = created_at + datetime.timedelta(milliseconds=10)
+    rec_time = created_at
     tx1 = (await client.post(
         "/api/seller/transactions",
         json={"payment_account_id": acc_id, "provider": "bkash", "trx_id": "TRX-SHARED-CONFLICT",
@@ -147,11 +154,13 @@ async def test_postgres_synthetic_conflict_and_recovery_journey(postgres_buyer):
     assert correct_res.status_code == 200, correct_res.text
     assert correct_res.json()["buyer_revision"] == 2
 
+    # Each receipt must fall within its own order's creation-to-claim interval.
+    ord2_receipt_time = datetime.datetime.fromisoformat(ord2["created_at"])
     # Seller records matching transaction for Order 2's corrected TrxID
     tx2_res = await client.post(
         "/api/seller/transactions",
         json={"payment_account_id": acc_id, "provider": "bkash", "trx_id": "TRX-ORDER2-LEGIT",
-              "amount_minor": 200000, "sender_number": "01811115552", "occurred_at": rec_time.isoformat()},
+              "amount_minor": 200000, "sender_number": "01811115552", "occurred_at": ord2_receipt_time.isoformat()},
         headers={"Idempotency-Key": "tx-ord2-legit"},
     )
     assert tx2_res.status_code == 201
