@@ -1,6 +1,8 @@
 import base64
 import json
 import time
+from contextlib import contextmanager
+from io import BytesIO
 
 import pytest
 from cryptography.hazmat.primitives import hashes
@@ -34,13 +36,14 @@ def _generate_rsa_key_pair():
     return private_key, jwk
 
 
-def _make_token(private_key, sub: str, issuer: str, exp_delta: int = 3600) -> str:
+def _make_token(private_key, sub: str, issuer: str, exp_delta: int = 3600, **claims) -> str:
     header = {"alg": "RS256", "kid": "integration-key", "typ": "JWT"}
     payload = {
         "sub": sub,
         "iss": issuer,
         "exp": int(time.time()) + exp_delta,
         "iat": int(time.time()),
+        **claims,
     }
     header_b64 = _b64url_encode(json.dumps(header).encode("utf-8"))
     payload_b64 = _b64url_encode(json.dumps(payload).encode("utf-8"))
@@ -65,6 +68,9 @@ async def test_durable_mode_rejects_mock_token(client: AsyncClient, monkeypatch)
     )
     assert resp_mock.status_code == 401
     assert resp_mock.json()["error"]["code"] == "UNAUTHORIZED"
+    resp_dev = await client.get("/api/seller/shop", headers={"Authorization": "Bearer dev-pilot_seller"})
+    assert resp_dev.status_code == 401
+    assert resp_dev.json()["error"]["code"] == "UNAUTHORIZED"
 
 
 @pytest.mark.asyncio
@@ -102,6 +108,17 @@ async def test_unavailable_verifier_returns_503(client: AsyncClient, monkeypatch
     )
     assert resp.status_code == 503
     assert resp.json()["error"]["code"] == "AUTH_UNAVAILABLE"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("issuer,key", [("", "invalid-pem"), ("https://clerk.example.com", "invalid-pem")])
+async def test_incomplete_or_invalid_verifier_configuration_returns_503(client, monkeypatch, issuer, key):
+    monkeypatch.setattr(settings, "CLERK_ISSUER", issuer)
+    monkeypatch.setattr(settings, "CLERK_JWT_KEY", key)
+    monkeypatch.setattr(auth_module, "_clerk_verifier", None)
+    response = await client.get("/api/seller/shop", headers={"Authorization": "Bearer signed.jwt.token"})
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "AUTH_UNAVAILABLE"
 
 
 @pytest.mark.asyncio
@@ -186,3 +203,35 @@ async def test_real_token_creates_and_reads_owning_shop_with_isolation(client: A
     assert resp1_read.json()["setup_needed"] is False
     assert resp1_read.json()["shop"]["id"] == shop1_id
     assert resp1_read.json()["shop"]["display_name"] == "Alpha's Boutique"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("constraint,value", [
+    ("CLERK_AUTHORIZED_PARTY", "https://seller.example.com"),
+    ("CLERK_AUDIENCE", "seller-api"),
+])
+async def test_configured_session_constraints_reject_foreign_tokens(client, monkeypatch, constraint, value):
+    issuer = "https://clerk.integration.example.com"
+    private_key, jwk = _generate_rsa_key_pair()
+    monkeypatch.setattr(settings, "CLERK_ISSUER", issuer)
+    monkeypatch.setattr(settings, "CLERK_JWT_KEY", "")
+    monkeypatch.setattr(settings, constraint, value)
+    monkeypatch.setattr(auth_module, "_clerk_verifier", None)
+    @contextmanager
+    def trusted_keys(request, timeout):
+        assert request.full_url == f"{issuer}/.well-known/jwks.json"
+        response = BytesIO(json.dumps({"keys": [jwk]}).encode())
+        response.status = 200
+        yield response
+
+    monkeypatch.setattr("app.core.clerk_verifier.urlopen", trusted_keys)
+    token = _make_token(private_key, "foreign_seller", issuer)
+    response = await client.get("/api/seller/shop", headers={"Authorization": f"Bearer {token}"})
+    assert response.status_code == 401
+    assert response.json()["error"]["code"] == "UNAUTHORIZED"
+    assert "shop" not in response.json()
+    claim = "azp" if constraint == "CLERK_AUTHORIZED_PARTY" else "aud"
+    valid_token = _make_token(private_key, "owning_seller", issuer, **{claim: value})
+    valid_response = await client.get("/api/seller/shop", headers={"Authorization": f"Bearer {valid_token}"})
+    assert valid_response.status_code == 200
+    assert valid_response.json()["setup_needed"] is True

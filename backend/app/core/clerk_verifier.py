@@ -1,5 +1,6 @@
 import base64
 import json
+import math
 import time
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
@@ -137,6 +138,8 @@ class ClerkTokenVerifier:
         except Exception as exc:
             raise AuthenticationError("Malformed token header") from exc
 
+        if not isinstance(header, dict):
+            raise AuthenticationError("Malformed token header")
         if header.get("alg") != "RS256":
             raise AuthenticationError(f"Unsupported token algorithm: {header.get('alg')}")
 
@@ -145,6 +148,8 @@ class ClerkTokenVerifier:
             payload = json.loads(payload_json.decode("utf-8"))
         except Exception as exc:
             raise AuthenticationError("Malformed token payload") from exc
+        if not isinstance(payload, dict):
+            raise AuthenticationError("Malformed token payload")
 
         try:
             signature = _b64url_decode(sig_b64)
@@ -152,6 +157,8 @@ class ClerkTokenVerifier:
             raise AuthenticationError("Malformed token signature") from exc
 
         kid = header.get("kid")
+        if kid is not None and (not isinstance(kid, str) or not kid):
+            raise AuthenticationError("Invalid key identifier")
         public_key = self._get_public_key(kid)
 
         signing_input = f"{header_b64}.{payload_b64}".encode("ascii")
@@ -167,23 +174,31 @@ class ClerkTokenVerifier:
 
         # Check expiration
         exp = payload.get("exp")
-        if exp is None:
-            raise AuthenticationError("Token missing expiration (exp) claim")
+        if isinstance(exp, bool) or not isinstance(exp, (int, float)) or (
+            isinstance(exp, float) and not math.isfinite(exp)
+        ):
+            raise AuthenticationError("Token missing or invalid expiration (exp) claim")
         now = int(time.time())
-        if now > exp:
+        if now >= exp:
             raise AuthenticationError("Token has expired")
+        nbf = payload.get("nbf")
+        if nbf is not None and (
+            isinstance(nbf, bool) or not isinstance(nbf, (int, float))
+            or (isinstance(nbf, float) and not math.isfinite(nbf)) or now < nbf
+        ):
+            raise AuthenticationError("Token is not yet valid")
 
         # Check issuer
         if self.issuer:
             token_iss = payload.get("iss")
-            if not token_iss or token_iss.rstrip("/") != self.issuer:
+            if not isinstance(token_iss, str) or token_iss != self.issuer:
                 raise AuthenticationError("Token issuer mismatch")
 
         # Check audience / authorized party if configured
         if self.audience:
             token_aud = payload.get("aud")
             aud_list = [token_aud] if isinstance(token_aud, str) else (token_aud or [])
-            if self.audience not in aud_list:
+            if not isinstance(aud_list, list) or self.audience not in aud_list:
                 raise AuthenticationError("Token audience mismatch")
 
         if self.authorized_party:

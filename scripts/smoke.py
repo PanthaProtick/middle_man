@@ -41,7 +41,7 @@ def smoke() -> None:
     for name in (
         "DATABASE_URL", "DIRECT_URL", "PGHOST", "PGDATABASE", "PGUSER", "PGPASSWORD",
         "GEMINI_API_KEY", "CLERK_SECRET_KEY", "CLERK_PUBLISHABLE_KEY", "CLERK_WEBHOOK_SECRET",
-        "CLERK_ISSUER", "CLERK_JWT_KEY",
+        "CLERK_ISSUER", "CLERK_JWT_KEY", "CLERK_AUTHORIZED_PARTY", "CLERK_AUDIENCE",
     ):
         environment[name] = ""
     environment.update(

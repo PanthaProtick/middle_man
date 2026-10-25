@@ -4,16 +4,66 @@
 
 **Blocked by:** 01: Fail explicitly when durable storage is unavailable.
 
-**Status:** complete
+**Status:** implementation complete; real Clerk-session acceptance pending
 
 ## Acceptance criteria
 
-- [x] The integration path obtains a real session token and uses verified identity to create/read only its owning shop; no default mock token grants access.
+- [ ] The integration path obtains a real session token and uses verified identity to create/read only its owning shop; no default mock token grants access. Code and offline evidence pass; real Clerk-session journey remains unrun.
 - [x] Verification checks signature, expiry, trusted issuer and applicable audience/authorized-party constraints; key discovery uses trusted configuration and handles key refresh.
 - [x] Invalid credentials yield typed 401 responses and unavailable verification yields an explicit 503 without private data; offline tests inject a bounded verifier seam.
 - [x] Record focused verification results and remaining gaps; for code/tooling changes, run the required final root verification gate and record its result.
 
 ## Decisions & Implementation
+
+### 2026-10-25 follow-up (supersedes the original completion claims)
+
+Base commit: `6ff56cd7a56897b1404320b001639f9f7a66bb82`. The original
+implementation still signed in with `dev-pilot_seller` and persisted the token in
+localStorage. It did not obtain a real Clerk session.
+
+- Added pinned `@clerk/react`, conditional `ClerkProvider` bootstrap and
+  `features/seller/SellerSession.tsx`. Clerk owns sign-in/out and persistence;
+  bearer tokens stay in application memory and refresh every 30 seconds. Missing
+  frontend configuration shows an explicit unavailable state. Public buyer routes
+  bypass Clerk. Session changes/sign-out remount the workspace to discard private
+  state and outstanding UI updates.
+- `App.tsx` accepts the SDK-acquired credential; removed localStorage token reads
+  and writes. The workspace sign-in callback no longer fabricates a credential.
+- Backend auth wires `CLERK_AUTHORIZED_PARTY`/`CLERK_AUDIENCE`, requires a trusted
+  issuer in the application factory, maps invalid verifier configuration to 503,
+  and rejects both dev/mock tokens in durable mode. Storage tests inject a bounded
+  identity dependency instead of depending on a durable-mode authentication bypass.
+- Verifier rejects non-object JWT JSON, invalid key identifiers, malformed or
+  non-finite expiry/not-before claims and tokens at the exact expiration boundary.
+  Issuer comparisons are exact. Existing signature/key-refresh behavior is retained.
+- Updated environment examples and offline input clearing in `tests/conftest.py`
+  and `scripts/smoke.py`; no real environment files were read or changed.
+
+Verification:
+
+- Confirmed red regressions before fixes for fabricated sign-in credentials,
+  malformed/time-bound JWT claims, durable dev tokens and invalid verifier config.
+- Focused frontend: session/workspace tests, 13 passed. Focused verifier: 15 passed.
+  Focused API auth: 9 passed. Durable storage regression suite: 15 passed.
+- `npm run typecheck`: PASS (both applications).
+- First root check stopped on import sorting in `tests/conftest.py`; corrected.
+- Final root `npm run check`: PASS across all eight stages;
+  303 backend tests passed, 67 skipped; 119 frontend tests passed;
+  `.cache/checks/check-Zt0oEn/result.json`.
+- Local browser: visually verified signed-out/unconfigured seller page at
+  `http://localhost:5173/`, disabled sign-in and explicit configuration message;
+  no private workspace shown. Owned dev server stopped afterward.
+- NOT RUN: a real Clerk-session sign-in/create/read/sign-out journey and live
+  provider/durable database acceptance. SDK-boundary doubles and signed synthetic
+  tokens establish offline behavior only. Ticket 20 retains broader browser flow.
+
+Review: independent code-review axes completed against base `6ff56cd`: Standards
+0 findings; Spec 1 evidence gap (real Clerk-session journey), no code defect or
+scope creep. No implementation edits followed the passing root gate.
+
+Next action: commit the reviewed implementation. To close
+the remaining acceptance gap, run the owning-shop journey using an owner-controlled
+Clerk test session and record dated evidence here.
 
 1. **Backend Token Verifier (`app.core.clerk_verifier.ClerkTokenVerifier`):**
    - Implemented RS256 token decoding and verification using Python `cryptography` library without adding unpinned dependencies.

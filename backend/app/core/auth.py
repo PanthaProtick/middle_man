@@ -45,10 +45,17 @@ _clerk_verifier: Optional[ClerkTokenVerifier] = None
 def get_clerk_verifier() -> ClerkTokenVerifier:
     global _clerk_verifier
     if _clerk_verifier is None:
-        _clerk_verifier = ClerkTokenVerifier(
-            issuer=settings.CLERK_ISSUER,
-            jwt_key_pem=settings.CLERK_JWT_KEY,
-        )
+        if not settings.CLERK_ISSUER.strip():
+            raise AuthenticationUnavailableError("Trusted identity issuer is not configured")
+        try:
+            _clerk_verifier = ClerkTokenVerifier(
+                issuer=settings.CLERK_ISSUER,
+                jwt_key_pem=settings.CLERK_JWT_KEY,
+                authorized_party=settings.CLERK_AUTHORIZED_PARTY or None,
+                audience=settings.CLERK_AUDIENCE or None,
+            )
+        except AuthenticationError as exc:
+            raise AuthenticationUnavailableError("Identity verifier configuration is invalid") from exc
     return _clerk_verifier
 
 
@@ -71,11 +78,11 @@ async def get_seller_identity(
         raise AuthenticationError("Empty authentication token")
 
     # In durable integration mode or production: default mock token never grants access
-    if settings.is_durable_mode and token == "mock-seller-token":
-        raise AuthenticationError("Mock seller token is not permitted in durable mode")
+    if settings.is_durable_mode and (token == "mock-seller-token" or token.startswith("dev-")):
+        raise AuthenticationError("Development seller tokens are not permitted in durable mode")
 
     # In production or when live/integration verifier is configured:
-    if settings.ENV == "production" or settings.is_clerk_verifier_configured or _clerk_verifier is not None:
+    if settings.is_durable_mode or settings.is_clerk_verifier_configured or _clerk_verifier is not None:
         if token.startswith("dev-") or token == "mock-seller-token":
             raise AuthenticationError("Dev or mock tokens are not permitted when identity verifier is configured")
 

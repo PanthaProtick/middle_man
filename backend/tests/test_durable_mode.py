@@ -133,7 +133,7 @@ async def test_check_database_readiness_unconfigured() -> None:
 
 @pytest.mark.asyncio
 async def test_seller_shop_mutation_blocks_in_durable_mode_when_db_unconfigured(
-    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch, verified_seller_identity: None
 ) -> None:
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", True)
     monkeypatch.setattr("app.core.database.AsyncSessionLocal", None)
@@ -171,7 +171,7 @@ async def test_seller_shop_mutation_in_offline_mode_succeeds_in_memory(
 
 @pytest.mark.asyncio
 async def test_seller_shop_mutation_database_runtime_outage_returns_503(
-    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch, verified_seller_identity: None
 ) -> None:
     """Verifies that get_db catches real session errors, rolls back, and raises typed 503."""
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", True)
@@ -224,7 +224,7 @@ async def test_seller_service_refuses_memory_fallback_in_durable_mode(monkeypatc
 
 @pytest.mark.asyncio
 async def test_seller_shop_mutation_resolves_committed_same_key_result(
-    client: AsyncClient, monkeypatch: pytest.MonkeyPatch
+    client: AsyncClient, monkeypatch: pytest.MonkeyPatch, verified_seller_identity: None
 ) -> None:
     monkeypatch.setattr("app.core.config.settings.SELF_TEST_MODE", True)
 

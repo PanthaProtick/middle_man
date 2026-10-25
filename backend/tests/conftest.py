@@ -13,7 +13,7 @@ pytest_plugins = ("buyer_postgres_support",)
 for name in (
     "DATABASE_URL", "DIRECT_URL", "PGHOST", "PGDATABASE", "PGUSER", "PGPASSWORD",
     "GEMINI_API_KEY", "CLERK_SECRET_KEY", "CLERK_PUBLISHABLE_KEY", "CLERK_WEBHOOK_SECRET",
-    "CLERK_ISSUER", "CLERK_JWT_KEY", "ORDER_LINK_ENCRYPTION_KEY",
+    "CLERK_ISSUER", "CLERK_JWT_KEY", "CLERK_AUTHORIZED_PARTY", "CLERK_AUDIENCE", "ORDER_LINK_ENCRYPTION_KEY",
     "PAYMENT_MARKER_SECRET", "PAYMENT_IDENTITY_SECRET",
 ):
     os.environ[name] = ""
@@ -26,7 +26,14 @@ os.environ["CORS_ORIGINS"] = '["http://localhost:5173"]'
 os.environ["GEMINI_MODEL"] = "gemini-2.5-flash"
 
 from app.api.routes import _in_memory_items  # noqa: E402
+from app.core.auth import SellerIdentity, get_seller_identity  # noqa: E402
 from app.main import app  # noqa: E402
+
+
+@pytest.fixture
+def verified_seller_identity(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Bounded authentication seam for storage-only API tests."""
+    monkeypatch.setitem(app.dependency_overrides, get_seller_identity, lambda: SellerIdentity("pilot_seller"))
 
 
 @pytest.fixture(autouse=True)

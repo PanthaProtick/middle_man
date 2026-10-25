@@ -79,6 +79,26 @@ def test_verify_valid_token_returns_seller_identity():
     assert identity.owner_id == "user_seller_123"
 
 
+@pytest.mark.parametrize("header,payload", [
+    ([], {}),
+    ({"alg": "RS256", "kid": []}, {}),
+    ({"alg": "RS256"}, []),
+    ({"alg": "RS256"}, {"exp": "tomorrow", "sub": "seller"}),
+    ({"alg": "RS256"}, {"exp": True, "sub": "seller"}),
+    ({"alg": "RS256"}, {"exp": float("inf"), "sub": "seller"}),
+    ({"alg": "RS256"}, {"exp": 2000000000, "nbf": 2000000000, "sub": "seller"}),
+    ({"alg": "RS256"}, {"exp": 1000, "sub": "seller"}),
+])
+def test_invalid_claim_shapes_and_time_boundaries_return_401(header, payload, monkeypatch):
+    monkeypatch.setattr("app.core.clerk_verifier.time.time", lambda: 1000)
+    private_key, jwk = _generate_rsa_key_pair()
+    verifier = ClerkTokenVerifier(jwks={"keys": [jwk]})
+    token = _create_token(private_key, header, payload)
+    with pytest.raises(AuthenticationError) as exc:
+        verifier.verify_token(token)
+    assert exc.value.status_code == 401
+
+
 def test_verify_valid_token_with_jwt_key_pem():
     private_key, _ = _generate_rsa_key_pair()
     pem_bytes = private_key.public_key().public_bytes(

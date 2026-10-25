@@ -380,7 +380,7 @@ describe('SellerWorkspace Component', () => {
     await act(async () => {
       signInBtn?.click();
     });
-    expect(onSignIn).toHaveBeenCalled();
+    expect(onSignIn).toHaveBeenCalledWith();
 
     // 2. Sign in with token
     await act(async () => {

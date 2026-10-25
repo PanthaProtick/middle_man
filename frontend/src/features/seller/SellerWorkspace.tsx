@@ -21,7 +21,7 @@ interface SellerWorkspaceProps {
   token?: string;
   activeSection?: WorkspaceSection;
   onSectionChange?: (section: WorkspaceSection) => void;
-  onSignIn?: (token: string) => void;
+  onSignIn?: () => void;
 }
 
 export function SellerWorkspace({
@@ -151,10 +151,12 @@ export function SellerWorkspace({
           <button
             type="button"
             className="btn btn-primary"
-            onClick={() => onSignIn?.('dev-pilot_seller')}
+            disabled={!onSignIn}
+            onClick={() => onSignIn?.()}
           >
             Sign in
           </button>
+          {!onSignIn && <p>Seller sign-in is unavailable. Configure Clerk to connect your shop.</p>}
         </div>
       </div>
     );

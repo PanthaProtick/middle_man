@@ -37,6 +37,8 @@ class Settings(BaseSettings):
     CLERK_WEBHOOK_SECRET: str = ""
     CLERK_ISSUER: str = ""
     CLERK_JWT_KEY: str = ""
+    CLERK_AUTHORIZED_PARTY: str = ""
+    CLERK_AUDIENCE: str = ""
 
     # Google Gemini API
     GEMINI_API_KEY: str = ""
