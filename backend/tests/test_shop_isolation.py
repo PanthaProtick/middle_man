@@ -1,6 +1,7 @@
 """Private HTTP surface sweep with two locally signed identities, never live credentials."""
 import re
 import uuid
+from datetime import datetime, timedelta, timezone
 
 import pytest
 from test_public_order_routes import _create_test_order, clean_memory_stores  # noqa: F401
@@ -103,6 +104,32 @@ async def test_signed_identities_cannot_read_or_mutate_foreign_private_surfaces(
         client.headers['Authorization'] = f'Bearer {identities[1 - index]}'
         assert (await client.get(f"/api/seller/orders/{foreign['id']}")).status_code == 200
         assert (await client.get(f'/api/seller/evidence/{evidence[1 - index]}')).status_code == 200
+
+    # Both shops must have eligible data: a global/no-op cleanup would otherwise pass.
+    for index, token in enumerate(identities):
+        client.headers['Authorization'] = f'Bearer {token}'
+        path = f"/api/seller/orders/{orders[index]['id']}"
+        version = (await client.get(path)).json()['version']
+        cancelled = await client.post(path + '/decisions', json={
+            'action': 'cancel', 'expected_version': version, 'reason': 'Synthetic retention test',
+        }, headers={'Idempotency-Key': 'retention-cancel'})
+        assert cancelled.status_code == 200, cancelled.text
+    future = datetime.now(timezone.utc) + timedelta(days=400)
+    monkeypatch.setattr('app.api.seller.get_utc_now', lambda: future)
+    monkeypatch.setattr('app.api.structured_retention.get_utc_now', lambda: future)
+    for index, token in enumerate(identities):
+        client.headers['Authorization'] = f'Bearer {token}'
+        cleaned = await client.post('/api/seller/retention/cleanup')
+        assert cleaned.status_code == 200, cleaned.text
+        assert (await client.get(f'/api/seller/evidence/{evidence[index]}')).status_code == 410
+        removed = await client.post('/api/seller/retention/structured/cleanup')
+        assert removed.status_code == 200, removed.text
+        assert removed.json()['removed'] == 1
+        assert (await client.get(f"/api/seller/orders/{orders[index]['id']}")).status_code == 410
+        if index == 0:
+            client.headers['Authorization'] = f'Bearer {identities[1]}'
+            assert (await client.get(f'/api/seller/evidence/{evidence[1]}')).status_code == 200
+            assert (await client.get(f"/api/seller/orders/{orders[1]['id']}")).status_code == 200
 
 
 
