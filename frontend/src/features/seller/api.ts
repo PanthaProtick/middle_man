@@ -1,3 +1,4 @@
+import { sellerFetch } from './sessionRequest';
 import type { ImportList, ImportResult } from './smsTypes';
 import type {
   AccountInput,
@@ -124,7 +125,7 @@ export async function requestJson<T>(
     headers['Idempotency-Key'] = idempotencyKey;
   }
 
-  const res = await fetch(url, { ...options, headers });
+  const res = await sellerFetch(url, { ...options, headers }, token);
   if (!res.ok) {
     let errBody: { error?: ApiError; detail?: string } = {};
     try {

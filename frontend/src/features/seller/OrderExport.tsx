@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { sellerFetch } from './sessionRequest';
+import { useEffect, useRef, useState } from 'react';
 import { requestJson } from './api';
 import type { OrderLifecycle } from './types';
 
@@ -35,6 +36,11 @@ export function OrderExport({ orderId, status, token }: {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [failed, setFailed] = useState(false);
+  const active = useRef(true);
+  useEffect(() => {
+    active.current = true;
+    return () => { active.current = false; };
+  }, []);
 
   async function run() {
     setBusy(true); setMessage(''); setFailed(false);
@@ -43,13 +49,14 @@ export function OrderExport({ orderId, status, token }: {
         const summary = await requestJson<OrderSummary>(
           `/api/seller/orders/${encodeURIComponent(orderId)}/summary`, {}, token,
         );
+        if (!active.current) return;
         await navigator.clipboard.writeText(readable(summary));
         setMessage('Summary copied.');
       } else {
         const query = status ? `?${new URLSearchParams({ status })}` : '';
-        const response = await fetch(`/api/seller/orders/export${query}`, {
+        const response = await sellerFetch(`/api/seller/orders/export${query}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        }, token);
         if (!response.ok) {
           const body: { error?: { message?: string } } = await response.json();
           throw new Error(body.error?.message ?? `Export failed (${response.status}).`);
@@ -58,7 +65,9 @@ export function OrderExport({ orderId, status, token }: {
           setMessage('No orders match this filter.');
           return;
         }
-        const url = URL.createObjectURL(await response.blob());
+        const blob = await response.blob();
+        if (!active.current) return;
+        const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url; link.download = 'order-summaries.csv';
         document.body.append(link); link.click(); link.remove();

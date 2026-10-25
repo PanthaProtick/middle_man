@@ -1,3 +1,4 @@
+import { sellerFetch } from './sessionRequest';
 import React, { useEffect, useState } from 'react';
 import { Image, Loader2, AlertCircle, FileQuestion, ExternalLink } from 'lucide-react';
 import { fetchHistory } from './corrections';
@@ -40,9 +41,9 @@ export function EvidenceViewer({ orderId, token, buyerRevision }: EvidenceViewer
 
         setEvidenceId(evId);
 
-        const res = await fetch(`/api/seller/evidence/${encodeURIComponent(evId)}`, {
+        const res = await sellerFetch(`/api/seller/evidence/${encodeURIComponent(evId)}`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+        }, token);
 
         if (!active) return;
 

@@ -59,3 +59,64 @@ it('shows token acquisition failures without opening a private workspace', async
   expect(container.textContent).toContain('Unable to obtain your seller session');
   expect(container.textContent).not.toContain('Shop Setup');
 });
+
+it.each([401, 503])('hides private content on session verification failure %s and allows recovery', async (status) => {
+  vi.mocked(fetch).mockImplementation(async (url) => new Response(JSON.stringify(
+    String(url).includes('/seller/shop') ? { setup_needed: false, shop: { id: 'alpha', display_name: 'Private Alpha Shop' } }
+      : String(url).includes('payment-accounts') ? [] : { items: [], next_cursor: null },
+  ), { status: 200 }));
+  await act(async () => root.render(<SellerSession />));
+  expect(container.textContent).toContain('Private Alpha Shop');
+  vi.mocked(fetch).mockImplementation(async (url) => new Response(JSON.stringify(
+    String(url).includes('/seller/')
+      ? { error: { code: status === 401 ? 'UNAUTHORIZED' : 'AUTH_UNAVAILABLE', message: 'Verification failed' } }
+      : { status: 'healthy' },
+  ), { status: String(url).includes('/seller/') ? status : 200 }));
+  const refresh = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.trim() === 'Refresh');
+  expect(refresh).not.toBeNull();
+  await act(async () => refresh?.click());
+  expect(container.textContent).not.toContain('Private Alpha Shop');
+  expect(container.textContent).toContain(status === 401 ? 'sign in again' : 'verification is unavailable');
+  vi.mocked(fetch).mockImplementation(async () => new Response(JSON.stringify({ setup_needed: true, shop: null })));
+  const retry = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Retry seller session');
+  await act(async () => retry?.click());
+  expect(container.textContent).toContain('Shop Setup');
+  expect(container.textContent).not.toContain('Private Alpha Shop');
+});
+
+
+it.each(['sign-out', 'identity-change', 'expiry'])('discards a late private response after %s', async (change) => {
+  let deliver!: (response: Response) => void;
+  vi.mocked(fetch).mockImplementation(async (url) => {
+    if (String(url).includes('/seller/shop')) return new Promise<Response>(resolve => { deliver = resolve; });
+    return new Response(JSON.stringify({ status: 'healthy' }));
+  });
+  await act(async () => root.render(<SellerSession />));
+  if (change === 'sign-out') {
+    await act(async () => container.querySelector<HTMLButtonElement>('button[title="Sign out of seller account"]')?.click());
+  } else {
+    clerk.sessionId = change === 'expiry' ? null : 'session-beta';
+    clerk.isSignedIn = change !== 'expiry';
+    clerk.getToken.mockResolvedValue('beta-token');
+    // The new identity remains at setup; the old request ignores AbortSignal on purpose.
+    vi.mocked(fetch).mockResolvedValue(new Response(JSON.stringify({ setup_needed: true, shop: null })));
+    await act(async () => root.render(<SellerSession />));
+  }
+  await act(async () => deliver(new Response(JSON.stringify({
+    setup_needed: false, shop: { id: 'alpha', display_name: 'Late Private Alpha' },
+  }))));
+  expect(container.textContent).not.toContain('Late Private Alpha');
+  expect(container.textContent).toContain(change === 'identity-change' ? 'Shop Setup' : 'Sign in to your shop');
+});
+
+it('clears private content when periodic token acquisition fails', async () => {
+  vi.useFakeTimers();
+  try {
+    await act(async () => root.render(<SellerSession />));
+    expect(container.textContent).toContain('Shop Setup');
+    clerk.getToken.mockResolvedValue(null);
+    await act(async () => vi.advanceTimersByTimeAsync(30000));
+    expect(container.textContent).not.toContain('Shop Setup');
+    expect(container.textContent).toContain('Unable to obtain your seller session');
+  } finally { vi.useRealTimers(); }
+});
