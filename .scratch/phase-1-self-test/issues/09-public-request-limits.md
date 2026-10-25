@@ -4,14 +4,14 @@
 
 **Blocked by:** 07: Open a buyer link with a safe public projection.
 
-**Status:** ready-for-agent
+**Status:** completed
 
 ## Acceptance criteria
 
-- [ ] Explicit configurable body/request/upload limits cover valid and invalid tokens; oversized bodies are rejected before whole-body buffering, including requests without a trustworthy content length.
-- [ ] Request-rate rejection has clear retry semantics, bounded limiter state and no private/token leakage; the local scope is documented rather than advertised as distributed protection.
-- [ ] Existing valid manual requests and allowed image sizes continue to work with readable rejection states.
-- [ ] Record focused verification results and remaining gaps; for code/tooling changes, run the required final root verification gate and record its result.
+- [x] Explicit configurable body/request/upload limits cover valid and invalid tokens; oversized bodies are rejected before whole-body buffering, including requests without a trustworthy content length.
+- [x] Request-rate rejection has clear retry semantics, bounded limiter state and no private/token leakage; the local scope is documented rather than advertised as distributed protection.
+- [x] Existing valid manual requests and allowed image sizes continue to work with readable rejection states.
+- [x] Record focused verification results and remaining gaps; for code/tooling changes, run the required final root verification gate and record its result.
 
 ## Bounded context
 
@@ -35,3 +35,15 @@ Reserve context for diagnosis, focused verification and the final gate. Before a
 ## Comments
 
 Published from the user-approved 22-ticket breakdown on 2026-10-24. Implementation has not started.
+
+### Implementation and verification — 2026-10-25
+
+- Added typed ASGI ingress admission in `backend/app/core/public_admission.py`, wired before routing in `backend/app/main.py`, with positive configurable settings in `backend/app/core/config.py`.
+- Actual streamed bytes are counted before domain work; oversized declared lengths are rejected without reads. Ordinary requests default to 64 KiB; upload envelopes to 6 MiB (existing 5 MiB extracted-image limit remains). Invalid tokens use the same admission rules.
+- Aggregate worker-local fixed-window quota defaults to 600 requests/60 seconds. State is constant-size and retains no token/client identifiers. 413 and 429 use typed private errors; 429 exposes Retry-After through CORS. Trade-offs and configuration documented in `docs/API_CONTRACTS.md`.
+- Buyer UI already renders typed rejections; fixed `useBuyerSubmission.ts` to preserve an uncertain previous attempt through a later 413/429. Regression confirms frozen payload/key survive timeout, failed status reconciliation, admission rejection and final retry.
+- TDD: initial stream regression failed before implementation; uncertain-retry regressions failed before the recovery fix and passed afterward.
+- Focused backend: 24 passed (`test_public_admission.py`, `test_evidence_routes.py`, `test_buyer_boundaries.py`). BuyerRetry feature tests: 7 passed. Typecheck passed.
+- Final `npm run check`: PASS, `.cache/checks/check-M2xGJp/result.json`; 322 backend passed / 71 skipped, 137 frontend passed; tooling, lint, strict types, build and HTTP smoke passed.
+- Code review: Standards 0 findings. Spec found one uncertain-retry issue, fixed and re-reviewed; 0 remaining findings.
+- Remaining limits: worker-local quota resets on restart and is shared by all buyers; no distributed protection, slow-client deadline, total concurrent-memory bound or hosted-edge validation. ASGI server transport buffering is outside this layer. Browser and live-provider checks NOT RUN; database-dependent skips remain skips.

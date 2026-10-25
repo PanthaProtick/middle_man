@@ -20,6 +20,7 @@ from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
 from app.core.config import settings
 from app.core.database import DurableStorageUnavailableError, check_database_readiness
+from app.core.public_admission import PublicAdmissionMiddleware
 from app.core.tokens import check_link_encryption_readiness
 from app.models.seller import ErrorBody, ErrorFieldItem, StandardErrorResponse
 from app.services.payment_marker_protection import check_payment_marker_readiness
@@ -71,12 +72,14 @@ async def protect_public_responses(request: Request, call_next: RequestResponseE
     return response
 
 # CORS setup
+app.add_middleware(PublicAdmissionMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS if isinstance(settings.CORS_ORIGINS, list) else ["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["Retry-After"],
 )
 
 

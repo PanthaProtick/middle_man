@@ -1,5 +1,34 @@
 # API Contracts & Data Flow Guide
 
+## Public request admission
+
+All HTTP requests under `/api/public/orders` share an aggregate fixed-window quota
+per application worker, before token lookup, validation or storage access. Defaults
+(positive integer environment settings): `PUBLIC_REQUESTS_PER_WINDOW=600`,
+`PUBLIC_REQUEST_WINDOW_SECONDS=60`, `PUBLIC_REQUEST_MAX_BYTES=65536`, and
+`PUBLIC_UPLOAD_MAX_BYTES=6291456`. The upload envelope applies to `/evidence`;
+existing image validation still caps the extracted image at 5 MiB and preserves
+format, dimension and per-order limits. The 6 MiB envelope allows multipart overhead.
+
+Declared oversized bodies are rejected without reading; all other bodies are read
+only up to the configured bound, counting actual bytes regardless of Content-Length,
+before route execution. An overflowing chunk is not copied and the rest is not drained.
+ASGI/server transport buffers and concurrent connections need separate server/edge
+limits; this is not a total process-memory or slow-client protection guarantee.
+
+`413 PUBLIC_BODY_TOO_LARGE` asks the buyer to reduce the request/screenshot.
+`429 PUBLIC_RATE_LIMITED` includes an integer `Retry-After` (seconds, exposed via
+CORS) and the delay in its readable message. Rejection is before domain mutation;
+retry after the delay, retaining an existing key when recovering an uncertain earlier
+attempt. Both use the standard error envelope and private/no-store/referrer headers.
+The buyer form preserves input and displays the rejection without claiming success.
+
+Limiter state is two numbers: it retains no tokens, IP addresses or request bodies.
+Invalid tokens, spoofed forwarded headers and changing URLs cannot bypass the shared
+quota. One noisy caller can exhaust capacity for other buyers; boundaries permit a
+burst either side of window reset. Workers/restarts have independent quotas. This is
+local self-test admission control, not distributed hosted abuse protection.
+
 ## Optional screenshot extraction
 
 `POST /api/public/orders/{token}/payment-extraction` requires `Idempotency-Key`

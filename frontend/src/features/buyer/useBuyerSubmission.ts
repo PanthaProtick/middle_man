@@ -29,7 +29,9 @@ export function useBuyerSubmission(portalToken: string, onSaved: (order: PublicO
       setIsLocked(false);
     } catch (error: unknown) {
       const definitive = error instanceof BuyerApiError && error.statusCode >= 400 && error.statusCode < 500 && error.statusCode !== 408;
-      if (definitive && error.statusCode !== 409 && error.statusCode !== 410) {
+      // Admission rejects only this retry, not a previous request with unknown outcome.
+      const admissionWhileUncertain = isLocked && error instanceof BuyerApiError && [413, 429].includes(error.statusCode);
+      if (definitive && !admissionWhileUncertain && error.statusCode !== 409 && error.statusCode !== 410) {
         attempt.current = null;
         setIsLocked(false);
         setSubmissionError(error.message);
@@ -42,7 +44,8 @@ export function useBuyerSubmission(portalToken: string, onSaved: (order: PublicO
       } else {
         // A transport failure can follow a commit. Reconcile before enabling edits.
         setIsLocked(true);
-        setSubmissionError('Submission outcome unknown. Retry the same details below. / জমা হয়েছে কি না জানা যায়নি। একই তথ্য দিয়ে আবার চেষ্টা করুন।');
+        const unknownMessage = 'Submission outcome unknown. Retry the same details below. / জমা হয়েছে কি না জানা যায়নি। একই তথ্য দিয়ে আবার চেষ্টা করুন।';
+        setSubmissionError(admissionWhileUncertain ? `${error.message} ${unknownMessage}` : unknownMessage);
         try {
           const fresh = await fetchPublicOrder(portalToken);
           if (fresh.lifecycle !== 'awaiting_buyer') {

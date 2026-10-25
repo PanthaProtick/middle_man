@@ -10,6 +10,23 @@ const order = {
   lifecycle: 'awaiting_buyer', created_at: '2026-10-23T00:00:00Z', expires_at: '2026-10-25T00:00:00Z',
 };
 
+it.each([413, 429])('keeps input editable and renders admission rejection %s', async (status) => {
+  const message = status === 429 ? 'Too many requests. Retry after 10 seconds.'
+    : 'Request is too large. Reduce the request or screenshot size and retry.';
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) =>
+    init?.method === 'POST'
+      ? new Response(JSON.stringify({ error: { code: status === 429 ? 'PUBLIC_RATE_LIMITED' : 'PUBLIC_BODY_TOO_LARGE', message } }), { status })
+      : new Response(JSON.stringify(order)));
+  const page = await filledPortal();
+  try {
+    await page.submit();
+    expect(page.container.textContent).toContain(message);
+    expect(page.container.querySelector<HTMLInputElement>('[name="buyer_name"]')?.value).toBe('Synthetic buyer');
+    expect(page.container.querySelector('fieldset')?.disabled).toBe(false);
+    expect(page.container.textContent).not.toContain('ACK-');
+  } finally { await page.close(); }
+});
+
 function edit(container: HTMLElement, name: string, value: string) {
   const input = container.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[name="${name}"]`)!;
   const prototype = input instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
@@ -108,15 +125,17 @@ it('preserves input and shows server field validation before allowing a correcte
   } finally { await page.close(); }
 });
 
-it('unblocks same-key recovery when submission and recovery status both time out', async () => {
+it.each([413, 429])('preserves uncertain attempt after admission rejection %s', async (status) => {
   vi.useFakeTimers();
   let reads = 0;
   let posts = 0;
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
     if (init?.method === 'POST') {
       posts++;
-      if (posts > 1) return new Response(JSON.stringify({ ...order, lifecycle: 'pending', submission_acknowledgement: 'ACK-RETRY' }));
+      if (posts === 2) return new Response(JSON.stringify({ error: { code: 'PUBLIC_ADMISSION_REJECTED', message: 'Retry after 10 seconds.' } }), { status });
+      if (posts > 2) return new Response(JSON.stringify({ ...order, lifecycle: 'pending', submission_acknowledgement: 'ACK-RETRY' }));
     } else if (++reads === 1) return new Response(JSON.stringify(order));
+    else if (posts === 2) throw new TypeError('Status still unavailable');
     return new Promise<Response>((_resolve, reject) => {
       init?.signal?.addEventListener('abort', () => reject(new DOMException('Timed out', 'AbortError')), { once: true });
     });
@@ -133,6 +152,12 @@ it('unblocks same-key recovery when submission and recovery status both time out
     expect(attempts).toHaveLength(2);
     expect(attempts[1][1]?.body).toBe(attempts[0][1]?.body);
     expect(attempts[1][1]?.headers).toEqual(attempts[0][1]?.headers);
+    expect(page.container.querySelector('fieldset')?.disabled).toBe(true);
+    expect(page.container.textContent).toContain('Retry after 10 seconds.');
+    await page.submit();
+    const finalAttempt = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')[2];
+    expect(finalAttempt[1]?.body).toBe(attempts[0][1]?.body);
+    expect(finalAttempt[1]?.headers).toEqual(attempts[0][1]?.headers);
     expect(page.container.textContent).toContain('ACK-RETRY');
   } finally { await page.close(); vi.useRealTimers(); }
 });
