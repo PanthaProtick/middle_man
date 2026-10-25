@@ -130,3 +130,11 @@ later tickets remain separate work.
 ## Boundaries
 
 Implement only this approved slice and its required seams; blockers must complete first. Do not replace the stack, fabricate successful writes or expand into courier/payment-processing features. The shared spec's public-access, account-deletion, standalone-receipt retention and provider/storage/rate-limit/backup launch gates remain binding. Implement gated interfaces without selecting deferred policy or treating a configuration flag as readiness. Publication of this ticket does not authorize deployment, live migrations or real-data pilot operation.
+
+### 2026-10-25 self-test ticket 08 follow-up
+
+Submission/recovery JSON requests now have a 15-second deadline, retaining the
+original key and frozen payload after unknown outcomes. Added durable deadline,
+invalid-input, post-deadline replay and buyer-correction rejection evidence.
+See .scratch/phase-1-self-test/issues/08-manual-submission-recovery.md for exact
+checks and limits. Existing assertions and submission API remain preserved.

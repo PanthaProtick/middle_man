@@ -107,3 +107,32 @@ it('preserves input and shows server field validation before allowing a correcte
     expect(page.container.textContent).toContain('ACK-CORRECTED');
   } finally { await page.close(); }
 });
+
+it('unblocks same-key recovery when submission and recovery status both time out', async () => {
+  vi.useFakeTimers();
+  let reads = 0;
+  let posts = 0;
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+    if (init?.method === 'POST') {
+      posts++;
+      if (posts > 1) return new Response(JSON.stringify({ ...order, lifecycle: 'pending', submission_acknowledgement: 'ACK-RETRY' }));
+    } else if (++reads === 1) return new Response(JSON.stringify(order));
+    return new Promise<Response>((_resolve, reject) => {
+      init?.signal?.addEventListener('abort', () => reject(new DOMException('Timed out', 'AbortError')), { once: true });
+    });
+  });
+  const page = await filledPortal();
+  try {
+    await act(async () => { page.container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); });
+    expect(page.container.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(true);
+    await act(async () => { await vi.advanceTimersByTimeAsync(30000); });
+    expect(page.container.querySelector('button[type="submit"]')?.hasAttribute('disabled')).toBe(false);
+    expect(page.container.querySelector('fieldset')?.disabled).toBe(true);
+    await page.submit();
+    const attempts = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
+    expect(attempts).toHaveLength(2);
+    expect(attempts[1][1]?.body).toBe(attempts[0][1]?.body);
+    expect(attempts[1][1]?.headers).toEqual(attempts[0][1]?.headers);
+    expect(page.container.textContent).toContain('ACK-RETRY');
+  } finally { await page.close(); vi.useRealTimers(); }
+});

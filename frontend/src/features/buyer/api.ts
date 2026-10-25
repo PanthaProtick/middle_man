@@ -29,6 +29,23 @@ async function requestJson<T>(
   options: RequestInit = {},
   idempotencyKey?: string,
 ): Promise<T> {
+  // Status polling supplies its own cancellation. Submission and recovery reads
+  // need a deadline too: aborting the client does not establish server rollback.
+  if (options.signal) return readJson<T>(url, options, idempotencyKey);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 15000);
+  try {
+    return await readJson<T>(url, { ...options, signal: controller.signal }, idempotencyKey);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function readJson<T>(
+  url: string,
+  options: RequestInit = {},
+  idempotencyKey?: string,
+): Promise<T> {
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(options.headers as Record<string, string> | undefined),

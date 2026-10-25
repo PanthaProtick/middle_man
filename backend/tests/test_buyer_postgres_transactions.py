@@ -82,3 +82,36 @@ async def test_public_read_outage_is_explicit_without_memory_fallback(postgres_b
     assert failed.status_code == 503
     assert failed.json()["error"]["code"] == "DATABASE_UNAVAILABLE"
     assert "synthetic_unavailable_orders" not in failed.text
+
+
+async def test_invalid_input_leaves_key_and_order_available_for_valid_submission(postgres_buyer):
+    client, connection, _, order = postgres_buyer
+    url = f"/api/public/orders/{order['portal_token']}/submission"
+    headers = {"Idempotency-Key": "correctable"}
+    invalid = await client.post(url, json={**PAYLOAD, "contact_number": "invalid"}, headers=headers)
+    assert invalid.status_code == 422
+    assert await connection.fetchval("SELECT lifecycle FROM orders") == "awaiting_buyer"
+    assert await connection.fetchval("SELECT count(*) FROM buyer_revisions") == 0
+    assert await connection.fetchval("SELECT count(*) FROM idempotency_records WHERE operation='buyer_submission'") == 0
+    valid = await client.post(url, json=PAYLOAD, headers=headers)
+    assert valid.status_code == 200
+    assert valid.json()["lifecycle"] == "pending"
+    assert await connection.fetchval("SELECT count(*) FROM buyer_revisions") == 1
+
+
+async def test_buyer_link_cannot_correct_durable_submission(postgres_buyer):
+    from app.core.auth import get_seller_identity
+    from app.main import app
+
+    client, connection, _, order = postgres_buyer
+    submitted = await client.post(f"/api/public/orders/{order['portal_token']}/submission",
+                                  json=PAYLOAD, headers={"Idempotency-Key": "initial"})
+    assert submitted.status_code == 200
+    app.dependency_overrides.pop(get_seller_identity)
+    for authorization in ({}, {"Authorization": f"Bearer {order['portal_token']}"}):
+        denied = await client.patch(f"/api/seller/orders/{order['id']}/buyer-details",
+                                    json={"expected_version": 2, "reason": "Unauthorized edit", "buyer_name": "Changed"},
+                                    headers={**authorization, "Idempotency-Key": "buyer-correction"})
+        assert denied.status_code == 401
+    assert await connection.fetchval("SELECT count(*) FROM buyer_revisions") == 1
+    assert await connection.fetchval("SELECT buyer_name FROM buyer_revisions") == PAYLOAD["buyer_name"]

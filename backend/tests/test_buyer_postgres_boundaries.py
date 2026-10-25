@@ -92,3 +92,50 @@ async def test_measurements_separate_repeat_bot_and_status_requests(postgres_buy
         assert (await client.get(url)).status_code == 200
     assert await connection.fetchval("SELECT count(*) FROM link_measurements WHERE event_type='open'") == 3
     assert await connection.fetchval("SELECT count(*) FROM link_measurements WHERE event_type='submission'") == 1
+
+
+async def test_open_draft_does_not_extend_original_48_hour_deadline(postgres_buyer):
+    client, connection, _, order = postgres_buyer
+    created, deadline = await connection.fetchrow("SELECT created_at, expires_at FROM orders")
+    assert deadline == created + datetime.timedelta(hours=48)
+    now = deadline - datetime.timedelta(minutes=1)
+    app.dependency_overrides[get_buyer_clock] = lambda: lambda: now
+    url = f"/api/public/orders/{order['portal_token']}"
+    opened = await client.get(url)
+    assert opened.status_code == 200
+    assert opened.json()["lifecycle"] == "awaiting_buyer"
+    now = deadline + datetime.timedelta(microseconds=1)
+    rejected = await client.post(url + "/submission", json=PAYLOAD, headers={"Idempotency-Key": "old-draft"})
+    assert rejected.status_code == 410
+    assert rejected.json()["error"]["code"] == "EXPIRED_SUBMISSION"
+    assert (await client.get(url)).json()["expires_at"] == opened.json()["expires_at"]
+    assert await connection.fetchval("SELECT count(*) FROM buyer_revisions") == 0
+    assert await connection.fetchval("SELECT count(*) FROM idempotency_records WHERE operation='buyer_submission'") == 0
+
+
+async def test_pending_outcome_replays_after_deadline_but_rejects_new_writes(postgres_buyer):
+    client, connection, sessions, order = postgres_buyer
+    deadline = await connection.fetchval("SELECT expires_at FROM orders")
+    now = deadline - datetime.timedelta(microseconds=1)
+    app.dependency_overrides[get_buyer_clock] = lambda: lambda: now
+    url = f"/api/public/orders/{order['portal_token']}"
+    first = await client.post(url + "/submission", json=PAYLOAD, headers={"Idempotency-Key": "original"})
+    assert first.status_code == 200
+    assert first.json()["lifecycle"] == "pending"
+    now = deadline + datetime.timedelta(days=2)
+    await sessions.kw["bind"].dispose()
+    replay = await client.post(url + "/submission", json=PAYLOAD, headers={"Idempotency-Key": "original"})
+    assert replay.status_code == 200
+    assert replay.json() == first.json()
+    status = await client.get(url)
+    assert status.status_code == 200
+    assert status.json()["lifecycle"] == "pending"
+    assert status.json()["submission_acknowledgement"] == first.json()["submission_acknowledgement"]
+    duplicate = await client.post(url + "/submission", json=PAYLOAD, headers={"Idempotency-Key": "new"})
+    assert duplicate.status_code == 409
+    assert duplicate.json()["error"]["code"] == "ORDER_ALREADY_SUBMITTED"
+    changed = await client.post(url + "/submission", json={**PAYLOAD, "buyer_name": "Changed"}, headers={"Idempotency-Key": "original"})
+    assert changed.status_code == 409
+    assert changed.json()["error"]["code"] == "IDEMPOTENCY_KEY_REUSED"
+    assert await connection.fetchval("SELECT count(*) FROM buyer_revisions") == 1
+    assert await connection.fetchval("SELECT completed_at FROM orders") is None
