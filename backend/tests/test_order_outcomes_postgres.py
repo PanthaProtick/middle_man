@@ -4,6 +4,7 @@ import asyncio
 import json
 
 from buyer_postgres_support import wait_for_order_waiters
+from test_image_service import _create_minimal_jpeg
 from test_payment_exceptions import exception_case
 
 
@@ -75,6 +76,55 @@ async def test_postgres_replacement_atomicity_and_links(postgres_buyer):
     assert new_row["predecessor_order_id"] == order["id"]
     assert new_row["version"] == 1
     assert new_row["product_name"] == "Postgres Replacement Product"
+
+    # Predecessor public projection isolation (AC36, AC48)
+    old_pub_res = await client.get(f"/api/public/orders/{order['portal_token']}")
+    assert old_pub_res.status_code == 200
+    assert "location" not in old_pub_res.headers
+    old_pub = old_pub_res.json()
+    assert old_pub["id"] == order["id"]
+    assert old_pub["lifecycle"] == "cancelled"
+    assert new_order["id"] not in old_pub_res.text
+    assert new_order["portal_token"] not in old_pub_res.text
+
+    # Predecessor cannot submit
+    sub_res = await client.post(
+        f"/api/public/orders/{order['portal_token']}/submission",
+        json={
+            "buyer_name": "PG Late Buyer",
+            "contact_number": "01711112222",
+            "address": {"raw_text": "PG Test Address"},
+            "payment_claim": {
+                "provider": "bkash",
+                "trx_id": "PGTX123",
+                "sender_number": "01811112222",
+                "amount_minor": 250000,
+            },
+        },
+        headers={"Idempotency-Key": "pg-sub-pred-block"},
+    )
+    assert sub_res.status_code == 409
+    assert sub_res.json()["error"]["code"] == "ORDER_ALREADY_SUBMITTED"
+
+    # Predecessor cannot upload evidence
+    up_res = await client.post(
+        f"/api/public/orders/{order['portal_token']}/evidence",
+        content=_create_minimal_jpeg(),
+        headers={"Content-Type": "image/jpeg", "Idempotency-Key": "pg-up-pred-block"},
+    )
+    assert up_res.status_code == 409
+    assert up_res.json()["error"]["code"] == "ORDER_ALREADY_SUBMITTED"
+
+    # Predecessor revocation denies public access with 410
+    rev_res = await client.post(
+        path + "/revoke-link",
+        json={"expected_version": 2},
+        headers={"Idempotency-Key": "pg-revoke-pred"},
+    )
+    assert rev_res.status_code == 200
+    rev_pub_res = await client.get(f"/api/public/orders/{order['portal_token']}")
+    assert rev_pub_res.status_code == 410
+    assert rev_pub_res.json()["error"]["code"] == "BUYER_LINK_REVOKED"
 
 
 async def test_postgres_replacement_versus_confirmation_contention(postgres_buyer):
