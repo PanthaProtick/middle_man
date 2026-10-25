@@ -8,6 +8,7 @@ import httpx
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.tokens import get_utc_now
 from app.models.address_assistance import AddressExtractionRequest, AddressExtractionResponse, AddressSuggestions
 from app.models.address_entities import AddressExtractionTable
@@ -62,6 +63,8 @@ class AddressAssistance:
             _require_unsubmitted(str(raw["lifecycle"]))
             prior = _memory.get((order_id, key))
             count = sum(1 for oid, _ in _memory if oid == order_id)
+        if not settings.ai_enabled:
+            return AddressExtractionResponse(available=False, message="AI is disabled. Enter your address manually.")
         fingerprint = hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
         if prior is not None:
             if prior.payload_hash != fingerprint:

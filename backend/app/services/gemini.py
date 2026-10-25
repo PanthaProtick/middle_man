@@ -31,10 +31,10 @@ class GeminiService:
             )
 
     def is_configured(self) -> bool:
-        return self.client is not None
+        return settings.ai_enabled and self.client is not None
 
     async def generate_chat(self, message: str, system_instruction: Optional[str] = None) -> ChatResult:
-        if not self.client:
+        if not self.client or not settings.ai_enabled:
             return {
                 "reply": f"[MOCK GEMINI RESPONSE] Received: '{message}'. To enable live Gemini AI responses, provide your GEMINI_API_KEY in backend/.env.",
                 "model": "mock-gemini-preview",
@@ -82,7 +82,7 @@ class GeminiService:
     async def generate_structured_idea(
         self, topic: str, target_audience: Optional[str] = None
     ) -> HackathonIdea:
-        if not self.client:
+        if not self.client or not settings.ai_enabled:
             return HackathonIdea(
                 title=f"Smart {topic.capitalize()} Hub",
                 tagline=f"Empowering {target_audience or 'users'} with real-time intelligent automation.",

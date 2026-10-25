@@ -270,3 +270,17 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
 - Account deletion, standalone unmatched structured-receipt retention, storage version
   history, backup purge and provider/log copies remain unsettled launch gates. These
   endpoints and local checks do not establish real-data readiness or deploy anything.
+## Self-test AI policy
+
+`SELF_TEST_MODE=true` disables AI regardless of Gemini credentials. Address and
+payment extraction retain their request/response contracts and order/evidence
+eligibility checks, but return `available=false`, no suggestions and manual-entry
+guidance before cached outcomes or provider work. Disabled requests do not consume
+extraction budget or retain new AI inputs. Outside self-test mode, existing enabled
+extraction behavior remains available.
+
+Public order responses expose `ai_assistance_available`, evaluated from current
+policy and provider configuration even for cached submission responses. This is
+configuration availability, not proof of provider health. The buyer form requires
+explicit `true` to display AI controls; missing/false keeps manual entry and optional
+screenshots available. Demo Gemini calls also remain local in self-test mode.

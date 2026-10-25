@@ -35,6 +35,7 @@ describe('BuyerPortal Component', () => {
     created_at: '2026-10-23T12:00:00Z',
     expires_at: '2026-10-25T12:00:00Z',
     completed_at: null,
+    ai_assistance_available: false,
   };
 
   beforeEach(() => {
@@ -65,6 +66,9 @@ describe('BuyerPortal Component', () => {
     expect(container.textContent).toContain('৳3,000.00'); // Expected COD
 
     // Check separate contact and payment sender fields are present
+    expect(container.textContent).toContain('AI assistance is unavailable');
+    expect(container.querySelector('[aria-label="Optional address assistance"]')).toBeNull();
+    expect(container.querySelector('input[type="file"]')).not.toBeNull();
     expect(container.querySelector('input[name="contact_number"]')).not.toBeNull();
     expect(container.querySelector('input[name="payment_sender"]')).not.toBeNull();
   });

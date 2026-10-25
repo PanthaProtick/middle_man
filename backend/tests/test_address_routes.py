@@ -50,6 +50,30 @@ SUGGESTIONS = {"district": "Dhaka", "thana": None, "area": None, "street_line": 
 
 
 @pytest.mark.asyncio
+async def test_self_test_disables_fresh_and_cached_address_with_credentials(client, monkeypatch):
+    from app.core.config import settings
+
+    order = await _create_test_order(client)
+    provider = ProviderDouble(SUGGESTIONS)
+    app.dependency_overrides[get_address_provider] = lambda: provider
+    url = f"/api/public/orders/{order['portal_token']}/address-extraction"
+    payload = {"raw_text": "Dhaka", "ai_opt_in": True}
+    assert (await client.post(url, json=payload, headers={"Idempotency-Key": "cached"})).json()["available"]
+    from app.core.database import get_db
+
+    monkeypatch.setitem(app.dependency_overrides, get_db, lambda: None)
+    monkeypatch.setattr(settings, "SELF_TEST_MODE", True)
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "synthetic-configured-key")
+    for key in ("cached", "fresh", "fresh"):
+        response = await client.post(url, json=payload, headers={"Idempotency-Key": key})
+        assert response.status_code == 200
+        assert response.json()["available"] is False
+        assert response.json()["suggestions"] is None
+        assert "manually" in response.json()["message"]
+    assert provider.calls == 1
+
+
+@pytest.mark.asyncio
 async def test_suggestions_replay_and_conflicting_key(client):
     order = await _create_test_order(client)
     provider = ProviderDouble(SUGGESTIONS)

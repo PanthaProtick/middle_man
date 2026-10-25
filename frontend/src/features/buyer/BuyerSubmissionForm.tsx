@@ -217,7 +217,8 @@ export function BuyerSubmissionForm({
         )}
       </div>
 
-      {portalToken && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
+      {order.ai_assistance_available !== true && <p>AI assistance is unavailable. Enter your address and payment details manually. Screenshots are optional.</p>}
+      {portalToken && order.ai_assistance_available === true && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
         onUse={value => updateField('address_raw', value)} disabled={isSubmitting || isLocked} />}
 
       {portalToken && (
@@ -231,7 +232,7 @@ export function BuyerSubmissionForm({
         />
       )}
 
-      {portalToken && draft.evidence_id && <PaymentAssistance portalToken={portalToken} draft={draft}
+      {portalToken && order.ai_assistance_available === true && draft.evidence_id && <PaymentAssistance portalToken={portalToken} draft={draft}
         onUse={patch => onDraftChange({ ...draft, ...patch })} disabled={isSubmitting || isLocked} />}
 
       <PaymentClaimFields

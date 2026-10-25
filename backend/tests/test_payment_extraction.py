@@ -109,6 +109,31 @@ async def stage(client, order, key="image"):
 
 
 @pytest.mark.asyncio
+async def test_self_test_disables_fresh_and_cached_payment_with_credentials(client, monkeypatch):
+    from app.core.config import settings
+    from app.core.database import get_db
+    from app.services.payment_provider import get_payment_provider
+
+    provider = ProviderDouble()
+    app.dependency_overrides[get_payment_provider] = lambda: provider
+    order = await _create_test_order(client)
+    evidence = await stage(client, order)
+    base = f"/api/public/orders/{order['portal_token']}"
+    payload = {"evidence_id": evidence, "ai_opt_in": True}
+    assert (await client.post(base + "/payment-extraction", json=payload, headers={"Idempotency-Key": "cached"})).json()["available"]
+    monkeypatch.setitem(app.dependency_overrides, get_db, lambda: None)
+    monkeypatch.setattr(settings, "SELF_TEST_MODE", True)
+    monkeypatch.setattr(settings, "GEMINI_API_KEY", "synthetic-configured-key")
+    for key in ("cached", "fresh", "fresh"):
+        response = await client.post(base + "/payment-extraction", json=payload, headers={"Idempotency-Key": key})
+        assert response.status_code == 200
+        assert response.json()["available"] is False
+        assert response.json()["suggestions"] is None
+        assert response.json()["evidence_id"] == evidence
+    assert provider.calls == 1
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "output",
     [

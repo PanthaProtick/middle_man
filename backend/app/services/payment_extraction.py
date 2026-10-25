@@ -8,6 +8,7 @@ import httpx
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.tokens import get_utc_now
 from app.models.entities import OrderEvidenceTable, OrderTable
 from app.models.payment_entities import PaymentExtractionTable
@@ -97,6 +98,11 @@ class PaymentExtraction:
         if evidence.status != "staged" or evidence.deleted_at is not None or evidence.delete_after <= now:
             raise SellerDomainException(
                 410, "EVIDENCE_UNAVAILABLE", "Screenshot unavailable. Enter payment details manually."
+            )
+        if not settings.ai_enabled:
+            return PaymentExtractionResponse(
+                evidence_id=payload.evidence_id, available=False,
+                message="AI is disabled. Enter payment details manually.",
             )
         fingerprint = hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
         if prior is not None:
