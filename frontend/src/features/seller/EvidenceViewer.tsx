@@ -15,6 +15,7 @@ export function EvidenceViewer({ orderId, token, buyerRevision }: EvidenceViewer
   const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [isUnavailable, setIsUnavailable] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -76,7 +77,7 @@ export function EvidenceViewer({ orderId, token, buyerRevision }: EvidenceViewer
         URL.revokeObjectURL(createdUrl);
       }
     };
-  }, [orderId, token, buyerRevision]);
+  }, [orderId, token, buyerRevision, retryKey]);
 
   if (loading) {
     return (
@@ -154,6 +155,7 @@ export function EvidenceViewer({ orderId, token, buyerRevision }: EvidenceViewer
         style={{
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
           gap: '8px',
           padding: '12px',
           background: 'rgba(239, 68, 68, 0.1)',
@@ -164,8 +166,26 @@ export function EvidenceViewer({ orderId, token, buyerRevision }: EvidenceViewer
           color: 'var(--rose-accent)',
         }}
       >
-        <AlertCircle size={16} color="var(--rose-accent)" />
-        <span>{errorMessage}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <AlertCircle size={16} color="var(--rose-accent)" />
+          <span>{errorMessage}</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setRetryKey((k) => k + 1)}
+          style={{
+            background: 'rgba(239, 68, 68, 0.15)',
+            border: '1px solid rgba(239, 68, 68, 0.4)',
+            borderRadius: '4px',
+            color: 'var(--rose-accent)',
+            padding: '3px 10px',
+            fontSize: '0.75rem',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Retry
+        </button>
       </div>
     );
   }

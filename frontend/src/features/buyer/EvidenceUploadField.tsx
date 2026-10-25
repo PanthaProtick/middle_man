@@ -21,20 +21,18 @@ export function EvidenceUploadField({
 }: EvidenceUploadFieldProps): React.JSX.Element {
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+  const [lastFailedFile, setLastFailedFile] = useState<File | null>(null);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const uploadFile = async (file: File) => {
     if (file.size > 5 * 1024 * 1024) {
       setUploadError('Image exceeds 5 MiB limit / ফাইলের সাইজ ৫ মেগাবাইটের বেশি হতে পারবে না');
-      if (e.target) e.target.value = '';
+      setLastFailedFile(null);
       return;
     }
 
     if (!['image/jpeg', 'image/png'].includes(file.type)) {
       setUploadError('Only JPEG and PNG formats are supported / শুধুমাত্র JPEG ও PNG ফরম্যাট গ্রহণযোগ্য');
-      if (e.target) e.target.value = '';
+      setLastFailedFile(null);
       return;
     }
 
@@ -43,8 +41,10 @@ export function EvidenceUploadField({
 
     try {
       const res = await uploadBuyerEvidence(portalToken, file);
+      setLastFailedFile(null);
       onUploaded(res.evidence_id, file.name);
     } catch (err: unknown) {
+      setLastFailedFile(file);
       setUploadError(
         err instanceof Error
           ? `${err.message} — You can still submit manually below.`
@@ -52,8 +52,29 @@ export function EvidenceUploadField({
       );
     } finally {
       setIsUploading(false);
+    }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      await uploadFile(file);
+    } finally {
       if (e.target) e.target.value = '';
     }
+  };
+
+  const handleRetry = async () => {
+    if (lastFailedFile && !disabled && !isUploading) {
+      await uploadFile(lastFailedFile);
+    }
+  };
+
+  const handleRemove = () => {
+    setLastFailedFile(null);
+    setUploadError(null);
+    onRemoved();
   };
 
   return (
@@ -96,11 +117,33 @@ export function EvidenceUploadField({
             marginBottom: '10px',
             display: 'flex',
             alignItems: 'center',
-            gap: '6px',
+            justifyContent: 'space-between',
+            gap: '8px',
           }}
         >
-          <AlertCircle size={14} />
-          <span>{uploadError}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <AlertCircle size={14} />
+            <span>{uploadError}</span>
+          </div>
+          {lastFailedFile && (
+            <button
+              type="button"
+              onClick={handleRetry}
+              disabled={disabled || isUploading}
+              style={{
+                background: 'rgba(239, 68, 68, 0.15)',
+                border: '1px solid rgba(239, 68, 68, 0.4)',
+                borderRadius: '4px',
+                color: 'var(--rose-accent)',
+                padding: '2px 8px',
+                fontSize: '0.75rem',
+                cursor: disabled || isUploading ? 'not-allowed' : 'pointer',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Retry
+            </button>
+          )}
         </div>
       )}
 
@@ -124,7 +167,7 @@ export function EvidenceUploadField({
           </div>
           <button
             type="button"
-            onClick={onRemoved}
+            onClick={handleRemove}
             disabled={disabled}
             style={{
               background: 'none',

@@ -134,4 +134,49 @@ describe('EvidenceUploadField', () => {
     expect(container.textContent).toContain('Storage temporarily unavailable');
     expect(container.textContent).toContain('You can still submit manually below');
   });
+
+  it('allows retrying upload with retry button after initial failure', async () => {
+    const onUploaded = vi.fn();
+    const uploadSpy = vi
+      .spyOn(api, 'uploadBuyerEvidence')
+      .mockRejectedValueOnce(new Error('Private storage service is unavailable'))
+      .mockResolvedValueOnce({
+        evidence_id: 'ev-retry-success',
+        media_type: 'image/png',
+        byte_size: 2048,
+        width: 100,
+        height: 100,
+      });
+
+    await act(async () => {
+      root.render(
+        <EvidenceUploadField
+          portalToken="token-abc"
+          onUploaded={onUploaded}
+          onRemoved={vi.fn()}
+        />,
+      );
+    });
+
+    const file = new File(['png-bytes'], 'receipt.png', { type: 'image/png' });
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+
+    await act(async () => {
+      Object.defineProperty(input, 'files', { value: [file] });
+      input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    expect(container.textContent).toContain('Private storage service is unavailable');
+    const retryBtn = Array.from(container.querySelectorAll('button')).find((btn) =>
+      btn.textContent?.includes('Retry'),
+    );
+    expect(retryBtn).toBeDefined();
+
+    await act(async () => {
+      retryBtn!.click();
+    });
+
+    expect(uploadSpy).toHaveBeenCalledTimes(2);
+    expect(onUploaded).toHaveBeenCalledWith('ev-retry-success', 'receipt.png');
+  });
 });

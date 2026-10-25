@@ -140,4 +140,64 @@ describe('EvidenceViewer', () => {
     expect(img?.getAttribute('src')).toBe('blob:http://localhost/mock-blob');
     expect(container.textContent).toContain('Open Full Size');
   });
+
+  it('renders retry button on error and re-attempts loading when clicked', async () => {
+    vi.spyOn(correctionsApi, 'fetchHistory').mockResolvedValue({
+      items: [
+        {
+          id: 'rev-1',
+          revision_number: 1,
+          actor: 'buyer',
+          reason: null,
+          created_at: '2026-10-24T12:00:00Z',
+          claim_accepted_at: '2026-10-24T12:00:00Z',
+          buyer_name: 'Buyer',
+          contact_number: '01711111111',
+          address: { raw_text: 'Dhaka' },
+          payment_claim: {
+            provider: 'bkash',
+            trx_id: 'TRX123',
+            sender_number: '01722222222',
+            amount_minor: 50000,
+            evidence_id: 'ev-active-123',
+          },
+        },
+      ],
+      next_cursor: null,
+    });
+
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ error: { code: 'STORAGE_UNAVAILABLE' } }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(new Blob(['png-bytes'], { type: 'image/png' }), {
+          status: 200,
+          headers: { 'Content-Type': 'image/png' },
+        }),
+      );
+
+    window.URL.createObjectURL = vi.fn().mockReturnValue('blob:http://localhost/mock-blob');
+    window.URL.revokeObjectURL = vi.fn();
+
+    await act(async () => {
+      root.render(<EvidenceViewer orderId="order-1" token="mock-token" />);
+    });
+
+    expect(container.textContent).toContain('Unable to load payment screenshot');
+    const retryBtn = Array.from(container.querySelectorAll('button')).find((btn) =>
+      btn.textContent?.includes('Retry'),
+    );
+    expect(retryBtn).toBeDefined();
+
+    await act(async () => {
+      retryBtn!.click();
+    });
+
+    expect(fetchSpy).toHaveBeenCalledTimes(2);
+    expect(container.querySelector('img')).not.toBeNull();
+  });
 });

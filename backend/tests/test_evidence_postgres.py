@@ -229,3 +229,52 @@ async def test_postgres_cleanup_storage_outage_safe_repeat_recovery(postgres_buy
     row_after = await connection.fetchrow("SELECT * FROM order_evidence WHERE id = $1", ev_id)
     assert row_after["status"] == "deleted"
     assert row_after["deleted_at"] is not None
+
+
+@pytest.mark.asyncio
+async def test_postgres_uncommitted_failed_evidence_rejected_at_submission(postgres_buyer):
+    client, connection, _, order = postgres_buyer
+
+    # 1. Outage during upload records failed status in PostgreSQL
+    inject_storage_outage(True)
+    try:
+        res = await client.post(
+            f"/api/public/orders/{order['portal_token']}/evidence",
+            content=_create_minimal_png(),
+            headers={"Content-Type": "image/png", "Idempotency-Key": "pg-outage-uncommitted"},
+        )
+        assert res.status_code == 503
+    finally:
+        inject_storage_outage(False)
+
+    failed_ev = await connection.fetchrow(
+        "SELECT id, status FROM order_evidence WHERE order_id = $1 AND status = 'failed'", order["id"]
+    )
+    assert failed_ev is not None
+    failed_id = failed_ev["id"]
+
+    # 2. Submitting order with failed evidence must be rejected with 422 UNCOMMITTED_EVIDENCE
+    sub_payload = {
+        "buyer_name": "PG Failed Ev Buyer",
+        "contact_number": "01711111111",
+        "address": {"raw_text": "Gulshan 1, Dhaka"},
+        "payment_claim": {
+            "provider": "bkash",
+            "trx_id": "PGTRX-FAILED-ATTACH",
+            "sender_number": "01722222222",
+            "amount_minor": order["required_advance_minor"],
+            "evidence_id": failed_id,
+        },
+    }
+    sub_res = await client.post(
+        f"/api/public/orders/{order['portal_token']}/submission",
+        json=sub_payload,
+        headers={"Idempotency-Key": "pg-sub-failed-ev"},
+    )
+    assert sub_res.status_code == 422
+    assert sub_res.json()["error"]["code"] == "UNCOMMITTED_EVIDENCE"
+
+    # Evidence status remains failed in database
+    current_status = await connection.fetchval("SELECT status FROM order_evidence WHERE id = $1", failed_id)
+    assert current_status == "failed"
+

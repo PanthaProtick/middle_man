@@ -1,7 +1,9 @@
+import uuid
 from pathlib import Path
 from typing import Optional
 
 _memory_evidence_files: dict[str, bytes] = {}
+_memory_orphans: set[str] = set()
 _injected_fault: bool = False
 _storage_dir: Optional[Path] = None
 
@@ -24,6 +26,8 @@ def inject_storage_outage(fault: bool) -> None:
 def set_evidence_storage_dir(path: Optional[Path]) -> None:
     global _storage_dir
     _storage_dir = path
+    if path is not None:
+        _sync_orphans_from_disk()
 
 
 def init_evidence_storage(target_dir: Optional[Path] = None) -> Path:
@@ -40,6 +44,72 @@ def reset_evidence_file_store() -> None:
     _injected_fault = False
     _storage_dir = None
     _memory_evidence_files.clear()
+    _memory_orphans.clear()
+
+
+def _get_orphan_manifest_path() -> Optional[Path]:
+    if _storage_dir is not None:
+        return _storage_dir / ".orphans.txt"
+    return None
+
+
+def _sync_orphans_from_disk() -> None:
+    manifest = _get_orphan_manifest_path()
+    if manifest and manifest.is_file():
+        try:
+            lines = manifest.read_text(encoding="utf-8").splitlines()
+            for line in lines:
+                cleaned = line.strip()
+                if cleaned:
+                    _memory_orphans.add(cleaned)
+        except OSError:
+            pass
+
+
+def _sync_orphans_to_disk() -> None:
+    manifest = _get_orphan_manifest_path()
+    if manifest is not None:
+        try:
+            if _memory_orphans:
+                manifest.parent.mkdir(parents=True, exist_ok=True)
+                manifest.write_text("\n".join(sorted(_memory_orphans)) + "\n", encoding="utf-8")
+            elif manifest.exists():
+                manifest.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+
+def record_orphan_evidence(storage_key: str) -> None:
+    _memory_orphans.add(storage_key)
+    _sync_orphans_to_disk()
+
+
+def get_orphan_evidence_keys() -> set[str]:
+    _sync_orphans_from_disk()
+    return set(_memory_orphans)
+
+
+def recover_orphan_evidence() -> int:
+    _sync_orphans_from_disk()
+    keys_to_recover = set(_memory_orphans)
+    recovered = 0
+    for key in keys_to_recover:
+        try:
+            target_path = _resolve_storage_path(key)
+            file_existed = False
+            if _storage_dir is not None:
+                file_existed = target_path.is_file()
+            else:
+                file_existed = key in _memory_evidence_files
+
+            delete_evidence_file(key)
+            _memory_orphans.discard(key)
+            if file_existed:
+                recovered += 1
+        except StorageOutageError:
+            pass
+    _sync_orphans_to_disk()
+    return recovered
 
 
 def _resolve_storage_path(storage_key: str) -> Path:
@@ -85,11 +155,19 @@ def save_evidence_file(storage_key: str, data: bytes) -> None:
 
     target_path = _resolve_storage_path(storage_key)
     if _storage_dir is not None:
+        temp_path: Optional[Path] = None
         try:
             target_path.parent.mkdir(parents=True, exist_ok=True)
-            target_path.write_bytes(data)
+            temp_path = target_path.parent / f".{target_path.name}.{uuid.uuid4().hex}.tmp"
+            temp_path.write_bytes(data)
+            temp_path.replace(target_path)
         except OSError as err:
-            raise StorageOutageError(f"Storage write failed: {err}") from err
+            if temp_path is not None and temp_path.exists():
+                try:
+                    temp_path.unlink(missing_ok=True)
+                except OSError:
+                    pass
+            raise StorageOutageError("Storage write failed") from err
     else:
         _memory_evidence_files[storage_key] = data
 
@@ -105,7 +183,7 @@ def read_evidence_file(storage_key: str) -> Optional[bytes]:
                 return None
             return target_path.read_bytes()
         except OSError as err:
-            raise StorageOutageError(f"Storage read failed: {err}") from err
+            raise StorageOutageError("Storage read failed") from err
     return _memory_evidence_files.get(storage_key)
 
 
@@ -119,6 +197,6 @@ def delete_evidence_file(storage_key: str) -> None:
             if target_path.is_file():
                 target_path.unlink(missing_ok=True)
         except OSError as err:
-            raise StorageOutageError(f"Storage delete failed: {err}") from err
+            raise StorageOutageError("Storage delete failed") from err
     else:
         _memory_evidence_files.pop(storage_key, None)
