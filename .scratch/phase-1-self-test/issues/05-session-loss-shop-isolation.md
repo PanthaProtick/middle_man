@@ -62,3 +62,5 @@ Verification:
 Remaining evidence and next action:
 
 The second checkbox remains open for actual two-owner Clerk sessions against the intended dedicated Neon development database. All observations above use offline process-memory storage and locally signed verifier fixtures; they do not prove live Clerk/Neon, durable permission behavior, hosted deployment or browser behavior. No provider credentials or private dataset were read/changed. Ticket 20 must record real sign-out/expiry/identity-switch and owning/foreign private-surface observations; durable permission evidence is still required before claiming full local synthetic self-test completion. Existing Ticket 04 likewise retains its real-session gap. New endpoints in later tickets need their own owning/foreign tests.
+
+Final follow-up gate (2026-10-25): `npm run check` PASS, `.cache/checks/check-yX9pFi/result.json`; backend 306 passed / 67 skipped, frontend 28 files / 130 passed. Tooling, lint, strict types, build and HTTP smoke passed. Follow-up commit `d2e70a8`; working tree clean after commit. Skipped durable/PostgreSQL cases remain unverified; no live evidence is inferred from these counts.
