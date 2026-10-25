@@ -37,12 +37,34 @@ it('retries an uncertain revocation with the identical payload and key', async (
   await act(async () => root.unmount());
 });
 
-it('shows revoked access without offering another mutation', async () => {
+it('offers reissue to recover revoked access', async () => {
   const host = document.createElement('div'); document.body.append(host);
   const root = createRoot(host);
   await act(async () => root.render(<BuyerLinkAccess order={{ ...order, buyer_link_revoked_at: '2026-10-25T00:00:00Z' }} token="session" onUpdated={vi.fn()} />));
   expect(host.textContent).toContain('Buyer link revoked');
-  expect(host.querySelector('button')).toBeNull();
+  expect(host.querySelector('button')!.textContent).toBe('Reissue buyer link');
+  await act(async () => root.unmount());
+});
+
+it('retries reissue with the same key and updates the saved link only after success', async () => {
+  const writes: RequestInit[] = [];
+  const onUpdated = vi.fn();
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    expect(url).toBe('/api/seller/orders/order-1/reissue-link');
+    writes.push(init!);
+    if (writes.length === 1) throw new TypeError('Connection lost');
+    return new Response(JSON.stringify({ ...order, version: 3, portal_token: 'fresh', portal_url: '/orders/fresh' }));
+  });
+  const host = document.createElement('div'); document.body.append(host);
+  const root = createRoot(host);
+  await act(async () => root.render(<BuyerLinkAccess order={order} token="session" onUpdated={onUpdated} />));
+  const reissue = () => Array.from(host.querySelectorAll('button')).find(button => /[Rr]eissue/.test(button.textContent!))!;
+  await act(async () => reissue().click());
+  expect(onUpdated).not.toHaveBeenCalled();
+  expect(Array.from(host.querySelectorAll('button')).find(button => button.textContent === 'Revoke buyer link')!.disabled).toBe(true);
+  await act(async () => reissue().click());
+  expect(writes[1]).toEqual(writes[0]);
+  expect(onUpdated).toHaveBeenCalledWith(expect.objectContaining({ portal_url: '/orders/fresh' }));
   await act(async () => root.unmount());
 });
 

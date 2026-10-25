@@ -88,7 +88,8 @@ async def test_confirmed_allocation_survives_durable_revocation(postgres_buyer):
     await confirmed_order_revocation(client)
 
 
-async def test_revocation_between_extraction_reservation_and_work_denies_storage(postgres_buyer, monkeypatch):
+@pytest.mark.parametrize("action", ["revoke", "reissue"])
+async def test_access_change_between_extraction_reservation_and_work_denies_storage(postgres_buyer, monkeypatch, action):
     from app.core.config import settings
     from app.main import app
     from app.models.payment_entities import PaymentExtractionTable
@@ -126,12 +127,12 @@ async def test_revocation_between_extraction_reservation_and_work_denies_storage
     }, headers={"Idempotency-Key": "extract"}))
     try:
         await asyncio.wait_for(reserved.wait(), timeout=5)
-        revoked = await client.post(f"/api/seller/orders/{order['id']}/revoke-link",
+        revoked = await client.post(f"/api/seller/orders/{order['id']}/{action}-link",
                                    json={"expected_version": 1}, headers={"Idempotency-Key": "revoke"})
         assert revoked.status_code == 200
     finally:
         resume.set()
         result = await task
         app.dependency_overrides.pop(get_payment_provider, None)
-    assert result.status_code == 410
-    assert result.json()["error"]["code"] == "BUYER_LINK_REVOKED"
+    assert result.status_code == (410 if action == "revoke" else 404)
+    assert result.json()["error"]["code"] == ("BUYER_LINK_REVOKED" if action == "revoke" else "NOT_FOUND")

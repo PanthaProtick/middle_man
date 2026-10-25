@@ -146,11 +146,12 @@ class PaymentExtraction:
             await db.commit()
             order = await db.scalar(
                 select(OrderTable)
-                .where(OrderTable.id == order_id)
+                .where(OrderTable.id == order_id, OrderTable.token_lookup_digest == digest)
                 .with_for_update()
                 .execution_options(populate_existing=True)
             )
-            assert order is not None
+            if order is None:
+                raise NotFoundError("Order not found")
             require_public_order_access(order)
             _check_and_apply_expiry(order, self.clock())
             _require_unsubmitted(order.lifecycle)

@@ -1,5 +1,25 @@
 # API Contracts & Data Flow Guide
 
+## Same-order buyer-link reissue
+
+`POST /api/seller/orders/{order_id}/reissue-link` requires the owning seller,
+`Idempotency-Key`, and `{expected_version}` (strict positive integer; no extra
+fields). Returns `SellerOrder` with a fresh saved link and incremented version.
+It clears revocation and permanently invalidates previous tokens for all public
+operations, including replay. Order identity, terms, allocation, original deadline
+and submission state remain unchanged. Expired/cancelled/replaced orders and
+unsubmitted orders past the deadline return `409 ORDER_NOT_REISSUABLE`.
+
+Shop/order locks serialize reissue with revocation and public mutations. Token
+rotation, audit and retry record commit together. Matching retries return the
+original result without rotating; if that token has since been rotated or revoked,
+the retry returns `409 BUYER_LINK_SUPERSEDED` and asks the seller to refresh.
+Changed-payload key reuse and stale versions conflict. Responses retain private
+no-store and no-referrer headers; database failures return the existing uncertain
+outcome response, so retry with the same key and payload. The workspace disables
+competing access actions while an outcome is unresolved and updates the saved
+copy/open link only after acknowledgement.
+
 ## Public request admission
 
 All HTTP requests under `/api/public/orders` share an aggregate fixed-window quota
