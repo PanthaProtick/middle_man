@@ -19,6 +19,7 @@ export function PaymentException({orderId, token, onAccepted}: {
   const [error,setError] = useState('');
   const [retry,setRetry] = useState(false);
   const [stale,setStale] = useState(false);
+  const [showTechnical, setShowTechnical] = useState(false);
   const pending = useRef<{payload:PaymentDecision;key:string} | null>(null);
   const sequence = useRef({value:0});
 
@@ -72,12 +73,22 @@ export function PaymentException({orderId, token, onAccepted}: {
     {busy && <p role="status">Loading payment…</p>}
     {receiptId && !retry && <button type="button" disabled={busy} onClick={()=>void loadPreview(receiptId)}>Refresh payment preview</button>}
     {preview && <>
-      <p>Order total: {money(preview.total_minor)} · Required advance: {money(preview.required_advance_minor)}</p>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
+        <p style={{ margin: 0 }}>Order total: {money(preview.total_minor)} · Required advance: {money(preview.required_advance_minor)}</p>
+        <button
+          type="button"
+          onClick={() => setShowTechnical(!showTechnical)}
+          style={{ background: 'none', border: 'none', color: 'var(--primary-accent)', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline' }}
+          aria-expanded={showTechnical}
+        >
+          {showTechnical ? 'Hide technical IDs' : 'Show technical IDs (for dev)'}
+        </button>
+      </div>
       <table><caption>Payment claim compared with seller receipt</caption>
         <thead><tr><th>Field</th><th>Order / buyer claim</th><th>Seller receipt</th></tr></thead>
         <tbody>
           <tr><th>Provider</th><td>{preview.account_provider} / {preview.claim_provider}</td><td>{preview.receipt.provider}</td></tr>
-          <tr><th>Receiving account ID</th><td>{preview.payment_account_id}</td><td>{preview.receipt.payment_account_id}</td></tr>
+          <tr style={{ display: showTechnical ? 'table-row' : 'none' }}><th>Receiving account ID</th><td>{preview.payment_account_id}</td><td>{preview.receipt.payment_account_id}</td></tr>
           <tr><th>TrxID</th><td>{preview.claim_trx_id}</td><td>{preview.receipt.trx_id}</td></tr>
           <tr><th>Sender</th><td>{preview.claim_sender}</td><td>{preview.receipt.sender_number_canonical ?? 'Unknown'}</td></tr>
           <tr><th>Amount</th><td>{money(preview.claim_amount_minor)}</td><td>{money(preview.accepted_amount_minor)}</td></tr>

@@ -60,7 +60,7 @@ export function AddAccountForm({
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value as 'bkash' | 'nagad')}
-            style={{ padding: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+            style={{ width: '120px', flexShrink: 0, padding: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
           >
             <option value="bkash">bKash</option>
             <option value="nagad">Nagad</option>
@@ -70,7 +70,7 @@ export function AddAccountForm({
             placeholder="Receiving Number (e.g. 01712345678 or ০১৭...)"
             value={receivingNumber}
             onChange={(e) => setReceivingNumber(e.target.value)}
-            style={{ flex: 1, padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+            style={{ flex: 1, minWidth: 0, padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
           />
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>

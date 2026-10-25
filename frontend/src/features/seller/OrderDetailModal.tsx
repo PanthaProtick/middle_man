@@ -10,6 +10,7 @@ import { EvidenceViewer } from './EvidenceViewer';
 import { OrderExport } from './OrderExport';
 import { BuyerLinkCopy } from './BuyerLinkCopy';
 import { BuyerLinkAccess } from './BuyerLinkAccess';
+import { DeveloperDetailsPanel } from './DeveloperDetailsPanel';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -20,6 +21,7 @@ interface OrderDetailModalProps {
 
 export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected }: OrderDetailModalProps): React.JSX.Element {
   const [order, setOrder] = useState(initialOrder);
+  const [showReviewCodes, setShowReviewCodes] = useState(false);
   const isExpired = order.lifecycle === 'expired';
   const isConfirmed = order.lifecycle === 'confirmed';
   const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
@@ -127,10 +129,21 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
 
         {hasReviewReasons && (
           <div style={{ marginBottom: '16px', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--rose-accent)', marginBottom: '6px' }}>
-              <AlertTriangle size={14} /> Review Required / অসঙ্গতি পাওয়া গেছে
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--rose-accent)' }}>
+                <AlertTriangle size={14} /> Review Required / অসঙ্গতি পাওয়া গেছে
+              </div>
+              <button
+                type="button"
+                className="btn btn-secondary btn-xs"
+                onClick={() => setShowReviewCodes((prev) => !prev)}
+                style={{ fontSize: '0.7rem', padding: '2px 8px' }}
+                aria-expanded={showReviewCodes}
+              >
+                {showReviewCodes ? 'Hide error codes' : 'Show error codes (for dev)'}
+              </button>
             </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: showReviewCodes ? 'flex' : 'none', flexWrap: 'wrap', gap: '6px' }}>
               {order.review_reasons.map((reason) => (
                 <span
                   key={reason}
@@ -190,6 +203,8 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
             </div>
           </div>
         </div>
+
+        <DeveloperDetailsPanel order={order} />
 
         {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
         {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}

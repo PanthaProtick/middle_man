@@ -16,6 +16,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
   const [stale, setStale] = useState(false);
+  const [showDevStatus, setShowDevStatus] = useState(false);
   const [pending, setPending] = useState<{key: string; input: CorrectionInput} | null>(null);
   const alive = useRef(true);
 
@@ -90,7 +91,24 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
     <h3>Correct buyer information / ক্রেতার তথ্য সংশোধন</h3>
     {error && <p role="alert">{error}</p>}
     {!order && !error && <p role="status">Loading buyer information…</p>}
-    {order && <p role="status">{order.lifecycle} — {order.review_reasons.join(', ') || 'No private review reasons'}</p>}
+    {order && (
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
+        <p role="status" style={{ margin: '4px 0' }}>
+          Status: <strong>{order.lifecycle}</strong>
+          <span style={{ display: showDevStatus ? 'inline' : 'none' }}>
+            {' '}— {order.review_reasons.join(', ') || 'No private review reasons'}
+          </span>
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowDevStatus((prev) => !prev)}
+          style={{ background: 'none', border: 'none', color: 'var(--primary-accent)', cursor: 'pointer', fontSize: '0.725rem', textDecoration: 'underline', padding: 0 }}
+          aria-expanded={showDevStatus}
+        >
+          {showDevStatus ? 'Hide dev details' : 'Show dev details'}
+        </button>
+      </div>
+    )}
     {isConfirmed && (
       <div className="courier-notice" role="note" style={{marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: 'var(--amber-accent)'}}>
         Portal corrections do not update courier bookings. Update courier parcels separately if already booked. / পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। কুরিয়ারে বুকিং করা থাকলে আলাদাভাবে আপডেট করুন।

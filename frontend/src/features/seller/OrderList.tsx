@@ -34,6 +34,11 @@ export function OrderList({
   onLoadMore,
 }: OrderListProps): React.JSX.Element {
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
+  const [expandedReviewIds, setExpandedReviewIds] = useState<Record<string, boolean>>({});
+
+  const toggleReviewCodes = (id: string) => {
+    setExpandedReviewIds((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   const confirmedCount = orders.filter((o) => o.lifecycle === 'confirmed').length;
   const exceptionCount = orders.filter((o) => o.lifecycle === 'pending' && o.review_reasons?.length > 0).length;
@@ -167,22 +172,41 @@ export function OrderList({
                     <span style={{ fontSize: '0.725rem', color: 'var(--rose-accent)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
                       <AlertTriangle size={11} /> Review:
                     </span>
-                    {ord.review_reasons.map((r) => (
-                      <span
-                        key={r}
-                        style={{
-                          fontSize: '0.7rem',
-                          padding: '1px 6px',
-                          background: 'rgba(239, 68, 68, 0.2)',
-                          border: '1px solid rgba(239, 68, 68, 0.3)',
-                          color: 'var(--rose-accent)',
-                          borderRadius: '4px',
-                          fontFamily: 'monospace',
-                        }}
-                      >
-                        {r}
-                      </span>
-                    ))}
+                    <button
+                      type="button"
+                      onClick={() => toggleReviewCodes(ord.id)}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: 'var(--primary-accent)',
+                        cursor: 'pointer',
+                        fontSize: '0.7rem',
+                        textDecoration: 'underline',
+                        padding: '0 2px',
+                      }}
+                      aria-expanded={Boolean(expandedReviewIds[ord.id])}
+                      title="Toggle raw technical review codes"
+                    >
+                      {expandedReviewIds[ord.id] ? 'Hide codes' : 'Show codes'}
+                    </button>
+                    <div style={{ display: expandedReviewIds[ord.id] ? 'inline-flex' : 'none', gap: '4px', flexWrap: 'wrap' }}>
+                      {ord.review_reasons.map((r) => (
+                        <span
+                          key={r}
+                          style={{
+                            fontSize: '0.7rem',
+                            padding: '1px 6px',
+                            background: 'rgba(239, 68, 68, 0.2)',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            color: 'var(--rose-accent)',
+                            borderRadius: '4px',
+                            fontFamily: 'monospace',
+                          }}
+                        >
+                          {r}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
 

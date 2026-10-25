@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   AlertTriangle,
   CheckCircle,
@@ -20,6 +20,7 @@ export function TransactionCard({
   isExpanded,
   onToggleExpand,
 }: TransactionCardProps): React.JSX.Element {
+  const [showSystemDetails, setShowSystemDetails] = useState(false);
   const isIncomplete = !tx.sender_number_canonical || !tx.occurred_at;
 
   return (
@@ -168,9 +169,27 @@ export function TransactionCard({
             borderTop: '1px solid var(--border-subtle)',
           }}
         >
-          <h5 style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: 'var(--primary-accent)' }}>
-            Recorded Observations ({tx.observations.length})
-          </h5>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+            <h5 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--primary-accent)' }}>
+              Recorded Observations ({tx.observations.length})
+            </h5>
+            <button
+              type="button"
+              onClick={() => setShowSystemDetails((prev) => !prev)}
+              style={{
+                background: 'none',
+                border: 'none',
+                color: 'var(--primary-accent)',
+                cursor: 'pointer',
+                fontSize: '0.725rem',
+                textDecoration: 'underline',
+                padding: 0,
+              }}
+              aria-expanded={showSystemDetails}
+            >
+              {showSystemDetails ? 'Hide dev details' : 'Show dev details'}
+            </button>
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {tx.observations.map((obs, idx) => (
               <div
@@ -215,7 +234,7 @@ export function TransactionCard({
                   <div>
                     Time: {obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : <span style={{ color: 'var(--amber-accent)' }}>Unknown</span>}
                   </div>
-                  <div>Actor: {obs.actor}</div>
+                  <div style={{ display: showSystemDetails ? 'block' : 'none' }}>Actor: {obs.actor}</div>
                   <div>Recorded: {formatBangladeshTime(obs.created_at)}</div>
                 </div>
               </div>
