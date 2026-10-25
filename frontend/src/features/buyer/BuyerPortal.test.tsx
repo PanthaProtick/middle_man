@@ -51,7 +51,7 @@ describe('BuyerPortal Component', () => {
   });
 
   it('renders loading state initially then displays public order details and form', async () => {
-    vi.spyOn(globalThis, 'fetch').mockImplementationOnce(() =>
+    const fetchOrder = vi.spyOn(globalThis, 'fetch').mockImplementationOnce(() =>
       Promise.resolve(new Response(JSON.stringify(mockPublicOrderAwaiting), { status: 200 }))
     );
 
@@ -61,6 +61,9 @@ describe('BuyerPortal Component', () => {
 
     expect(container.textContent).toContain('Smart Gadget Shop');
     expect(container.textContent).toContain('Wireless Bluetooth Earbuds');
+    expect(fetchOrder).toHaveBeenCalledWith('/api/public/orders/mock-token-123', expect.objectContaining({
+      method: 'GET', cache: 'no-store', headers: { 'Content-Type': 'application/json' },
+    }));
     expect(container.textContent).toContain('01712345678');
     expect(container.textContent).toContain('৳500.00'); // Advance
     expect(container.textContent).toContain('৳3,000.00'); // Expected COD

@@ -18,6 +18,7 @@ for name in (
 ):
     os.environ[name] = ""
 os.environ["ENV"] = "test"
+os.environ["PUBLIC_BUYER_ACCESS_POLICY"] = ""
 os.environ["DEBUG"] = "false"
 os.environ["API_PREFIX"] = "/api"
 os.environ["PGPORT"] = "5432"

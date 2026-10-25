@@ -1,6 +1,6 @@
 import json
 import re
-from typing import List, Union
+from typing import List, Literal, Union
 
 from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -21,6 +21,7 @@ class Settings(BaseSettings):
 
     # Self-test integration mode (requires durable storage, real auth, private evidence)
     SELF_TEST_MODE: bool = False
+    PUBLIC_BUYER_ACCESS_POLICY: Literal["", "self_test_link_possession"] = ""
 
     # Database (Neon Serverless Postgres)
     DATABASE_URL: str = ""

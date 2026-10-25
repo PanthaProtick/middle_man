@@ -106,11 +106,13 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     request_id = get_request_id(request.headers.get("x-request-id"))
+    is_public_order = request.url.path.startswith(f"{settings.API_PREFIX}/public/orders")
     fields = [
         ErrorFieldItem(
             field=".".join(str(loc) for loc in err["loc"] if loc != "body"),
             code=err["type"],
-            message=str(err["msg"]),
+            # Custom validators can include the raw phone/address in their message.
+            message="Invalid value" if is_public_order and err["type"] == "value_error" else str(err["msg"]),
         )
         for err in exc.errors()
     ]
@@ -120,7 +122,9 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             message="Request validation failed",
             fields=fields,
         ),
-        detail=(None if request.url.path.startswith(f"{settings.API_PREFIX}/seller/transactions/sms-")
+        detail=(None if is_public_order or request.url.path.startswith(
+                    f"{settings.API_PREFIX}/seller/transactions/sms-"
+                )
                 else jsonable_encoder(exc.errors())),
         request_id=request_id,
     )

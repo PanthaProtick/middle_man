@@ -56,7 +56,7 @@ def smoke() -> None:
     log_path.parent.mkdir(parents=True, exist_ok=True)
     # Direct Python avoids orphaning a server behind a shell or uv wrapper.
     with log_path.open("w+", encoding="utf-8") as log, subprocess.Popen(
-        [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(api_port)],
+        [sys.executable, "-m", "uvicorn", "app.main:app", "--host", "127.0.0.1", "--port", str(api_port), "--no-access-log"],
         cwd=ROOT / "backend", env=environment, stdout=log, stderr=log,
     ) as server:
         try:

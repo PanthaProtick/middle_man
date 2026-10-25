@@ -41,6 +41,20 @@ they must not silently change the agreed access or order-lifecycle behavior.
 
 ## Acceptance matrix
 
+Buyer-link reads and initial submission require both `SELF_TEST_MODE=True` and
+`PUBLIC_BUYER_ACCESS_POLICY="self_test_link_possession"` in the backend configuration,
+with `ENV=development` (or `test`). The policy defaults to denied and is rejected
+outside those local environments. Link possession grants no buyer identity guarantee;
+anyone holding a forwarded link can view its public terms and make the first submission.
+Seller routes still require the owning seller's verified session. Durable storage and
+startup checks still apply; the policy does not enable an in-memory self-test fallback.
+
+Use `npm run dev:backend`, which disables Uvicorn access logging to avoid recording
+bearer URLs. Direct Uvicorn launches must also pass `--no-access-log`. Application
+handlers do not log request bodies; public validation errors omit input values and
+sanitize custom validator messages. Proxy and hosting logs require separate review
+before any hosted use. This policy is for the private synthetic exercise only.
+
 The [AC01–AC50 annex](../.scratch/phase-1-order-confirmation/acceptance.md) remains
 normative. For each ID, record result, release revision, date, evidence link and
 any deferred portion. The groups below assign evidence, not completion status.

@@ -12,7 +12,13 @@ class PublicAccessGateError(HTTPException):
 
 
 async def verify_public_access_gate() -> bool:
-    """Default deny until the public-access policy is approved. No header grants access."""
+    """Explicit local self-test consent; token and lifecycle checks remain in services."""
+    if (
+        settings.SELF_TEST_MODE
+        and settings.ENV in ("development", "test")
+        and settings.PUBLIC_BUYER_ACCESS_POLICY == "self_test_link_possession"
+    ):
+        return True
     raise PublicAccessGateError()
 
 
