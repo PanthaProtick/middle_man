@@ -45,6 +45,7 @@ def to_seller_order(
     )
     basis = alloc.basis if (row.lifecycle in ("confirmed", "cancelled") and alloc) else None
     return SellerOrder(
+        buyer_link_revoked_at=row.buyer_link_revoked_at,
         id=str(row.id),
         shop_id=str(row.shop_id),
         payment_account_id=str(row.payment_account_id),

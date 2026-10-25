@@ -299,6 +299,22 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
 - Account deletion, standalone unmatched structured-receipt retention, storage version
   history, backup purge and provider/log copies remain unsettled launch gates. These
   endpoints and local checks do not establish real-data readiness or deploy anything.
+## Buyer-link revocation
+
+- `POST /api/seller/orders/{id}/revoke-link` requires owning-seller authentication,
+  `Idempotency-Key` and strict positive `expected_version`; unknown fields fail validation.
+  Returns `SellerOrder` with `buyer_link_revoked_at`. Same-key/payload retries replay
+  the committed result; changed payload or stale version returns 409. Foreign orders
+  return 404. Database failures return 503 and require identical-payload/key retry.
+- Revocation, version increment, audit event and replay record commit together under
+  the shop-then-order lock. It preserves lifecycle, terms, deadline and allocation.
+  Public reads, submission/upload replay and AI assistance return 410
+  `BUYER_LINK_REVOKED` before cached results, storage reads or provider work. Public
+  authorization refreshes locked database rows to avoid stale session state.
+- Migration `0018_buyer_link_revocation.sql` is additive. Apply it before running
+  this version against a persistent database. Local disposable-schema verification
+  does not apply this migration to Neon or any manual self-test dataset.
+
 ## Self-test AI policy
 
 `SELF_TEST_MODE=true` disables AI regardless of Gemini credentials. Address and

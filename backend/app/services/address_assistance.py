@@ -16,6 +16,7 @@ from app.models.entities import OrderTable
 from app.services.address_provider import AddressProvider
 from app.services.buyer_service import _require_unsubmitted
 from app.services.order_service import _check_and_apply_expiry, _memory_orders, _memory_orders_by_digest
+from app.services.public_order_access import require_public_order_access
 from app.services.seller_service import IdempotencyConflictError, NotFoundError, SellerDomainException
 
 _memory: dict[tuple[str, str], AddressExtractionTable] = {}
@@ -42,11 +43,12 @@ class AddressAssistance:
         db = self.db
         now = self.clock()
         if db is not None:
-            order = await db.scalar(select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update())
+            order = await db.scalar(select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update().execution_options(populate_existing=True))
             if order is None:
                 raise NotFoundError("Order not found")
             now = self.clock()  # Time must be sampled after waiting for the lock.
             order_id, shop_id = order.id, order.shop_id
+            require_public_order_access(order)
             _check_and_apply_expiry(order, now)
             if order.lifecycle == "expired":
                 await db.commit()
@@ -59,6 +61,7 @@ class AddressAssistance:
             if raw is None:
                 raise NotFoundError("Order not found")
             shop_id = str(raw["shop_id"])
+            require_public_order_access(raw)
             _check_and_apply_expiry(raw, now)
             _require_unsubmitted(str(raw["lifecycle"]))
             prior = _memory.get((order_id, key))

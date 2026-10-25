@@ -26,7 +26,7 @@ from app.services.order_service import (
     _memory_orders,
     _memory_orders_by_digest,
 )
-from app.services.retention_access import require_retained_record
+from app.services.public_order_access import require_public_order_access
 from app.services.seller_service import (
     NotFoundError,
     SellerDomainException,
@@ -65,11 +65,11 @@ class EvidenceService:
             if shop_id is not None:
                 await self.db.execute(select(ShopTable).where(ShopTable.id == shop_id).with_for_update())
             order = await self.db.scalar(
-                select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update()
+                select(OrderTable).where(OrderTable.token_lookup_digest == digest).with_for_update().execution_options(populate_existing=True)
             )
             if order is None:
                 raise NotFoundError("Order not found")
-            require_retained_record(order)
+            require_public_order_access(order)
 
             cached = await check_idempotency_record(
                 self.db, idempotency_key, digest, "buyer_evidence_upload", payload_hash
@@ -173,16 +173,16 @@ class EvidenceService:
             return res, 201
 
         # Memory mode
+        order_id = _memory_orders_by_digest.get(digest)
+        if not order_id or order_id not in _memory_orders:
+            raise NotFoundError("Order not found")
+        order_raw = _memory_orders[order_id]
+        require_public_order_access(order_raw)
         cached = await check_idempotency_record(
             None, idempotency_key, digest, "buyer_evidence_upload", payload_hash
         )
         if cached:
             return EvidenceUploadResponse(**cached[1]), cached[0]
-
-        order_id = _memory_orders_by_digest.get(digest)
-        if not order_id or order_id not in _memory_orders:
-            raise NotFoundError("Order not found")
-        order_raw = _memory_orders[order_id]
 
         _check_and_apply_expiry(order_raw, now)
         lifecycle = str(order_raw["lifecycle"])

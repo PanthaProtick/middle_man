@@ -37,6 +37,7 @@ class OrderInput(BaseModel):
 
 
 class SellerOrder(BaseModel):
+    buyer_link_revoked_at: Optional[datetime] = None
     id: str
     shop_id: str
     payment_account_id: str

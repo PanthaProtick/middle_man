@@ -73,6 +73,7 @@ class OrderTable(Base):
     account_label: Mapped[str] = mapped_column(String(200), nullable=False)
 
     # Lifecycle and versions
+    buyer_link_revoked_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     lifecycle: Mapped[str] = mapped_column(String(32), default="awaiting_buyer", nullable=False, index=True)
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
     buyer_revision: Mapped[int | None] = mapped_column(Integer, nullable=True)

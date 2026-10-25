@@ -9,6 +9,7 @@ import { OrderOutcomes } from './OrderOutcomes';
 import { EvidenceViewer } from './EvidenceViewer';
 import { OrderExport } from './OrderExport';
 import { BuyerLinkCopy } from './BuyerLinkCopy';
+import { BuyerLinkAccess } from './BuyerLinkAccess';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -210,6 +211,8 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
             }}
           />
         )}
+        {token && <BuyerLinkAccess key={`access-${order.id}`} order={order} token={token}
+          onUpdated={fresh => { setOrder(fresh); onCorrected?.(fresh); }} />}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '20px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
             <BuyerLinkCopy key={order.portal_url} portalUrl={order.portal_url} detail />
