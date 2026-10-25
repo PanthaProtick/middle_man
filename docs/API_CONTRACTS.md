@@ -284,8 +284,11 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   Overdue unpurged evidence returns 410 `EVIDENCE_EXPIRED`.
 - `GET /api/seller/retention/status` provides owning-seller visibility into retained vs
   purged counts, overdue items, and failure history without cross-shop or raw content leaks.
-- `POST /api/seller/retention/cleanup` runs safe, retryable cleanup. Storage outages prevent
-  acknowledgement or marking records deleted until required copies are removed.
+- `POST /api/seller/retention/cleanup` runs safe, retryable cleanup for the owning shop.
+- CLI local invocation: `python -m app.services.raw_evidence_cli [--shop-id <id>] [--as-of <iso-timestamp>] [--allow-standby]`
+  runs repeatable background/operator cleanup with JSON summary and exit code 0 (clean) or 1 (partial_failure/error).
+  Without `--allow-standby`, requires an initialized database connection and fails closed rather than claiming clean status.
+- Storage outages prevent acknowledgement or marking records deleted until required copies are removed.
 - External storage bucket version history, database backup retention lifecycles, and
   third-party AI provider logging terms remain explicit launch gates, not false deletion claims.
 

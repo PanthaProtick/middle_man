@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 
-from app.services.evidence_store import inject_storage_outage
+from app.services.evidence_store import init_evidence_storage, inject_storage_outage
 from app.services.raw_evidence_cleanup import get_retention_status, purge_raw_evidence
 from tests.test_image_service import _create_minimal_png
 
@@ -186,7 +186,8 @@ async def test_postgres_raw_evidence_cleanup_and_retention_unavailability(postgr
 
 
 @pytest.mark.asyncio
-async def test_postgres_cleanup_storage_outage_safe_repeat_recovery(postgres_buyer):
+async def test_postgres_cleanup_storage_outage_safe_repeat_recovery(postgres_buyer, tmp_path):
+    init_evidence_storage(tmp_path)
     client, connection, sessions, order = postgres_buyer
 
     png_data = _create_minimal_png(width=30, height=30)
@@ -197,6 +198,11 @@ async def test_postgres_cleanup_storage_outage_safe_repeat_recovery(postgres_buy
     )
     assert res.status_code == 201
     ev_id = res.json()["evidence_id"]
+
+    ev_row = await connection.fetchrow("SELECT storage_key FROM order_evidence WHERE id = $1", ev_id)
+    assert ev_row is not None
+    disk_file = tmp_path / ev_row["storage_key"]
+    assert disk_file.is_file()
 
     await connection.execute(
         "UPDATE order_evidence SET delete_after = NOW() - INTERVAL '1 day' WHERE id = $1",
@@ -214,12 +220,13 @@ async def test_postgres_cleanup_storage_outage_safe_repeat_recovery(postgres_buy
     finally:
         inject_storage_outage(False)
 
-    # In database: record was NOT marked deleted
+    # In database: record was NOT marked deleted, physical file still exists on disk
     row = await connection.fetchrow("SELECT * FROM order_evidence WHERE id = $1", ev_id)
     assert row["status"] != "deleted"
     assert row["deleted_at"] is None
+    assert disk_file.is_file()
 
-    # Retry cleanup after outage recovery
+    # Retry cleanup after outage recovery: removes physical file and marks deleted in DB
     async with sessions() as db:
         cleanup_retry = await purge_raw_evidence(db, now, order["shop_id"])
         assert cleanup_retry.items_purged == 1
@@ -229,6 +236,7 @@ async def test_postgres_cleanup_storage_outage_safe_repeat_recovery(postgres_buy
     row_after = await connection.fetchrow("SELECT * FROM order_evidence WHERE id = $1", ev_id)
     assert row_after["status"] == "deleted"
     assert row_after["deleted_at"] is not None
+    assert not disk_file.is_file()
 
 
 @pytest.mark.asyncio

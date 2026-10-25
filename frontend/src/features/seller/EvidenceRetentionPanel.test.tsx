@@ -124,4 +124,100 @@ describe('EvidenceRetentionPanel', () => {
     expect(cleanupMock).toHaveBeenCalledWith('mock-token');
     expect(container.textContent).toContain('Purged 2 raw items');
   });
+
+  it('displays failure alert when cleanup throws error and allows safe retry', async () => {
+    vi.spyOn(retentionApi, 'fetchRetentionStatus')
+      .mockResolvedValueOnce(mockOverdueStatus)
+      .mockResolvedValueOnce(mockCleanStatus);
+
+    const cleanupMock = vi
+      .spyOn(retentionApi, 'runRetentionCleanup')
+      .mockRejectedValueOnce(new Error('Storage service unavailable: failed to remove file'))
+      .mockResolvedValueOnce({
+        shop_id: 'shop-123',
+        ran_at: '2026-10-24T12:05:00Z',
+        items_purged: 2,
+        items_failed: 0,
+        overdue_remaining: 0,
+        status: 'clean',
+        failures: [],
+      } as RetentionCleanupResponse);
+
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<EvidenceRetentionPanel token="mock-token" />);
+    });
+
+    const cleanupBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Run Evidence Cleanup'),
+    );
+    expect(cleanupBtn).toBeDefined();
+
+    // First attempt fails with storage error
+    await act(async () => {
+      cleanupBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(cleanupMock).toHaveBeenCalledTimes(1);
+    expect(container.textContent).toContain('Storage service unavailable: failed to remove file');
+    expect(cleanupBtn?.hasAttribute('disabled')).toBe(false);
+
+    // Second attempt (retry) succeeds after recovery
+    await act(async () => {
+      cleanupBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(cleanupMock).toHaveBeenCalledTimes(2);
+    expect(container.textContent).toContain('Purged 2 raw items');
+    expect(container.textContent).toContain('Raw evidence clean');
+  });
+
+  it('displays partial failure feedback and overdue items when some deletions fail', async () => {
+    const mockPartialStatus: RetentionStatusResponse = {
+      ...mockOverdueStatus,
+      overdue_count: 1,
+      failed_count: 1,
+      overdue_items: [mockOverdueStatus.overdue_items[0]],
+    };
+
+    vi.spyOn(retentionApi, 'fetchRetentionStatus')
+      .mockResolvedValueOnce(mockOverdueStatus)
+      .mockResolvedValueOnce(mockPartialStatus);
+
+    vi.spyOn(retentionApi, 'runRetentionCleanup').mockResolvedValue({
+      shop_id: 'shop-123',
+      ran_at: '2026-10-24T12:05:00Z',
+      items_purged: 1,
+      items_failed: 1,
+      overdue_remaining: 1,
+      status: 'partial_failure',
+      failures: [
+        {
+          evidence_type: 'screenshot',
+          evidence_id: 'ev-overdue-1',
+          order_id: 'ord-101',
+          delete_after: '2026-10-20T10:00:00Z',
+          error: 'Storage service unavailable: failed to remove file',
+        },
+      ],
+    } as RetentionCleanupResponse);
+
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<EvidenceRetentionPanel token="mock-token" />);
+    });
+
+    const cleanupBtn = Array.from(container.querySelectorAll('button')).find((b) =>
+      b.textContent?.includes('Run Evidence Cleanup'),
+    );
+
+    await act(async () => {
+      cleanupBtn?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+
+    expect(container.textContent).toContain('Purged 1 raw items (1 failed, 1 overdue remaining).');
+    expect(container.textContent).toContain('1 raw evidence items overdue');
+    expect(container.textContent).toContain('(1 storage failure)');
+    expect(container.textContent).toContain('ev-overdue-1');
+  });
 });

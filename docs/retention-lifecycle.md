@@ -25,6 +25,22 @@ This document records the retention, storage deletion, and external lifecycle po
   - The item remains pending cleanup and is reported as overdue/failed in seller retention status.
   - Subsequent cleanup runs safely retry deletion. Complete deletion is acknowledged only after file removal succeeds.
 
+## Local Invocations
+
+1. **Local CLI Runner (Operator / Maintenance)**:
+   - Invocation: `python -m app.services.raw_evidence_cli [--shop-id <id>] [--as-of <iso-timestamp>] [--allow-standby]`
+   - Scans and deletes raw evidence exceeding 30 days from original collection.
+   - Emits structured JSON summary and returns exit code 0 (`clean`) or 1 (`partial_failure`/`failed`).
+   - Uses durable database session when configured. Fails closed with `status="failed"` if the database is unconfigured unless `--allow-standby` is explicitly passed.
+
+2. **Seller API Endpoint**:
+   - Invocation: `POST /api/seller/retention/cleanup` (authenticated seller).
+   - Scans and safely purges due raw evidence for the authenticated seller's shop.
+
+3. **Seller Workspace Panel**:
+   - Triggerable via the "Run Evidence Cleanup" button in `EvidenceRetentionPanel.tsx`.
+
+
 ## External Systems & Launch Gates
 
 Local unit tests and PostgreSQL integration run offline using isolated adapters and mock stores. The following external systems cannot have their purge verified by application unlinks alone and remain mandatory **launch gates** before live data pilot operations:

@@ -11,7 +11,13 @@ from app.models.sms import SmsImportInput
 from app.services.address_assistance import reset_address_memory
 from app.services.buyer_service import reset_buyer_memory_store
 from app.services.evidence_service import _memory_order_evidence, reset_memory_evidence
-from app.services.evidence_store import inject_storage_outage, read_evidence_file, reset_evidence_file_store
+from app.services.evidence_store import (
+    init_evidence_storage,
+    inject_storage_outage,
+    read_evidence_file,
+    reset_evidence_file_store,
+    save_evidence_file,
+)
 from app.services.order_service import reset_order_memory_store
 from app.services.payment_extraction import reset_payment_memory
 from app.services.raw_evidence_cleanup import (
@@ -102,10 +108,15 @@ async def test_sms_raw_cleanup_after_30_days(client: AsyncClient):
     )
     assert len(reimport_res.items) == 1
     assert reimport_res.items[0].evidence_id == ev_id
+    assert reimport_res.items[0].collected_at == record.collected_at
+    assert reimport_res.items[0].delete_after == deadline
+    assert record.raw_text is None
+    assert len(list(_memory_sms.values())) == 1
 
 
 @pytest.mark.asyncio
-async def test_image_raw_cleanup_after_30_days_leaves_order_intact(client: AsyncClient):
+async def test_image_raw_cleanup_after_30_days_leaves_order_intact(client: AsyncClient, tmp_path):
+    init_evidence_storage(tmp_path)
     seller = SellerIdentity(owner_id="seller_img_cleanup")
     app.dependency_overrides[get_seller_identity] = lambda: seller
 
@@ -142,6 +153,8 @@ async def test_image_raw_cleanup_after_30_days_leaves_order_intact(client: Async
     assert sub_res.status_code == 200
 
     storage_key = _memory_order_evidence[ev_id]["storage_key"]
+    disk_file = tmp_path / storage_key
+    assert disk_file.is_file()
     assert read_evidence_file(storage_key) is not None
 
     read_res = await client.get(f"/api/seller/evidence/{ev_id}")
@@ -151,11 +164,32 @@ async def test_image_raw_cleanup_after_30_days_leaves_order_intact(client: Async
     shop = await SellerService().get_shop_by_owner("seller_img_cleanup")
     assert shop is not None
 
+    # Seller order correction does not reset evidence deadline
+    patch_res = await client.patch(
+        f"/api/seller/orders/{order['id']}/buyer-details",
+        json={
+            "expected_version": 2,
+            "reason": "Correct address",
+            "address": {"raw_text": "House 12, Road 4, Banani, Dhaka"},
+        },
+        headers={"Idempotency-Key": "sub-corr-1"},
+    )
+    assert patch_res.status_code == 200
+    assert _memory_order_evidence[ev_id]["delete_after"] == deadline
+
+    # Boundary timing: 1 hour before 30-day deadline, file remains
+    before_deadline = deadline - datetime.timedelta(hours=1)
+    cleanup_before = await purge_raw_evidence(db=None, now=before_deadline, shop_id=shop.id)
+    assert cleanup_before.items_purged == 0
+    assert disk_file.is_file()
+
+    # Expired past 30 days: file is purged from disk
     now_expired = deadline + datetime.timedelta(minutes=5)
     cleanup_res = await purge_raw_evidence(db=None, now=now_expired, shop_id=shop.id)
     assert cleanup_res.items_purged == 1
     assert _memory_order_evidence[ev_id]["status"] == "deleted"
     assert _memory_order_evidence[ev_id]["deleted_at"] is not None
+    assert not disk_file.is_file()
     assert read_evidence_file(storage_key) is None
 
     read_del = await client.get(f"/api/seller/evidence/{ev_id}")
@@ -166,17 +200,22 @@ async def test_image_raw_cleanup_after_30_days_leaves_order_intact(client: Async
     assert ord_check.status_code == 200
     ord_data = ord_check.json()
     assert ord_data["lifecycle"] == "pending"
-    assert ord_data["buyer_revision"] == 1
+    assert ord_data["buyer_revision"] == 2
 
 
 @pytest.mark.asyncio
-async def test_storage_outage_handling_and_safe_repeat_recovery():
+async def test_storage_outage_handling_and_safe_repeat_recovery(tmp_path):
+    init_evidence_storage(tmp_path)
     shop_id = "test-shop-outage"
     now = datetime.datetime.now(datetime.timezone.utc)
     past = now - datetime.timedelta(days=31)
 
     ev_id = str(uuid.uuid4())
     storage_key = f"{shop_id}/orders/{ev_id}.png"
+    save_evidence_file(storage_key, b"real-file-bytes-for-outage-test")
+    disk_file = tmp_path / storage_key
+    assert disk_file.is_file()
+
     _memory_order_evidence[ev_id] = {
         "id": ev_id,
         "shop_id": shop_id,
@@ -202,6 +241,8 @@ async def test_storage_outage_handling_and_safe_repeat_recovery():
         assert len(cleanup.failures) == 1
         assert cleanup.failures[0].evidence_id == ev_id
 
+        # Physical file is NOT unlinked and status is NOT marked deleted
+        assert disk_file.is_file()
         assert _memory_order_evidence[ev_id]["status"] == "attached"
         assert _memory_order_evidence[ev_id]["deleted_at"] is None
 
@@ -211,10 +252,12 @@ async def test_storage_outage_handling_and_safe_repeat_recovery():
     finally:
         inject_storage_outage(False)
 
+    # Safe retry removes the actual disk file and marks record deleted
     retry = await purge_raw_evidence(db=None, now=now, shop_id=shop_id)
     assert retry.items_purged == 1
     assert retry.items_failed == 0
     assert retry.status == "clean"
+    assert not disk_file.is_file()
     assert _memory_order_evidence[ev_id]["status"] == "deleted"
     assert _memory_order_evidence[ev_id]["deleted_at"] is not None
 
