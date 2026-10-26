@@ -76,6 +76,7 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
             imported.result_json = result.model_dump_json()
         for field in ('product_name', 'account_receiving_number', 'account_label', 'encrypted_portal_token', 'portal_token', 'portal_url'):
             row[field] = ''
-        row.update(retained_at=now, buyer_revision=None, total_minor=0, required_advance_minor=0)
+        row.update(retained_at=now, buyer_revision=None, total_minor=0, required_advance_minor=0,
+                   parcel_weight_grams=None, parcel_quantity=None)
         removed += 1
     return removed

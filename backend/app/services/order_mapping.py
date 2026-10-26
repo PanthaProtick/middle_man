@@ -62,6 +62,8 @@ def to_seller_order(
         review_reasons=review_reasons or [],
         buyer_revision=row.buyer_revision,
         allocation_basis=basis,
+        parcel_weight_grams=row.parcel_weight_grams,
+        parcel_quantity=row.parcel_quantity,
         portal_token=decrypted_token,
         portal_url=f"/orders/{decrypted_token}",
         created_at=row.created_at,

@@ -4,6 +4,8 @@ from typing import List, Literal, Optional
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 MAX_SAFE_INTEGER = 9007199254740991  # 2^53 - 1
+MAX_PARCEL_WEIGHT_GRAMS = 1_000_000
+MAX_PARCEL_QUANTITY = 10_000
 
 
 class OrderInput(BaseModel):
@@ -11,6 +13,10 @@ class OrderInput(BaseModel):
     total_minor: int = Field(..., gt=0)
     required_advance_minor: int = Field(..., gt=0)
     payment_account_id: str = Field(..., min_length=1, max_length=64)
+    parcel_weight_grams: int | None = Field(
+        None, strict=True, ge=1, le=MAX_PARCEL_WEIGHT_GRAMS
+    )
+    parcel_quantity: int | None = Field(None, strict=True, ge=1, le=MAX_PARCEL_QUANTITY)
 
     @field_validator("product_name")
     @classmethod
@@ -54,6 +60,8 @@ class SellerOrder(BaseModel):
     review_reasons: List[str] = Field(default_factory=list)
     buyer_revision: Optional[int] = None
     allocation_basis: Optional[str] = None
+    parcel_weight_grams: Optional[int] = None
+    parcel_quantity: Optional[int] = None
     portal_token: str
     portal_url: str
     created_at: datetime

@@ -4,10 +4,26 @@
 
 `GET /api/seller/orders/{order_id}/courier-draft` requires the owning seller.
 Returns `CourierDraft`: order identity, creation time, `status: local_proposal`,
-current recipient name/contact/address, remaining COD in minor units, and blockers.
-There is no courier submission endpoint in this ticket. Missing parcel details,
-merchant connection/pickup store, and Pathao location IDs always block booking.
-Cancelled orders additionally return `ORDER_NOT_CONFIRMED`.
+`version`, current recipient name/contact/address, remaining COD in minor units,
+optional `parcel_weight_grams`/`parcel_quantity`, ordered
+`missing_parcel_fields` (`weight`, `quantity`), and blockers.
+Order creation accepts the same optional parcel fields; omitted values are not
+guessed. Confirmation copies them into the editable draft. Draft edits do not
+change agreed order terms, the accepted advance, or remaining COD.
+
+`PATCH /api/seller/orders/{order_id}/courier-draft` requires the owning seller,
+`Idempotency-Key`, and `{expected_version, parcel_weight_grams?, parcel_quantity?}`.
+At least one parcel field is required; omitted fields are unchanged and explicit
+null is rejected. Weight is a positive integer no greater than 1000000 grams;
+quantity is a positive integer no greater than 10000. Only confirmed orders are
+editable. Same key and payload replay the stored response; a reused key with a
+different payload returns 409 `IDEMPOTENCY_KEY_REUSED`; a stale version returns
+409 `STALE_VERSION`; foreign/missing orders return 404.
+
+There is no courier submission endpoint in this ticket. Any missing parcel field
+sets `PARCEL_DETAILS_REQUIRED`; merchant connection/pickup store and Pathao
+location IDs always block booking. Cancelled orders additionally return
+`ORDER_NOT_CONFIRMED`.
 
 Both confirmation paths insert one unique order-level creation marker within the
 allocation transaction (migration 0019). GET projects the current retained buyer

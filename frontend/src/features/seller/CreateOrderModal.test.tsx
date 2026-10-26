@@ -40,6 +40,33 @@ describe('CreateOrderModal Component', () => {
     },
   ];
 
+  function mockCreatedOrder(): SellerOrder {
+    return {
+      id: 'ord-new',
+      shop_id: 's1',
+      payment_account_id: 'acc-1',
+      product_name: 'Cotton Panjabi',
+      total_minor: 220000,
+      required_advance_minor: 30000,
+      expected_cod_minor: 190000,
+      actual_cod_minor: null,
+      account_provider: 'bkash',
+      account_receiving_number: '01711223344',
+      account_label: 'Main bKash',
+      lifecycle: 'awaiting_buyer',
+      version: 1,
+      review_reasons: [],
+      buyer_revision: null,
+      allocation_basis: null,
+      portal_token: 'token-xyz',
+      portal_url: '/orders/token-xyz',
+      created_at: '2026-10-23T12:00:00Z',
+      updated_at: '2026-10-23T12:00:00Z',
+      expires_at: '2026-10-25T12:00:00Z',
+      completed_at: null,
+    };
+  }
+
   beforeEach(() => {
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -121,37 +148,88 @@ describe('CreateOrderModal Component', () => {
     expect(container.textContent).toContain('Required delivery advance cannot exceed order total');
   });
 
+  it('submits optional early parcel details in grams', async () => {
+    const onOrderCreated = vi.fn();
+    const created: SellerOrder = {
+      ...mockCreatedOrder(), parcel_weight_grams: 1500, parcel_quantity: 3,
+    };
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify(created), { status: 201 }),
+    );
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(CreateOrderModal, {
+        accounts: mockAccounts, token: 'test-tok', onClose: vi.fn(),
+        onOrderCreated, onError: vi.fn(),
+      }));
+    });
+    await act(async () => {
+      setInputValue(container.querySelector('input[name="productName"]')!, 'Panjabi');
+      setInputValue(container.querySelector('input[name="totalBdt"]')!, '2200');
+      setInputValue(container.querySelector('input[name="advanceBdt"]')!, '300');
+      setInputValue(container.querySelector('input[name="parcelWeightKg"]')!, '1.5');
+      setInputValue(container.querySelector('input[name="parcelQuantity"]')!, '3');
+      container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+    expect(JSON.parse(String(fetcher.mock.calls[0][1]?.body))).toMatchObject({
+      parcel_weight_grams: 1500, parcel_quantity: 3,
+    });
+    expect(onOrderCreated).toHaveBeenCalledWith(created);
+    await act(async () => root.unmount());
+  });
+
+  it('omits parcel details that were not supplied', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(JSON.stringify({ ...mockCreatedOrder(), parcel_weight_grams: null, parcel_quantity: null }), { status: 201 }),
+    );
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(CreateOrderModal, {
+        accounts: mockAccounts, token: 'test-tok', onClose: vi.fn(),
+        onOrderCreated: vi.fn(), onError: vi.fn(),
+      }));
+    });
+    await act(async () => {
+      setInputValue(container.querySelector('input[name="productName"]')!, 'Panjabi');
+      setInputValue(container.querySelector('input[name="totalBdt"]')!, '2200');
+      setInputValue(container.querySelector('input[name="advanceBdt"]')!, '300');
+      container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+    const body = JSON.parse(String(fetcher.mock.calls[0][1]?.body));
+    expect(body).not.toHaveProperty('parcel_weight_grams');
+    expect(body).not.toHaveProperty('parcel_quantity');
+    await act(async () => root.unmount());
+  });
+
+  it('rejects an invalid optional parcel weight before submitting', async () => {
+    const fetcher = vi.spyOn(globalThis, 'fetch');
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(React.createElement(CreateOrderModal, {
+        accounts: mockAccounts, token: 'test-tok', onClose: vi.fn(),
+        onOrderCreated: vi.fn(), onError: vi.fn(),
+      }));
+    });
+    await act(async () => {
+      setInputValue(container.querySelector('input[name="productName"]')!, 'Panjabi');
+      setInputValue(container.querySelector('input[name="totalBdt"]')!, '2200');
+      setInputValue(container.querySelector('input[name="advanceBdt"]')!, '300');
+      setInputValue(container.querySelector('input[name="parcelWeightKg"]')!, '1.2345');
+      container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+    });
+    expect(container.textContent).toContain('Parcel weight');
+    expect(fetcher).not.toHaveBeenCalled();
+    await act(async () => root.unmount());
+  });
+
   it('submits valid order and invokes onOrderCreated callback', async () => {
     const onOrderCreated = vi.fn();
     const onClose = vi.fn();
 
-    const mockCreatedOrder: SellerOrder = {
-      id: 'ord-new',
-      shop_id: 's1',
-      payment_account_id: 'acc-1',
-      product_name: 'Cotton Panjabi',
-      total_minor: 220000,
-      required_advance_minor: 30000,
-      expected_cod_minor: 190000,
-      actual_cod_minor: null,
-      account_provider: 'bkash',
-      account_receiving_number: '01711223344',
-      account_label: 'Main bKash',
-      lifecycle: 'awaiting_buyer',
-      version: 1,
-      review_reasons: [],
-      buyer_revision: null,
-      allocation_basis: null,
-      portal_token: 'token-xyz',
-      portal_url: '/orders/token-xyz',
-      created_at: '2026-10-23T12:00:00Z',
-      updated_at: '2026-10-23T12:00:00Z',
-      expires_at: '2026-10-25T12:00:00Z',
-      completed_at: null,
-    };
+    const created = mockCreatedOrder();
 
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(JSON.stringify(mockCreatedOrder), {
+      new Response(JSON.stringify(created), {
         status: 201,
         headers: { 'Content-Type': 'application/json' },
       }),
@@ -182,7 +260,7 @@ describe('CreateOrderModal Component', () => {
       form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     });
 
-    expect(onOrderCreated).toHaveBeenCalledWith(mockCreatedOrder);
+    expect(onOrderCreated).toHaveBeenCalledWith(created);
     expect(onClose).toHaveBeenCalled();
   });
 });

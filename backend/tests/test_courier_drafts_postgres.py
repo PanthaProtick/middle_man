@@ -21,6 +21,31 @@ async def read_draft(client, order):
     return response.json()
 
 
+async def parcel_order(client, base, key, **parcel):
+    response = await client.post('/api/seller/orders', json={
+        'product_name': 'Parcel order', 'total_minor': 1200000, 'required_advance_minor': 200000,
+        'payment_account_id': base['payment_account_id'], **parcel,
+    }, headers={'Idempotency-Key': key})
+    assert response.status_code == 201, response.text
+    return response.json()
+
+
+async def confirm_automatically(client, order, transaction_id):
+    receipt = await client.post('/api/seller/transactions', json={
+        'payment_account_id': order['payment_account_id'], 'provider': 'bkash',
+        'trx_id': transaction_id, 'amount_minor': 200000, 'sender_number': '01822222222',
+        'occurred_at': order['created_at'],
+    }, headers={'Idempotency-Key': f'receipt-{transaction_id}'})
+    assert receipt.status_code == 201, receipt.text
+    claim = await client.post(f"/api/public/orders/{order['portal_token']}/submission", json={
+        'buyer_name': 'Parcel Buyer', 'contact_number': '01711111111',
+        'address': {'raw_text': 'Parcel address, Dhaka'},
+        'payment_claim': {'provider': 'bkash', 'trx_id': transaction_id,
+                          'sender_number': '01822222222', 'amount_minor': 200000},
+    }, headers={'Idempotency-Key': f'claim-{transaction_id}'})
+    assert claim.status_code == 200, claim.text
+
+
 @pytest.mark.parametrize('receipt_first', [True, False])
 async def test_automatic_draft_both_arrival_orders_replay_restart(postgres_buyer, receipt_first):
     client, connection, _, order = postgres_buyer
@@ -141,3 +166,63 @@ async def test_automatic_draft_failure_rolls_back_submission(postgres_buyer):
     assert retry.status_code == 200, retry.text
     assert retry.json()['lifecycle'] == 'confirmed'
     assert (await read_draft(client, order))['remaining_cod_minor'] == 1000000
+
+
+async def test_early_parcel_values_survive_confirmation_restart_and_correction(postgres_buyer):
+    client, connection, _, base = postgres_buyer
+    order = await parcel_order(client, base, 'pg-early-parcel',
+                               parcel_weight_grams=1500, parcel_quantity=3)
+    await confirm_automatically(client, order, 'PG-EARLY')
+    draft = await read_draft(client, order)
+    assert draft['parcel_weight_grams'] == 1500 and draft['parcel_quantity'] == 3
+    assert draft['missing_parcel_fields'] == []
+    assert await connection.fetchrow(
+        'SELECT parcel_weight_grams, parcel_quantity FROM courier_drafts WHERE order_id=$1',
+        order['id']) == (1500, 3)
+    reset_order_memory_store()
+    assert await read_draft(client, order) == draft
+    saved = await client.patch(f"/api/seller/orders/{order['id']}/courier-draft", json={
+        'expected_version': draft['version'], 'parcel_weight_grams': 2600, 'parcel_quantity': 5,
+    }, headers={'Idempotency-Key': 'pg-parcel-save'})
+    assert saved.status_code == 200, saved.text
+    assert saved.json()['parcel_weight_grams'] == 2600 and saved.json()['parcel_quantity'] == 5
+    reset_order_memory_store()
+    current = await read_draft(client, order)
+    assert current['remaining_cod_minor'] == 1000000
+    assert (current['recipient_name'], current['contact_number'], current['address']) == (
+        'Parcel Buyer', '01711111111', 'Parcel address, Dhaka')
+    assert await connection.fetchrow(
+        'SELECT total_minor, required_advance_minor FROM orders WHERE id=$1',
+        order['id']) == (1200000, 200000)
+    assert await connection.fetchval(
+        'SELECT accepted_amount_minor FROM allocations WHERE order_id=$1', order['id']) == 200000
+    assert await connection.fetchval('SELECT count(*) FROM courier_drafts WHERE order_id=$1',
+                                     order['id']) == 1
+
+
+async def test_postgres_stale_and_foreign_parcel_edits_do_not_overwrite(postgres_buyer):
+    client, connection, _, base = postgres_buyer
+    order = await parcel_order(client, base, 'pg-parcel-stale')
+    await confirm_automatically(client, order, 'PG-STALE')
+    draft = await read_draft(client, order)
+    first = await client.patch(f"/api/seller/orders/{order['id']}/courier-draft", json={
+        'expected_version': draft['version'], 'parcel_weight_grams': 700, 'parcel_quantity': 2,
+    }, headers={'Idempotency-Key': 'pg-stale-first'})
+    assert first.status_code == 200, first.text
+    stale = await client.patch(f"/api/seller/orders/{order['id']}/courier-draft", json={
+        'expected_version': draft['version'], 'parcel_weight_grams': 900, 'parcel_quantity': 9,
+    }, headers={'Idempotency-Key': 'pg-stale-second'})
+    assert stale.status_code == 409 and stale.json()['error']['code'] == 'STALE_VERSION'
+    assert await read_draft(client, order) == first.json()
+    assert await connection.fetchrow(
+        'SELECT parcel_weight_grams, parcel_quantity FROM courier_drafts WHERE order_id=$1',
+        order['id']) == (700, 2)
+    app.dependency_overrides[get_seller_identity] = lambda: SellerIdentity('pg-foreign-parcel')
+    await client.post('/api/seller/shop', json={'display_name': 'PG Foreign'})
+    foreign = await client.patch(f"/api/seller/orders/{order['id']}/courier-draft", json={
+        'expected_version': first.json()['version'], 'parcel_weight_grams': 1000, 'parcel_quantity': 10,
+    }, headers={'Idempotency-Key': 'pg-foreign-edit'})
+    assert foreign.status_code == 404
+    assert await connection.fetchrow(
+        'SELECT parcel_weight_grams, parcel_quantity FROM courier_drafts WHERE order_id=$1',
+        order['id']) == (700, 2)

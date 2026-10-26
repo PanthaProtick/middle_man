@@ -85,6 +85,7 @@ async def remove_order(db: AsyncSession, order: OrderTable, now: datetime) -> No
     await db.execute(update(AllocationTable).where(AllocationTable.order_id == order.id).values(actor='', reason=None))
     order.product_name = order.account_receiving_number = order.account_label = order.encrypted_portal_token = ''
     order.total_minor = order.required_advance_minor = 0
+    order.parcel_weight_grams = order.parcel_quantity = None
     order.buyer_revision = None
     order.retained_at = order.retention_attempted_at = now
     order.retention_error = None

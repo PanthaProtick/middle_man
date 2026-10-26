@@ -72,6 +72,10 @@ class OrderTable(Base):
     account_receiving_number: Mapped[str] = mapped_column(String(20), nullable=False)
     account_label: Mapped[str] = mapped_column(String(200), nullable=False)
 
+    # Optional early parcel facts; a draft owns its own editable copy.
+    parcel_weight_grams: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    parcel_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
     # Lifecycle and versions
     buyer_link_revoked_at: Mapped[datetime.datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     lifecycle: Mapped[str] = mapped_column(String(32), default="awaiting_buyer", nullable=False, index=True)

@@ -23,7 +23,13 @@ async def allocate_db(db: AsyncSession, order: OrderTable, receipt: ReceivedTran
                       digests: list[tuple[str, str]], now: datetime.datetime, *,
                       basis: str, actor: str, reason: str | None, details: str) -> None:
     from app.services.reconciliation_db import clear_order_review_reasons_db
-    db.add(CourierDraftTable(order_id=order.id, created_at=now))
+    db.add(CourierDraftTable(
+        order_id=order.id,
+        created_at=now,
+        parcel_weight_grams=order.parcel_weight_grams,
+        parcel_quantity=order.parcel_quantity,
+        version=1,
+    ))
     exception = basis == 'manual' and bool(json.loads(details)['exceptions'])
     increment = insert(PaymentMetricsTable).values(shop_id=order.shop_id, confirmed_count=1,
         manual_count=int(basis == 'manual'), exception_count=int(exception))
@@ -87,7 +93,8 @@ def allocate_memory(order: dict[str, Any], receipt: dict[str, Any], markers: set
         _memory_transaction_allocations,
         _memory_used_payment_markers,
     )
-    draft_id, draft_created_at = prepare_memory_draft(order['id'], now)
+    draft_id, draft = prepare_memory_draft(order['id'], now, order.get('parcel_weight_grams'),
+                                           order.get('parcel_quantity'))
     metric = _memory_payment_metrics.setdefault(order['shop_id'], PaymentSummary())
     metric.confirmed_count += 1
     metric.manual_count += int(basis == 'manual')
@@ -129,4 +136,4 @@ def allocate_memory(order: dict[str, Any], receipt: dict[str, Any], markers: set
     receipt["version"] = int(receipt.get("version", 1)) + 1
 
     _memory_order_review_reasons.pop(order_id, None)
-    _memory_drafts[draft_id] = draft_created_at
+    _memory_drafts[draft_id] = draft

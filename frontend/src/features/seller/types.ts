@@ -61,6 +61,8 @@ export interface SellerOrder {
   review_reasons: string[];
   buyer_revision: number | null;
   allocation_basis: string | null;
+  parcel_weight_grams?: number | null;
+  parcel_quantity?: number | null;
   portal_token: string;
   portal_url: string;
   created_at: string;
@@ -76,6 +78,8 @@ export interface OrderInput {
   total_minor: number;
   required_advance_minor: number;
   payment_account_id: string;
+  parcel_weight_grams?: number;
+  parcel_quantity?: number;
 }
 
 export interface SellerOrderListResponse {

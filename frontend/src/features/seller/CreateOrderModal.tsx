@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { X, ShoppingBag, AlertCircle, ArrowRight } from 'lucide-react';
 import type { PaymentAccount, SellerOrder } from './types';
 import { createOrder } from './api';
+import { FormErrorBanner } from './FormErrorBanner';
+import { parseParcelQuantity, parseParcelWeightKg } from './parcel';
+import { ParcelEarlyFields } from './ParcelEarlyFields';
 
 interface CreateOrderModalProps {
   accounts: PaymentAccount[];
@@ -23,6 +26,8 @@ export function CreateOrderModal({
   const [productName, setProductName] = useState('');
   const [totalBdt, setTotalBdt] = useState('');
   const [advanceBdt, setAdvanceBdt] = useState('');
+  const [parcelWeightKg, setParcelWeightKg] = useState('');
+  const [parcelQuantity, setParcelQuantity] = useState('');
   const [selectedAccountId, setSelectedAccountId] = useState(
     activeAccounts.length > 0 ? activeAccounts[0].id : '',
   );
@@ -83,6 +88,15 @@ export function CreateOrderModal({
       setValidationError('Please select an active receiving payment account');
       return;
     }
+    let weightGrams: number | undefined;
+    let quantity: number | undefined;
+    try {
+      if (parcelWeightKg.trim()) weightGrams = parseParcelWeightKg(parcelWeightKg);
+      if (parcelQuantity.trim()) quantity = parseParcelQuantity(parcelQuantity);
+    } catch (err) {
+      setValidationError(err instanceof Error ? err.message : 'Parcel details are invalid');
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -92,6 +106,8 @@ export function CreateOrderModal({
           total_minor: totalNum * 100,
           required_advance_minor: advanceNum * 100,
           payment_account_id: selectedAccountId,
+          ...(weightGrams !== undefined ? { parcel_weight_grams: weightGrams } : {}),
+          ...(quantity !== undefined ? { parcel_quantity: quantity } : {}),
         },
         idempotencyKeyRef.current,
         token,
@@ -153,25 +169,7 @@ export function CreateOrderModal({
           </button>
         </div>
 
-        {validationError && (
-          <div
-            style={{
-              padding: '10px 14px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              borderRadius: '6px',
-              color: 'var(--rose-accent)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '16px',
-              fontSize: '0.875rem',
-            }}
-          >
-            <AlertCircle size={16} />
-            <span>{validationError}</span>
-          </div>
-        )}
+        {validationError && <FormErrorBanner message={validationError} />}
 
         {activeAccounts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '24px 0' }}>
@@ -255,6 +253,14 @@ export function CreateOrderModal({
                 BDT {expectedCod.toLocaleString()}
               </span>
             </div>
+
+            <ParcelEarlyFields
+              weightKg={parcelWeightKg}
+              quantity={parcelQuantity}
+              onWeightChange={setParcelWeightKg}
+              onQuantityChange={setParcelQuantity}
+              disabled={submitting}
+            />
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>

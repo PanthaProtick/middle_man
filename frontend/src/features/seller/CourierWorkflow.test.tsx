@@ -22,7 +22,9 @@ it('refreshes the same order proposal after cancellation in the modal', async ()
     if (String(url).endsWith('/courier-draft')) {
       draftReads++;
       return new Response(JSON.stringify({ order_id: order.id, status: 'local_proposal',
-        recipient_name: 'Buyer', contact_number: '01711111111', address: 'Dhaka', remaining_cod_minor: 1000000,
+        version: 1, recipient_name: 'Buyer', contact_number: '01711111111', address: 'Dhaka',
+        remaining_cod_minor: 1000000, parcel_weight_grams: null, parcel_quantity: null,
+        missing_parcel_fields: cancelled ? [] : ['weight', 'quantity'],
         blockers: cancelled ? ['ORDER_NOT_CONFIRMED'] : ['PARCEL_DETAILS_REQUIRED'] }));
     }
     if (String(url).endsWith('/decisions')) {
@@ -42,7 +44,7 @@ it('refreshes the same order proposal after cancellation in the modal', async ()
     Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(reason, 'Stop dispatch');
     reason.dispatchEvent(new Event('input', { bubbles: true }));
   });
-  await act(async () => host.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
+  await act(async () => reason.closest('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
   expect(draftReads).toBe(2);
   expect(host.textContent).toContain('no longer confirmed');
   await act(async () => root.unmount());
