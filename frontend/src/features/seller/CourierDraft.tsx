@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestJson, SellerApiError } from './api';
 import { MAX_PARCEL_QUANTITY, MAX_PARCEL_WEIGHT_GRAMS, parseParcelQuantity, parseParcelWeightKg } from './parcel';
+import type { ParcelRevision } from './courierReviewTypes';
 
 const blockerLabels = {
   PARCEL_DETAILS_REQUIRED: 'Add parcel weight and quantity before booking.',
@@ -48,7 +49,9 @@ function inputsFrom(identity: string, proposal: Proposal): ParcelInputs {
   };
 }
 
-export function CourierDraft({ orderId, token }: { orderId: string; token: string }) {
+export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, choicesSavedParcel }: {
+  orderId: string; token: string; onSaved?: () => void; reviewManaged?: boolean; choicesSavedParcel?: ParcelRevision;
+}) {
   // Key the private state to its request identity so even the render before
   // effect cleanup cannot show the previous shop's proposal.
   const identity = `${token}:${orderId}`;
@@ -84,7 +87,10 @@ export function CourierDraft({ orderId, token }: { orderId: string; token: strin
   const save = async () => {
     if (!proposal || !parcelInputs || !editable) return;
     const body: { expected_version: number; parcel_weight_grams?: number; parcel_quantity?: number } = {
-      expected_version: proposal.version,
+      // Only advance over selection-only writes; concurrent parcel changes must still conflict.
+      expected_version: choicesSavedParcel?.parcel_weight_grams === proposal.parcel_weight_grams &&
+        choicesSavedParcel?.parcel_quantity === proposal.parcel_quantity
+        ? Math.max(proposal.version, choicesSavedParcel.version) : proposal.version,
     };
     try {
       if (parcelInputs.weight.trim()) body.parcel_weight_grams = parseParcelWeightKg(parcelInputs.weight);
@@ -113,6 +119,7 @@ export function CourierDraft({ orderId, token }: { orderId: string; token: strin
       saveKeyRef.current = null;
       setState({ identity, proposal: updated });
       setInputs(inputsFrom(identity, updated));
+      onSaved?.();
     } catch (cause) {
       if (cause instanceof SellerApiError && cause.code === 'STALE_VERSION') {
         reportSaveError('Courier details changed. Reload the current values before saving again.');
@@ -183,7 +190,9 @@ export function CourierDraft({ orderId, token }: { orderId: string; token: strin
         }}>Reload current details</button></p>}
         <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save parcel details'}</button>
       </form>}
-      <ul>{proposal.blockers.map(blocker => <li key={blocker}>{blockerLabels[blocker]}</li>)}</ul>
+      <ul>{proposal.blockers.filter(blocker => !reviewManaged ||
+        blocker === 'PARCEL_DETAILS_REQUIRED' || blocker === 'ORDER_NOT_CONFIRMED')
+        .map(blocker => <li key={blocker}>{blockerLabels[blocker]}</li>)}</ul>
     </>}
   </section>;
 }

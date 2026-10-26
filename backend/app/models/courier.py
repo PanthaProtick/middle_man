@@ -3,7 +3,7 @@ from datetime import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
-from sqlalchemy import DateTime, ForeignKey, Integer, String
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -19,6 +19,8 @@ class CourierDraftTable(Base):
     parcel_weight_grams: Mapped[int | None] = mapped_column(Integer, nullable=True)
     parcel_quantity: Mapped[int | None] = mapped_column(Integer, nullable=True)
     version: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    review_choices: Mapped[str | None] = mapped_column(Text, nullable=True)
+    reviewed_token: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
 class CourierDraftUpdate(BaseModel):

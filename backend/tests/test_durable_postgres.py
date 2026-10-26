@@ -27,9 +27,9 @@ from app.services.seller_service import SellerDomainException, SellerService, _m
 def test_migrations_directory_inventory() -> None:
     migrations_dir = Path(__file__).parents[1] / "migrations"
     migration_files = sorted(migrations_dir.glob("*.sql"))
-    assert len(migration_files) == 22
+    assert len(migration_files) == 23
     prefixes = [f.name[:4] for f in migration_files]
-    expected_prefixes = [f"{i:04d}" for i in range(1, 23)]
+    expected_prefixes = [f"{i:04d}" for i in range(1, 24)]
     assert prefixes == expected_prefixes
 
     all_sql = "\n".join(f.read_text(encoding="utf-8").lower() for f in migration_files)

@@ -46,6 +46,9 @@ class _DraftRecord:
     parcel_weight_grams: int | None
     parcel_quantity: int | None
     version: int
+    order_version: int
+    buyer_revision: int
+    buyer_location: str | None
 
 
 async def get_draft(db: AsyncSession | None, shop_id: str, order_id: str) -> CourierDraft:
@@ -58,11 +61,12 @@ async def _load(db: AsyncSession | None, shop_id: str, order_id: str,
         # Retention and buyer corrections lock the same order. Never project a mix
         # of pre-retention and post-retention records.
         order = await db.scalar(select(OrderTable).where(
-            OrderTable.id == order_id, OrderTable.shop_id == shop_id).with_for_update())
+            OrderTable.id == order_id, OrderTable.shop_id == shop_id).with_for_update()
+            .execution_options(populate_existing=True))
         if order is None:
             raise NotFoundError('Order not found')
         require_retained_record(order)
-        marker = await db.get(CourierDraftTable, order_id, with_for_update=lock_draft)
+        marker = await db.get(CourierDraftTable, order_id, with_for_update=lock_draft, populate_existing=True)
         buyer = await db.scalar(select(BuyerRevisionTable).where(
             BuyerRevisionTable.order_id == order_id,
             BuyerRevisionTable.revision_number == order.buyer_revision))
@@ -79,6 +83,8 @@ async def _load(db: AsyncSession | None, shop_id: str, order_id: str,
             parcel_weight_grams=marker.parcel_weight_grams,
             parcel_quantity=marker.parcel_quantity,
             version=int(marker.version),
+            order_version=int(order.version), buyer_revision=int(order.buyer_revision or 0),
+            buyer_location=buyer.address_pathao,
         )
 
     from app.services.buyer_service import _memory_buyer_revisions
@@ -104,6 +110,8 @@ async def _load(db: AsyncSession | None, shop_id: str, order_id: str,
         parcel_weight_grams=memory_marker.get('parcel_weight_grams'),
         parcel_quantity=memory_marker.get('parcel_quantity'),
         version=int(memory_marker.get('version', 1)),
+        order_version=int(raw['version']), buyer_revision=int(raw.get('buyer_revision') or 0),
+        buyer_location=revision.get('address_pathao'),
     )
 
 
