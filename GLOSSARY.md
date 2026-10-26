@@ -38,3 +38,12 @@ The number of the payment account used to send the delivery advance. The buyer s
 
 **Payment match**:
 Agreement between a buyer's payment claim and a received-payment record belonging to the same shop and designated receiving account. It includes both TrxID and payment sender number, alongside the provider and amount checks; it does not independently prove receipt through the payment provider.
+
+**Courier draft**:
+A proposed delivery request prepared in Middle Man when an order is confirmed, awaiting seller review and submission. It is not a booking with the courier.
+
+**Pathao booking**:
+A delivery request accepted by Pathao under the seller's own merchant account, with a consignment ID identifying the request.
+
+**Pickup store**:
+A location registered under the seller's Pathao merchant account from which parcels are to be collected.

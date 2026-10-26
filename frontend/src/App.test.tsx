@@ -45,6 +45,7 @@ describe('Application workflow shell', () => {
     expect(container.textContent).toContain('Never share your PIN or OTP');
     expect(container.textContent).not.toContain('Seller desk');
     expect(fetchHealth).not.toHaveBeenCalled();
-    expect(container.querySelector('a[referrerpolicy="no-referrer"]')?.getAttribute('href')).toBe('/?order-link=synthetic');
+    expect(container.textContent).not.toContain('Correct Buyer Information');
+    expect(container.querySelector('a[href*="order-link="]')).toBeNull();
   });
 });

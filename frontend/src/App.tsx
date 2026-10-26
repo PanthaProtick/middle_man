@@ -52,14 +52,6 @@ export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps 
         <BuyerPortal portalToken={portalToken} />
         <div className="portal-footer-action">
           <p>Never share your PIN or OTP. Your seller reviews the order and payment details.</p>
-          <a
-            href={`/?order-link=${encodeURIComponent(portalToken)}`}
-            referrerPolicy="no-referrer"
-            className="btn btn-secondary btn-sm"
-            style={{ textDecoration: 'none', color: 'var(--primary-accent)', fontSize: '0.8rem' }}
-          >
-            <Store size={13} /> Seller Access: Correct Buyer Information
-          </a>
         </div>
       </div>
     );
