@@ -31,6 +31,6 @@ buyer destination, conservatively requiring review of that revision.
 
 Only a review hash and noncredential selections are stored in migration 0023;
 recipient details remain projected from existing records. Retention access
-denial remains authoritative. `submission_enabled` is always false, including
-for a completed review. No create-order transport or protected attempt workflow
-is introduced by this ticket.
+denial remains authoritative. `submission_enabled` is true only when the review
+is completed without blockers in the offline environment; real/production booking
+remains disabled. Submission workflow details are in `docs/pathao-submission-contract.md`.

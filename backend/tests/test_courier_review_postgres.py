@@ -6,6 +6,14 @@ from test_courier_review import test_correction_settings_and_cancellation_invali
 from test_courier_review import test_review_exception_cod_and_foreign_access as exception_case
 
 
+@pytest.fixture(autouse=True)
+def postgres_offline_settings(monkeypatch):
+    from app.core.config import settings
+    monkeypatch.setattr(settings, 'SELF_TEST_MODE', False)
+    monkeypatch.setattr(settings, 'PATHAO_LOCATION_ENVIRONMENT', 'offline')
+    yield
+
+
 async def test_durable_review_restart_and_stale_settings(postgres_buyer):
     from app.services.courier_drafts import _memory_drafts
     from app.services.pathao_connections import _memory

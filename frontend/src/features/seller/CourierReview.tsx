@@ -37,6 +37,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
   const review = state?.identity === identity ? state.review : undefined;
   const choices = editing?.identity === identity ? editing.choices : undefined;
   const dirty = review && choices && JSON.stringify(review.choices) !== JSON.stringify(choices);
+
   const mutate = async (method: 'PUT' | 'POST') => {
     if (!review || !choices || busy) return;
     const requestGeneration = generation.current;
@@ -56,9 +57,45 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
       if (currentIdentity.current === identity && generation.current === requestGeneration) setBusy(undefined);
     }
   };
+
+  const submitBooking = async () => {
+    if (!review || busy || !review.submission_enabled) return;
+    const requestGeneration = generation.current;
+    setBusy(identity);
+    try {
+      const updated = await requestJson<Review>(
+        `/api/seller/orders/${orderId}/courier-submission`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ expected_token: review.token }),
+        },
+        token,
+        'submit-' + crypto.randomUUID(),
+      );
+      if (currentIdentity.current !== identity || generation.current !== requestGeneration) return;
+      setState({ identity, review: updated });
+      setEditing({ identity, choices: updated.choices });
+    } catch (err: unknown) {
+      if (currentIdentity.current === identity && generation.current === requestGeneration) {
+        const errorObj = err as { message?: string };
+        const msg = errorObj?.message || 'Submission could not be completed. Reload current details.';
+        setState({ identity, error: msg });
+        requestJson<Review>(path, {}, token).then(refreshed => {
+          if (currentIdentity.current === identity && generation.current === requestGeneration) {
+            setState({ identity, review: refreshed, error: msg });
+          }
+        }).catch(() => {});
+      }
+    } finally {
+      if (currentIdentity.current === identity && generation.current === requestGeneration) setBusy(undefined);
+    }
+  };
+
   return <section className="buyer-correction" aria-label="Booking draft review" aria-busy={busy}>
     <h4>Review current delivery draft</h4>
-    <p>External booking is unavailable until the protected submission workflow exists.</p>
+    {!review?.submission_enabled && !review?.latest_attempt && (
+      <p>External booking is unavailable until the review is complete.</p>
+    )}
     <button type="button" disabled={busy} onClick={() => { setState(undefined); setAttempt(value => value + 1); }}>Reload current review</button>
     {state?.identity === identity && state.error && <p role="alert">{state.error}</p>}
     {!review && !state?.error && <p role="status">Loading review…</p>}
@@ -96,7 +133,29 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
       {dirty && <p>Save changes before reviewing.</p>}
       <button type="button" data-review disabled={busy || dirty || review.blockers.length > 0 || review.reviewed}
         onClick={() => void mutate('POST')}>Confirm current review</button>
-      {review.reviewed && !dirty && <p role="status">Review complete. This remains a local draft; no Pathao booking exists.</p>}
+      {review.reviewed && !dirty && !review.latest_attempt && <p role="status">Review complete. This remains a local draft; no Pathao booking exists.</p>}
+      {review.reviewed && !dirty && review.submission_enabled && (
+        <button type="button" data-submit disabled={busy} onClick={() => void submitBooking()}>
+          Submit booking to Pathao (simulated)
+        </button>
+      )}
+      {busy && <p role="status">Submitting booking to Pathao (simulated)…</p>}
+      {review.latest_attempt?.status === 'success' && (
+        <div role="status" className="booking-result">
+          <p><strong>Booking confirmed (simulated offline).</strong></p>
+          <p>Simulated consignment: <code>{review.latest_attempt.consignment_id}</code></p>
+        </div>
+      )}
+      {review.latest_attempt?.status === 'unknown' && (
+        <div role="alert" className="booking-unknown">
+          <p><strong>Booking outcome unknown.</strong> The submission was sent, but the courier response was interrupted or could not be verified. Further attempts are blocked to prevent duplicate booking.</p>
+        </div>
+      )}
+      {review.latest_attempt?.status === 'failed' && (
+        <div role="alert" className="booking-failed">
+          <p>Previous submission rejected: {review.latest_attempt.error_message || 'Courier rejected booking'}. You may review and try again.</p>
+        </div>
+      )}
     </>}
   </section>;
 }

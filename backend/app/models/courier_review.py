@@ -1,9 +1,8 @@
 """Local review choices and opaque optimistic concurrency contract."""
-from typing import Literal
-
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.courier import CourierDraft
+from app.models.courier_submission import CourierAttemptView
 from app.models.pathao import ConnectionView, DeliveryType, Environment, PickupStore
 from app.models.pathao_location import LocationResolution, LocationSelection
 
@@ -38,4 +37,5 @@ class CourierReview(BaseModel):
     blockers: list[str]
     token: str
     reviewed: bool
-    submission_enabled: Literal[False] = False
+    submission_enabled: bool = False
+    latest_attempt: CourierAttemptView | None = None

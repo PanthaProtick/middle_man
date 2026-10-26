@@ -17,7 +17,7 @@ The user approved this 12-ticket breakdown. Each implementation ticket has its o
 | [11](11-remove-obsolete-neon-test-data.md) | Inventoried, verified removal of authorized obsolete development data | None |
 | [12](12-verify-browser-and-sandbox-journey.md) | Browser and actual sandbox acceptance with final repository checks | 09, 10 |
 
-Initial frontier at publication: **01, 03, 11**. As of 2026-10-27, tickets **01–05 are implemented with local verification**, and the current frontier is **06, 11**. Real Pathao acceptance remains unrun. Ticket 11 is independent of the courier implementation and is not a gate on ticket 12. Real booking transport is introduced only after attempt protection, reconciliation, and post-submission change handling exist. Production activation is outside this effort.
+Initial frontier at publication: **01, 03, 11**. As of 2026-10-27, tickets **01–06 are implemented with local verification**, and the current frontier is **07, 08, 11**. Real Pathao acceptance remains unrun. Ticket 11 is independent of the courier implementation and is not a gate on ticket 12. Real booking transport is introduced only after attempt protection, reconciliation, and post-submission change handling exist. Production activation is outside this effort.
 
 Each ticket includes its own acceptance and verification requirements. Use the established HTTP API/PostgreSQL seam and replace only the external courier boundary for controlled faults; retain component tests and separate actual browser/provider acceptance. Run root `npm run check` as the final gate for code/tooling changes.
 

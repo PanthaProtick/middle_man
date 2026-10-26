@@ -9,6 +9,7 @@ from app.models.courier_review import CourierReview, ReviewChoices, ReviewUpdate
 from app.models.entities import ShopTable
 from app.models.pathao import ConnectionView, PathaoConnectionTable
 from app.models.pathao_location import LocationResolution, LocationSelection
+from app.services import courier_attempts
 from app.services import pathao_connections as connections
 from app.services.courier_drafts import _DraftRecord, _load, project
 from app.services.pathao_catalog import InvalidLocation
@@ -92,9 +93,28 @@ async def read(db: AsyncSession | None, shop: str, order: str) -> CourierReview:
     if fingerprint(current, choices, revision.version) != fingerprint(record, choices, revision.version):
         raise StaleVersionError('Order changed while loading review. Refresh current details.')
     token = fingerprint(current, choices, revision.version)
-    result = CourierReview(draft=project(current), choices=choices, connection=connection,
-                           stores=stores, location=location, blockers=blockers, token=token,
-                           reviewed=not blockers and marker_value(current, 'reviewed_token') == token)
+    latest_attempt = await courier_attempts.get_latest_attempt(db, order)
+    is_reviewed = not blockers and marker_value(current, 'reviewed_token') == token
+    has_active_attempt = latest_attempt is not None and latest_attempt.status in ('submitting', 'success', 'unknown')
+    submission_enabled = (
+        is_reviewed
+        and not blockers
+        and choices.environment == 'offline'
+        and not has_active_attempt
+        and current.lifecycle == 'confirmed'
+    )
+    result = CourierReview(
+        draft=project(current),
+        choices=choices,
+        connection=connection,
+        stores=stores,
+        location=location,
+        blockers=blockers,
+        token=token,
+        reviewed=is_reviewed,
+        submission_enabled=submission_enabled,
+        latest_attempt=latest_attempt,
+    )
     if db is not None:
         await db.commit()
     return result
@@ -112,6 +132,7 @@ async def locked_current(db: AsyncSession | None, shop: str, order: str,
     else:
         version = (await connections.latest(db, shop, review.choices.environment)).version
     record = await _load(db, shop, order, lock_draft=True)
+    await courier_attempts.assert_order_allows_edits(db, order, 'Review')
     if expected != review.token or fingerprint(record, review.choices, version or 0) != expected:
         raise StaleVersionError('Review changed. Reload and review current details.')
     if record.lifecycle != 'confirmed':
@@ -147,4 +168,4 @@ async def approve(db: AsyncSession | None, shop: str, order: str, expected: str)
     set_marker(record, 'reviewed_token', expected)
     if db is not None:
         await db.commit()
-    return review.model_copy(update={'reviewed': True})
+    return await read(db, shop, order)

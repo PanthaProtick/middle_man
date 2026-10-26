@@ -7,6 +7,7 @@ from typing import Literal
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from app.models.courier_submission import CourierBookingSnapshot
 from app.models.pathao import Environment, MerchantCredentials, PickupStore
 from app.services.seller_service import SellerDomainException
 
@@ -99,3 +100,41 @@ async def list_stores(shop: str, env: Environment, credentials: MerchantCredenti
             raise unavailable()
     except (httpx.HTTPError, ValueError, ValidationError, TimeoutError):
         raise unavailable() from None
+
+
+class CourierDefinitiveFailure(Exception):
+    """Definitive noncreation failure from courier provider."""
+    pass
+
+
+class CourierBookingResult(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    consignment_id: str
+    merchant_order_id: str
+    is_simulated: bool = False
+
+
+async def submit_booking(shop: str, env: Environment, request: CourierBookingSnapshot) -> CourierBookingResult:
+    if env != 'offline':
+        raise CourierDefinitiveFailure('Real and production booking is not yet available.')
+    if request.remaining_cod_minor < 0:
+        raise CourierDefinitiveFailure('Remaining COD balance cannot be negative.')
+    expected_bdt = request.remaining_cod_minor // 100
+    if request.amount_to_collect_bdt != expected_bdt:
+        raise CourierDefinitiveFailure('COD conversion mismatch.')
+    if not request.recipient_phone.strip() or len(request.recipient_phone.strip()) < 11:
+        raise CourierDefinitiveFailure('Recipient contact phone is invalid.')
+    if not request.recipient_address.strip() or len(request.recipient_address.strip()) < 5:
+        raise CourierDefinitiveFailure('Recipient delivery address is incomplete.')
+    if request.city_id <= 0 or request.zone_id <= 0 or request.store_id <= 0:
+        raise CourierDefinitiveFailure('Pickup store, city, and zone locations are required.')
+    if request.item_weight_grams <= 0 or request.item_quantity <= 0:
+        raise CourierDefinitiveFailure('Package weight and item quantity must be positive.')
+
+    digest = hashlib.sha256(f"{shop}:{request.order_id}:{request.store_id}".encode()).hexdigest()[:12].upper()
+    return CourierBookingResult(
+        consignment_id=f"SIM-PATHAO-{digest}",
+        merchant_order_id=request.order_id,
+        is_simulated=True,
+    )
+

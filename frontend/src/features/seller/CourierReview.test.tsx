@@ -96,3 +96,126 @@ it('loads dependent locations and clears children when the seller changes city',
   expect(host.textContent).toContain('Save changes before reviewing');
   await act(async () => root.unmount());
 });
+
+it('submits a reviewed draft, suppresses duplicate clicks and shows simulated consignment', async () => {
+  const readyReview = { ...review, reviewed: true, submission_enabled: true };
+  const bookedReview = {
+    ...readyReview,
+    submission_enabled: false,
+    latest_attempt: {
+      id: 'att-1', order_id: 'a', attempt_number: 1, status: 'success' as const, environment: 'offline' as const,
+      simulated: true, reviewed_token: review.token, correlation_id: 'a-1', consignment_id: 'SIM-PATHAO-TEST123',
+      booking_snapshot: null, error_code: null, error_message: null, created_at: '', updated_at: '',
+    },
+  };
+  let resolveSubmit: (res: Response) => void = () => {};
+  const submitPromise = new Promise<Response>(resolve => { resolveSubmit = resolve; });
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+    if (String(url).includes('/courier-submission')) return submitPromise;
+    if (String(url).includes('/locations?')) return new Response(JSON.stringify({ choices: [] }));
+    return new Response(JSON.stringify(readyReview));
+  });
+
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<CourierReview orderId="a" token="seller" />));
+  const submitBtn = host.querySelector<HTMLButtonElement>('[data-submit]')!;
+  expect(submitBtn).not.toBeNull();
+
+  await act(async () => submitBtn.click());
+  expect(submitBtn.disabled).toBe(true);
+  expect(host.textContent).toContain('Submitting booking to Pathao');
+
+  await act(async () => submitBtn.click());
+  expect(fetcher.mock.calls.filter(c => String(c[0]).includes('/courier-submission'))).toHaveLength(1);
+
+  await act(async () => resolveSubmit(new Response(JSON.stringify(bookedReview))));
+  expect(host.textContent).toContain('Booking confirmed (simulated offline)');
+  expect(host.textContent).toContain('SIM-PATHAO-TEST123');
+  expect(host.querySelector('[data-submit]')).toBeNull();
+  await act(async () => root.unmount());
+});
+
+it('displays definitive rejection error and leaves review editable for retry', async () => {
+  const readyReview = { ...review, reviewed: true, submission_enabled: true };
+  const failedReview = {
+    ...readyReview,
+    latest_attempt: {
+      id: 'att-fail', order_id: 'a', attempt_number: 1, status: 'failed' as const, environment: 'offline' as const,
+      simulated: true, reviewed_token: review.token, correlation_id: 'a-1', consignment_id: null,
+      booking_snapshot: null, error_code: 'COURIER_REJECTED', error_message: 'Inactive pickup store',
+      created_at: '', updated_at: '',
+    },
+  };
+  let submitAttempt = 0;
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+    if (String(url).includes('/courier-submission')) {
+      submitAttempt += 1;
+      return new Response(JSON.stringify({ error: { code: 'COURIER_REJECTED', message: 'Store inactive' } }), { status: 422 });
+    }
+    if (String(url).includes('/locations?')) return new Response(JSON.stringify({ choices: [] }));
+    return new Response(JSON.stringify(submitAttempt > 0 ? failedReview : readyReview));
+  });
+
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<CourierReview orderId="a" token="seller" />));
+  const submitBtn = host.querySelector<HTMLButtonElement>('[data-submit]')!;
+  await act(async () => submitBtn.click());
+
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain('Store inactive');
+  expect(host.textContent).toContain('Previous submission rejected');
+  await act(async () => root.unmount());
+});
+
+it('displays protected alert on unknown outcome and blocks resubmission', async () => {
+  const readyReview = { ...review, reviewed: true, submission_enabled: true };
+  const unknownReview = {
+    ...readyReview,
+    submission_enabled: false,
+    latest_attempt: {
+      id: 'att-unknown', order_id: 'a', attempt_number: 1, status: 'unknown' as const, environment: 'offline' as const,
+      simulated: true, reviewed_token: review.token, correlation_id: 'a-1', consignment_id: null,
+      booking_snapshot: null, error_code: 'COURIER_OUTCOME_UNKNOWN', error_message: 'Timeout',
+      created_at: '', updated_at: '',
+    },
+  };
+  let submitAttempt = 0;
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+    if (String(url).includes('/courier-submission')) {
+      submitAttempt += 1;
+      return new Response(JSON.stringify({ error: { code: 'COURIER_OUTCOME_UNKNOWN', message: 'Timeout' } }), { status: 504 });
+    }
+    if (String(url).includes('/locations?')) return new Response(JSON.stringify({ choices: [] }));
+    return new Response(JSON.stringify(submitAttempt > 0 ? unknownReview : readyReview));
+  });
+
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<CourierReview orderId="a" token="seller" />));
+  const submitBtn = host.querySelector<HTMLButtonElement>('[data-submit]')!;
+  await act(async () => submitBtn.click());
+
+  expect(host.querySelector('.booking-unknown')?.textContent).toContain('Booking outcome unknown');
+  expect(host.querySelector('[data-submit]')).toBeNull();
+  await act(async () => root.unmount());
+});
+
+it('displays session loss error and enables retry when submission is unauthorized', async () => {
+  const readyReview = { ...review, reviewed: true, submission_enabled: true };
+  let calls = 0;
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+    if (String(url).includes('/courier-submission')) {
+      calls += 1;
+      return new Response(JSON.stringify({ error: { code: 'UNAUTHORIZED', message: 'Session expired. Please sign in again.' } }), { status: 401 });
+    }
+    if (String(url).includes('/locations?')) return new Response(JSON.stringify({ choices: [] }));
+    return new Response(JSON.stringify(readyReview));
+  });
+
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<CourierReview orderId="a" token="seller" />));
+  const submitBtn = host.querySelector<HTMLButtonElement>('[data-submit]')!;
+  await act(async () => submitBtn.click());
+
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain('Session expired');
+  expect(submitBtn.disabled).toBe(false);
+  await act(async () => root.unmount());
+});

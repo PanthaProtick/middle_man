@@ -6,9 +6,10 @@ from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.database import get_db
 from app.models.courier import CourierDraft, CourierDraftUpdate
 from app.models.courier_review import CourierReview, ReviewUpdate, ReviewVersion
+from app.models.courier_submission import CourierSubmissionInput
 from app.models.pathao import Environment
 from app.models.pathao_location import LocationCatalog
-from app.services import courier_review, pathao_connections
+from app.services import courier_attempts, courier_review, pathao_connections
 from app.services.courier_drafts import get_draft, update_draft
 from app.services.pathao_catalog import hierarchy
 from app.services.seller_service import NotFoundError, SellerDomainException, SellerService
@@ -45,6 +46,24 @@ async def update_review(order_id: str, payload: ReviewUpdate, shop: str = Depend
 async def approve_review(order_id: str, payload: ReviewVersion, shop: str = Depends(review_scope),
                          db: AsyncSession | None = Depends(get_db)) -> CourierReview:
     return await courier_review.approve(db, shop, order_id, payload.expected_token)
+
+
+@router.post('/{order_id}/courier-submission', response_model=CourierReview)
+async def submit_courier(
+    order_id: str,
+    payload: CourierSubmissionInput,
+    response: Response,
+    idempotency_key: str = Header(..., alias='Idempotency-Key', min_length=1, max_length=64),
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: AsyncSession | None = Depends(get_db),
+) -> CourierReview:
+    _set_security_headers(response)
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if shop is None:
+        raise NotFoundError('Order not found')
+    return await courier_attempts.execute_submission(
+        db, shop.id, seller.owner_id, order_id, payload.expected_token, idempotency_key,
+    )
 
 
 @router.get('/{order_id}/courier-review/locations', response_model=LocationCatalog)

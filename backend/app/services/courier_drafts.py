@@ -128,6 +128,8 @@ async def update_draft(db: AsyncSession | None, shop_id: str, actor: str, order_
             409, 'INVALID_LIFECYCLE',
             'Parcel details can only be edited while the order is confirmed.',
         )
+    from app.services.courier_attempts import assert_order_allows_edits
+    await assert_order_allows_edits(db, order_id, 'Parcel details')
     if record.version != payload.expected_version:
         raise StaleVersionError('Courier draft changed. Refresh before editing.')
     changes = payload.model_dump(include={'parcel_weight_grams', 'parcel_quantity'}, exclude_unset=True)

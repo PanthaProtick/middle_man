@@ -39,7 +39,7 @@ async def test_complete_review_and_invalidate_after_parcel_change(client):
     approved = await client.post(path, json={'expected_token': ready['token']})
     assert approved.status_code == 200, approved.text
     assert approved.json()['reviewed'] is True
-    assert approved.json()['submission_enabled'] is False
+    assert approved.json()['submission_enabled'] is True
     assert (await client.post(path, json={'expected_token': ready['token']})).json() == approved.json()
     assert (await client.patch(path.replace('courier-review', 'courier-draft'), json={
         'expected_version': ready['draft']['version'], 'parcel_quantity': 3,

@@ -86,6 +86,7 @@ EXPECTED_SCHEMA_TABLES = [
     "payment_marker_keys",
     "courier_drafts",
     "pathao_connection_revisions",
+    "courier_attempts",
 ]
 
 
