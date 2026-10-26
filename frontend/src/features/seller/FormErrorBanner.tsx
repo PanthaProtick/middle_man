@@ -3,6 +3,7 @@ import { AlertCircle } from 'lucide-react';
 export function FormErrorBanner({ message }: { message: string }) {
   return (
     <div
+      role="alert"
       style={{
         padding: '10px 14px',
         background: 'rgba(239, 68, 68, 0.1)',

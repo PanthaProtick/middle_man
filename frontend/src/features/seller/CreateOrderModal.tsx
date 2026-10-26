@@ -3,8 +3,8 @@ import { X, ShoppingBag, AlertCircle, ArrowRight } from 'lucide-react';
 import type { PaymentAccount, SellerOrder } from './types';
 import { createOrder } from './api';
 import { FormErrorBanner } from './FormErrorBanner';
-import { parseParcelQuantity, parseParcelWeightKg } from './parcel';
 import { ParcelEarlyFields } from './ParcelEarlyFields';
+import { useEarlyParcelDetails } from './useEarlyParcelDetails';
 
 interface CreateOrderModalProps {
   accounts: PaymentAccount[];
@@ -26,8 +26,7 @@ export function CreateOrderModal({
   const [productName, setProductName] = useState('');
   const [totalBdt, setTotalBdt] = useState('');
   const [advanceBdt, setAdvanceBdt] = useState('');
-  const [parcelWeightKg, setParcelWeightKg] = useState('');
-  const [parcelQuantity, setParcelQuantity] = useState('');
+  const parcel = useEarlyParcelDetails();
   const [selectedAccountId, setSelectedAccountId] = useState(
     activeAccounts.length > 0 ? activeAccounts[0].id : '',
   );
@@ -88,15 +87,8 @@ export function CreateOrderModal({
       setValidationError('Please select an active receiving payment account');
       return;
     }
-    let weightGrams: number | undefined;
-    let quantity: number | undefined;
-    try {
-      if (parcelWeightKg.trim()) weightGrams = parseParcelWeightKg(parcelWeightKg);
-      if (parcelQuantity.trim()) quantity = parseParcelQuantity(parcelQuantity);
-    } catch (err) {
-      setValidationError(err instanceof Error ? err.message : 'Parcel details are invalid');
-      return;
-    }
+    const parcelValues = parcel.validate();
+    if (!parcelValues) return;
 
     setSubmitting(true);
     try {
@@ -106,8 +98,7 @@ export function CreateOrderModal({
           total_minor: totalNum * 100,
           required_advance_minor: advanceNum * 100,
           payment_account_id: selectedAccountId,
-          ...(weightGrams !== undefined ? { parcel_weight_grams: weightGrams } : {}),
-          ...(quantity !== undefined ? { parcel_quantity: quantity } : {}),
+          ...parcelValues,
         },
         idempotencyKeyRef.current,
         token,
@@ -255,10 +246,12 @@ export function CreateOrderModal({
             </div>
 
             <ParcelEarlyFields
-              weightKg={parcelWeightKg}
-              quantity={parcelQuantity}
-              onWeightChange={setParcelWeightKg}
-              onQuantityChange={setParcelQuantity}
+              weightKg={parcel.weightKg}
+              quantity={parcel.quantity}
+              onWeightChange={parcel.onWeightChange}
+              onQuantityChange={parcel.onQuantityChange}
+              errors={parcel.errors}
+              validationAttempt={parcel.validationAttempt}
               disabled={submitting}
             />
 

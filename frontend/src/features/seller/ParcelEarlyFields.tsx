@@ -1,4 +1,6 @@
+import { useEffect, useRef } from 'react';
 import { MAX_PARCEL_QUANTITY, MAX_PARCEL_WEIGHT_GRAMS } from './parcel';
+import type { ParcelErrors } from './useEarlyParcelDetails';
 
 interface ParcelEarlyFieldsProps {
   weightKg: string;
@@ -6,6 +8,8 @@ interface ParcelEarlyFieldsProps {
   onWeightChange: (value: string) => void;
   onQuantityChange: (value: string) => void;
   disabled: boolean;
+  errors: ParcelErrors;
+  validationAttempt: number;
 }
 
 const inputStyle = {
@@ -23,9 +27,15 @@ export function ParcelEarlyFields({
   onWeightChange,
   onQuantityChange,
   disabled,
+  errors,
+  validationAttempt,
 }: ParcelEarlyFieldsProps) {
+  const fieldsRef = useRef<HTMLFieldSetElement>(null);
+  useEffect(() => {
+    fieldsRef.current?.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus();
+  }, [validationAttempt]);
   return (
-    <fieldset style={{ border: 'none', padding: 0, margin: '0 0 14px' }}>
+    <fieldset ref={fieldsRef} style={{ border: 'none', padding: 0, margin: '0 0 14px' }}>
       <legend style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '4px' }}>
         Parcel details (optional now)
       </legend>
@@ -48,9 +58,11 @@ export function ParcelEarlyFields({
             value={weightKg}
             onChange={(e) => onWeightChange(e.target.value)}
             disabled={disabled}
-            aria-describedby="parcel-early-hint"
+            aria-invalid={Boolean(errors.weight)}
+            aria-describedby={`parcel-early-hint${errors.weight ? ' parcel-weight-error' : ''}`}
             style={inputStyle}
           />
+          {errors.weight && <p id="parcel-weight-error" role="alert">{errors.weight}</p>}
         </div>
         <div>
           <label htmlFor="parcel-quantity" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
@@ -67,9 +79,11 @@ export function ParcelEarlyFields({
             value={quantity}
             onChange={(e) => onQuantityChange(e.target.value)}
             disabled={disabled}
-            aria-describedby="parcel-early-hint"
+            aria-invalid={Boolean(errors.quantity)}
+            aria-describedby={`parcel-early-hint${errors.quantity ? ' parcel-quantity-error' : ''}`}
             style={inputStyle}
           />
+          {errors.quantity && <p id="parcel-quantity-error" role="alert">{errors.quantity}</p>}
         </div>
       </div>
     </fieldset>

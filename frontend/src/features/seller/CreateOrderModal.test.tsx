@@ -146,6 +146,8 @@ describe('CreateOrderModal Component', () => {
     });
 
     expect(container.textContent).toContain('Required delivery advance cannot exceed order total');
+    expect(container.querySelector('[role="alert"]')?.textContent)
+      .toContain('Required delivery advance cannot exceed order total');
   });
 
   it('submits optional early parcel details in grams', async () => {
