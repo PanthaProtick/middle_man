@@ -2,6 +2,7 @@ import React from 'react';
 import { CreditCard } from 'lucide-react';
 import { PaymentAccountList } from './PaymentAccountList';
 import { AddAccountForm } from './AddAccountForm';
+import { PathaoSettings } from './PathaoSettings';
 import type { PaymentAccount } from './types';
 
 interface AccountsSectionProps {
@@ -45,6 +46,7 @@ export function AccountsSection({
         onAccountCreated={onAccountCreated}
         onError={onError}
       />
+      <PathaoSettings token={token} />
     </section>
   );
 }

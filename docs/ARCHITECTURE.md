@@ -98,3 +98,12 @@ use or the total cap. The enclosing transaction also persists the idempotent res
 rollback and replay cannot increase counters independently. Migration 0010 backfills
 counts from existing allocations. Private decision history remains separate from
 aggregate-only metrics and public buyer projections.
+
+## Pathao connection boundary
+
+Merchant settings use the narrow async `pathao_provider` adapter and dedicated
+`pathao_secrets` encryption boundary, separate from receiving-payment accounts.
+`pathao_connections` appends shop/environment revisions (migration 0021), verifies
+store membership outside transactions, then compares versions under the shop lock.
+No booking operations exist here. See [contracts and source-review limits](pathao-account-contract.md).
+

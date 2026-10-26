@@ -1,5 +1,12 @@
 # API Contracts & Data Flow Guide
 
+## Pathao merchant settings
+
+Shop-scoped, environment-specific connection/default management is documented in
+[the Pathao settings contract](pathao-account-contract.md). It uses write-only
+encrypted credentials and immutable optimistic revisions. These settings do not
+submit bookings or remove draft readiness blockers by themselves.
+
 ## Local courier proposals
 
 `GET /api/seller/orders/{order_id}/courier-draft` requires the owning seller.

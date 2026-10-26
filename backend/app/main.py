@@ -13,6 +13,7 @@ from app.api.courier import router as courier_router
 from app.api.link_access import router as link_access_router
 from app.api.order_export import router as order_export_router
 from app.api.orders import router as orders_router
+from app.api.pathao import router as pathao_router
 from app.api.public_orders import router as public_orders_router
 from app.api.routes import router as api_router
 from app.api.seller import router as seller_router
@@ -116,12 +117,13 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
 async def validation_exception_handler(request: Request, exc: RequestValidationError) -> JSONResponse:
     request_id = get_request_id(request.headers.get("x-request-id"))
     is_public_order = request.url.path.startswith(f"{settings.API_PREFIX}/public/orders")
+    is_courier_settings = request.url.path.startswith(f"{settings.API_PREFIX}/seller/courier/pathao")
     fields = [
         ErrorFieldItem(
             field=".".join(str(loc) for loc in err["loc"] if loc != "body"),
             code=err["type"],
             # Custom validators can include the raw phone/address in their message.
-            message="Invalid value" if is_public_order and err["type"] == "value_error" else str(err["msg"]),
+            message="Invalid value" if is_courier_settings or is_public_order and err["type"] == "value_error" else str(err["msg"]),
         )
         for err in exc.errors()
     ]
@@ -131,7 +133,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             message="Request validation failed",
             fields=fields,
         ),
-        detail=(None if is_public_order or request.url.path.startswith(
+        detail=(None if is_courier_settings or is_public_order or request.url.path.startswith(
                     f"{settings.API_PREFIX}/seller/transactions/sms-"
                 )
                 else jsonable_encoder(exc.errors())),
@@ -147,6 +149,7 @@ app.include_router(structured_retention_router, prefix=settings.API_PREFIX)
 app.include_router(order_export_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
 app.include_router(courier_router, prefix=settings.API_PREFIX)
+app.include_router(pathao_router, prefix=settings.API_PREFIX)
 app.include_router(link_access_router, prefix=settings.API_PREFIX)
 # Literal SMS paths must precede the receipt-ID route.
 app.include_router(sms_router, prefix=settings.API_PREFIX)
