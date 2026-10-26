@@ -108,6 +108,7 @@ describe('BuyerPortal Component', () => {
       .mockImplementationOnce(() =>
         Promise.resolve(new Response(JSON.stringify(mockPublicOrderAwaiting), { status: 200 }))
       )
+      .mockImplementationOnce(() => Promise.resolve(new Response(JSON.stringify({condition: 'disconnected', choices: []}))))
       .mockImplementationOnce(() =>
         Promise.resolve(
           new Response(

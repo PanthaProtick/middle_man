@@ -2,7 +2,7 @@ import datetime
 from collections.abc import Callable
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request, Response
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -11,6 +11,7 @@ from app.core.public_gate import verify_public_access_gate
 from app.core.tokens import get_utc_now
 from app.models.address_assistance import AddressExtractionRequest, AddressExtractionResponse
 from app.models.buyer import BuyerSubmission, EvidenceUploadResponse, PublicOrder
+from app.models.pathao_location import LocationCatalog
 from app.models.payment_extraction import PaymentExtractionRequest, PaymentExtractionResponse
 from app.services.address_assistance import AddressAssistance
 from app.services.address_provider import AddressProvider, get_address_provider
@@ -24,6 +25,25 @@ router = APIRouter(prefix="/public/orders", tags=["public-orders"])
 
 def get_buyer_clock() -> Callable[[], datetime.datetime]:
     return get_utc_now
+
+
+@router.get('/{portal_token}/pathao-locations', response_model=LocationCatalog)
+async def pathao_locations(
+    portal_token: str,
+    city_id: int | None = Query(None, gt=0),
+    zone_id: int | None = Query(None, gt=0),
+    clock: Callable[[], datetime.datetime] = Depends(get_buyer_clock),
+    is_gate_approved: bool = Depends(verify_public_access_gate),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> LocationCatalog:
+    from app.services.pathao_catalog import invalid
+    from app.services.pathao_locations import catalog, link_shop
+    await link_shop(db, portal_token, clock)
+    if zone_id is not None and city_id is None:
+        raise invalid()
+    result = await catalog(db, portal_token, city_id, zone_id)
+    await link_shop(db, portal_token, clock)
+    return result
 
 
 @router.post("/{portal_token}/payment-extraction", response_model=PaymentExtractionResponse)

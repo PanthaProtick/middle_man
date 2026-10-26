@@ -1,11 +1,13 @@
 import { requestJson } from './api';
 import type { SellerOrder } from './types';
 
+import type { PathaoResolution } from '../buyer/pathaoTypes';
+
 export interface BuyerDetails {
   buyer_name: string;
   contact_number: string;
   address: {raw_text: string; district?: string | null; thana?: string | null; area?: string | null;
-    street_line?: string | null; landmark?: string | null};
+    street_line?: string | null; landmark?: string | null; pathao?: PathaoResolution | null};
   payment_claim: {provider: 'bkash' | 'nagad'; trx_id: string; sender_number: string;
     amount_minor: number; claimed_at?: string | null; evidence_id?: string | null};
 }

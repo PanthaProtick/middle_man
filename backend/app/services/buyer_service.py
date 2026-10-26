@@ -96,6 +96,14 @@ class BuyerService:
         # Hashing scopes avoids persisting the bearer token and bounds composite key length.
         digest = hashlib.sha256(portal_token.strip().encode("utf-8")).hexdigest()
         payload_hash = compute_payload_hash(submission.model_dump(mode="json"))
+        from app.services.pathao_locations import link_shop, resolve, submission_window_open
+        # Only the original client payload determines replay identity.
+        await link_shop(self.db, portal_token)
+        prior = await check_idempotency_record(self.db, idempotency_key, digest, 'buyer_submission', payload_hash)
+        if self.db is not None:
+            await self.db.commit()
+        if prior is None and await submission_window_open(self.db, portal_token, self.clock):
+            submission = submission.model_copy(update={'address': await resolve(self.db, portal_token, submission.address)})
         if self.db is not None:
             shop_id = await self.db.scalar(select(OrderTable.shop_id).where(OrderTable.token_lookup_digest == digest))
             if shop_id is not None:

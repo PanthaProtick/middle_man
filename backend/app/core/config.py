@@ -83,6 +83,7 @@ class Settings(BaseSettings):
     # Order Link Encryption
     ORDER_LINK_ENCRYPTION_KEY: str = ""
     PATHAO_CREDENTIAL_ENCRYPTION_KEY: str = ""
+    PATHAO_LOCATION_ENVIRONMENT: Literal['offline', 'sandbox', 'production'] = 'offline'
 
     # Payment Marker Protection
     PAYMENT_MARKER_SECRET: str = ""

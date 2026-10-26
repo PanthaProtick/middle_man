@@ -5,6 +5,7 @@ import { PaymentClaimFields } from './PaymentClaimFields';
 import { EvidenceUploadField } from './EvidenceUploadField';
 import { PaymentAssistance } from './PaymentAssistance';
 import { AddressAssistance } from './AddressAssistance';
+import { PathaoLocations } from './PathaoLocations';
 import { canonicalizeBdPhone } from '../seller/api';
 import { parseClaimedAmount } from './api';
 
@@ -89,6 +90,7 @@ export function BuyerSubmissionForm({
       contact_number: draft.contact_number.trim(),
       address: {
         raw_text: draft.address_raw.trim(),
+        ...(draft.pathao ? {pathao: draft.pathao} : {}),
       },
       payment_claim: {
         provider: draft.payment_provider,
@@ -194,6 +196,8 @@ export function BuyerSubmissionForm({
       </div>
 
       {/* Delivery Address */}
+      {portalToken && <PathaoLocations portalToken={portalToken} value={draft.pathao ?? {}}
+        disabled={isSubmitting || isLocked} onChange={pathao => onDraftChange({...draft, pathao})} />}
       <div className="form-group" style={{ marginBottom: '14px' }}>
         <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
           <MapPin size={15} color="var(--primary-accent)" />

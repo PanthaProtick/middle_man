@@ -22,7 +22,7 @@ it.each([false, undefined, true])('uses backend AI availability %s while preserv
   document.body.append(container);
   const root = createRoot(container);
   const submit = vi.fn().mockResolvedValue(undefined);
-  const fetcher = vi.spyOn(globalThis, 'fetch');
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({condition: 'disconnected', choices: []})));
   try {
     await act(async () => root.render(<BuyerSubmissionForm portalToken="token"
       order={{ ...order, ai_assistance_available: available }} draft={draft}
@@ -35,7 +35,9 @@ it.each([false, undefined, true])('uses backend AI availability %s while preserv
       address: { raw_text: 'Dhaka' },
       payment_claim: expect.objectContaining({ evidence_id: 'synthetic-evidence', trx_id: 'ABC123' }),
     }));
-    expect(fetcher).not.toHaveBeenCalled();
+    // The catalog read is independent of AI; neither extraction endpoint may be called.
+    expect(fetcher).toHaveBeenCalledTimes(1);
+    expect(fetcher.mock.calls[0][0]).toBe('/api/public/orders/token/pathao-locations');
   } finally {
     await act(async () => root.unmount());
     container.remove();

@@ -144,6 +144,11 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
     {history && <details><summary>Buyer revision history ({history.items.length})</summary>
       {history.items.map(item => <article key={item.id}>
         <p>Revision {item.revision_number}: {item.buyer_name}, {item.contact_number}, {item.address.raw_text}</p>
+        {item.address.pathao && <p>Pathao: {item.address.pathao.condition} · {item.address.pathao.environment} ·
+          {item.address.pathao.city_name ?? 'City unresolved'} ({item.address.pathao.city_id ?? '—'}) /{' '}
+          {item.address.pathao.zone_name ?? 'Zone unresolved'} ({item.address.pathao.zone_id ?? '—'}) /{' '}
+          {item.address.pathao.area_name ?? 'Area unresolved'} ({item.address.pathao.area_id ?? '—'}).
+          {item.address.pathao.booking_blocked && ' Booking blocked; seller resolution/review required.'}</p>}
         <p>{item.payment_claim.provider} · {item.payment_claim.trx_id} · {item.payment_claim.sender_number} · BDT {(item.payment_claim.amount_minor / 100).toFixed(2)}</p>
         <p>{item.actor} · {item.reason ?? 'Initial submission'} · {item.created_at}</p>
         <p>Payment claim accepted: {item.claim_accepted_at}</p>

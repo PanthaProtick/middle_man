@@ -87,6 +87,39 @@ it('retries the frozen payload and key after an unknown outcome', async () => {
   }
 });
 
+it('retains courier IDs, written directions and independent payment claim on retry', async () => {
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (init?.method === 'POST') throw new TypeError('Synthetic lost response');
+    if (String(url).includes('/pathao-locations')) {
+      const path = String(url);
+      const choices = path.includes('zone_id=10') ? [{id: 100, name: 'Area', home_delivery_available: true}]
+        : path.includes('city_id=1') ? [{id: 10, name: 'Zone'}] : [{id: 1, name: 'Dhaka'}];
+      return new Response(JSON.stringify({condition: 'resolved', simulated: true, choices}));
+    }
+    return new Response(JSON.stringify(order));
+  });
+  const page = await filledPortal();
+  try {
+    for (const [name, value] of [['city', '1'], ['zone', '10'], ['area', '100']]) {
+      await act(async () => {
+        const select = page.container.querySelector<HTMLSelectElement>(`select[name="pathao_${name}"]`)!;
+        select.value = value;
+        select.dispatchEvent(new Event('change', {bubbles: true}));
+      });
+    }
+    await page.submit();
+    await page.submit();
+    const posts = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
+    expect(posts).toHaveLength(2);
+    expect(posts[1][1]?.body).toEqual(posts[0][1]?.body);
+    expect(posts[1][1]?.headers).toEqual(posts[0][1]?.headers);
+    expect(JSON.parse(String(posts[0][1]?.body))).toMatchObject({
+      contact_number: '01711111111', address: {raw_text: 'Synthetic address', pathao: {city_id: 1, zone_id: 10, area_id: 100}},
+      payment_claim: {trx_id: 'SYNTHETIC', sender_number: '01822222222'},
+    });
+  } finally { await page.close(); }
+});
+
 it('reconciles a lost response to saved pending status without another submission', async () => {
   let submitted = false;
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {

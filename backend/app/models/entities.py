@@ -124,6 +124,7 @@ class BuyerRevisionTable(Base):
     address_area: Mapped[str | None] = mapped_column(String(100), nullable=True)
     address_street_line: Mapped[str | None] = mapped_column(String(200), nullable=True)
     address_landmark: Mapped[str | None] = mapped_column(String(200), nullable=True)
+    address_pathao: Mapped[str | None] = mapped_column(Text, nullable=True)
     payment_provider: Mapped[str] = mapped_column(String(32), nullable=False)
     payment_trx_id: Mapped[str] = mapped_column(String(128), nullable=False)
     payment_sender_raw: Mapped[str] = mapped_column(String(32), nullable=False)

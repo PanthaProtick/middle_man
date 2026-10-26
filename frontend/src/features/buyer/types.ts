@@ -1,3 +1,5 @@
+import type { PathaoSelection } from './pathaoTypes';
+
 export interface PublicOrder {
   ai_assistance_available?: boolean;
   id: string;
@@ -19,6 +21,7 @@ export interface PublicOrder {
 }
 
 export interface AddressInput {
+  pathao?: PathaoSelection;
   raw_text: string;
   district?: string;
   thana?: string;
@@ -44,6 +47,7 @@ export interface BuyerSubmissionInput {
 }
 
 export interface BuyerFormDraft {
+  pathao?: PathaoSelection;
   buyer_name: string;
   contact_number: string;
   address_raw: string;

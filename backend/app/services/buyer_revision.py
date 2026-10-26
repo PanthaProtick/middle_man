@@ -20,6 +20,7 @@ def buyer_revision(submission: BuyerSubmission, order_id: str, now: datetime.dat
         "address_area": submission.address.area,
         "address_street_line": submission.address.street_line,
         "address_landmark": submission.address.landmark,
+        "address_pathao": submission.address.pathao.model_dump_json() if submission.address.pathao else None,
         "payment_provider": submission.payment_claim.provider,
         "payment_trx_id": submission.payment_claim.trx_id,
         "payment_sender_raw": submission.payment_claim.sender_number_raw,

@@ -2,6 +2,10 @@
 
 ## Pathao merchant settings
 
+Buyer destination collection and the controlled public catalog are documented in
+[the Pathao location contract](pathao-location-contract.md). Written-address fallback
+preserves payment claims while unresolved locations continue to block booking.
+
 Shop-scoped, environment-specific connection/default management is documented in
 [the Pathao settings contract](pathao-account-contract.md). It uses write-only
 encrypted credentials and immutable optimistic revisions. These settings do not

@@ -11,6 +11,7 @@ from app.models.buyer import Address, BuyerSubmission, PaymentClaim
 from app.models.correction import BuyerCorrection, BuyerHistory, BuyerRevisionView
 from app.models.entities import BuyerRevisionTable, OrderTable, ReceivedTransactionTable, ShopTable
 from app.models.order import SellerOrder
+from app.models.pathao_location import LocationResolution
 from app.services.buyer_revision import buyer_revision
 from app.services.buyer_service import _memory_buyer_revisions
 from app.services.order_service import OrderService, _memory_orders
@@ -24,7 +25,7 @@ def revision_view(raw: dict[str, Any]) -> BuyerRevisionView:
     return BuyerRevisionView(
         id=raw['id'], revision_number=raw['revision_number'], buyer_name=raw['buyer_name'],
         contact_number=raw['contact_number_raw'],
-        address=Address(raw_text=raw['address_raw'], **{key: raw['address_' + key] for key in
+        address=Address(raw_text=raw['address_raw'], pathao=LocationResolution.model_validate_json(raw['address_pathao']) if raw.get('address_pathao') else None, **{key: raw['address_' + key] for key in
                      ('district', 'thana', 'area', 'street_line', 'landmark')}),
         payment_claim=PaymentClaim(provider=raw['payment_provider'], trx_id=raw['payment_trx_id'],
             sender_number=raw['payment_sender_raw'], amount_minor=raw['payment_amount_minor'],
@@ -95,6 +96,9 @@ async def _correct(db: AsyncSession | None, shop_id: str, actor: str, order_id: 
     values = prior.model_dump(include=set(fields))
     values.update(payload.model_dump(include=set(fields), exclude_unset=True))
     submission = BuyerSubmission.model_validate(values)
+    if submission.address != prior.address:
+        # Corrections cannot assert courier authority; a changed address needs new review.
+        submission.address.pathao = LocationResolution(condition='missing_choices')
     now = get_utc_now()
     changed_claim = submission.payment_claim != prior.payment_claim
     raw = buyer_revision(submission, order_id, now)

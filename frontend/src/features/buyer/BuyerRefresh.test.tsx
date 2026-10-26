@@ -206,6 +206,7 @@ it('does not let a late submission reopen a newer public-policy denial', async (
   let submitted: (value: Response) => void = () => { throw new Error('Not submitted'); };
   vi.spyOn(globalThis, 'fetch')
     .mockResolvedValueOnce(response({ ...pending, lifecycle: 'awaiting_buyer' }))
+    .mockResolvedValueOnce(new Response(JSON.stringify({condition: 'disconnected', choices: []})))
     .mockImplementationOnce(() => new Promise<Response>((resolve) => { submitted = resolve; }))
     .mockResolvedValueOnce(new Response(JSON.stringify({ error: {
       code: 'PUBLIC_ACCESS_POLICY_UNSETTLED', message: 'Access disabled',

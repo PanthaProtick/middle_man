@@ -5,6 +5,7 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, computed_field
 
 from app.core.config import settings
 from app.models.order import MAX_SAFE_INTEGER
+from app.models.pathao_location import LocationResolution
 from app.models.seller import canonicalize_bd_phone
 
 
@@ -25,6 +26,7 @@ class Address(BaseModel):
     area: Optional[str] = Field(None, max_length=100)
     street_line: Optional[str] = Field(None, max_length=200)
     landmark: Optional[str] = Field(None, max_length=200)
+    pathao: LocationResolution | None = None
 
     @field_validator("raw_text")
     @classmethod
