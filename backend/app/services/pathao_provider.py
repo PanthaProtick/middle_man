@@ -107,6 +107,24 @@ class CourierDefinitiveFailure(Exception):
     pass
 
 
+class CourierEvidenceUnavailable(Exception):
+    """Provider cannot verify that the supplied consignment exists for this account."""
+
+
+class CourierBookingEvidence(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    consignment_id: str
+    merchant_order_id: str
+    environment: Environment
+    store_id: int
+    is_simulated: bool
+
+
+def simulated_consignment(shop: str, order_id: str, store_id: int) -> str:
+    digest = hashlib.sha256(f"{shop}:{order_id}:{store_id}".encode()).hexdigest()[:12].upper()
+    return f"SIM-PATHAO-{digest}"
+
+
 class CourierBookingResult(BaseModel):
     model_config = ConfigDict(extra='forbid')
     consignment_id: str
@@ -131,10 +149,27 @@ async def submit_booking(shop: str, env: Environment, request: CourierBookingSna
     if request.item_weight_grams <= 0 or request.item_quantity <= 0:
         raise CourierDefinitiveFailure('Package weight and item quantity must be positive.')
 
-    digest = hashlib.sha256(f"{shop}:{request.order_id}:{request.store_id}".encode()).hexdigest()[:12].upper()
     return CourierBookingResult(
-        consignment_id=f"SIM-PATHAO-{digest}",
+        consignment_id=simulated_consignment(shop, request.order_id, request.store_id),
         merchant_order_id=request.order_id,
+        is_simulated=True,
+    )
+
+
+async def lookup_booking(
+    shop: str, env: Environment, consignment_id: str, merchant_order_id: str, store_id: int,
+) -> CourierBookingEvidence:
+    """Verifies an existing consignment against the account, order reference, and environment."""
+    if env != 'offline':
+        raise CourierEvidenceUnavailable('Real consignment verification is not yet available.')
+    expected = simulated_consignment(shop, merchant_order_id, store_id)
+    if consignment_id.strip().upper() != expected:
+        raise CourierEvidenceUnavailable('No matching consignment was found for this account and order reference.')
+    return CourierBookingEvidence(
+        consignment_id=expected,
+        merchant_order_id=merchant_order_id,
+        environment=env,
+        store_id=store_id,
         is_simulated=True,
     )
 

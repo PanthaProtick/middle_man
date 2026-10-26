@@ -5,11 +5,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.database import get_db
 from app.models.courier import CourierDraft, CourierDraftUpdate
+from app.models.courier_reconciliation import CourierReconciliationInput
 from app.models.courier_review import CourierReview, ReviewUpdate, ReviewVersion
 from app.models.courier_submission import CourierSubmissionInput
 from app.models.pathao import Environment
 from app.models.pathao_location import LocationCatalog
-from app.services import courier_attempts, courier_review, pathao_connections
+from app.services import (
+    courier_attempts,
+    courier_reconciliation,
+    courier_review,
+    pathao_connections,
+)
 from app.services.courier_drafts import get_draft, update_draft
 from app.services.pathao_catalog import hierarchy
 from app.services.seller_service import NotFoundError, SellerDomainException, SellerService
@@ -63,6 +69,22 @@ async def submit_courier(
         raise NotFoundError('Order not found')
     return await courier_attempts.execute_submission(
         db, shop.id, seller.owner_id, order_id, payload.expected_token, idempotency_key,
+    )
+
+
+@router.post('/{order_id}/courier-reconciliation', response_model=CourierReview)
+async def reconcile_courier_attempt(
+    order_id: str,
+    payload: CourierReconciliationInput,
+    response: Response,
+    idempotency_key: str = Header(..., alias='Idempotency-Key', min_length=1, max_length=64),
+    shop: str = Depends(review_scope),
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: AsyncSession | None = Depends(get_db),
+) -> CourierReview:
+    _set_security_headers(response)
+    return await courier_reconciliation.execute(
+        db, shop, seller.owner_id, order_id, payload, idempotency_key,
     )
 
 

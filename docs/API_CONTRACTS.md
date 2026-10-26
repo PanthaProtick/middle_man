@@ -50,6 +50,25 @@ allocation writes cannot discard the enclosing submission and report false succe
 The seller proposal uses the shared session request guard, hides previous identities
 immediately, rejects late responses, and reloads when the order version changes.
 
+## Courier reconciliation
+
+`POST /api/seller/orders/{order_id}/courier-reconciliation` resolves an `unknown`
+submission attempt and requires the owning seller plus `Idempotency-Key`. The body is
+`{attempt_id, expected_version, action}`. `attach_existing` also requires
+`environment`, `consignment_id`, and `merchant_order_id`; the courier adapter must
+confirm the consignment for that shop, order reference, store, and environment.
+`confirm_noncreation` records an explicit seller confirmation and requires no
+consignment fields. Responses use the existing `CourierReview` shape.
+
+Successful resolution preserves the attempt's reviewed snapshot, increments
+`resolution_version`, and appends a `courier_reconciliations` audit row containing
+the actor, action, timestamp, resulting status, and safe evidence references. An
+existing consignment cannot be attached to another order. Stale versions and
+already-resolved attempts return conflicts; same-key replay returns the stored
+response. The retry path is the normal submission reservation, which revalidates
+lifecycle, review freshness, connection, address, and parcel details. Full details
+are in [the submission contract](pathao-submission-contract.md).
+
 ## Same-order buyer-link reissue
 
 `POST /api/seller/orders/{order_id}/reissue-link` requires the owning seller,

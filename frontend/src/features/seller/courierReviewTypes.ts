@@ -37,6 +37,9 @@ export interface CourierAttempt {
   booking_snapshot: BookingSnapshot | null;
   error_code: string | null;
   error_message: string | null;
+  resolution_version: number;
+  resolution_action: 'attach_existing' | 'confirm_noncreation' | null;
+  resolved_at: string | null;
   created_at: string;
   updated_at: string;
 }

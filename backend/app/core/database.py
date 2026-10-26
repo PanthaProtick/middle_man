@@ -87,6 +87,7 @@ EXPECTED_SCHEMA_TABLES = [
     "courier_drafts",
     "pathao_connection_revisions",
     "courier_attempts",
+    "courier_reconciliations",
 ]
 
 

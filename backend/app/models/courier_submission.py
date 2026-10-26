@@ -1,6 +1,6 @@
 """Durable attempt tracking, outcome states, and reviewed booking snapshot contract."""
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text
@@ -10,6 +10,7 @@ from app.core.database import Base
 from app.models.pathao import Environment
 
 AttemptStatus = Literal['submitting', 'success', 'failed', 'unknown']
+ReconciliationAction = Literal['attach_existing', 'confirm_noncreation']
 
 
 class CourierAttemptTable(Base):
@@ -27,6 +28,9 @@ class CourierAttemptTable(Base):
     booking_snapshot: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
     error_code: Mapped[str | None] = mapped_column(String(64), nullable=True)
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    resolution_version: Mapped[int] = mapped_column(Integer, nullable=False, default=0, server_default='0')
+    resolution_action: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
 
@@ -62,6 +66,9 @@ class CourierAttemptView(BaseModel):
     booking_snapshot: CourierBookingSnapshot | None = None
     error_code: str | None = None
     error_message: str | None = None
+    resolution_version: int = 0
+    resolution_action: ReconciliationAction | None = None
+    resolved_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 
@@ -87,6 +94,9 @@ def to_attempt_view(row: CourierAttemptTable | dict[str, Any]) -> CourierAttempt
             booking_snapshot=snapshot,
             error_code=row.error_code,
             error_message=row.error_message,
+            resolution_version=row.resolution_version,
+            resolution_action=cast(ReconciliationAction | None, row.resolution_action),
+            resolved_at=row.resolved_at,
             created_at=row.created_at,
             updated_at=row.updated_at,
         )
@@ -104,6 +114,9 @@ def to_attempt_view(row: CourierAttemptTable | dict[str, Any]) -> CourierAttempt
         booking_snapshot=snapshot,
         error_code=row.get('error_code'),
         error_message=row.get('error_message'),
+        resolution_version=row.get('resolution_version', 0),
+        resolution_action=row.get('resolution_action'),
+        resolved_at=row.get('resolved_at'),
         created_at=row['created_at'],
         updated_at=row['updated_at'],
     )

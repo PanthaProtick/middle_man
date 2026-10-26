@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestJson } from './api';
 import type { ParcelRevision, Review, ReviewChoices } from './courierReviewTypes';
+import { CourierReconciliation } from './CourierReconciliation';
 import { CourierReviewLocations } from './CourierReviewLocations';
 
 const blockerLabels: Record<string, string> = {
@@ -142,19 +143,37 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
       {busy && <p role="status">Submitting booking to Pathao (simulated)…</p>}
       {review.latest_attempt?.status === 'success' && (
         <div role="status" className="booking-result">
-          <p><strong>Booking confirmed (simulated offline).</strong></p>
+          <p><strong>{review.latest_attempt.resolution_action === 'attach_existing'
+            ? 'Existing booking attached (simulated offline).'
+            : 'Booking confirmed (simulated offline).'}</strong></p>
           <p>Simulated consignment: <code>{review.latest_attempt.consignment_id}</code></p>
+          {review.latest_attempt.resolution_action === 'attach_existing' && (
+            <p>The original unknown attempt and its reviewed snapshot are preserved.</p>
+          )}
         </div>
       )}
       {review.latest_attempt?.status === 'unknown' && (
-        <div role="alert" className="booking-unknown">
-          <p><strong>Booking outcome unknown.</strong> The submission was sent, but the courier response was interrupted or could not be verified. Further attempts are blocked to prevent duplicate booking.</p>
+        <div className="booking-unknown">
+          <p role="alert"><strong>Booking outcome unknown.</strong> The submission was sent, but the courier
+            response was interrupted or could not be verified. Further attempts are blocked to prevent duplicate booking.</p>
+          <CourierReconciliation key={`${identity}:${review.latest_attempt.id}`}
+            orderId={orderId} token={token} attempt={review.latest_attempt}
+            onResolved={updated => {
+              setState({ identity, review: updated });
+              setEditing({ identity, choices: updated.choices });
+            }} />
         </div>
       )}
       {review.latest_attempt?.status === 'failed' && (
-        <div role="alert" className="booking-failed">
-          <p>Previous submission rejected: {review.latest_attempt.error_message || 'Courier rejected booking'}. You may review and try again.</p>
-        </div>
+        review.latest_attempt.error_code === 'CONFIRMED_NONCREATION'
+          ? <div role="status" className="booking-noncreation">
+            <p><strong>Confirmed noncreation recorded.</strong> Current lifecycle, connection, address, and parcel
+              details are revalidated before another attempt. Review again if anything changed.</p>
+          </div>
+          : <div role="alert" className="booking-failed">
+            <p>Previous submission rejected: {review.latest_attempt.error_message || 'Courier rejected booking'}.
+              You may review and try again.</p>
+          </div>
       )}
     </>}
   </section>;

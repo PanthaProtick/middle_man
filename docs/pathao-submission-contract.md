@@ -42,6 +42,35 @@ is unavailable and rejected server-side.
      acceptance followed by local DB persistence failure. Classified conservatively as `status = 'unknown'`.
      Further submission attempts and draft edits are strictly blocked until reconciled.
 
+## Unknown-outcome reconciliation
+
+Seller-only `POST /api/seller/orders/{id}/courier-reconciliation` resolves one protected
+`unknown` attempt. It requires `Idempotency-Key` and
+`{attempt_id, expected_version, action}`.
+
+- `action = attach_existing` additionally requires `environment`, `consignment_id`, and
+  `merchant_order_id`. The offline adapter verifies that the consignment belongs to the
+  authenticated shop, the order reference, the selected store, and the attempt environment.
+  A missing, foreign, or mismatched consignment leaves the attempt `unknown` and returns a
+  controlled `422 EVIDENCE_UNAVAILABLE`/`EVIDENCE_MISMATCH`. One consignment cannot be
+  associated with another order (`409 CONSIGNMENT_ALREADY_ASSOCIATED`).
+- `action = confirm_noncreation` records an explicit seller confirmation that no booking
+  exists. It changes only the attempt to `failed`/`CONFIRMED_NONCREATION`; an empty merchant
+  panel, timeout, or absent local row is never inferred as noncreation.
+- Both actions preserve the original attempt, reviewed token, correlation ID, and booking
+  snapshot. They increment `resolution_version` and write an attributable
+  `courier_reconciliations` row (actor, action, timestamp, resulting state, and non-secret
+  reference/evidence fields). Other attempts for the order are untouched.
+- Stale versions return `409 STALE_VERSION`; an already-resolved attempt returns
+  `409 ATTEMPT_NOT_RECONCILABLE`. Same-key replay returns the stored review. Competing
+  operators serialize on the order/shop/attempt locks, so only one resolution is recorded.
+- A confirmed noncreation permits a new attempt only after the normal reservation rechecks
+  current lifecycle, reviewed revision, connection, address, and parcel facts. Cancelling
+  the order still blocks a new booking. An existing booking can still be attached after a
+  local cancellation, retaining the order-state blockers (including cancellation).
+- Provider I/O runs outside the database transaction. Settings changes, draft edits,
+  reconnects, or a different idempotency key cannot bypass the protected attempt.
+
 ## Invariant and restart protections
 
 - Rejection messages stored in attempts and returned to sellers use controlled
