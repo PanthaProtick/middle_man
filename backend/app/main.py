@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
 from starlette.middleware.base import RequestResponseEndpoint
 
+from app.api.courier import router as courier_router
 from app.api.link_access import router as link_access_router
 from app.api.order_export import router as order_export_router
 from app.api.orders import router as orders_router
@@ -145,6 +146,7 @@ app.include_router(seller_router, prefix=settings.API_PREFIX)
 app.include_router(structured_retention_router, prefix=settings.API_PREFIX)
 app.include_router(order_export_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
+app.include_router(courier_router, prefix=settings.API_PREFIX)
 app.include_router(link_access_router, prefix=settings.API_PREFIX)
 # Literal SMS paths must precede the receipt-ID route.
 app.include_router(sms_router, prefix=settings.API_PREFIX)

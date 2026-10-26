@@ -55,6 +55,8 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
             else:
                 del _memory_transactions[receipt['id']]
         _memory_buyer_revisions.pop(row['id'], None)
+        from app.services.courier_drafts import _memory_drafts
+        _memory_drafts.pop(row['id'], None)
         _memory_order_review_reasons.pop(row['id'], None)
         _memory_audit_events[:] = [a for a in _memory_audit_events if a.get('aggregate_id') not in erased]
         for record in _memory_idempotency_store.values():

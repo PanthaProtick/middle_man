@@ -5,6 +5,7 @@ from sqlalchemy import delete, select, tuple_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.address_entities import AddressExtractionTable
+from app.models.courier import CourierDraftTable
 from app.models.entities import (
     AllocationTable,
     AuditEventTable,
@@ -75,6 +76,7 @@ async def remove_order(db: AsyncSession, order: OrderTable, now: datetime) -> No
     for receipt in receipts:
         await remove_receipt(db, receipt, now)
     await redact_replays(db, {order.id, *(r.id for r in revisions)}, order.shop_id)
+    await db.execute(delete(CourierDraftTable).where(CourierDraftTable.order_id == order.id))
     for model in (BuyerRevisionTable, OrderReviewReasonTable, AddressExtractionTable, PaymentExtractionTable):
         await db.execute(delete(model).where(model.order_id == order.id))
     await db.execute(delete(AuditEventTable).where(AuditEventTable.shop_id == order.shop_id,

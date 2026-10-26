@@ -84,6 +84,7 @@ EXPECTED_SCHEMA_TABLES = [
     "payment_extractions",
     "evidence_cleanups",
     "payment_marker_keys",
+    "courier_drafts",
 ]
 
 

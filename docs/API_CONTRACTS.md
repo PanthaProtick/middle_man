@@ -1,5 +1,28 @@
 # API Contracts & Data Flow Guide
 
+## Local courier proposals
+
+`GET /api/seller/orders/{order_id}/courier-draft` requires the owning seller.
+Returns `CourierDraft`: order identity, creation time, `status: local_proposal`,
+current recipient name/contact/address, remaining COD in minor units, and blockers.
+There is no courier submission endpoint in this ticket. Missing parcel details,
+merchant connection/pickup store, and Pathao location IDs always block booking.
+Cancelled orders additionally return `ORDER_NOT_CONFIRMED`.
+
+Both confirmation paths insert one unique order-level creation marker within the
+allocation transaction (migration 0019). GET projects the current retained buyer
+revision and accepted allocation rather than storing another copy of personal
+data. COD uses the accepted receipt amount, including exceptions and zero COD.
+Existing overpayment checks remain enforced. No provider is contacted. The offline
+adapter has the same uniqueness behavior but is intentionally process-local.
+
+Responses are private/no-store. Foreign/missing orders or absent drafts return 404;
+retained-away orders return 410. Structured retention deletes the creation marker
+and source personal data. Reconciliation retries use a savepoint so failed local
+allocation writes cannot discard the enclosing submission and report false success.
+The seller proposal uses the shared session request guard, hides previous identities
+immediately, rejects late responses, and reloads when the order version changes.
+
 ## Same-order buyer-link reissue
 
 `POST /api/seller/orders/{order_id}/reissue-link` requires the owning seller,

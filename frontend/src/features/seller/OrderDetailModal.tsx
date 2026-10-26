@@ -5,6 +5,7 @@ import { formatBangladeshTime, formatRemainingCod } from './api';
 import { BuyerCorrection } from './BuyerCorrection';
 import { PaymentException } from './PaymentException';
 import { PaymentHistory } from './PaymentHistory';
+import { CourierDraft } from './CourierDraft';
 import { OrderOutcomes } from './OrderOutcomes';
 import { EvidenceViewer } from './EvidenceViewer';
 import { OrderExport } from './OrderExport';
@@ -206,6 +207,8 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
 
         <DeveloperDetailsPanel order={order} />
 
+        {token && (isConfirmed || order.lifecycle === 'cancelled') && order.allocation_basis &&
+          <CourierDraft key={`courier-${order.id}-${order.version}-${token}`} orderId={order.id} token={token} />}
         {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
         {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
           onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}

@@ -7,6 +7,7 @@ from typing import Any
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.models.courier import CourierDraftTable
 from app.models.entities import (
     AllocationTable,
     AuditEventTable,
@@ -22,6 +23,7 @@ async def allocate_db(db: AsyncSession, order: OrderTable, receipt: ReceivedTran
                       digests: list[tuple[str, str]], now: datetime.datetime, *,
                       basis: str, actor: str, reason: str | None, details: str) -> None:
     from app.services.reconciliation_db import clear_order_review_reasons_db
+    db.add(CourierDraftTable(order_id=order.id, created_at=now))
     exception = basis == 'manual' and bool(json.loads(details)['exceptions'])
     increment = insert(PaymentMetricsTable).values(shop_id=order.shop_id, confirmed_count=1,
         manual_count=int(basis == 'manual'), exception_count=int(exception))
@@ -75,6 +77,7 @@ async def allocate_db(db: AsyncSession, order: OrderTable, receipt: ReceivedTran
 
 def allocate_memory(order: dict[str, Any], receipt: dict[str, Any], markers: set[tuple[str, str, str]],
                     now: datetime.datetime, *, basis: str, actor: str, reason: str | None, details: str) -> None:
+    from app.services.courier_drafts import _memory_drafts, prepare_memory_draft
     from app.services.payment_history import _memory_payment_metrics
     from app.services.reconciliation_store import (
         _memory_allocations,
@@ -84,6 +87,7 @@ def allocate_memory(order: dict[str, Any], receipt: dict[str, Any], markers: set
         _memory_transaction_allocations,
         _memory_used_payment_markers,
     )
+    draft_id, draft_created_at = prepare_memory_draft(order['id'], now)
     metric = _memory_payment_metrics.setdefault(order['shop_id'], PaymentSummary())
     metric.confirmed_count += 1
     metric.manual_count += int(basis == 'manual')
@@ -125,3 +129,4 @@ def allocate_memory(order: dict[str, Any], receipt: dict[str, Any], markers: set
     receipt["version"] = int(receipt.get("version", 1)) + 1
 
     _memory_order_review_reasons.pop(order_id, None)
+    _memory_drafts[draft_id] = draft_created_at

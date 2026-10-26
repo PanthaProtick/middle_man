@@ -79,13 +79,16 @@ async def reconcile_order_db(
     from app.services.payment_marker_protection import verify_marker_key
     for attempt in range(max_retries):
         try:
-            shop_id = await db.scalar(select(OrderTable.shop_id).where(OrderTable.id == order_id))
-            if shop_id is not None:
-                await db.execute(select(ShopTable).where(ShopTable.id == shop_id).with_for_update())
-                await verify_marker_key(db, shop_id)
-            return await _reconcile_order_db_attempt(db, order_id, now, digest_calculator)
+            # Reconciliation is nested inside submission/receipt mutations. A
+            # retry must preserve those writes rather than roll them back and
+            # silently return an unsubmitted order as a successful submission.
+            async with db.begin_nested():
+                shop_id = await db.scalar(select(OrderTable.shop_id).where(OrderTable.id == order_id))
+                if shop_id is not None:
+                    await db.execute(select(ShopTable).where(ShopTable.id == shop_id).with_for_update())
+                    await verify_marker_key(db, shop_id)
+                return await _reconcile_order_db_attempt(db, order_id, now, digest_calculator)
         except DBAPIError:
-            await db.rollback()
             if attempt == max_retries - 1:
                 raise
     return False

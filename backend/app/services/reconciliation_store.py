@@ -11,6 +11,8 @@ _memory_order_review_reasons: Dict[str, List[str]] = {}  # order_id -> list of r
 
 
 def reset_reconciliation_memory_store() -> None:
+    from app.services.courier_drafts import _memory_drafts
+    _memory_drafts.clear()
     from app.services.payment_marker_protection import _memory_keys
     _memory_keys.clear()
     from app.services.payment_history import _memory_payment_metrics
