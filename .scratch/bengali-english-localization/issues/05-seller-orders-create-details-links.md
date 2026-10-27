@@ -1,30 +1,23 @@
-# 05: Seller orders, order creation, details, and buyer links
+# 05: Order creation, details, and buyer links
 
-**What to build:** Localize the seller order list, create-order modal, order
-details modal, buyer-link access controls, and link copy feedback.
+**What to build:** Create and inspect orders and manage buyer links in either language without changing order or link semantics.
 
-**Blocked by:** 01
+**Blocked by:** 01 — Language switching and buyer order summary
 
-**Status:** ready
+**Status:** ready-for-agent
 
-- [ ] Localize `OrderList` filters, search/empty/loading/error states, lifecycle
-      labels, dates, amounts, review indicators, pagination, and inspect actions.
-      Replace raw lifecycle/filter enums with localized labels while keeping
-      `option` values and query parameters unchanged.
-- [ ] Localize `CreateOrderModal` labels, help, parcel fields, validation, computed
-      order total/delivery advance/remaining COD, submit/progress/failure text, and
-      accessible names. Bengali digits are accepted and normalized in numeric
-      inputs; money/precision behavior is unchanged.
-- [ ] Localize `OrderDetailModal` sections, buyer/product/parcel details, payment
-      status, allocation/review context, timestamps, close control, and raw enum
-      labels. Preserve buyer-written data and IDs verbatim.
-- [ ] Localize `BuyerLinkAccess` view/rotate/revoke states, confirmation and caution
-      copy, and `BuyerLinkCopy` copy/copied/copying/failure feedback. Do not change
-      link generation, revocation, or clipboard payloads.
-- [ ] Provide localized labels for unknown/future enum values instead of printing
-      bare codes, while retaining a stable fallback.
-- [ ] Switching language preserves typed order values, selected filters, open
-      dialogs, copied state, and pending requests; it sends no create/link request.
-- [ ] Extend order list/create/details/link tests for both locales, preserved
-      values, validation, copy feedback, and request counts.
-- [ ] Focused `npm run test:frontend` passes for these suites.
+- [ ] Translate lists, search, filters, pagination, lifecycle/review labels, creation, parcel-entry guidance, computed balances, details, empty/loading/error states, and accessible names.
+
+- [ ] Translate validation and server field errors, preserving first-invalid focus, numeric precision, and acceptance of Bengali digits at numeric boundaries.
+
+- [ ] Translate link viewing/copy/rotation/revocation feedback and warnings; preserve generated URLs, clipboard link payloads, access rights, and shared-link language independence.
+
+- [ ] Use stable coded labels and safe unknown-value guidance without changing enums, query parameters, authorization, or idempotency contracts.
+
+- [ ] Preserve product/buyer/address/account data, IDs, parcel values, evidence, filters, drafts, open dialogs, and pending/failed operations across switching. No create/link mutation is repeated.
+
+- [ ] Extend rendered creation/list/details/link journeys and relevant endpoint tests for both languages, success/failure, retained values, original payloads, and request counts.
+
+- [ ] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details.
+
+- [ ] Run focused repository tests for changed behavior, then root npm run check as the final pre-handoff gate. Record changed paths, exact results, and failed/blocked/unrun browser or provider acceptance in the existing task record. Mocks and HTTP smoke do not prove live acceptance.

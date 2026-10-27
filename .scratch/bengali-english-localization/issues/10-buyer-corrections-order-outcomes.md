@@ -1,28 +1,23 @@
 # 10: Buyer corrections and order outcomes
 
-**What to build:** Localize buyer revision history/correction and seller order
-outcome actions, including rejection, replacement, and cancellation safety copy.
+**What to build:** Review buyer revisions and correct, reject, replace, or cancel an order in either language while preserving lifecycle safeguards.
 
-**Blocked by:** 01
+**Blocked by:** 01 — Language switching and buyer order summary
 
-**Status:** ready
+**Status:** ready-for-agent
 
-- [ ] Localize `BuyerCorrection`, `corrections.ts` display copy, and
-      `OrderOutcomes`, including revision history, review reasons, correction form,
-      locked-field explanations, courier notices, retry-same-correction, reject,
-      replace, and cancel flows.
-- [ ] Cover pending/terminal/unavailable/expired/retry states, confirmation and
-      caution copy, payment-resolution requirements before replacement, and
-      allocated-order blockers. Preserve the distinction between seller acceptance
-      and provider verification.
-- [ ] Preserve buyer revisions, address/name/message text, reasons/actors, order
-      IDs, and evidence verbatim. Stable codes become localized labels with an
-      unknown-code fallback.
-- [ ] Replace raw ISO revision timestamps with the shared localized date format;
-      keep stored instants and locked-term behavior unchanged.
-- [ ] Switching language preserves an open correction draft, selected outcome
-      action, confirmation state, pending request, and failed-operation state; it
-      sends no correction/rejection/replacement/cancellation request.
-- [ ] Extend correction/outcome tests for both locales, preserved values,
-      lifecycle assertions, and no repeated mutation on switch.
-- [ ] Focused `npm run test:frontend` passes for these suites.
+- [ ] Translate revision history, review reasons, correction forms, locked fields, courier notices, retry guidance, and rejection/replacement/cancellation confirmations.
+
+- [ ] Cover pending/terminal/unavailable/expired/failure states, stable server field/reason codes, and safe unknown-error guidance.
+
+- [ ] Preserve payment-resolution prerequisites, allocated-order blockers, fixed-term constraints, authorization, expiry, and provider-booking warnings.
+
+- [ ] Preserve buyer names/addresses/messages, revisions, evidence, user-written reasons, actor identifiers, and order IDs. Localize coded labels rather than original text.
+
+- [ ] Use approved terms and localized timestamps without changing stored instants; confirmation must not imply independently verified payment.
+
+- [ ] Switch during drafts, selected outcomes, confirmation dialogs, pending requests, and failures without losing state or repeating mutations. Extend rendered journeys and request/replay tests in both locales, retaining lifecycle/privacy assertions.
+
+- [ ] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details.
+
+- [ ] Run focused repository tests for changed behavior, then root npm run check as the final pre-handoff gate. Record changed paths, exact results, and failed/blocked/unrun browser or provider acceptance in the existing task record. Mocks and HTTP smoke do not prove live acceptance.

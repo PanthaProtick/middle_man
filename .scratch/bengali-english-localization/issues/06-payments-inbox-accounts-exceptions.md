@@ -1,33 +1,23 @@
-# 06: Payments inbox, accounts, matching, and exceptions
+# 06: Receiving accounts and payment matching
 
-**What to build:** Localize receiving accounts, payment inbox, manual transaction
-entry, payment exception review, and related enum/error presentation.
+**What to build:** Configure receiving accounts, record payments, and resolve matching exceptions in either language without overstating payment certainty.
 
-**Blocked by:** 01
+**Blocked by:** 01 — Language switching and buyer order summary
 
-**Status:** ready
+**Status:** ready-for-agent
 
-- [ ] Localize `PaymentsSection`, `AccountsSection`, `AddAccountForm`,
-      `PaymentAccountList`, `TransactionInbox`, `TransactionCard`,
-      `ManualTransactionModal`, `PaymentException`, and `paymentDecisions.ts`
-      display copy.
-- [ ] Cover account add/edit states, provider labels, receiving number guidance,
-      empty/loading/error states, transaction filters, unmatched/conflicting/used
-      states, manual receipt entry, amounts/dates, approval previews, exception
-      blockers, retry, and success/failure feedback.
-- [ ] Preserve glossary meaning. Buyer payment proof remains a claim; manual
-      approval/matching does not claim independent provider verification. Do not
-      weaken amount, sender, account, time, single-use, or unresolved-evidence
-      gates.
-- [ ] Keep provider names, account numbers, TrxID values, SMS evidence, and opaque
-      identifiers verbatim. Stable codes become localized labels with an unknown-
-      code fallback.
-- [ ] Bengali digits are accepted at numeric boundaries and normalized; displayed
-      money uses 0-9 digits and the shared money formatter. Preserve monetary
-      precision and validation semantics.
-- [ ] Switching language preserves filters, draft receipt values, pending
-      approval, failed-operation state, and loaded evidence; no payment mutation or
-      repeated approval is sent.
-- [ ] Extend payments/accounts/exception tests for both locales, preserved values,
-      code fallbacks, formatting, and no repeated mutation on switch.
-- [ ] Focused `npm run test:frontend` passes for these suites.
+- [ ] Translate receiving-account setup/lists, transaction inbox/filtering, manual entry, matching previews, exception blockers, loading/empty/progress, and success/failure/retry.
+
+- [ ] Localize stable account/payment/exception reasons and server validation codes, adding narrow presentation metadata only where needed; unknown errors receive safe guidance.
+
+- [ ] Preserve amount/sender/account/time/single-use/unresolved-evidence checks and authorization. Matching or manual acceptance must not imply independent provider verification.
+
+- [ ] Preserve account labels, providers, phone/account numbers, TrxIDs, SMS evidence, and user text. Normalize Bengali digits only at numeric boundaries; retain precision.
+
+- [ ] Switch with account/receipt drafts, filters, loaded evidence, pending approval, or failed decisions without losing state or repeating account/payment mutations.
+
+- [ ] Extend rendered account/inbox/exception journeys and relevant request tests in both locales for valid/invalid input, conflicts, unmatched records, unknown codes, retained data, and no duplicate acceptance.
+
+- [ ] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details.
+
+- [ ] Run focused repository tests for changed behavior, then root npm run check as the final pre-handoff gate. Record changed paths, exact results, and failed/blocked/unrun browser or provider acceptance in the existing task record. Mocks and HTTP smoke do not prove live acceptance.
