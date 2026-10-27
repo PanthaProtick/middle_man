@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { act } from 'react';
+import { act, StrictMode } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { OrderList } from './OrderList';
 import { OrderDetailModal } from './OrderDetailModal';
@@ -94,6 +94,32 @@ describe('Order Reconciliation and Review UI', () => {
     container.remove();
     if (originalClipboard) Object.defineProperty(navigator, 'clipboard', originalClipboard);
     else Reflect.deleteProperty(navigator, 'clipboard');
+  });
+
+  it('opens a labelled modal with focus on its named close control', async () => {
+    await act(async () => root.render(<OrderDetailModal order={confirmedOrder} onClose={vi.fn()} />));
+    const dialog = container.querySelector('dialog');
+    expect(dialog?.open).toBe(true);
+    expect(document.getElementById(dialog!.getAttribute('aria-labelledby')!)?.textContent).toBe('Order & Link Details');
+    const close = dialog!.querySelector<HTMLButtonElement>('button[aria-label="Close order details"]');
+    expect(close).not.toBeNull();
+    expect(document.activeElement).toBe(close);
+  });
+
+  it.each(['cancel', 'icon', 'footer'])('dismisses via %s and returns focus to Inspect', async method => {
+    await act(async () => root.render(<StrictMode><OrderList orders={[confirmedOrder]}
+      statusFilter="" onFilterChange={() => {}} nextCursor={null} onLoadMore={() => {}} /></StrictMode>));
+    const inspect = Array.from(container.querySelectorAll('button')).find(button => button.textContent === 'Inspect')!;
+    inspect.focus();
+    await act(async () => inspect.click());
+    const dialog = container.querySelector('dialog')!;
+    await act(async () => {
+      if (method === 'cancel') dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
+      else if (method === 'icon') dialog.querySelector<HTMLButtonElement>('[aria-label="Close order details"]')!.click();
+      else Array.from(dialog.querySelectorAll('button')).find(button => button.textContent === 'Close')!.click();
+    });
+    expect(container.querySelector('dialog')).toBeNull();
+    expect(document.activeElement).toBe(inspect);
   });
 
   it('renders confirmed order in OrderList with Confirmed badge and Actual COD', async () => {

@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
+import './OrderDetailModal.css';
 import { X, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
 import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { SellerOrder } from './types';
@@ -25,28 +26,33 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
   const [order, setOrder] = useState(initialOrder);
   const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(null);
   const [showReviewCodes, setShowReviewCodes] = useState(false);
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    const opener = document.activeElement;
+    const dialog = dialogRef.current!;
+    dialog.showModal();
+    closeRef.current?.focus();
+    return () => {
+      dialog.close();
+      if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
+    };
+  }, []);
   const isExpired = order.lifecycle === 'expired';
   const isConfirmed = order.lifecycle === 'confirmed';
   const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '16px',
-      }}
-    >
-      <div
-        className="card"
+      <dialog
+        ref={dialogRef}
+        aria-labelledby={titleId}
+        onCancel={event => { event.preventDefault(); onClose(); }}
+        className="card order-detail-dialog"
         style={{
-          width: '100%',
+          width: 'calc(100% - 32px)',
           maxWidth: '560px',
+          margin: 'auto',
           background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)',
           borderRadius: '12px',
@@ -59,9 +65,12 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Package size={20} color="var(--primary-accent)" />
-            <h3 style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)' }}>Order & Link Details</h3>
+            <h3 id={titleId} style={{ margin: 0, fontSize: '1.15rem', color: 'var(--text-primary)' }}>Order & Link Details</h3>
           </div>
           <button
+            ref={closeRef}
+            type="button"
+            aria-label="Close order details"
             onClick={onClose}
             style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
           >
@@ -252,7 +261,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
             Close
           </button>
         </div>
-      </div>
-    </div>
+      </dialog>
   );
 }
