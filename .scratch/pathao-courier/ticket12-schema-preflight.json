@@ -1,0 +1,24 @@
+{
+  "status": "READ_ONLY_PREFLIGHT",
+  "recorded_development_target_matches": true,
+  "identity": {
+    "database": "neondb",
+    "schema": "public",
+    "recovery": false
+  },
+  "pending_tables": [
+    "courier_attempts",
+    "courier_reconciliations"
+  ],
+  "draft_columns": [
+    "order_id",
+    "created_at",
+    "parcel_weight_grams",
+    "parcel_quantity",
+    "version",
+    "review_choices",
+    "reviewed_token"
+  ],
+  "order_count": 12,
+  "applied": false
+}

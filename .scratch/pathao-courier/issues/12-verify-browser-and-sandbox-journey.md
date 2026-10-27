@@ -121,3 +121,30 @@
 - Independent review of this evidence update: Standards 0 findings; Spec 0 findings.
   Both reviews confirm this is a partial checkpoint, not full Ticket 12 acceptance.
   `git diff --check` passed. No TDD slice was needed because no source behavior changed.
+
+## Approved local-policy attempt — 2026-10-27
+
+- Owner confirmed no verified sandbox account/store yet and approved enabling
+  self_test_link_possession for local acceptance. Sandbox acceptance remains BLOCKED.
+- Started the existing root backend wrapper with session-only SELF_TEST_MODE=true
+  and PUBLIC_BUYER_ACCESS_POLICY=self_test_link_possession. No environment files,
+  application sources or authentication requirements were changed.
+- Startup FAILED closed: the configured database lacks courier_attempts and
+  courier_reconciliations. The previous API ran with SELF_TEST_MODE=false, so it
+  did not enforce this startup inventory. Buyer access was not successfully enabled.
+- Read-only preflight confirmed the recorded Neon development endpoint matches,
+  database neondb, schema public, writable primary; exactly those two expected
+  tables are missing. Twelve orders currently exist. Safe result artifact:
+  ticket12-schema-preflight.json. No database mutation was attempted.
+- Existing migrations 0024_courier_submissions.sql and
+  0025_courier_reconciliation.sql supply the missing schema. Requested approval
+  to apply these exact migrations transactionally and verify preservation because
+  this remote schema mutation exceeds the approved local configuration action.
+- Restored the backend wrapper with SELF_TEST_MODE=false while approval is pending;
+  startup completed and GET /api/health returned healthy. No memory fallback or
+  successful buyer submission is claimed. No root check repeated for this operational
+  investigation; the prior checkpoint's automated results remain the latest gates.
+- Next: on migration approval, apply exact 0024/0025 to the verified development
+  target with bounded locks/timeouts and preservation checks, restart self-test
+  mode, then resume the synthetic order's buyer/seller browser journey. Do not
+  attempt actual sandbox booking without verified account/store access.
