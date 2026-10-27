@@ -20,7 +20,7 @@ describe('AddAccountForm', () => {
     vi.restoreAllMocks();
   });
 
-  it('renders provider select and receiving number input with proper styles and placeholders', () => {
+  it('renders provider select and inputs with accessible labels and options', () => {
     const root = createRoot(container);
     act(() => {
       root.render(
@@ -32,20 +32,26 @@ describe('AddAccountForm', () => {
       );
     });
 
-    const select = container.querySelector('select');
+    const select = container.querySelector<HTMLSelectElement>('select[aria-label="Payment provider"]');
     expect(select).not.toBeNull();
     expect(select?.value).toBe('bkash');
-    expect(select?.style.width).toBe('120px');
+    const options = Array.from(select?.options ?? []).map((o) => ({ value: o.value, text: o.text }));
+    expect(options).toEqual([
+      { value: 'bkash', text: 'bKash' },
+      { value: 'nagad', text: 'Nagad' },
+    ]);
 
-    const inputs = container.querySelectorAll('input');
-    expect(inputs.length).toBe(2);
+    const receivingInput = container.querySelector<HTMLInputElement>('input[aria-label="Receiving number"]');
+    expect(receivingInput).not.toBeNull();
+    expect(receivingInput?.placeholder).toContain('Receiving Number');
 
-    const receivingInput = inputs[0];
-    expect(receivingInput.placeholder).toContain('Receiving Number');
-    expect(receivingInput.style.flexGrow).toBe('1');
+    const labelInput = container.querySelector<HTMLInputElement>('input[aria-label="Account label"]');
+    expect(labelInput).not.toBeNull();
+    expect(labelInput?.placeholder).toContain('Label');
 
-    const labelInput = inputs[1];
-    expect(labelInput.placeholder).toContain('Label');
+    const submitButton = container.querySelector<HTMLButtonElement>('button[type="submit"]');
+    expect(submitButton).not.toBeNull();
+    expect(submitButton?.textContent).toContain('Add Account');
   });
 
   it('submits form successfully when valid data is entered', async () => {
@@ -76,12 +82,13 @@ describe('AddAccountForm', () => {
       );
     });
 
-    const inputs = container.querySelectorAll('input');
+    const receivingInput = container.querySelector<HTMLInputElement>('input[aria-label="Receiving number"]')!;
+    const labelInput = container.querySelector<HTMLInputElement>('input[aria-label="Account label"]')!;
     const form = container.querySelector('form');
 
     act(() => {
-      setInputValue(inputs[0], '01700000001');
-      setInputValue(inputs[1], 'Main bKash');
+      setInputValue(receivingInput, '01700000001');
+      setInputValue(labelInput, 'Main bKash');
     });
 
     await act(async () => {

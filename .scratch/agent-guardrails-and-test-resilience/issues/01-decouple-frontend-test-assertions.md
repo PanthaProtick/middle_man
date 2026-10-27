@@ -4,9 +4,9 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** complete
 
-- [ ] Payment account form tests verify provider selection and input values using accessible labels and element roles rather than checking literal inline style properties.
-- [ ] Order creation parcel validation tests query required inputs, validation feedback, and submission behavior using accessible attributes rather than internal container hierarchy.
-- [ ] All existing functional validations (required field errors, valid submissions, callback dispatches) remain thoroughly asserted and pass.
-- [ ] Focused frontend tests execute and pass cleanly in offline environments.
+- [x] Payment account form tests verify provider selection and input values using accessible labels and element roles rather than checking literal inline style properties.
+- [x] Order creation parcel validation tests query required inputs, validation feedback, and submission behavior using accessible attributes rather than internal container hierarchy.
+- [x] All existing functional validations (required field errors, valid submissions, callback dispatches) remain thoroughly asserted and pass.
+- [x] Focused frontend tests execute and pass cleanly in offline environments.

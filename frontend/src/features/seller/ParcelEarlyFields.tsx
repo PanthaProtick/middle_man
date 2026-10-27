@@ -51,6 +51,7 @@ export function ParcelEarlyFields({
             id="parcel-weight-kg"
             type="number"
             name="parcelWeightKg"
+            aria-label="Weight (kg)"
             placeholder="e.g. 1.5"
             min="0.001"
             max={MAX_PARCEL_WEIGHT_GRAMS / 1000}
@@ -72,6 +73,7 @@ export function ParcelEarlyFields({
             id="parcel-quantity"
             type="number"
             name="parcelQuantity"
+            aria-label="Quantity"
             placeholder="e.g. 2"
             min="1"
             max={MAX_PARCEL_QUANTITY}

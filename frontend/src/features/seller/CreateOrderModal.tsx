@@ -119,16 +119,9 @@ export function CreateOrderModal({
     <div
       role="presentation"
       style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '16px',
+        position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px',
       }}
     >
       <div
@@ -137,12 +130,8 @@ export function CreateOrderModal({
         aria-modal="true"
         aria-labelledby="create-order-dialog-title"
         style={{
-          width: '100%',
-          maxWidth: '520px',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: '16px',
-          padding: '24px',
+          width: '100%', maxWidth: '520px', background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '24px',
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
@@ -175,10 +164,12 @@ export function CreateOrderModal({
         ) : (
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              <label htmlFor="create-order-product-name" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                 Product Name / Agreed Items
               </label>
               <input
+                id="create-order-product-name"
+                aria-label="Product Name / Agreed Items"
                 type="text"
                 ref={productInputRef}
                 name="productName"
@@ -192,10 +183,12 @@ export function CreateOrderModal({
 
             <div className="form-grid-2">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                <label htmlFor="create-order-total-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Total Agreed Price (BDT)
                 </label>
                 <input
+                  id="create-order-total-bdt"
+                  aria-label="Total Agreed Price (BDT)"
                   type="number"
                   name="totalBdt"
                   placeholder="e.g. 2500"
@@ -209,10 +202,12 @@ export function CreateOrderModal({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                <label htmlFor="create-order-advance-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Required Advance (BDT)
                 </label>
                 <input
+                  id="create-order-advance-bdt"
+                  aria-label="Required Advance (BDT)"
                   type="number"
                   name="advanceBdt"
                   placeholder="e.g. 300"
@@ -258,10 +253,12 @@ export function CreateOrderModal({
             />
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              <label htmlFor="create-order-payment-account-id" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                 Receiving Payment Account (Fixed Snapshot)
               </label>
               <select
+                id="create-order-payment-account-id"
+                aria-label="Receiving Payment Account (Fixed Snapshot)"
                 name="paymentAccountId"
                 value={selectedAccountId}
                 onChange={(e) => setSelectedAccountId(e.target.value)}
