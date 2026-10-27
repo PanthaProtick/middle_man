@@ -210,9 +210,12 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
               Local cancellation does not cancel the courier booking in Pathao. You must resolve or cancel the booking directly in Pathao.
             </div>
           )}
+          {isAllocated && courierAttemptStatus == null && <p role="alert">
+            Courier booking status is unavailable. Local cancellation does not cancel a Pathao booking. Check and resolve any booking directly in Pathao.
+          </p>}
           {courierAttemptStatus === 'unsubmitted' && (
             <div role="note" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'var(--bg-surface)', padding: '6px 8px', borderRadius: '4px' }}>
-              Cancellation prevents courier draft submission. No booking exists in Pathao.
+              Cancellation prevents courier draft submission. No local courier attempt is recorded; check Pathao for bookings created elsewhere.
             </div>
           )}
           <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for cancellation (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />

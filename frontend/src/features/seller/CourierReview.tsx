@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestJson } from './api';
-import type { ParcelRevision, Review, ReviewChoices } from './courierReviewTypes';
+import type { CourierAttemptStatus, ParcelRevision, Review, ReviewChoices } from './courierReviewTypes';
 import { CourierReconciliation } from './CourierReconciliation';
 import { CourierReviewLocations } from './CourierReviewLocations';
 
@@ -15,14 +15,17 @@ const blockerLabels: Record<string, string> = {
   ORDER_NOT_CONFIRMED: 'This order is no longer confirmed.',
 };
 
-export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onReviewLoaded }: {
+export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onReviewLoaded, onAttemptStatusChanged }: {
   orderId: string; token: string; refresh?: number; onChoicesSaved?: (parcel: ParcelRevision) => void;
   onReviewLoaded?: (review: Review) => void;
+  onAttemptStatusChanged?: (status: CourierAttemptStatus | null) => void;
 }) {
   const identity = `${orderId}:${token}:${refresh}`;
   const currentIdentity = useRef(identity);
   const onReviewLoadedRef = useRef(onReviewLoaded);
   useEffect(() => { onReviewLoadedRef.current = onReviewLoaded; }, [onReviewLoaded]);
+  const statusCallback = useRef(onAttemptStatusChanged);
+  useEffect(() => { statusCallback.current = onAttemptStatusChanged; }, [onAttemptStatusChanged]);
   const generation = useRef(0);
   useEffect(() => { currentIdentity.current = identity; generation.current += 1; }, [identity]);
   const [attempt, setAttempt] = useState(0);
@@ -33,11 +36,13 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
   const path = `/api/seller/orders/${orderId}/courier-review`;
   useEffect(() => {
     let active = true;
+    statusCallback.current?.(null);
     requestJson<Review>(path, {}, token).then(review => {
       if (active) {
         setState({ identity, review });
         setEditing({ identity, choices: review.choices });
         onReviewLoadedRef.current?.(review);
+        statusCallback.current?.(review.latest_attempt?.status ?? 'unsubmitted');
       }
     }).catch(() => { if (active) setState({ identity, error: 'Review unavailable. Reload current details.' }); });
     return () => { active = false; generation.current += 1; };
@@ -57,6 +62,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
       if (currentIdentity.current !== identity || generation.current !== requestGeneration) return;
       setState({ identity, review: updated }); setEditing({ identity, choices: updated.choices });
       onReviewLoadedRef.current?.(updated);
+      statusCallback.current?.(updated.latest_attempt?.status ?? 'unsubmitted');
       if (method === 'PUT') onChoicesSaved?.(updated.draft);
     } catch {
       if (currentIdentity.current === identity && generation.current === requestGeneration) {
@@ -69,6 +75,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
 
   const submitBooking = async () => {
     if (!review || busy || !review.submission_enabled) return;
+    statusCallback.current?.('submitting');
     const requestGeneration = generation.current;
     setBusy(identity);
     try {
@@ -85,14 +92,19 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
       setState({ identity, review: updated });
       setEditing({ identity, choices: updated.choices });
       onReviewLoadedRef.current?.(updated);
+      statusCallback.current?.(updated.latest_attempt?.status ?? 'unsubmitted');
     } catch (err: unknown) {
       if (currentIdentity.current === identity && generation.current === requestGeneration) {
         const errorObj = err as { message?: string };
         const msg = errorObj?.message || 'Submission could not be completed. Reload current details.';
         setState({ identity, error: msg });
+        statusCallback.current?.('unknown');
         requestJson<Review>(path, {}, token).then(refreshed => {
           if (currentIdentity.current === identity && generation.current === requestGeneration) {
             setState({ identity, review: refreshed, error: msg });
+            setEditing({ identity, choices: refreshed.choices });
+            onReviewLoadedRef.current?.(refreshed);
+            statusCallback.current?.(refreshed.latest_attempt?.status ?? 'unsubmitted');
           }
         }).catch(() => {});
       }
@@ -191,6 +203,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
               setState({ identity, review: updated });
               setEditing({ identity, choices: updated.choices });
               onReviewLoadedRef.current?.(updated);
+              statusCallback.current?.(updated.latest_attempt?.status ?? 'unsubmitted');
             }} />
         </div>
       )}

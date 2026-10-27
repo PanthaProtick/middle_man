@@ -6,127 +6,12 @@ import { BuyerCorrection } from './BuyerCorrection';
 import { OrderOutcomes } from './OrderOutcomes';
 import type { Review } from './courierReviewTypes';
 import type { SellerOrder } from './types';
+import { baseReview, mockOrder } from './courierPostSubmissionTestData';
 
 afterEach(() => {
   vi.restoreAllMocks();
   document.body.innerHTML = '';
 });
-
-const baseReview: Review = {
-  token: 'f'.repeat(64),
-  reviewed: true,
-  submission_enabled: false,
-  choices: {
-    environment: 'offline',
-    store_id: 10,
-    delivery_type: 48,
-    location: { city_id: 1, zone_id: 2, area_id: 3 },
-  },
-  connection: {
-    environment: 'offline',
-    version: 1,
-    status: 'connected',
-    merchant_hint: 'Simulated merchant',
-    simulated: true,
-    production_booking_enabled: false,
-    default_store_id: 10,
-    default_delivery_type: 48,
-  },
-  stores: [{ id: 10, name: 'Default Store' }],
-  location: { city_name: 'Dhaka', zone_name: 'Uttara', area_name: 'Sector 3' },
-  blockers: [],
-  draft: {
-    version: 2,
-    recipient_name: 'Updated Buyer',
-    contact_number: '01922222222',
-    address: 'Updated Address 789',
-    parcel_weight_grams: 1200,
-    parcel_quantity: 2,
-    remaining_cod_minor: 500000,
-  },
-  latest_attempt: {
-    id: 'attempt-1',
-    order_id: 'order-1',
-    attempt_number: 1,
-    status: 'success',
-    environment: 'offline',
-    simulated: true,
-    reviewed_token: 'f'.repeat(64),
-    correlation_id: 'corr-1',
-    consignment_id: 'SIM-PATHAO-12345',
-    booking_snapshot: {
-      order_id: 'order-1',
-      recipient_name: 'Original Buyer',
-      recipient_phone: '01711111111',
-      recipient_address: 'Original Address 123',
-      city_id: 1,
-      zone_id: 2,
-      area_id: 3,
-      store_id: 10,
-      delivery_type: 48,
-      item_weight_grams: 1200,
-      item_quantity: 2,
-      amount_to_collect_bdt: 5000,
-      remaining_cod_minor: 500000,
-    },
-    error_code: null,
-    error_message: null,
-    resolution_version: 0,
-    resolution_action: null,
-    resolved_at: null,
-    created_at: '2026-10-27T00:00:00Z',
-    updated_at: '2026-10-27T00:00:00Z',
-  },
-  delivery_mismatch: {
-    mismatch: true,
-    cancelled: false,
-    recipient_name_changed: true,
-    contact_number_changed: true,
-    address_changed: true,
-    changed_fields: ['recipient_name', 'contact_number', 'address'],
-    booked_snapshot: {
-      order_id: 'order-1',
-      recipient_name: 'Original Buyer',
-      recipient_phone: '01711111111',
-      recipient_address: 'Original Address 123',
-      city_id: 1,
-      zone_id: 2,
-      area_id: 3,
-      store_id: 10,
-      delivery_type: 48,
-      item_weight_grams: 1200,
-      item_quantity: 2,
-      amount_to_collect_bdt: 5000,
-      remaining_cod_minor: 500000,
-    },
-    message: 'Delivery details were updated locally after courier submission (recipient name, contact number, delivery address). Local changes do not update the Pathao booking. Resolve or update the booking directly in Pathao.',
-  },
-};
-
-const mockOrder: SellerOrder = {
-  id: 'order-1',
-  shop_id: 'shop-1',
-  payment_account_id: 'acc-1',
-  product_name: 'Premium Leather Bag',
-  total_minor: 600000,
-  required_advance_minor: 100000,
-  expected_cod_minor: 500000,
-  actual_cod_minor: 500000,
-  account_provider: 'bkash',
-  account_receiving_number: '01700000000',
-  account_label: 'Main bKash',
-  lifecycle: 'confirmed',
-  version: 3,
-  review_reasons: [],
-  buyer_revision: 2,
-  allocation_basis: 'automatic',
-  portal_token: 'token-123',
-  portal_url: '/orders/token-123',
-  created_at: '2026-10-26T00:00:00Z',
-  updated_at: '2026-10-27T00:00:00Z',
-  expires_at: '2026-10-28T00:00:00Z',
-  completed_at: null,
-};
 
 it('CourierReview displays delivery mismatch warning and original booked snapshot', async () => {
   vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify(baseReview)));
@@ -276,7 +161,7 @@ it('OrderOutcomes shows draft cancellation notice when order is not yet booked',
     cancelBtn.click();
   });
 
-  expect(container.textContent).toContain('Cancellation prevents courier draft submission. No booking exists in Pathao.');
+  expect(container.textContent).toContain('Cancellation prevents courier draft submission. No local courier attempt is recorded; check Pathao for bookings created elsewhere.');
 
   await act(async () => root.unmount());
 });

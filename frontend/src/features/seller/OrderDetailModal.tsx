@@ -23,9 +23,7 @@ interface OrderDetailModalProps {
 
 export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected }: OrderDetailModalProps): React.JSX.Element {
   const [order, setOrder] = useState(initialOrder);
-  const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(
-    initialOrder.lifecycle === 'confirmed' && initialOrder.allocation_basis ? 'unsubmitted' : null
-  );
+  const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(null);
   const [showReviewCodes, setShowReviewCodes] = useState(false);
   const isExpired = order.lifecycle === 'expired';
   const isConfirmed = order.lifecycle === 'confirmed';
@@ -212,7 +210,7 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         <DeveloperDetailsPanel order={order} />
 
         {token && (isConfirmed || order.lifecycle === 'cancelled') && order.allocation_basis &&
-          <CourierWorkspace key={`courier-${order.id}-${order.version}-${token}`} orderId={order.id} token={token} onReviewLoaded={(rev) => setCourierAttemptStatus(rev.latest_attempt?.status ?? 'unsubmitted')} />}
+          <CourierWorkspace key={`courier-${order.id}-${order.version}-${token}`} orderId={order.id} token={token} onAttemptStatusChanged={setCourierAttemptStatus} />}
         {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
         {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
           onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}

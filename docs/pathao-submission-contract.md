@@ -10,7 +10,9 @@ is unavailable and rejected server-side.
 - Accepts JSON payload `expected_token` matching the 64-hex SHA-256 review fingerprint.
 - Returns `CourierReview` containing `latest_attempt` (status, simulated consignment,
   booking snapshot, error information).
-- Same-key replay returns the cached status and payload. Different idempotency keys or
+- Same-key replay preserves the committed operation receipt and returns the current
+  authorized review, including later delivery changes and cancellation warnings. It never
+  submits again. Different idempotency keys or
   repeated clicks cannot bypass an existing in-flight, unknown, or booked attempt.
 
 ## Reservation and transaction boundaries
@@ -62,12 +64,15 @@ Seller-only `POST /api/seller/orders/{id}/courier-reconciliation` resolves one p
   `courier_reconciliations` row (actor, action, timestamp, resulting state, and non-secret
   reference/evidence fields). Other attempts for the order are untouched.
 - Stale versions return `409 STALE_VERSION`; an already-resolved attempt returns
-  `409 ATTEMPT_NOT_RECONCILABLE`. Same-key replay returns the stored review. Competing
+  `409 ATTEMPT_NOT_RECONCILABLE`. Same-key replay returns the current authorized review
+  without applying the resolution again. Competing
   operators serialize on the order/shop/attempt locks, so only one resolution is recorded.
   The attempt, audit, and idempotency receipt commit together. Review rendering happens
   after releasing locks; if it fails, the same key resumes rendering from the committed
   receipt without applying another resolution. The first successfully persisted review
-  is the replay snapshot, including when simultaneous requests render it. Reusing the
+  is retained as the operation receipt, including when simultaneous requests render it.
+  Replays project current facts so a later local change or newer attempt cannot be hidden
+  by a historical response. Reusing the
   key with different input returns `409 IDEMPOTENCY_KEY_REUSED`. The seller UI retains
   the key when retrying the same action and evidence after an interrupted response.
 - A confirmed noncreation permits a new attempt only after the normal reservation rechecks

@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { CourierDraft } from './CourierDraft';
 import { CourierReview } from './CourierReview';
-import type { ParcelRevision, Review } from './courierReviewTypes';
+import type { CourierAttemptStatus, ParcelRevision } from './courierReviewTypes';
 
-export function CourierWorkspace({ orderId, token, onReviewLoaded }: {
+export function CourierWorkspace({ orderId, token, onAttemptStatusChanged }: {
   orderId: string;
   token: string;
-  onReviewLoaded?: (review: Review) => void;
+  onAttemptStatusChanged?: (status: CourierAttemptStatus | null) => void;
 }) {
   const [refresh, setRefresh] = useState(0);
   const [choicesSavedParcel, setChoicesSavedParcel] = useState<ParcelRevision>();
@@ -14,6 +14,6 @@ export function CourierWorkspace({ orderId, token, onReviewLoaded }: {
     <CourierDraft orderId={orderId} token={token} reviewManaged choicesSavedParcel={choicesSavedParcel}
       onSaved={() => setRefresh(value => value + 1)} />
     <CourierReview orderId={orderId} token={token} refresh={refresh} onChoicesSaved={setChoicesSavedParcel}
-      onReviewLoaded={onReviewLoaded} />
+      onAttemptStatusChanged={onAttemptStatusChanged} />
   </>;
 }

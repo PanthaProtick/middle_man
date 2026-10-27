@@ -64,10 +64,14 @@ Successful resolution preserves the attempt's reviewed snapshot, increments
 `resolution_version`, and appends a `courier_reconciliations` audit row containing
 the actor, action, timestamp, resulting status, and safe evidence references. An
 existing consignment cannot be attached to another order. Stale versions and
-already-resolved attempts return conflicts; same-key replay returns the stored
-response. The resolution, audit, and replay receipt commit atomically. If review
+already-resolved attempts return conflicts; same-key replay returns the current
+authorized review, including later local changes, without repeating the resolution.
+The resolution, audit, and replay receipt commit atomically. If review
 rendering fails after commit, the same key resumes it; concurrent renders preserve
-the first saved response. Different input with the same key returns
+the first saved response as the operation receipt. Submission retries also project
+the current authorized review without repeating booking. Rendering a replay can fail
+if current facts or metadata are unavailable; the committed operation remains intact.
+Different input with the same key returns
 `409 IDEMPOTENCY_KEY_REUSED`. The retry path is the normal submission reservation, which revalidates
 lifecycle, review freshness, connection, address, and parcel details. Full details
 are in [the submission contract](pathao-submission-contract.md).

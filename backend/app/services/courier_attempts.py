@@ -122,7 +122,7 @@ async def execute_submission(
     hashed = compute_payload_hash({'expected_token': expected_token})
     cached = await check_idempotency_record(db, key, scope, 'courier_submission', hashed)
     if cached:
-        return CourierReview.model_validate(cached[1])
+        return await courier_review.read(db, shop, order_id)
 
     attempt, snapshot = await reserve_attempt(db, shop, order_id, expected_token)
 

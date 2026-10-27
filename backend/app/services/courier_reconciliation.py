@@ -8,7 +8,7 @@ from app.models.courier_reconciliation import CourierReconciliationInput
 from app.models.courier_review import CourierReview
 from app.models.courier_submission import CourierAttemptTable, CourierAttemptView, to_attempt_view
 from app.models.entities import OrderTable, ShopTable
-from app.services import pathao_provider
+from app.services import courier_review, pathao_provider
 from app.services.courier_reconciliation_replay import ReconciliationReplay
 from app.services.courier_reconciliation_resolution import (
     _apply,
@@ -146,7 +146,7 @@ async def execute(
     )
     cached = await replay.read(db)
     if isinstance(cached, CourierReview):
-        return cached
+        return await courier_review.read(db, shop, order_id)
     if cached is not None:
         return await replay.respond(db, shop, order_id)
 
@@ -156,7 +156,9 @@ async def execute(
     if db is not None:
         await db.commit()
     if cached is not None:
-        return cached if isinstance(cached, CourierReview) else await replay.respond(db, shop, order_id)
+        if isinstance(cached, CourierReview):
+            return await courier_review.read(db, shop, order_id)
+        return await replay.respond(db, shop, order_id)
     _assert_reconcilable(attempt, payload.expected_version)
 
     evidence = None
@@ -168,7 +170,9 @@ async def execute(
     if cached is not None:
         if db is not None:
             await db.commit()
-        return cached if isinstance(cached, CourierReview) else await replay.respond(db, shop, order_id)
+        if isinstance(cached, CourierReview):
+            return await courier_review.read(db, shop, order_id)
+        return await replay.respond(db, shop, order_id)
     _assert_reconcilable(locked, payload.expected_version)
     if evidence is not None:
         await _assert_consignment_unused(db, evidence.consignment_id)
