@@ -208,3 +208,31 @@
 - Independent Standards review: 0 findings. Independent Spec review: 0 findings.
   No application code changed and no new TDD slice was needed. Ticket 12 remains
   incomplete; continue after owner switches the in-app seller session to Shop A.
+
+## Seller location selection delay — 2026-10-27
+
+- Owner's manual walkthrough established production account connection, store
+  listing and saved store recovery after selecting Production again. The settings
+  environment selector resets to Offline on mount; that is distinct from loss of
+  saved production defaults. Production booking remains disabled; no sandbox
+  acceptance or production booking was performed.
+- Reported bug: selecting city/zone takes time to appear. Deterministic component
+  reproduction delayed the zones response after choosing city 1; the control
+  displayed an empty value instead of 1. Initial focused test failed at that exact
+  assertion. Existing code discarded all lists on each city/zone selection and
+  refetched cities, zones and areas sequentially before publishing any result.
+- CourierReviewLocations now gives each catalog level an independent request.
+  Parent lists and selected values remain visible while the child loads; no city
+  refetch on zone selection, no catalog fetch on area selection. Initial selected
+  hierarchies can load independently. Child controls expose loading status and
+  aria-busy. Superseded/unmounted requests are aborted and late results ignored;
+  failures retain valid parent choices with the existing reload-review recovery.
+- Changed frontend component and new CourierReviewLocations.test.tsx. Focused
+  location/review suites: 12 passed, including slow child responses, request counts,
+  stale response isolation, child clearing, abort and failure behavior. Typecheck
+  passed. This fixes UI feedback and request waterfalls; it does not claim faster
+  live Pathao responses. Browser/live provider timing retest remains pending.
+- Final npm run check PASS: .cache/checks/check-DalOh0/result.json; 520 backend
+  passed, 180 PostgreSQL skipped; 213 frontend passed; all eight stages passed.
+  Independent Standards and Spec reviews: 0 findings. No live provider timing
+  improvement or completed browser retest is claimed by these automated gates.
