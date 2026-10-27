@@ -21,7 +21,7 @@ The ui-ux-pro-max design-system search initially suggested a marketplace pattern
 - One seller navigation set: orders, received payments/SMS, receiving accounts and retention. Diagnostic tools remain secondary, with a return-to-shop control.
 - Explain the sequence: share a link, collect buyer/payment details, review and deliver.
 - Keep order creation primary and payment recording secondary; preserve correction, exception and retention capabilities.
-- Retain English/Bangla buyer labels and the existing manual submission path. Full seller localization needs separate language research and is not claimed here.
+- Current behavior retains English/Bangla buyer labels and the existing manual submission path. The [Bengali/English design](../tasks/bengali-english-localization-design.md) plans selected-language buyer and seller interfaces; this replacement is not implemented yet.
 - Keep advance and remaining COD visible; replace unsupported secure/official-account language with seller-account wording. Seller acceptance does not imply provider verification.
 - Label page-derived metrics as loaded records rather than claiming shop-wide totals from a filtered, paginated response.
 - At least 44px primary control targets, visible keyboard focus, reduced-motion support, 16px form controls and an accessible skip link. Light is the supported theme; no dark-mode toggle is offered.
