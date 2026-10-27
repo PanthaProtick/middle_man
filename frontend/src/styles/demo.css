@@ -99,7 +99,7 @@
 .tag-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: var(--pill-gap);
   margin-top: 12px;
 }
 

@@ -1,0 +1,18 @@
+
+> dev-template@1.0.0 test:backend
+> node scripts/workspace.mjs test:backend tests/test_courier_drafts.py::test_draft_edit_completes_fields_idempotently_without_changing_terms tests/test_courier_drafts_postgres.py::test_concurrent_confirmation_creates_one_draft tests/test_courier_submission.py::test_successful_simulated_submission_and_replay tests/test_courier_submission_postgres.py::test_postgres_submission_success_and_replay tests/test_courier_submission_postgres.py::test_postgres_simultaneous_submission_concurrency
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.7.0
+rootdir: E:\middle_man\backend
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 6 items
+
+tests\test_courier_drafts.py .                                           [ 16%]
+tests\test_courier_drafts_postgres.py ..                                 [ 50%]
+tests\test_courier_submission.py .                                       [ 66%]
+tests\test_courier_submission_postgres.py ..                             [100%]
+
+============================== 6 passed in 2.59s ==============================

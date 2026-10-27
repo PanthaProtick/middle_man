@@ -1,0 +1,21 @@
+
+> dev-template@1.0.0 test:backend
+> node scripts/workspace.mjs test:backend tests/test_courier_drafts.py::test_draft_denies_other_shop_and_buyer_and_retention_invalidates tests/test_courier_drafts.py::test_invalid_stale_and_foreign_draft_edits_never_overwrite tests/test_courier_drafts_postgres.py::test_postgres_stale_and_foreign_parcel_edits_do_not_overwrite tests/test_courier_review.py::test_review_exception_cod_and_foreign_access tests/test_courier_submission.py::test_cross_shop_submission_forbidden tests/test_pathao_connections.py::test_foreign_store_and_session_cannot_manage_connection tests/test_courier_reconciliation_evidence.py::test_cross_shop_reconciliation_is_hidden tests/test_courier_post_submission_changes.py::test_cross_shop_denial_and_replay_on_booked_order
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.7.0
+rootdir: E:\middle_man\backend
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 9 items
+
+tests\test_courier_drafts.py ..                                          [ 22%]
+tests\test_courier_drafts_postgres.py .                                  [ 33%]
+tests\test_courier_review.py ..                                          [ 55%]
+tests\test_courier_submission.py .                                       [ 66%]
+tests\test_pathao_connections.py .                                       [ 77%]
+tests\test_courier_reconciliation_evidence.py .                          [ 88%]
+tests\test_courier_post_submission_changes.py .                          [100%]
+
+============================== 9 passed in 1.01s ==============================

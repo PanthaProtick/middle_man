@@ -7,6 +7,9 @@
 - Make one testable behavior work at a time. Preserve unrelated code, comments,
   and checkout changes. Add regression tests for bugs and success/failure cases
   for changed endpoints or domain logic; keep meaningful existing assertions.
+- Decompose broad visual or architectural changes into bounded feature clusters.
+  Run focused test commands after each feature cluster before modifying subsequent
+  files or screens.
 - After two failures with the same hypothesis, gather new evidence and revise it.
   Escalate an unresolved decision with a reproducer and the remaining uncertainty.
 - Use focused tests while editing. Before completing code or tooling changes, run
@@ -33,6 +36,9 @@
 - Start with `git status --short` and scoped `rg` searches. `npm run context`
   lists source paths; `npm run context -- <file> "<file>#L10-L40"` emits bounded,
   numbered text for handoffs. Follow callers and tests before choosing an edit.
+- Navigation discipline: mandate bounded line-range queries for large files and
+  prohibit consecutive redundant reads of identical files in a single turn.
+  Establish a target inventory before inspecting leaf components.
 - Keep conventions intact; reduce retrieved material, not verification coverage.
   Read failure tails and relevant files instead of dumping lockfiles, all skills,
   generated assets, or entire logs. Never include real environment/credential files.
@@ -43,13 +49,19 @@
 ## Execution and orchestration guardrails
 
 - Subagents: Pass base commit, changed paths, and acceptance targets, then yield
-  the turn. Never run sleep timers (`schedule`) or status polling loops waiting for
-  subagents; both Codex and Antigravity resume automatically upon completion.
+  the turn. Never run sleep timers (`schedule`) or call status tools such as
+  `manage_task` and `manage_subagents` while waiting; both Codex and Antigravity wake
+  you automatically on completion.
+- Background tasks: After starting a background test or verification run, yield the
+  turn and wait for its completion event. Never poll status with tools such as
+  `manage_task` or `manage_subagents`, and never run sleep timers while waiting.
+  While the run is active, send no interim progress messages or partial summaries;
+  read the output and deliver one report once that event arrives.
 - Windows PowerShell: Use PowerShell-compatible syntax (comma-separated lists
   `file1, file2` instead of bash braces `{file1,file2}`). Write scratch Python to
   `.scratch/` with UTF-8 instead of nested inline quotes (`-c "..."`).
 - Context and diffs: Run `git diff --stat` before full diffs; scope diffs to
-  target files. Bound large reads with `npm run context` to avoid truncation.
+  target files. Bound large reads with `StartLine`/`EndLine` or `npm run context` to avoid truncation.
 - Testing tier: Use focused test commands (`npm run test:backend`,
   `npm run test:frontend`) during inner iteration; run root `npm run check` strictly
   as the final pre-handoff verification gate.

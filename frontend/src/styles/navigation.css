@@ -175,7 +175,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 12px;
+  gap: var(--pill-gap);
   margin: 24px 0 38px;
   flex-wrap: wrap;
 }

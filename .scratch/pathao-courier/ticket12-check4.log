@@ -1,0 +1,19 @@
+
+> dev-template@1.0.0 test:backend
+> node scripts/workspace.mjs test:backend tests/test_courier_review.py::test_complete_review_and_invalidate_after_parcel_change tests/test_courier_review.py::test_correction_settings_and_cancellation_invalidate_review tests/test_courier_review.py::test_unready_choices_cannot_be_approved tests/test_courier_submission.py::test_submission_rejects_stale_review_cancellation_and_unreviewed tests/test_courier_submission_failures.py::test_definitive_failure_leaves_draft_editable_and_retryable tests/test_courier_submission_postgres.py::test_postgres_definitive_failure_retryable tests/test_courier_drafts_postgres.py::test_draft_insert_failure_rolls_back_confirmation_and_retry_is_safe tests/test_courier_drafts_postgres.py::test_automatic_draft_failure_rolls_back_submission
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.7.0
+rootdir: E:\middle_man\backend
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 11 items
+
+tests\test_courier_review.py ......                                      [ 54%]
+tests\test_courier_submission.py .                                       [ 63%]
+tests\test_courier_submission_failures.py .                              [ 72%]
+tests\test_courier_submission_postgres.py .                              [ 81%]
+tests\test_courier_drafts_postgres.py ..                                 [100%]
+
+============================= 11 passed in 2.15s ==============================

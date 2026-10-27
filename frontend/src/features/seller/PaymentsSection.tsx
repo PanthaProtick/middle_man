@@ -33,12 +33,12 @@ export function PaymentsSection({
 }: PaymentsSectionProps): React.JSX.Element {
   return (
     <section aria-labelledby="section-payments-title">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+      <div className="isolated-section-header" style={{ marginBottom: '16px' }}>
         <div>
-          <h4 id="section-payments-title" style={{ color: 'var(--primary-accent)', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Smartphone size={16} /> Received Payments Inbox
+          <h4 id="section-payments-title" className="isolated-section-title">
+            <Smartphone size={18} /> Received Payments Inbox
           </h4>
-          <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '2px 0 0' }}>
+          <p className="isolated-section-desc">
             Paste bKash, Nagad, or Rocket SMS to automatically extract transactions and resolve pending buyer orders.
           </p>
         </div>

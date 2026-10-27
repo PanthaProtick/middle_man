@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { RefreshCw, Search, SlidersHorizontal } from 'lucide-react';
+import { RefreshCw, Search, SlidersHorizontal, ReceiptText } from 'lucide-react';
 import type { PaymentAccount, ReceiptView } from './types';
 import { EvidenceResolution } from './EvidenceResolution';
 import { TransactionCard } from './TransactionCard';
@@ -36,7 +36,21 @@ export function TransactionInbox({
   };
 
   return (
-    <div>
+    <div className="isolated-section">
+      <div className="isolated-section-header">
+        <div>
+          <h4 className="isolated-section-title">
+            <ReceiptText size={18} /> Transaction Ledger &amp; Observations
+          </h4>
+          <p className="isolated-section-desc">
+            Received payment SMS extractions, manual payment records, and reconciliation history.
+          </p>
+        </div>
+        <span className="section-tab-count" style={{ alignSelf: 'center', fontSize: '0.78rem', padding: '3px 8px' }}>
+          {transactions.length} {transactions.length === 1 ? 'transaction' : 'transactions'}
+        </span>
+      </div>
+
       <div
         style={{
           display: 'flex',
@@ -47,19 +61,18 @@ export function TransactionInbox({
           marginBottom: '16px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <SlidersHorizontal size={16} color="var(--text-secondary)" />
           <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Filter:</span>
           <select
             value={filter}
             onChange={(e) => onFilterChange(e.target.value)}
+            className="form-control"
             style={{
               padding: '6px 10px',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '6px',
-              color: 'var(--text-primary)',
+              minHeight: '38px',
               fontSize: '0.85rem',
+              width: 'auto',
             }}
           >
             <option value="">All Transactions</option>
@@ -84,15 +97,15 @@ export function TransactionInbox({
       {transactions.length === 0 ? (
         <div
           style={{
-            padding: '32px',
+            padding: '32px 16px',
             textAlign: 'center',
-            background: 'rgba(255, 255, 255, 0.02)',
+            background: 'var(--bg-surface)',
             borderRadius: '8px',
             border: '1px dashed var(--border-subtle)',
           }}
         >
           <Search size={24} style={{ color: 'var(--text-muted)', margin: '0 auto 8px' }} />
-          <p style={{ color: 'var(--text-secondary)', margin: 0 }}>
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
             {filter
               ? 'No received transactions match the selected filter.'
               : 'No received payments recorded yet. Click "Record Received Payment" above to add manual payment observations.'}
@@ -102,12 +115,14 @@ export function TransactionInbox({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {transactions.map((tx) => (
             <React.Fragment key={tx.id}>
-            <TransactionCard
-              transaction={tx}
-              isExpanded={expandedId === tx.id}
-              onToggleExpand={() => toggleExpand(tx.id)}
-            />
-            {expandedId === tx.id && token && <EvidenceResolution receiptId={tx.id} token={token} accounts={accounts} onResolved={onResolved ?? (() => {})} />}
+              <TransactionCard
+                transaction={tx}
+                isExpanded={expandedId === tx.id}
+                onToggleExpand={() => toggleExpand(tx.id)}
+              />
+              {expandedId === tx.id && token && (
+                <EvidenceResolution receiptId={tx.id} token={token} accounts={accounts} onResolved={onResolved ?? (() => {})} />
+              )}
             </React.Fragment>
           ))}
 

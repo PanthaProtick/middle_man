@@ -17,17 +17,33 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-function input(name: string): HTMLInputElement {
-  return container.querySelector<HTMLInputElement>(`input[name="${name}"]`)!;
+function getFieldByAccessibleLabel(label: string): HTMLInputElement {
+  const byAria = container.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`);
+  if (byAria) return byAria;
+
+  const labels = Array.from(container.querySelectorAll('label'));
+  const matchingLabel = labels.find((l) => l.textContent?.includes(label));
+  if (matchingLabel) {
+    const id = matchingLabel.htmlFor || matchingLabel.getAttribute('for');
+    if (id) {
+      const el = container.querySelector<HTMLInputElement>(`#${id}`);
+      if (el) return el;
+    }
+  }
+  throw new Error(`Input field with accessible label "${label}" not found`);
 }
 
-function enter(name: string, value: string) {
-  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input(name), value);
-  input(name).dispatchEvent(new Event('input', { bubbles: true }));
+function enter(field: HTMLInputElement, value: string) {
+  Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(field, value);
+  field.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function submit() {
-  container.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+  const submitButton = container.querySelector<HTMLButtonElement>('button[type="submit"]');
+  expect(submitButton).not.toBeNull();
+  expect(submitButton?.textContent).toContain('Generate Buyer Link');
+  const form = submitButton?.closest('form') ?? container.querySelector('form');
+  form?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
 }
 
 it('announces and associates parcel errors, focuses the first error, and preserves other entries', async () => {
@@ -36,35 +52,53 @@ it('announces and associates parcel errors, focuses the first error, and preserv
   const fetcher = vi.spyOn(globalThis, 'fetch');
   await act(async () => root.render(<CreateOrderModal accounts={[account]} onClose={vi.fn()}
     onOrderCreated={vi.fn()} onError={vi.fn()} />));
+
+  const productField = getFieldByAccessibleLabel('Product Name / Agreed Items');
+  const totalField = getFieldByAccessibleLabel('Total Agreed Price (BDT)');
+  const advanceField = getFieldByAccessibleLabel('Required Advance (BDT)');
+  const weightField = getFieldByAccessibleLabel('Weight (kg)');
+  const quantityField = getFieldByAccessibleLabel('Quantity');
+
   await act(async () => {
-    enter('productName', 'Test parcel'); enter('totalBdt', '1000'); enter('advanceBdt', '100');
+    enter(productField, 'Test parcel');
+    enter(totalField, '1000');
+    enter(advanceField, '100');
     // Valid native number notation that the parcel contract deliberately rejects.
-    enter('parcelWeightKg', '1e0'); enter('parcelQuantity', '2e0');
+    enter(weightField, '1e0');
+    enter(quantityField, '2e0');
   });
   await act(async () => submit());
-  for (const name of ['parcelWeightKg', 'parcelQuantity']) {
-    const field = input(name);
+
+  for (const [field, expectedError] of [
+    [weightField, 'Parcel weight'],
+    [quantityField, 'Parcel quantity'],
+  ] as const) {
     expect(field.getAttribute('aria-invalid')).toBe('true');
     const descriptions = field.getAttribute('aria-describedby')!.split(' ');
     expect(descriptions).toContain('parcel-early-hint');
-    const error = descriptions.map(id => document.getElementById(id))
+    const errorAlert = descriptions
+      .map(id => document.getElementById(id))
       .find(element => element?.getAttribute('role') === 'alert');
-    expect(error?.textContent).toContain(name === 'parcelWeightKg' ? 'Parcel weight' : 'Parcel quantity');
+    expect(errorAlert).toBeDefined();
+    expect(errorAlert?.textContent).toContain(expectedError);
   }
-  expect(document.activeElement).toBe(input('parcelWeightKg'));
-  expect(input('parcelQuantity').value).toBe('2e0');
-  expect(input('productName').value).toBe('Test parcel');
+
+  expect(document.activeElement).toBe(weightField);
+  expect(quantityField.value).toBe('2e0');
+  expect(productField.value).toBe('Test parcel');
   expect(fetcher).not.toHaveBeenCalled();
 
-  await act(async () => enter('parcelWeightKg', '1.5'));
-  expect(input('parcelWeightKg').getAttribute('aria-invalid')).not.toBe('true');
-  expect(input('parcelQuantity').getAttribute('aria-invalid')).toBe('true');
-  expect(document.activeElement).toBe(input('parcelWeightKg'));
-  await act(async () => submit());
-  expect(document.activeElement).toBe(input('parcelQuantity'));
+  await act(async () => enter(weightField, '1.5'));
+  expect(weightField.getAttribute('aria-invalid')).not.toBe('true');
+  expect(quantityField.getAttribute('aria-invalid')).toBe('true');
+  expect(document.activeElement).toBe(weightField);
 
-  await act(async () => enter('parcelQuantity', '2'));
-  expect(container.querySelector('[role="alert"]')).toBeNull();
+  await act(async () => submit());
+  expect(document.activeElement).toBe(quantityField);
+
+  await act(async () => enter(quantityField, '2'));
+  expect(container.querySelectorAll('[role="alert"]')).toHaveLength(0);
+
   fetcher.mockResolvedValue(new Response(JSON.stringify({ id: 'new-order' }), { status: 201 }));
   await act(async () => submit());
   expect(JSON.parse(String(fetcher.mock.calls[0][1]?.body))).toMatchObject({

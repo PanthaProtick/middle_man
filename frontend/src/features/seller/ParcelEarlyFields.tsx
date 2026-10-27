@@ -42,7 +42,7 @@ export function ParcelEarlyFields({
       <p id="parcel-early-hint" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
         Optional when creating the buyer link. A valid weight and quantity are both required before booking.
       </p>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+      <div className="form-grid-2">
         <div>
           <label htmlFor="parcel-weight-kg" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
             Weight (kg)
@@ -51,6 +51,7 @@ export function ParcelEarlyFields({
             id="parcel-weight-kg"
             type="number"
             name="parcelWeightKg"
+            aria-label="Weight (kg)"
             placeholder="e.g. 1.5"
             min="0.001"
             max={MAX_PARCEL_WEIGHT_GRAMS / 1000}
@@ -72,6 +73,7 @@ export function ParcelEarlyFields({
             id="parcel-quantity"
             type="number"
             name="parcelQuantity"
+            aria-label="Quantity"
             placeholder="e.g. 2"
             min="1"
             max={MAX_PARCEL_QUANTITY}

@@ -4,12 +4,15 @@ import type { PathaoConnectInput, PathaoConnection, PathaoDefaultsInput, PathaoD
 
 export function PathaoSettings({ token }: { token: string }): React.JSX.Element {
   const [environment, setEnvironment] = useState<PathaoEnvironment>('offline');
-  return <section aria-label="Pathao courier settings">
-    <h4>Pathao courier account</h4>
-    <p>Optional: keep creating buyer links and collecting orders without a courier connection.</p>
-    <p>Production booking is disabled. These settings do not create a booking.</p>
-    <label>Courier environment
-      <select value={environment} onChange={event => setEnvironment(event.target.value as PathaoEnvironment)}>
+  return <section aria-label="Pathao courier settings" className="pathao-settings-panel">
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
+      <h4 style={{ margin: 0, color: 'var(--primary-accent)', fontSize: '0.95rem' }}>Pathao courier account</h4>
+      <span className="badge info">{environment.toUpperCase()}</span>
+    </div>
+    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 0 4px' }}>Optional: keep creating buyer links and collecting orders without a courier connection.</p>
+    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 12px' }}>Production booking is disabled. These settings do not create a booking.</p>
+    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '12px' }}>Courier environment
+      <select className="form-control" style={{ marginTop: '4px', maxWidth: '320px' }} value={environment} onChange={event => setEnvironment(event.target.value as PathaoEnvironment)}>
         <option value="offline">Offline — simulated</option>
         <option value="sandbox">Pathao sandbox</option>
         <option value="production">Pathao production — setup only</option>
@@ -114,32 +117,32 @@ function ConnectionForm({ token, environment }: { token: string; environment: Pa
     <p role="status">{connection ? `${connection.status} · Revision ${connection.version} · ${connection.merchant_hint ?? 'No merchant'}` : error ? 'Settings unavailable' : 'Loading settings…'}</p>
     {environment === 'offline' && <p>Simulated setup and pickup stores. No credentials or Pathao requests.</p>}
     {error && <p role="alert">{error}</p>}
-    <button type="button" className="btn" onClick={() => void reload()} disabled={busy}>Reload settings</button>
+    <button type="button" className="btn btn-secondary btn-sm" style={{ marginBottom: '12px' }} onClick={() => void reload()} disabled={busy}>Reload settings</button>
     <form ref={credentials} onSubmit={connect} autoComplete="off">
       <fieldset disabled={busy || !connection}>
         <legend>{connection?.status === 'connected' ? 'Replace merchant connection' : 'Connect merchant'}</legend>
         {environment !== 'offline' && <>
           <p>Credentials are write-only. Replacing the connection clears pickup and service defaults.</p>
-          <label>Client ID<input name="client_id" type="password" required maxLength={256} autoComplete="off" /></label>
-          <label>Client secret<input name="client_secret" type="password" required maxLength={2048} autoComplete="new-password" /></label>
-          <label>Merchant email<input name="username" type="email" required maxLength={256} autoComplete="off" /></label>
-          <label>Merchant password<input name="password" type="password" required maxLength={2048} autoComplete="new-password" /></label>
+          <label>Client ID<input name="client_id" className="form-control" type="password" required maxLength={256} autoComplete="off" /></label>
+          <label>Client secret<input name="client_secret" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
+          <label>Merchant email<input name="username" className="form-control" type="email" required maxLength={256} autoComplete="off" /></label>
+          <label>Merchant password<input name="password" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
         </>}
-        <button className="btn" type="submit">{environment === 'offline' ? 'Connect simulated account' : 'Verify and save connection'}</button>
+        <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '8px' }}>{environment === 'offline' ? 'Connect simulated account' : 'Verify and save connection'}</button>
       </fieldset>
     </form>
-    {connection?.status === 'connected' && <form data-defaults onSubmit={saveDefaults}>
+    {connection?.status === 'connected' && <form data-defaults onSubmit={saveDefaults} style={{ marginTop: '12px' }}>
       <fieldset disabled={busy || !stores}>
         <legend>Courier defaults</legend>
         {stores?.stores.length === 0 && <p>No active pickup stores. Add one in Pathao, then reload settings.</p>}
-        <label>Pickup store<select name="pickup" value={pickup} required onChange={event => setPickup(event.target.value)}>
+        <label>Pickup store<select name="pickup" className="form-control" value={pickup} required onChange={event => setPickup(event.target.value)}>
           <option value="">Choose a pickup store</option>
           {stores?.stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
         </select></label>
-        <label>Delivery service<select value={service} onChange={event => setService(event.target.value === '12' ? 12 : 48)}>
+        <label>Delivery service<select className="form-control" value={service} onChange={event => setService(event.target.value === '12' ? 12 : 48)}>
           <option value="48">Normal delivery (48)</option><option value="12">On-demand delivery (12)</option>
         </select></label>
-        <button className="btn" type="submit" disabled={!pickup || !stores?.stores.length}>Save courier defaults</button>
+        <button className="btn btn-primary btn-sm" type="submit" disabled={!pickup || !stores?.stores.length} style={{ marginTop: '8px' }}>Save courier defaults</button>
       </fieldset>
     </form>}
   </div>;

@@ -1,5 +1,5 @@
 .buyer-correction {
-  margin: 20px 0;
+  margin: var(--section-gap) 0;
   padding: 16px;
   border: 1px solid var(--border-subtle);
   border-radius: 12px;

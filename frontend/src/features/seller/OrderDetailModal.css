@@ -1,3 +1,25 @@
 .order-detail-dialog::backdrop {
   background: rgba(0, 0, 0, 0.75);
 }
+
+.order-detail-dialog {
+  width: calc(100% - 24px);
+  max-width: 680px;
+  margin: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 24px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.35);
+  box-sizing: border-box;
+}
+
+@media (max-width: 600px) {
+  .order-detail-dialog {
+    width: calc(100% - 16px);
+    padding: 16px 14px;
+    border-radius: 12px;
+  }
+}

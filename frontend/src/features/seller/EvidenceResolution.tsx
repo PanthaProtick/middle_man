@@ -58,8 +58,14 @@ export function EvidenceResolution({receiptId, token, onResolved, accounts = []}
   }
 
   if (!comparison) return <section aria-label="Evidence resolution">
-    {error ? <><p role="alert">{error}</p><button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void refetch()}>Retry comparison</button></>
-      : <p role="status">Loading evidence comparison…</p>}
+    {error ? (
+      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}>
+        <span>{error}</span>
+        <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void refetch()}>
+          Retry comparison
+        </button>
+      </div>
+    ) : <p role="status">Loading evidence comparison…</p>}
   </section>;
   const locked = Boolean(comparison.allocated_order_id) || comparison.receipt.reconciliation_state === 'used';
   return <section className="evidence-resolution" aria-label="Evidence resolution">

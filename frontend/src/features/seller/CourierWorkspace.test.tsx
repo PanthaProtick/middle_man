@@ -20,6 +20,9 @@ it('keeps unsaved parcel input and uses the shared version after saving delivery
   });
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   await act(async () => root.render(<CourierWorkspace orderId="a" token="seller" />));
+  expect(host.querySelectorAll('.delivery-summary-address')).toHaveLength(1);
+  expect(host.querySelector('section[aria-label="Courier proposal"] h4')?.textContent).toBe('Parcel details');
+  expect(host.querySelector('section[aria-label="Courier proposal"] .delivery-summary')).toBeNull();
   const input = host.querySelector<HTMLInputElement>('input[name="parcelQuantity"]')!;
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, '2');

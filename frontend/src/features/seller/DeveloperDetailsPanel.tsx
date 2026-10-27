@@ -67,6 +67,8 @@ export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperD
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '8px',
           padding: '10px 14px',
           background: 'rgba(255, 255, 255, 0.03)',
         }}

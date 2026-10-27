@@ -53,11 +53,17 @@ export function AddAccountForm({
   };
 
   return (
-    <div style={{ padding: '16px', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-      <h5 style={{ color: 'var(--primary-accent)', marginBottom: '12px', fontSize: '0.88rem' }}>Add Receiving Account</h5>
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '500px' }}>
-        <div style={{ display: 'flex', gap: '8px' }}>
+    <div className="isolated-subcard">
+      <div className="isolated-subcard-header">
+        <h5 className="isolated-subcard-title">
+          <Plus size={15} color="var(--primary-accent)" />
+          <span>Add Receiving Account</span>
+        </h5>
+      </div>
+      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px', maxWidth: '520px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <select
+            aria-label="Payment provider"
             value={provider}
             onChange={(e) => setProvider(e.target.value as 'bkash' | 'nagad')}
             style={{ width: '120px', flexShrink: 0, padding: '8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
@@ -67,19 +73,21 @@ export function AddAccountForm({
           </select>
           <input
             type="text"
+            aria-label="Receiving number"
             placeholder="Receiving Number (e.g. 01712345678 or ০১৭...)"
             value={receivingNumber}
             onChange={(e) => setReceivingNumber(e.target.value)}
-            style={{ flex: 1, minWidth: 0, padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+            style={{ flex: 1, flexGrow: 1, minWidth: '160px', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
           />
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <input
             type="text"
+            aria-label="Account label"
             placeholder="Label (e.g. Personal bKash, Shop Nagad)"
             value={label}
             onChange={(e) => setLabel(e.target.value)}
-            style={{ flex: 1, padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
+            style={{ flex: 1, minWidth: '160px', padding: '8px 12px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.85rem' }}
           />
           <button type="submit" className="btn btn-primary btn-sm" disabled={submitting}>
             <Plus size={14} /> {submitting ? 'Adding...' : 'Add Account'}

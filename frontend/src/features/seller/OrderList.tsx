@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, AlertTriangle, Eye } from 'lucide-react';
+import { Clock, AlertTriangle, Eye, ShoppingBag } from 'lucide-react';
 import type { OrderLifecycle, SellerOrder } from './types';
 import { formatBangladeshTime, formatRemainingCod } from './api';
 import { OrderDetailModal } from './OrderDetailModal';
@@ -44,31 +44,30 @@ export function OrderList({
   const exceptionCount = orders.filter((o) => o.lifecycle === 'pending' && o.review_reasons?.length > 0).length;
 
   return (
-    <div style={{ marginTop: '24px' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+    <div className="isolated-section" style={{ marginTop: '20px' }}>
+      <div className="isolated-section-header">
         <div>
-          <h4 style={{ color: 'var(--primary-accent)', fontSize: '0.95rem', margin: 0 }}>
-            Orders & Active Buyer Links ({orders.length})
+          <h4 className="isolated-section-title">
+            <ShoppingBag size={18} /> Orders &amp; Active Buyer Links ({orders.length})
           </h4>
-          <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', marginTop: '4px' }}>
+          <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', marginTop: '4px', flexWrap: 'wrap' }}>
             <span style={{ color: 'var(--emerald-accent)' }}>✓ Confirmed: {confirmedCount}</span>
             {exceptionCount > 0 && <span style={{ color: 'var(--rose-accent)' }}>⚠ Review Exceptions: {exceptionCount}</span>}
           </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <label htmlFor="order-status-filter" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status:</label>
           <select
             id="order-status-filter"
             value={statusFilter}
             onChange={(e) => onFilterChange(e.target.value)}
+            className="form-control"
             style={{
               padding: '4px 8px',
               fontSize: '0.8rem',
-              background: 'var(--bg-surface)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '4px',
-              color: 'var(--text-primary)',
+              minHeight: '36px',
+              width: 'auto',
             }}
           >
             <option value="">All Statuses</option>
@@ -90,25 +89,17 @@ export function OrderList({
           </p>
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {orders.map((ord) => {
             const badge = LIFECYCLE_BADGES[ord.lifecycle] || { label: ord.lifecycle, bg: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)' };
             const isAwaiting = ord.lifecycle === 'awaiting_buyer';
             const isExpired = ord.lifecycle === 'expired';
 
             return (
-              <div
-                key={ord.id}
-                style={{
-                  padding: '14px 16px',
-                  background: 'var(--bg-surface)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: '8px',
-                }}
-              >
+              <div key={ord.id} className="isolated-subcard">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-                  <div>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem', marginRight: '8px' }}>
+                  <div style={{ minWidth: 0, maxWidth: '100%' }}>
+                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem', marginRight: '8px', wordBreak: 'break-word' }}>
                       {ord.product_name}
                     </span>
                     <span
@@ -129,7 +120,7 @@ export function OrderList({
                     </span>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
                     <button
                       className="btn btn-secondary btn-sm"
                       onClick={() => setSelectedOrder(ord)}
@@ -142,7 +133,7 @@ export function OrderList({
                   </div>
                 </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px', marginBottom: '10px', fontSize: '0.825rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '8px', marginBottom: '10px', fontSize: '0.825rem' }}>
                   <div>
                     <span style={{ color: 'var(--text-secondary)' }}>Total: </span>
                     <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>BDT {(ord.total_minor / 100).toLocaleString()}</span>
@@ -183,6 +174,7 @@ export function OrderList({
                         fontSize: '0.7rem',
                         textDecoration: 'underline',
                         padding: '0 2px',
+                        whiteSpace: 'nowrap',
                       }}
                       aria-expanded={Boolean(expandedReviewIds[ord.id])}
                       title="Toggle raw technical review codes"
@@ -210,7 +202,7 @@ export function OrderList({
                   </div>
                 )}
 
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '6px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)', paddingTop: '6px' }}>
                   <div>Created: {formatBangladeshTime(ord.created_at)}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isExpired ? 'var(--rose-accent)' : isAwaiting ? 'var(--amber-accent)' : 'var(--text-secondary)' }}>
                     <Clock size={12} />

@@ -1,0 +1,18 @@
+
+> dev-template@1.0.0 test:backend
+> node scripts/workspace.mjs test:backend tests/test_courier_retention.py tests/test_courier_reconciliation_replay.py tests/test_courier_reconciliation_replay_postgres.py tests/test_courier_changed_replay.py
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.7.0
+rootdir: E:\middle_man\backend
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 31 items
+
+tests\test_courier_retention.py ......                                   [ 19%]
+tests\test_courier_reconciliation_replay.py ......                       [ 38%]
+tests\test_courier_reconciliation_replay_postgres.py ...........         [ 74%]
+tests\test_courier_changed_replay.py ........                            [100%]
+
+============================= 31 passed in 16.73s =============================

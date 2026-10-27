@@ -119,16 +119,9 @@ export function CreateOrderModal({
     <div
       role="presentation"
       style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '16px',
+        position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.75)',
+        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px',
       }}
     >
       <div
@@ -137,19 +130,15 @@ export function CreateOrderModal({
         aria-modal="true"
         aria-labelledby="create-order-dialog-title"
         style={{
-          width: '100%',
-          maxWidth: '520px',
-          background: 'var(--bg-surface)',
-          border: '1px solid var(--border-subtle)',
-          borderRadius: '16px',
-          padding: '24px',
+          width: '100%', maxWidth: '520px', background: 'var(--bg-surface)',
+          border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '24px',
           boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShoppingBag size={20} color="var(--amber-accent)" />
-            <h3 id="create-order-dialog-title" style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>Create Order & Buyer Link</h3>
+            <h3 id="create-order-dialog-title" style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>Create Order &amp; Buyer Link</h3>
           </div>
           <button
             onClick={onClose}
@@ -175,10 +164,12 @@ export function CreateOrderModal({
         ) : (
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '14px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              <label htmlFor="create-order-product-name" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                 Product Name / Agreed Items
               </label>
               <input
+                id="create-order-product-name"
+                aria-label="Product Name / Agreed Items"
                 type="text"
                 ref={productInputRef}
                 name="productName"
@@ -190,12 +181,14 @@ export function CreateOrderModal({
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div className="form-grid-2">
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                <label htmlFor="create-order-total-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Total Agreed Price (BDT)
                 </label>
                 <input
+                  id="create-order-total-bdt"
+                  aria-label="Total Agreed Price (BDT)"
                   type="number"
                   name="totalBdt"
                   placeholder="e.g. 2500"
@@ -209,10 +202,12 @@ export function CreateOrderModal({
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                <label htmlFor="create-order-advance-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Required Advance (BDT)
                 </label>
                 <input
+                  id="create-order-advance-bdt"
+                  aria-label="Required Advance (BDT)"
                   type="number"
                   name="advanceBdt"
                   placeholder="e.g. 300"
@@ -233,10 +228,12 @@ export function CreateOrderModal({
                 background: 'rgba(99, 102, 241, 0.08)',
                 border: '1px solid rgba(99, 102, 241, 0.2)',
                 borderRadius: '6px',
+                fontSize: '0.875rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                fontSize: '0.875rem',
+                flexWrap: 'wrap',
+                gap: '8px',
               }}
             >
               <span style={{ color: 'var(--text-secondary)' }}>Expected Remaining COD:</span>
@@ -250,16 +247,18 @@ export function CreateOrderModal({
               quantity={parcel.quantity}
               onWeightChange={parcel.onWeightChange}
               onQuantityChange={parcel.onQuantityChange}
+              disabled={submitting}
               errors={parcel.errors}
               validationAttempt={parcel.validationAttempt}
-              disabled={submitting}
             />
 
             <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              <label htmlFor="create-order-payment-account-id" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                 Receiving Payment Account (Fixed Snapshot)
               </label>
               <select
+                id="create-order-payment-account-id"
+                aria-label="Receiving Payment Account (Fixed Snapshot)"
                 name="paymentAccountId"
                 value={selectedAccountId}
                 onChange={(e) => setSelectedAccountId(e.target.value)}
@@ -276,7 +275,7 @@ export function CreateOrderModal({
               </p>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap' }}>
               <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting}>
                 Cancel
               </button>
