@@ -5,7 +5,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.models.courier_review import CourierReview, ReviewChoices, ReviewUpdate, SavedReviewChoices
+from app.models.courier_review import (
+    CourierReview,
+    DeliveryMismatch,
+    ReviewChoices,
+    ReviewUpdate,
+    SavedReviewChoices,
+)
+from app.models.courier_submission import CourierAttemptView
 from app.models.entities import ShopTable
 from app.models.pathao import ConnectionView, PathaoConnectionTable
 from app.models.pathao_location import LocationResolution, LocationSelection
@@ -47,6 +54,60 @@ def fingerprint(record: _DraftRecord, choices: ReviewChoices, revision: int) -> 
         'buyer_revision': record.buyer_revision, 'draft_version': record.version,
         'cod': record.remaining_cod_minor, 'choices': choices.model_dump(), 'connection': revision,
     })
+
+
+def check_delivery_mismatch(
+    current: _DraftRecord, latest_attempt: CourierAttemptView | None
+) -> DeliveryMismatch | None:
+    if latest_attempt is None or latest_attempt.status not in ('submitting', 'success', 'unknown'):
+        return None
+    snapshot = latest_attempt.booking_snapshot
+    if snapshot is None:
+        return None
+
+    is_cancelled = current.lifecycle == 'cancelled'
+    name_changed = current.recipient_name != snapshot.recipient_name
+    phone_changed = current.contact_number != snapshot.recipient_phone
+    address_changed = current.address != snapshot.recipient_address
+
+    if not (is_cancelled or name_changed or phone_changed or address_changed):
+        return None
+
+    changed_fields: list[str] = []
+    messages: list[str] = []
+    if is_cancelled:
+        changed_fields.append('cancellation')
+        messages.append('Order was cancelled locally after courier submission. Local cancellation does not cancel the Pathao booking.')
+
+    delivery_changes: list[str] = []
+    if name_changed:
+        changed_fields.append('recipient_name')
+        delivery_changes.append('recipient name')
+    if phone_changed:
+        changed_fields.append('contact_number')
+        delivery_changes.append('contact number')
+    if address_changed:
+        changed_fields.append('address')
+        delivery_changes.append('delivery address')
+
+    if delivery_changes:
+        messages.append(
+            f"Delivery details were updated locally after courier submission ({', '.join(delivery_changes)}). Local changes do not update the Pathao booking."
+        )
+
+    messages.append('Resolve or update the booking directly in Pathao.')
+    full_message = ' '.join(messages)
+
+    return DeliveryMismatch(
+        mismatch=True,
+        cancelled=is_cancelled,
+        recipient_name_changed=name_changed,
+        contact_number_changed=phone_changed,
+        address_changed=address_changed,
+        changed_fields=changed_fields,
+        booked_snapshot=snapshot,
+        message=full_message,
+    )
 
 
 async def read(db: AsyncSession | None, shop: str, order: str) -> CourierReview:
@@ -103,6 +164,7 @@ async def read(db: AsyncSession | None, shop: str, order: str) -> CourierReview:
         and not has_active_attempt
         and current.lifecycle == 'confirmed'
     )
+    delivery_mismatch = check_delivery_mismatch(current, latest_attempt)
     result = CourierReview(
         draft=project(current),
         choices=choices,
@@ -114,6 +176,7 @@ async def read(db: AsyncSession | None, shop: str, order: str) -> CourierReview:
         reviewed=is_reviewed,
         submission_enabled=submission_enabled,
         latest_attempt=latest_attempt,
+        delivery_mismatch=delivery_mismatch,
     )
     if db is not None:
         await db.commit()

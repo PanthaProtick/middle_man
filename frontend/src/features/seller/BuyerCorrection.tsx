@@ -3,11 +3,18 @@ import { useEffect, useRef, useState } from 'react';
 import { SellerApiError, canonicalizeBdPhone, parseBdtToMinor } from './api';
 import { correctBuyer, fetchCorrectionOrder, fetchHistory, resolveCorrectionLink } from './corrections';
 import type { CorrectionInput, History, Revision } from './corrections';
+import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { SellerOrder } from './types';
 
-interface Props {orderId?: string; portalToken?: string; token: string; onCorrected?: (order: SellerOrder) => void}
+interface Props {
+  orderId?: string;
+  portalToken?: string;
+  token: string;
+  onCorrected?: (order: SellerOrder) => void;
+  courierAttemptStatus?: CourierAttemptStatus | null;
+}
 
-export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Props) {
+export function BuyerCorrection({orderId, portalToken, token, onCorrected, courierAttemptStatus}: Props) {
   const [order, setOrder] = useState<SellerOrder>();
   const [history, setHistory] = useState<History>();
   const [draft, setDraft] = useState<Revision>();
@@ -111,7 +118,15 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected}: Prop
     )}
     {isConfirmed && (
       <div className="courier-notice" role="note" style={{marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: 'var(--amber-accent)'}}>
-        Portal corrections do not update courier bookings. Update courier parcels separately if already booked. / পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। কুরিয়ারে বুকিং করা থাকলে আলাদাভাবে আপডেট করুন।
+        {courierAttemptStatus === 'success'
+          ? 'Courier booking is already confirmed in Pathao. Portal corrections do not update courier bookings. Update courier parcels separately in Pathao. / কুরিয়ার বুকিং ইতিপূর্বে পাঠাও-এ কনফার্ম করা হয়েছে। পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। পাঠাও-এ সরাসরি বুকিং আপডেট করুন।'
+          : courierAttemptStatus === 'submitting'
+            ? 'Courier submission is in flight. Portal corrections do not update courier bookings. Resolve in Pathao if booked. / কুরিয়ার সাবমিশন প্রক্রিয়াধীন। পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না।'
+            : courierAttemptStatus === 'unknown'
+              ? 'Courier submission outcome is unknown. Portal corrections do not update courier bookings. Reconcile the attempt and resolve in Pathao. / কুরিয়ার সাবমিশন ফলাফল অনিশ্চিত। পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না।'
+              : courierAttemptStatus === 'unsubmitted'
+                ? 'Unsubmitted courier draft. Corrections refresh the delivery draft before booking submission. Portal corrections do not update courier bookings if already booked elsewhere.'
+                : 'Portal corrections do not update courier bookings. Update courier parcels separately if already booked. / পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। কুরিয়ারে বুকিং করা থাকলে আলাদাভাবে আপডেট করুন।'}
       </div>
     )}
     {stale && <button onClick={async () => {

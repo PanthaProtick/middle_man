@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Ban, XCircle, RefreshCw, AlertTriangle } from 'lucide-react';
+import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { PaymentAccount, SellerOrder } from './types';
 import { cancelOrder, rejectOrder, replaceOrder } from './paymentDecisions';
 import { fetchPaymentAccounts } from './api';
@@ -9,9 +10,10 @@ interface OrderOutcomesProps {
   token?: string;
   onUpdated: (order: SellerOrder) => void;
   onReplaced?: (newOrder: SellerOrder) => void;
+  courierAttemptStatus?: CourierAttemptStatus | null;
 }
 
-export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: OrderOutcomesProps): React.JSX.Element {
+export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courierAttemptStatus }: OrderOutcomesProps): React.JSX.Element {
   const [activeAction, setActiveAction] = useState<'none' | 'cancel' | 'reject' | 'replace'>('none');
   const [reason, setReason] = useState('');
   const [productName, setProductName] = useState(order.product_name);
@@ -203,6 +205,16 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: Orde
               Confirmed payment allocation is preserved and will not be refunded.
             </div>
           )}
+          {['submitting', 'unknown', 'success'].includes(courierAttemptStatus ?? '') && (
+            <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--rose-accent)', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 8px', borderRadius: '4px' }}>
+              Local cancellation does not cancel the courier booking in Pathao. You must resolve or cancel the booking directly in Pathao.
+            </div>
+          )}
+          {courierAttemptStatus === 'unsubmitted' && (
+            <div role="note" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'var(--bg-surface)', padding: '6px 8px', borderRadius: '4px' }}>
+              Cancellation prevents courier draft submission. No booking exists in Pathao.
+            </div>
+          )}
           <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for cancellation (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
             <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting}>Dismiss</button>
@@ -228,6 +240,11 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced }: Orde
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
             Predecessor will be cancelled. A new order with fresh link and terms will be created.
           </div>
+          {['submitting', 'unknown', 'success'].includes(courierAttemptStatus ?? '') && (
+            <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--rose-accent)', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 8px', borderRadius: '4px' }}>
+              Local cancellation does not cancel the courier booking in Pathao. You must resolve or cancel the booking directly in Pathao.
+            </div>
+          )}
           <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
             <input type="number" value={totalBdt} onChange={(e) => setTotalBdt(e.target.value)} placeholder="Total BDT" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />

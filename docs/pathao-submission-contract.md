@@ -79,6 +79,25 @@ Seller-only `POST /api/seller/orders/{id}/courier-reconciliation` resolves one p
 - Provider I/O runs outside the database transaction. Settings changes, draft edits,
   reconnects, or a different idempotency key cannot bypass the protected attempt.
 
+## Post-submission changes and mismatch detection
+
+- Before external submission, seller delivery corrections (`PATCH /buyer-details`) refresh the draft
+  and invalidate stale review approval. Pre-submission order cancellation (`POST /decisions`) sets
+  `lifecycle = 'cancelled'`, blocks reservation (`INVALID_LIFECYCLE`), and prevents submission calls.
+- Once submission is in flight (`submitting`), outcome unknown (`unknown`), or accepted (`success`),
+  the reviewed booking snapshot, consignment association, and attempt ledger remain intact.
+- Local delivery corrections or order cancellations never claim to modify or cancel a Pathao booking,
+  and never silently trigger amendment, replacement, or cancellation requests to the provider.
+- When an order is cancelled or delivery details (recipient name, contact number, address) are corrected
+  after submission or while submission is in flight, `CourierReview` exposes typed `delivery_mismatch`:
+  - `mismatch: true`, with booleans `cancelled`, `recipient_name_changed`, `contact_number_changed`,
+    `address_changed`, machine-readable `changed_fields`, `booked_snapshot`, and seller action message.
+  - When in-flight submissions finish or delayed reconciliations attach an existing consignment, the
+    mismatch/action notice is preserved rather than overwritten by a generic success result.
+  - Unrelated edits (such as audit notes without delivery changes) do not fabricate a delivery mismatch.
+- An unknown attempt remains protected after local correction or cancellation. Resolving a local change
+  does not erase uncertainty or create a duplicate booking opportunity.
+
 ## Invariant and restart protections
 
 - Rejection messages stored in attempts and returned to sellers use controlled

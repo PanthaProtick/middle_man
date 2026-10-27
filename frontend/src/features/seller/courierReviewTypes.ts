@@ -44,6 +44,19 @@ export interface CourierAttempt {
   updated_at: string;
 }
 
+export type CourierAttemptStatus = CourierAttempt['status'] | 'unsubmitted';
+
+export interface DeliveryMismatch {
+  mismatch: boolean;
+  cancelled: boolean;
+  recipient_name_changed: boolean;
+  contact_number_changed: boolean;
+  address_changed: boolean;
+  changed_fields: string[];
+  booked_snapshot: BookingSnapshot | null;
+  message: string;
+}
+
 export interface Review {
   token: string;
   reviewed: boolean;
@@ -59,6 +72,7 @@ export interface Review {
     parcel_weight_grams: number | null; parcel_quantity: number | null; remaining_cod_minor: number;
   };
   latest_attempt?: CourierAttempt | null;
+  delivery_mismatch?: DeliveryMismatch | null;
 }
 
 export interface ReviewCatalog { choices: LocationChoice[] }

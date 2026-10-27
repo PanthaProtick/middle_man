@@ -2,7 +2,7 @@
 from pydantic import BaseModel, ConfigDict, Field
 
 from app.models.courier import CourierDraft
-from app.models.courier_submission import CourierAttemptView
+from app.models.courier_submission import CourierAttemptView, CourierBookingSnapshot
 from app.models.pathao import ConnectionView, DeliveryType, Environment, PickupStore
 from app.models.pathao_location import LocationResolution, LocationSelection
 
@@ -28,6 +28,18 @@ class ReviewUpdate(ReviewChoices, ReviewVersion):
     pass
 
 
+class DeliveryMismatch(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    mismatch: bool = True
+    cancelled: bool = False
+    recipient_name_changed: bool = False
+    contact_number_changed: bool = False
+    address_changed: bool = False
+    changed_fields: list[str] = Field(default_factory=list)
+    booked_snapshot: CourierBookingSnapshot | None = None
+    message: str
+
+
 class CourierReview(BaseModel):
     draft: CourierDraft
     choices: ReviewChoices
@@ -39,3 +51,4 @@ class CourierReview(BaseModel):
     reviewed: bool
     submission_enabled: bool = False
     latest_attempt: CourierAttemptView | None = None
+    delivery_mismatch: DeliveryMismatch | None = None

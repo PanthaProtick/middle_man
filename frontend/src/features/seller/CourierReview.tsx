@@ -15,11 +15,14 @@ const blockerLabels: Record<string, string> = {
   ORDER_NOT_CONFIRMED: 'This order is no longer confirmed.',
 };
 
-export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
+export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onReviewLoaded }: {
   orderId: string; token: string; refresh?: number; onChoicesSaved?: (parcel: ParcelRevision) => void;
+  onReviewLoaded?: (review: Review) => void;
 }) {
   const identity = `${orderId}:${token}:${refresh}`;
   const currentIdentity = useRef(identity);
+  const onReviewLoadedRef = useRef(onReviewLoaded);
+  useEffect(() => { onReviewLoadedRef.current = onReviewLoaded; }, [onReviewLoaded]);
   const generation = useRef(0);
   useEffect(() => { currentIdentity.current = identity; generation.current += 1; }, [identity]);
   const [attempt, setAttempt] = useState(0);
@@ -31,7 +34,11 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
   useEffect(() => {
     let active = true;
     requestJson<Review>(path, {}, token).then(review => {
-      if (active) { setState({ identity, review }); setEditing({ identity, choices: review.choices }); }
+      if (active) {
+        setState({ identity, review });
+        setEditing({ identity, choices: review.choices });
+        onReviewLoadedRef.current?.(review);
+      }
     }).catch(() => { if (active) setState({ identity, error: 'Review unavailable. Reload current details.' }); });
     return () => { active = false; generation.current += 1; };
   }, [path, token, identity, attempt]);
@@ -49,6 +56,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
       }) }, token);
       if (currentIdentity.current !== identity || generation.current !== requestGeneration) return;
       setState({ identity, review: updated }); setEditing({ identity, choices: updated.choices });
+      onReviewLoadedRef.current?.(updated);
       if (method === 'PUT') onChoicesSaved?.(updated.draft);
     } catch {
       if (currentIdentity.current === identity && generation.current === requestGeneration) {
@@ -76,6 +84,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
       if (currentIdentity.current !== identity || generation.current !== requestGeneration) return;
       setState({ identity, review: updated });
       setEditing({ identity, choices: updated.choices });
+      onReviewLoadedRef.current?.(updated);
     } catch (err: unknown) {
       if (currentIdentity.current === identity && generation.current === requestGeneration) {
         const errorObj = err as { message?: string };
@@ -141,6 +150,22 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
         </button>
       )}
       {busy && <p role="status">Submitting booking to Pathao (simulated)…</p>}
+      {review.delivery_mismatch && (
+        <div role="alert" className="delivery-mismatch-warning" style={{
+          marginBottom: '12px', padding: '10px 12px', background: 'rgba(239, 68, 68, 0.1)',
+          border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: 'var(--rose-accent)',
+        }}>
+          <p style={{ margin: 0, fontWeight: 600 }}>Action required in Pathao / পাঠাও-এ সমাধান প্রয়োজন</p>
+          <p style={{ margin: '4px 0 0' }}>{review.delivery_mismatch.message}</p>
+          {review.delivery_mismatch.booked_snapshot && (
+            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              Original booked details: {review.delivery_mismatch.booked_snapshot.recipient_name} ·{' '}
+              {review.delivery_mismatch.booked_snapshot.recipient_phone} ·{' '}
+              {review.delivery_mismatch.booked_snapshot.recipient_address}
+            </p>
+          )}
+        </div>
+      )}
       {review.latest_attempt?.status === 'success' && (
         <div role="status" className="booking-result">
           <p><strong>{review.latest_attempt.resolution_action === 'attach_existing'
@@ -165,6 +190,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
             onResolved={updated => {
               setState({ identity, review: updated });
               setEditing({ identity, choices: updated.choices });
+              onReviewLoadedRef.current?.(updated);
             }} />
         </div>
       )}

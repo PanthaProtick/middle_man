@@ -72,6 +72,20 @@ the first saved response. Different input with the same key returns
 lifecycle, review freshness, connection, address, and parcel details. Full details
 are in [the submission contract](pathao-submission-contract.md).
 
+## Courier post-submission changes
+
+When a seller corrects delivery details (`PATCH /api/seller/orders/{order_id}/buyer-details`) or
+cancels an order (`POST /api/seller/orders/{order_id}/decisions`) after courier submission has been
+reserved, in flight, unknown, or accepted, the original booking snapshot, attempt history, and
+consignment association remain intact. No provider modification or cancellation is initiated.
+`CourierReview` includes nullable `delivery_mismatch`:
+- `mismatch` (boolean), `cancelled` (boolean), `recipient_name_changed` (boolean),
+  `contact_number_changed` (boolean), `address_changed` (boolean), `changed_fields` (string array),
+  `booked_snapshot` (`CourierBookingSnapshot`), and `message` directing the seller to resolve in Pathao.
+- The mismatch notice is preserved across in-flight completion and delayed reconciliations.
+- Corrections before reservation invalidate stale review approval (`reviewed_token` cleared);
+  cancellation before reservation blocks submission (`409 INVALID_LIFECYCLE`).
+
 ## Same-order buyer-link reissue
 
 `POST /api/seller/orders/{order_id}/reissue-link` requires the owning seller,

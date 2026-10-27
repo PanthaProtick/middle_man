@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { X, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
+import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { SellerOrder } from './types';
 import { formatBangladeshTime, formatRemainingCod } from './api';
 import { BuyerCorrection } from './BuyerCorrection';
@@ -22,6 +23,9 @@ interface OrderDetailModalProps {
 
 export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected }: OrderDetailModalProps): React.JSX.Element {
   const [order, setOrder] = useState(initialOrder);
+  const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(
+    initialOrder.lifecycle === 'confirmed' && initialOrder.allocation_basis ? 'unsubmitted' : null
+  );
   const [showReviewCodes, setShowReviewCodes] = useState(false);
   const isExpired = order.lifecycle === 'expired';
   const isConfirmed = order.lifecycle === 'confirmed';
@@ -208,17 +212,18 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         <DeveloperDetailsPanel order={order} />
 
         {token && (isConfirmed || order.lifecycle === 'cancelled') && order.allocation_basis &&
-          <CourierWorkspace key={`courier-${order.id}-${order.version}-${token}`} orderId={order.id} token={token} />}
+          <CourierWorkspace key={`courier-${order.id}-${order.version}-${token}`} orderId={order.id} token={token} onReviewLoaded={(rev) => setCourierAttemptStatus(rev.latest_attempt?.status ?? 'unsubmitted')} />}
         {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
         {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
           onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
         {token && order.buyer_revision && <EvidenceViewer key={`evidence-${order.id}`} orderId={order.id} token={token} buyerRevision={order.buyer_revision} />}
-        {token && order.buyer_revision && <BuyerCorrection key={`${order.id}-${order.version}`} orderId={order.id} token={token} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
+        {token && order.buyer_revision && <BuyerCorrection key={`${order.id}-${order.version}`} orderId={order.id} token={token} courierAttemptStatus={courierAttemptStatus} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
         {token && (
           <OrderOutcomes
             key={`outcomes-${order.id}-${order.version}`}
             order={order}
             token={token}
+            courierAttemptStatus={courierAttemptStatus}
             onUpdated={(fresh) => {
               setOrder(fresh);
               onCorrected?.(fresh);
