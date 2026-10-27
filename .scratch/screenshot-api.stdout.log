@@ -1,0 +1,84 @@
+2026-10-27 21:57:50,851 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-10-27 21:57:50,853 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:50,959 INFO sqlalchemy.engine.Engine select current_schema()
+2026-10-27 21:57:50,960 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:51,071 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-10-27 21:57:51,073 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:51,351 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 21:57:51,352 INFO sqlalchemy.engine.Engine SELECT 1
+2026-10-27 21:57:51,353 INFO sqlalchemy.engine.Engine [generated in 0.00078s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:51,469 INFO sqlalchemy.engine.Engine SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()
+2026-10-27 21:57:51,469 INFO sqlalchemy.engine.Engine [generated in 0.00066s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:51,529 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-27 21:57:51,680 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 21:57:51,710 INFO sqlalchemy.engine.Engine SELECT orders.encrypted_portal_token 
+FROM orders 
+WHERE orders.encrypted_portal_token != %(encrypted_portal_token_1)s::VARCHAR 
+ LIMIT %(param_1)s::INTEGER
+2026-10-27 21:57:51,710 INFO sqlalchemy.engine.Engine [generated in 0.00081s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:51,817 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-27 21:57:51,978 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 21:57:51,980 INFO sqlalchemy.engine.Engine SELECT payment_marker_keys.shop_id, payment_marker_keys.fingerprint 
+FROM payment_marker_keys
+2026-10-27 21:57:51,980 INFO sqlalchemy.engine.Engine [generated in 0.00038s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:52,132 INFO sqlalchemy.engine.Engine SELECT used_payment_markers.id, used_payment_markers.shop_id, used_payment_markers.provider, used_payment_markers.transaction_digest, used_payment_markers.created_at 
+FROM used_payment_markers 
+WHERE (used_payment_markers.shop_id NOT IN (%(shop_id_1_1)s::VARCHAR, %(shop_id_1_2)s::VARCHAR))
+2026-10-27 21:57:52,133 INFO sqlalchemy.engine.Engine [generated in 0.00162s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 21:57:52,188 INFO sqlalchemy.engine.Engine ROLLBACK
+ 2026-10-27 22:02:51,108 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-10-27 22:02:51,110 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:51,220 INFO sqlalchemy.engine.Engine select current_schema()
+2026-10-27 22:02:51,221 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:51,328 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-10-27 22:02:51,329 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:51,603 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 22:02:51,605 INFO sqlalchemy.engine.Engine SELECT 1
+2026-10-27 22:02:51,605 INFO sqlalchemy.engine.Engine [generated in 0.00057s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:51,714 INFO sqlalchemy.engine.Engine SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()
+2026-10-27 22:02:51,715 INFO sqlalchemy.engine.Engine [generated in 0.00104s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:51,771 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-27 22:02:51,884 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 22:02:51,914 INFO sqlalchemy.engine.Engine SELECT orders.encrypted_portal_token 
+FROM orders 
+WHERE orders.encrypted_portal_token != %(encrypted_portal_token_1)s::VARCHAR 
+ LIMIT %(param_1)s::INTEGER
+2026-10-27 22:02:51,915 INFO sqlalchemy.engine.Engine [generated in 0.00071s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:52,032 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-27 22:02:52,145 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 22:02:52,147 INFO sqlalchemy.engine.Engine SELECT payment_marker_keys.shop_id, payment_marker_keys.fingerprint 
+FROM payment_marker_keys
+2026-10-27 22:02:52,147 INFO sqlalchemy.engine.Engine [generated in 0.00066s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:52,365 INFO sqlalchemy.engine.Engine SELECT used_payment_markers.id, used_payment_markers.shop_id, used_payment_markers.provider, used_payment_markers.transaction_digest, used_payment_markers.created_at 
+FROM used_payment_markers 
+WHERE (used_payment_markers.shop_id NOT IN (%(shop_id_1_1)s::VARCHAR, %(shop_id_1_2)s::VARCHAR))
+2026-10-27 22:02:52,366 INFO sqlalchemy.engine.Engine [generated in 0.00090s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:02:52,421 INFO sqlalchemy.engine.Engine ROLLBACK
+ 2026-10-27 22:07:51,208 INFO sqlalchemy.engine.Engine select pg_catalog.version()
+2026-10-27 22:07:51,210 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:51,320 INFO sqlalchemy.engine.Engine select current_schema()
+2026-10-27 22:07:51,321 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:51,438 INFO sqlalchemy.engine.Engine show standard_conforming_strings
+2026-10-27 22:07:51,439 INFO sqlalchemy.engine.Engine [raw sql] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:51,720 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 22:07:51,722 INFO sqlalchemy.engine.Engine SELECT 1
+2026-10-27 22:07:51,722 INFO sqlalchemy.engine.Engine [generated in 0.00041s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:51,828 INFO sqlalchemy.engine.Engine SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()
+2026-10-27 22:07:51,829 INFO sqlalchemy.engine.Engine [generated in 0.00079s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:51,884 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-27 22:07:51,992 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 22:07:52,019 INFO sqlalchemy.engine.Engine SELECT orders.encrypted_portal_token 
+FROM orders 
+WHERE orders.encrypted_portal_token != %(encrypted_portal_token_1)s::VARCHAR 
+ LIMIT %(param_1)s::INTEGER
+2026-10-27 22:07:52,019 INFO sqlalchemy.engine.Engine [generated in 0.00068s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:52,127 INFO sqlalchemy.engine.Engine ROLLBACK
+2026-10-27 22:07:52,269 INFO sqlalchemy.engine.Engine BEGIN (implicit)
+2026-10-27 22:07:52,271 INFO sqlalchemy.engine.Engine SELECT payment_marker_keys.shop_id, payment_marker_keys.fingerprint 
+FROM payment_marker_keys
+2026-10-27 22:07:52,271 INFO sqlalchemy.engine.Engine [generated in 0.00056s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:52,412 INFO sqlalchemy.engine.Engine SELECT used_payment_markers.id, used_payment_markers.shop_id, used_payment_markers.provider, used_payment_markers.transaction_digest, used_payment_markers.created_at 
+FROM used_payment_markers 
+WHERE (used_payment_markers.shop_id NOT IN (%(shop_id_1_1)s::VARCHAR, %(shop_id_1_2)s::VARCHAR))
+2026-10-27 22:07:52,413 INFO sqlalchemy.engine.Engine [generated in 0.00127s] [SQL parameters hidden due to hide_parameters=True]
+2026-10-27 22:07:52,481 INFO sqlalchemy.engine.Engine ROLLBACK

@@ -1,0 +1,17 @@
+
+> dev-template@1.0.0 test:frontend
+> node scripts/workspace.mjs test:frontend src/features/seller/CourierPostSubmissionChanges.test.tsx src/features/seller/CourierSubmission.test.tsx
+
+
+> frontend@0.0.0 test
+> vitest run src/features/seller/CourierPostSubmissionChanges.test.tsx src/features/seller/CourierSubmission.test.tsx
+
+
+ RUN  v4.1.12 E:/middle_man/frontend
+
+
+ Test Files  1 passed (1)
+      Tests  7 passed (7)
+   Start at  21:13:30
+   Duration  1.05s (transform 129ms, setup 30ms, import 268ms, tests 122ms, environment 456ms)
+

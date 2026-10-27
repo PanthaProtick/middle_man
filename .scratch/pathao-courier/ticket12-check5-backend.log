@@ -1,0 +1,17 @@
+
+> dev-template@1.0.0 test:backend
+> node scripts/workspace.mjs test:backend tests/test_courier_submission_failures.py tests/test_courier_post_submission_changes.py tests/test_courier_submission_postgres.py::test_postgres_unknown_timeout_blocks_retry tests/test_courier_submission_postgres.py::test_postgres_persistence_failure_leaves_protected_unknown tests/test_courier_submission_postgres.py::test_postgres_restart_recovery tests/test_courier_submission_postgres.py::test_postgres_correction_after_success_creates_mismatch tests/test_courier_submission_postgres.py::test_postgres_cancellation_after_success_creates_mismatch tests/test_courier_submission_postgres.py::test_postgres_correction_while_submission_in_flight tests/test_courier_submission_postgres.py::test_postgres_cancellation_while_submission_in_flight
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.13, pytest-9.1.1, pluggy-1.7.0
+rootdir: E:\middle_man\backend
+configfile: pyproject.toml
+plugins: anyio-4.15.1, asyncio-1.4.0
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collected 27 items
+
+tests\test_courier_submission_failures.py ...........                    [ 40%]
+tests\test_courier_post_submission_changes.py .........                  [ 74%]
+tests\test_courier_submission_postgres.py .......                        [100%]
+
+============================= 27 passed in 5.01s ==============================
