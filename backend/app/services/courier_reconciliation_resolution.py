@@ -8,8 +8,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.courier_reconciliation import CourierReconciliationInput, CourierReconciliationTable
 from app.models.courier_submission import CourierAttemptTable, CourierAttemptView
+from app.models.entities import OrderTable
 from app.services import pathao_provider
 from app.services.courier_reconciliation_replay import ReconciliationReplay
+from app.services.retention_access import require_retained_record
 from app.services.seller_service import SellerDomainException, StaleVersionError
 
 _memory_reconciliations: dict[str, list[dict[str, Any]]] = {}
@@ -28,6 +30,16 @@ async def _apply(
     evidence: pathao_provider.CourierBookingEvidence | None,
     replay: ReconciliationReplay,
 ) -> None:
+    # The caller holds the order lock. Recheck after provider I/O, since cleanup
+    # may have completed while evidence was being verified.
+    if db is not None:
+        order = await db.get(OrderTable, attempt.order_id, populate_existing=True)
+        if order is None:
+            raise _conflict('RECORD_UNAVAILABLE', 'Order unavailable.', 410)
+        require_retained_record(order)
+    else:
+        from app.services.order_service import _memory_orders
+        require_retained_record(_memory_orders[attempt.order_id])
     now = datetime.now(timezone.utc)
     version = attempt.resolution_version + 1
     if payload.action == 'attach_existing':

@@ -1,6 +1,7 @@
 """Explicit offline adapter; durable acceptance belongs to PostgreSQL."""
 from datetime import datetime
 
+from app.services.courier_retention import erase_courier_details
 from app.services.order_mapping import check_and_apply_expiry
 from app.services.retention_caches import redact_import_result, references_identity
 from app.services.structured_retention import calendar_deadline
@@ -55,6 +56,7 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
             else:
                 del _memory_transactions[receipt['id']]
         _memory_buyer_revisions.pop(row['id'], None)
+        erased.update(await erase_courier_details(None, shop_id, row['id']))
         from app.services.courier_drafts import _memory_drafts
         _memory_drafts.pop(row['id'], None)
         _memory_order_review_reasons.pop(row['id'], None)
@@ -62,6 +64,7 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
         for record in _memory_idempotency_store.values():
             if references_identity(record['data'], erased):
                 record['data'] = {'record_unavailable': True}
+                record['payload_hash'] = ''
         for key, address in list(addresses.items()):
             if address.order_id == row['id']:
                 del addresses[key]

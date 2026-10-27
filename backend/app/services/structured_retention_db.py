@@ -17,6 +17,7 @@ from app.models.entities import (
     TransactionObservationTable,
 )
 from app.models.payment_entities import PaymentExtractionTable
+from app.services.courier_retention import erase_courier_details
 from app.services.payment_marker_protection import verify_marker_key
 from app.services.receipt_identity import receipt_identities
 from app.services.retention_caches import redact_replays
@@ -75,12 +76,13 @@ async def remove_order(db: AsyncSession, order: OrderTable, now: datetime) -> No
             tuple_(ReceivedTransactionTable.provider, ReceivedTransactionTable.trx_id).in_(claim_ids))))).all()
     for receipt in receipts:
         await remove_receipt(db, receipt, now)
-    await redact_replays(db, {order.id, *(r.id for r in revisions)}, order.shop_id)
+    attempts = await erase_courier_details(db, order.shop_id, order.id)
+    await redact_replays(db, {order.id, *(r.id for r in revisions), *attempts}, order.shop_id)
     await db.execute(delete(CourierDraftTable).where(CourierDraftTable.order_id == order.id))
     for model in (BuyerRevisionTable, OrderReviewReasonTable, AddressExtractionTable, PaymentExtractionTable):
         await db.execute(delete(model).where(model.order_id == order.id))
     await db.execute(delete(AuditEventTable).where(AuditEventTable.shop_id == order.shop_id,
-        AuditEventTable.aggregate_id == order.id))
+        AuditEventTable.aggregate_id.in_({order.id, *attempts})))
     await db.execute(delete(LinkMeasurementTable).where(LinkMeasurementTable.token_lookup_digest == order.token_lookup_digest))
     await db.execute(update(AllocationTable).where(AllocationTable.order_id == order.id).values(actor='', reason=None))
     order.product_name = order.account_receiving_number = order.account_label = order.encrypted_portal_token = ''
