@@ -59,3 +59,65 @@
   authenticated synthetic shop workspace appeared without clicking Retry.
   This verifies startup recovery only, not the complete Ticket 12 journey.
 - Next: resume Pathao sandbox connection. No sandbox booking acceptance is claimed.
+
+## Sandbox connection attempt — 2026-10-27
+
+- Seller connection returned `PATHAO_UNAVAILABLE`. A read-only external probe
+  using published shared sandbox test credentials reached the sandbox
+  `/aladdin/api/v1/issue-token` endpoint and received HTTP 522. Store listing
+  could not run because authentication did not return a token. No booking or
+  store-creation request was made; credentials/tokens were not printed or saved.
+- This establishes a provider timeout during the probe, not invalid credentials,
+  store availability, or a successful sandbox connection. Actual sandbox
+  acceptance remains BLOCKED. Retry connect after provider recovery; if it still
+  fails, capture fresh stage/status evidence rather than assuming the same cause.
+- Temporary diagnostic script removed. No application changes or new root
+  verification gate were needed for this read-only provider investigation.
+
+## Acceptance checkpoint — 2026-10-27 (Ticket 12 continuation)
+
+- Base: `486b46df3e01bdff50fd02c6c70789978278bc32`. Preserved the existing
+  uncommitted sandbox-timeout note above. No application sources changed.
+- Actual browser, Thorium at `http://localhost:5173`: authenticated Synthetic
+  Shop A reloaded successfully. Pathao settings initially showed sandbox,
+  disconnected revision 0, no merchant, a settings error, and production disabled.
+  Reload-settings click failed with `coordinate input geometry is unavailable`;
+  screenshot recovery failed with `window capture timed out`. Keyboard navigation
+  remained usable. These are automation failures, not proof of application defects.
+- Browser PASS (bounded case): created `SYNTHETIC Ticket12 notebook` using the
+  seller form, with no parcel details and no connected courier. Total BDT 1,000,
+  required advance BDT 200, expected COD BDT 800. Order count changed 8 to 9;
+  inspector showed Awaiting Buyer, v1, and the matching amounts. Created at
+  16:16 BST on October 27. This synthetic record remains for acceptance continuation.
+- Buyer browser BLOCKED: opened that order's portal in a separate in-app browser;
+  it displayed `Public Access Disabled` and the unsettled-access-policy message.
+  `backend/app/core/public_gate.py` requires development/test, SELF_TEST_MODE and
+  the explicit self_test_link_possession policy. Requested owner consent before
+  changing that access boundary; no configuration or policy bypass was applied.
+- Actual sandbox BLOCKED: Ticket 09 still records no verified account-owned
+  sandbox credentials/store; the visible seller connection is disconnected.
+  Requested current setup status without secrets. No new provider authentication,
+  booking, consignment lookup or production call was attempted in this continuation.
+  The earlier HTTP 522 is historical evidence, not a fresh provider measurement.
+- Automated/offline PASS: `npm run check`, with repository-local PYTEST_ADDOPTS
+  basetemp `.cache/pytest-ticket12-final`; `.cache/checks/check-yi3Ows/result.json`.
+  All eight stages passed: tooling, backend lint/types/tests, frontend lint/tests/
+  build, HTTP smoke. Backend 520 passed, 180 skipped; frontend 210 passed.
+- PostgreSQL NOT RUN by this gate (180 skips). Ticket 10 records prior disposable
+  PostgreSQL retention acceptance; this run does not refresh that evidence.
+- Browser NOT RUN: phone/desktop viewport matrix, buyer validation/submission,
+  valid locations and recovery, manual/automatic confirmation and unique drafts,
+  accepted-advance exceptions, alternate sender/contact, zero COD, stale review,
+  cancellation/correction, duplicate clicks, unknown recovery, external-action
+  notices, cross-shop denial, public projection privacy, retention/replay workflow.
+- Sandbox NOT RUN: complete connect/store/catalog/booking/persistence/restart
+  journey. Production NOT RUN; no physical pickup, delivery or settlement claim.
+- Independent Ticket 11 remains `ready-for-agent`; its latest checkpoint records
+  restricted cleanup verification pending and actual Neon cleanup NOT EXECUTED.
+  It is not a prerequisite for this acceptance journey and was not performed here.
+- Ticket 12 remains incomplete. Next: resolve local buyer-policy consent and
+  verified sandbox account/store availability, resume with the new synthetic order,
+  then exercise the remaining browser/provider cases and retain separate evidence.
+- Independent review of this evidence update: Standards 0 findings; Spec 0 findings.
+  Both reviews confirm this is a partial checkpoint, not full Ticket 12 acceptance.
+  `git diff --check` passed. No TDD slice was needed because no source behavior changed.
