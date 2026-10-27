@@ -149,7 +149,7 @@ export function CreateOrderModal({
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <ShoppingBag size={20} color="var(--amber-accent)" />
-            <h3 id="create-order-dialog-title" style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>Create Order & Buyer Link</h3>
+            <h3 id="create-order-dialog-title" style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>Create Order &amp; Buyer Link</h3>
           </div>
           <button
             onClick={onClose}
@@ -190,7 +190,7 @@ export function CreateOrderModal({
               />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '14px' }}>
+            <div className="form-grid-2">
               <div>
                 <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
                   Total Agreed Price (BDT)
@@ -233,10 +233,12 @@ export function CreateOrderModal({
                 background: 'rgba(99, 102, 241, 0.08)',
                 border: '1px solid rgba(99, 102, 241, 0.2)',
                 borderRadius: '6px',
+                fontSize: '0.875rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
-                fontSize: '0.875rem',
+                flexWrap: 'wrap',
+                gap: '8px',
               }}
             >
               <span style={{ color: 'var(--text-secondary)' }}>Expected Remaining COD:</span>
@@ -250,9 +252,9 @@ export function CreateOrderModal({
               quantity={parcel.quantity}
               onWeightChange={parcel.onWeightChange}
               onQuantityChange={parcel.onQuantityChange}
+              disabled={submitting}
               errors={parcel.errors}
               validationAttempt={parcel.validationAttempt}
-              disabled={submitting}
             />
 
             <div style={{ marginBottom: '20px' }}>
@@ -276,7 +278,7 @@ export function CreateOrderModal({
               </p>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap' }}>
               <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting}>
                 Cancel
               </button>

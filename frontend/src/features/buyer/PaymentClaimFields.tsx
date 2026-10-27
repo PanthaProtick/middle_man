@@ -18,10 +18,8 @@ export function PaymentClaimFields({
 }: PaymentClaimFieldsProps): React.JSX.Element {
   return (
     <>
-      <div style={{ margin: '18px 0', borderTop: '1px dashed var(--border-subtle)' }} />
-
       {/* Payment Provider & Amount */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
+      <div className="form-grid-2">
         <div className="form-group">
           <label
             htmlFor="payment_provider"
@@ -59,7 +57,7 @@ export function PaymentClaimFields({
             value={draft.claimed_advance_bdt}
             onChange={(e) => onUpdateField('claimed_advance_bdt', e.target.value)}
             aria-describedby={fieldErrors.claimed_advance_bdt ? "claimed_advance_bdt-error" : undefined}
-          aria-invalid={!!fieldErrors.claimed_advance_bdt}
+            aria-invalid={!!fieldErrors.claimed_advance_bdt}
             className="form-control"
             style={{ marginTop: '6px', width: '100%' }}
           />
@@ -107,7 +105,7 @@ export function PaymentClaimFields({
       </div>
 
       {/* Transaction ID */}
-      <div className="form-group" style={{ marginBottom: '18px' }}>
+      <div className="form-group" style={{ marginBottom: '6px' }}>
         <label
           htmlFor="payment_trx_id"
           style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}

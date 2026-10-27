@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ShieldCheck } from 'lucide-react';
 import { structuredRetention } from './retentionApi';
 import type { StructuredRetentionStatus } from './retentionApi';
 
@@ -37,15 +38,35 @@ export function StructuredRetentionPanel({ token, onCleaned }: Props) {
     } finally { setBusy(false); }
   }
 
-  return <section className="card" style={{ padding: '24px', marginTop: '16px' }} aria-label="Completed record retention">
-    <h3>Completed record retention</h3>
-    <p>Completed personal records are removed after 12 calendar months. Unresolved orders stay available. Used payments remain protected.</p>
-    {busy && <p role="status">Loading retention status…</p>}
-    {error && <p role="alert">{error}</p>}
-    {status && <p role="status">{status.overdue} overdue · {status.failed} failed{status.standby ? ' · Offline demonstration' : ''}</p>}
-    {removed !== null && <p role="status">Removed {removed} completed records.</p>}
-    <button className="btn btn-primary btn-sm" type="button" disabled={busy} onClick={() => { void retry(); }}>
-      {status ? 'Run / retry completed record cleanup' : 'Retry retention status'}
-    </button>
-  </section>;
+  return (
+    <section className="isolated-section" aria-label="Completed record retention">
+      <div className="isolated-section-header" style={{ marginBottom: '10px' }}>
+        <div>
+          <h3 className="isolated-section-title">
+            <ShieldCheck size={18} /> Completed record retention
+          </h3>
+          <p className="isolated-section-desc">
+            Completed personal records are removed after 12 calendar months. Unresolved orders stay available. Used payments remain protected.
+          </p>
+        </div>
+      </div>
+      {busy && <p role="status" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Loading retention status…</p>}
+      {error && <p role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.85rem' }}>{error}</p>}
+      {status && (
+        <div className="isolated-subcard" style={{ margin: '12px 0' }}>
+          <p role="status" style={{ margin: 0, fontWeight: 600, fontSize: '0.875rem' }}>
+            {status.overdue} overdue · {status.failed} failed{status.standby ? ' · Offline demonstration' : ''}
+          </p>
+        </div>
+      )}
+      {removed !== null && (
+        <p role="status" style={{ color: 'var(--emerald-accent)', fontSize: '0.85rem' }}>
+          Removed {removed} completed records.
+        </p>
+      )}
+      <button className="btn btn-primary btn-sm" type="button" disabled={busy} onClick={() => { void retry(); }}>
+        {status ? 'Run / retry completed record cleanup' : 'Retry retention status'}
+      </button>
+    </section>
+  );
 }

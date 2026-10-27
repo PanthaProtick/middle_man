@@ -1,0 +1,236 @@
+/* ==========================================================================
+   Section Isolation & Visual Boundaries
+   ========================================================================== */
+
+/* Main Isolated Section Card */
+.isolated-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 22px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 10px rgba(20, 102, 83, 0.04);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  min-width: 0;
+}
+
+.isolated-section:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 4px 14px rgba(20, 102, 83, 0.07);
+}
+
+/* Section Header Block */
+.isolated-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.isolated-section-header > div:first-child {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.isolated-section-title {
+  color: var(--primary-accent);
+  font-family: var(--font-heading);
+  font-size: 1.05rem;
+  font-weight: 700;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  letter-spacing: -0.01em;
+}
+
+.isolated-section-desc {
+  color: var(--text-secondary);
+  font-size: 0.825rem;
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+/* Sub-panels inside isolated sections */
+.isolated-subcard {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+  min-width: 0;
+  transition: border-color 0.15s ease;
+}
+
+.isolated-subcard:hover {
+  border-color: var(--border-hover);
+}
+
+.isolated-subcard:last-child {
+  margin-bottom: 0;
+}
+
+.isolated-subcard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.isolated-subcard-title {
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Responsive Form Grids */
+.form-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+/* Modal Section Isolation */
+.detail-section-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 16px;
+  min-width: 0;
+}
+
+.detail-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-section-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-accent);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.modal-terms-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 130px), 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+  background: var(--bg-surface);
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-subtle);
+}
+
+/* Buyer Form Section Isolation */
+.buyer-form-section {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  margin-bottom: 16px;
+  min-width: 0;
+  transition: border-color 0.2s ease;
+}
+
+.buyer-form-section:focus-within {
+  border-color: var(--border-focus);
+}
+
+.buyer-form-section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.buyer-form-section-badge {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #e4eee7;
+  color: var(--primary-accent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.buyer-form-section-title {
+  font-size: 0.925rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.buyer-form-section-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  margin: 2px 0 0;
+}
+
+/* Pathao Settings Section Isolation */
+.pathao-settings-panel {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-top: 16px;
+  min-width: 0;
+}
+
+.pathao-settings-panel label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  margin-bottom: 10px;
+}
+
+.pathao-settings-panel select,
+.pathao-settings-panel input {
+  margin-top: 4px;
+  width: 100%;
+}
+
+.pathao-settings-panel fieldset {
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  padding: 12px 14px;
+  margin-top: 12px;
+  background: var(--bg-card);
+}
+
+.pathao-settings-panel legend {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-accent);
+  padding: 0 6px;
+}

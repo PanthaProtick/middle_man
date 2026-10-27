@@ -110,12 +110,12 @@ export function BuyerSubmissionForm({
 
   return (
     <form onSubmit={handleSubmit} className="card" style={{ border: '1px solid var(--border-subtle)' }} noValidate>
-      <div style={{ marginBottom: '16px' }}>
-        <h3 style={{ margin: 0, fontSize: '1.05rem', color: 'var(--text-primary)' }}>
-          Delivery & Payment Confirmation / ডেলিভারি ও পেমেন্ট তথ্য
+      <div style={{ marginBottom: '18px' }}>
+        <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
+          Delivery &amp; Payment Confirmation / ডেলিভারি ও পেমেন্ট তথ্য
         </h3>
-        <p style={{ margin: '4px 0 0 0', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          Please fill in your details accurately to confirm this order.
+        <p style={{ margin: '4px 0 0 0', fontSize: '0.825rem', color: 'var(--text-secondary)' }}>
+          Please complete your details in the sections below to confirm this order.
         </p>
       </div>
 
@@ -124,7 +124,7 @@ export function BuyerSubmissionForm({
           role="alert"
           style={{
             padding: '12px',
-            borderRadius: '6px',
+            borderRadius: '8px',
             background: 'rgba(239, 68, 68, 0.1)',
             border: '1px solid rgba(239, 68, 68, 0.3)',
             color: 'var(--rose-accent)',
@@ -141,95 +141,126 @@ export function BuyerSubmissionForm({
       )}
 
       <fieldset disabled={isSubmitting || isLocked} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-      {/* Buyer Name */}
-      <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label htmlFor="buyer_name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-          <User size={15} color="var(--primary-accent)" />
-          <span>Your Full Name / আপনার নাম <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
-        </label>
-        <input
-          id="buyer_name"
-          name="buyer_name"
-          type="text"
-          value={draft.buyer_name}
-          onChange={(e) => updateField('buyer_name', e.target.value)}
-          placeholder="e.g. Rahim Uddin"
-          maxLength={200}
-          aria-describedby={fieldErrors.buyer_name ? "buyer_name-error" : undefined}
-          aria-invalid={!!fieldErrors.buyer_name}
-          className="form-control"
-          style={{ marginTop: '6px', width: '100%' }}
-        />
-        {fieldErrors.buyer_name && (
-          <div id="buyer_name-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.buyer_name}</div>
-        )}
-      </div>
+        {/* Section 1: Customer Contact */}
+        <div className="buyer-form-section">
+          <div className="buyer-form-section-header">
+            <div className="buyer-form-section-badge">1</div>
+            <div>
+              <h4 className="buyer-form-section-title">Recipient Information / আপনার তথ্য</h4>
+              <p className="buyer-form-section-subtitle">Name and phone number for delivery confirmation</p>
+            </div>
+          </div>
 
-      {/* Contact Number */}
-      <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label htmlFor="contact_number" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-          <Phone size={15} color="var(--primary-accent)" />
-          <span>Your Contact Number / যোগাযোগের ফোন নাম্বার <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
-        </label>
-        <input
-          id="contact_number"
-          name="contact_number"
-          type="tel"
-          value={draft.contact_number}
-          onChange={(e) => updateField('contact_number', e.target.value)}
-          placeholder="017XXXXXXXX or ০১৭XXXXXXXX"
-          maxLength={32}
-          aria-describedby={fieldErrors.contact_number ? "contact_number-error" : undefined}
-          aria-invalid={!!fieldErrors.contact_number}
-          className="form-control"
-          style={{ marginTop: '6px', width: '100%' }}
-        />
-        <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-          For courier call & delivery updates (কুরিয়ার কলের জন্য)
+          <div className="form-group" style={{ marginBottom: '14px' }}>
+            <label htmlFor="buyer_name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+              <User size={15} color="var(--primary-accent)" />
+              <span>Your Full Name / আপনার নাম <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
+            </label>
+            <input
+              id="buyer_name"
+              name="buyer_name"
+              type="text"
+              value={draft.buyer_name}
+              onChange={(e) => updateField('buyer_name', e.target.value)}
+              placeholder="e.g. Rahim Uddin"
+              maxLength={200}
+              aria-describedby={fieldErrors.buyer_name ? "buyer_name-error" : undefined}
+              aria-invalid={!!fieldErrors.buyer_name}
+              className="form-control"
+              style={{ marginTop: '6px', width: '100%' }}
+            />
+            {fieldErrors.buyer_name && (
+              <div id="buyer_name-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.buyer_name}</div>
+            )}
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="contact_number" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+              <Phone size={15} color="var(--primary-accent)" />
+              <span>Your Contact Number / যোগাযোগের ফোন নাম্বার <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
+            </label>
+            <input
+              id="contact_number"
+              name="contact_number"
+              type="tel"
+              value={draft.contact_number}
+              onChange={(e) => updateField('contact_number', e.target.value)}
+              placeholder="017XXXXXXXX or ০১৭XXXXXXXX"
+              maxLength={32}
+              aria-describedby={fieldErrors.contact_number ? "contact_number-error" : undefined}
+              aria-invalid={!!fieldErrors.contact_number}
+              className="form-control"
+              style={{ marginTop: '6px', width: '100%' }}
+            />
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              For courier call &amp; delivery updates (কুরিয়ার কলের জন্য)
+            </div>
+            {fieldErrors.contact_number && (
+              <div id="contact_number-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
+            )}
+          </div>
         </div>
-        {fieldErrors.contact_number && (
-          <div id="contact_number-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
-        )}
-      </div>
 
-      {/* Delivery Address */}
-      {portalToken && <PathaoLocations portalToken={portalToken} value={draft.pathao ?? {}}
-        disabled={isSubmitting || isLocked} onChange={pathao => onDraftChange({...draft, pathao})} />}
-      <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-          <MapPin size={15} color="var(--primary-accent)" />
-          <span>Full Delivery Address / সম্পূর্ণ ডেলিভারি ঠিকানা <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
-        </label>
-        <textarea
-          id="address_raw"
-          name="address_raw"
-          rows={3}
-          value={draft.address_raw}
-          onChange={(e) => updateField('address_raw', e.target.value)}
-          placeholder="House/Holding, Road, Area/Thana, District (e.g. বাড়ি ১২, রোড ৫, ধানমন্ডি, ঢাকা)"
-          maxLength={2000}
-          aria-describedby={fieldErrors.address_raw ? "address_raw-error" : undefined}
-          aria-invalid={!!fieldErrors.address_raw}
-          className="form-control"
-          style={{ marginTop: '6px', width: '100%', resize: 'vertical' }}
-        />
-        {fieldErrors.address_raw && (
-          <div id="address_raw-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
-        )}
-      </div>
+        {/* Section 2: Delivery Address & Courier */}
+        <div className="buyer-form-section">
+          <div className="buyer-form-section-header">
+            <div className="buyer-form-section-badge">2</div>
+            <div>
+              <h4 className="buyer-form-section-title">Delivery Location / ডেলিভারির ঠিকানা</h4>
+              <p className="buyer-form-section-subtitle">Full destination address for courier dispatch</p>
+            </div>
+          </div>
 
-      {order.ai_assistance_available !== true && <p>AI assistance is unavailable. Enter your address and payment details manually.</p>}
-      {portalToken && order.ai_assistance_available === true && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
-        onUse={value => updateField('address_raw', value)} disabled={isSubmitting || isLocked} />}
+          {portalToken && <PathaoLocations portalToken={portalToken} value={draft.pathao ?? {}}
+            disabled={isSubmitting || isLocked} onChange={pathao => onDraftChange({...draft, pathao})} />}
 
-      <PaymentClaimFields
-        order={order}
-        draft={draft}
-        fieldErrors={fieldErrors}
-        onUpdateField={updateField}
-      />
+          <div className="form-group" style={{ marginBottom: '10px' }}>
+            <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
+              <MapPin size={15} color="var(--primary-accent)" />
+              <span>Full Delivery Address / সম্পূর্ণ ডেলিভারি ঠিকানা <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
+            </label>
+            <textarea
+              id="address_raw"
+              name="address_raw"
+              rows={3}
+              value={draft.address_raw}
+              onChange={(e) => updateField('address_raw', e.target.value)}
+              placeholder="House/Holding, Road, Area/Thana, District (e.g. বাড়ি ১২, রোড ৫, ধানমন্ডি, ঢাকা)"
+              maxLength={2000}
+              aria-describedby={fieldErrors.address_raw ? "address_raw-error" : undefined}
+              aria-invalid={!!fieldErrors.address_raw}
+              className="form-control text-area"
+              style={{ marginTop: '6px', width: '100%', resize: 'vertical' }}
+            />
+            {fieldErrors.address_raw && (
+              <div id="address_raw-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
+            )}
+          </div>
 
+          {order.ai_assistance_available !== true && <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0' }}>AI assistance is unavailable. Enter your address and payment details manually.</p>}
+          {portalToken && order.ai_assistance_available === true && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
+            onUse={value => updateField('address_raw', value)} disabled={isSubmitting || isLocked} />}
+        </div>
+
+        {/* Section 3: Advance Payment Information */}
+        <div className="buyer-form-section">
+          <div className="buyer-form-section-header">
+            <div className="buyer-form-section-badge">3</div>
+            <div>
+              <h4 className="buyer-form-section-title">Advance Payment Claim / অগ্রিম পেমেন্টের তথ্য</h4>
+              <p className="buyer-form-section-subtitle">Record the advance you sent to the shop receiving account</p>
+            </div>
+          </div>
+
+          <PaymentClaimFields
+            order={order}
+            draft={draft}
+            fieldErrors={fieldErrors}
+            onUpdateField={updateField}
+          />
+        </div>
       </fieldset>
+
       {/* Submit Button */}
       <button
         type="submit"

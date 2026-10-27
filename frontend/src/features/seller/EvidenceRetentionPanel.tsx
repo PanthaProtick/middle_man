@@ -66,7 +66,7 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
 
   if (loading && !status) {
     return (
-      <div style={{ padding: '16px', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px solid var(--border-subtle)', color: 'var(--text-secondary)' }}>
+      <div className="isolated-section" style={{ color: 'var(--text-secondary)' }}>
         <p role="status">Loading evidence retention status…</p>
       </div>
     );
@@ -78,19 +78,18 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
   return (
     <section
       aria-label="Raw evidence retention and cleanup"
-      style={{
-        padding: '16px',
-        background: 'var(--bg-surface)',
-        borderRadius: '8px',
-        border: '1px solid var(--border-subtle)',
-        marginTop: '20px',
-      }}
+      className="isolated-section"
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-        <h4 style={{ color: 'var(--primary-accent)', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Shield size={16} /> 30-Day Raw Evidence Retention
-        </h4>
-        <div style={{ display: 'flex', gap: '8px' }}>
+      <div className="isolated-section-header">
+        <div>
+          <h4 className="isolated-section-title">
+            <Shield size={18} /> 30-Day Raw Evidence Retention
+          </h4>
+          <p className="isolated-section-desc">
+            Original raw SMS text and address AI requests/responses are retained for up to 30 days from collection. Reprocessing never resets this deadline. Structured claims, accepted allocations, and COD remain intact after deletion.
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn btn-secondary btn-sm"
@@ -115,10 +114,6 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
         </div>
       </div>
 
-      <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 12px' }}>
-        Original raw SMS text and address AI requests/responses are retained for up to 30 days from collection. Reprocessing never resets this deadline. Structured claims, accepted allocations, and COD remain intact after deletion.
-      </p>
-
       {error && (
         <div role="alert" style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', color: 'var(--rose-accent)', fontSize: '0.85rem', marginBottom: '12px' }}>
           {error}
@@ -134,13 +129,13 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
       {status && (
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+            <div className="isolated-subcard" style={{ marginBottom: 0 }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Raw SMS</span>
               <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                 {status.counts.sms_active} retained / {status.counts.sms_purged} purged
               </strong>
             </div>
-            <div style={{ padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
+            <div className="isolated-subcard" style={{ marginBottom: 0 }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>AI Prompts/Outputs</span>
               <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
                 {status.counts.ai_extractions_active} retained / {status.counts.ai_extractions_purged} purged
@@ -148,7 +143,7 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', flexWrap: 'wrap' }}>
             {hasOverdue || hasFailed ? (
               <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--amber-accent)' }}>
                 <AlertTriangle size={15} />
