@@ -150,6 +150,10 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved }: {
           {review.latest_attempt.resolution_action === 'attach_existing' && (
             <p>The original unknown attempt and its reviewed snapshot are preserved.</p>
           )}
+          {review.blockers.includes('ORDER_NOT_CONFIRMED') && (
+            <p role="alert">Local cancellation does not cancel this existing Pathao booking.
+              Resolve the booking in Pathao before dispatching or creating a replacement.</p>
+          )}
         </div>
       )}
       {review.latest_attempt?.status === 'unknown' && (

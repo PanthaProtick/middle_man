@@ -120,6 +120,11 @@ async def test_postgres_confirmed_noncreation_allows_retry(postgres_buyer, monke
     assert rows[0]['error_code'] == 'CONFIRMED_NONCREATION'
     assert rows[0]['resolution_action'] == 'confirm_noncreation'
     assert rows[1]['status'] == 'success'
+    replay = await reconcile(client, order, {
+        'attempt_id': attempt['id'], 'expected_version': 0, 'action': 'confirm_noncreation',
+    }, 'pg-noncreation-resolve')
+    assert replay.status_code == 200
+    assert replay.json() == response.json()
 
 
 async def test_postgres_competing_resolutions_serialize(postgres_buyer, monkeypatch):

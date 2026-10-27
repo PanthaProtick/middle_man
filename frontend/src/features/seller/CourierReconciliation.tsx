@@ -20,6 +20,7 @@ export function CourierReconciliation({ orderId, token, attempt, onResolved }: {
   onResolved: (review: Review) => void;
 }) {
   const mounted = useRef(true);
+  const retryKeys = useRef(new Map<string, string>());
   useEffect(() => {
     mounted.current = true;
     return () => { mounted.current = false; };
@@ -47,11 +48,14 @@ export function CourierReconciliation({ orderId, token, attempt, onResolved }: {
       }
       : common;
     try {
+      const serialized = JSON.stringify(body);
+      const key = retryKeys.current.get(serialized) ?? `reconcile-${crypto.randomUUID()}`;
+      retryKeys.current.set(serialized, key);
       const review = await requestJson<Review>(
         `/api/seller/orders/${orderId}/courier-reconciliation`,
-        { method: 'POST', body: JSON.stringify(body) },
+        { method: 'POST', body: serialized },
         token,
-        `reconcile-${crypto.randomUUID()}`,
+        key,
       );
       if (mounted.current) onResolved(review);
     } catch (err: unknown) {

@@ -4,7 +4,94 @@
 
 **Blocked by:** 06 — Submit drafts safely through the offline courier adapter.
 
-**Status:** implemented — local verification complete
+**Status:** implemented — completion gaps resolved; local verification complete
+
+## Browser verification follow-up (2026-10-27)
+
+- **PASS**: exercised the actual seller review/reconciliation components and
+  stylesheet in a real browser with explicitly synthetic fetch responses.
+  Verified initial protections, rejected evidence, response interruption and
+  retained retry key, disabled loading controls, recovered success,
+  cancelled-order external-action warning, and acknowledged noncreation.
+- Evidence and reproduction fixture:
+  [browser verification record](../ticket07-browser-verification.md), including
+  screenshots of cancelled-order recovered success and confirmed noncreation.
+- This closes the changed-component browser interaction check. It does not
+  establish an authenticated whole-app or live-provider journey. Physical-device,
+  sandbox/live Pathao/Clerk, and hosted migration acceptance remain NOT RUN.
+- No production source changes in this verification pass; the prior full
+  `check-6eNPhc` automated PASS remains applicable.
+
+## Completion fixes (2026-10-27)
+
+- Closed the replay failure window: resolution, append-only audit, and a durable
+  idempotency receipt now commit in one transaction. Review rendering happens
+  after commit and outside resolution locks. A failed render/finalization resumes
+  from the receipt; the first persisted response remains the stable replay.
+- Same-key checks run again after loading the attempt and after acquiring locks.
+  Duplicate-consignment validation runs under those locks after replay handling,
+  so delayed evidence cannot mistake a winning same-key resolution for a duplicate.
+- Seller reconciliation retains the key for retries with the same payload.
+  Recovered bookings on orders that are no longer confirmed explicitly warn that
+  local cancellation does not cancel Pathao and require seller action in Pathao.
+- Changed paths: `backend/app/core/idempotency.py`, reconciliation service and new
+  `courier_reconciliation_replay.py` / `courier_reconciliation_resolution.py`,
+  reconciliation backend tests and new memory/PostgreSQL replay suites,
+  `CourierReconciliation.tsx`, `CourierReview.tsx`, component tests, and contracts.
+  No new migration or live-provider transport is needed.
+- Regression coverage: both actions across receipt/write/render/finalization
+  failures, PostgreSQL rollback after a flushed receipt, simultaneous same-key
+  identical/different input, delayed evidence, stable replay after a later booking,
+  retained UI retry keys, and cancelled-order recovered success warnings.
+- Focused checks: 30 reconciliation backend tests passed before the final delayed
+  evidence case; the updated PostgreSQL replay suite then passed 11/11.
+  Seller component suite: 7/7 passed. Backend lint and strict types passed.
+- Final root `npm run check`: **PASS**, all eight gates; **630 backend passed,
+  0 skipped**, **191 frontend passed**, build and HTTP smoke passed. Result:
+  `.cache/checks/check-6eNPhc/result.json`. Tests used disposable isolated schemas
+  on loopback PostgreSQL port 5432 and workspace-local TEMP/TMP.
+  At that gate, browser/device and live Pathao/Clerk, sandbox lookup,
+  and hosted migrations remain NOT RUN. Ticket 08 still owns the broader
+  post-submission correction/mismatch workflow.
+- Local ticket 07 scope is complete. Next action: ticket 08's broader handling of
+  post-submission changes; actual sandbox acceptance remains ticket 09.
+
+## Independent completion verification (2026-10-27)
+
+Historical findings below are addressed by the completion fixes above.
+
+- Reviewed commit `54c240a` against the acceptance criteria. No implementation
+  changes were made during verification.
+- **P2 — replay persistence is not atomic with resolution.**
+  `backend/app/services/courier_reconciliation.py` commits the attempt/audit in
+  `_apply` before reading the current review and saving the idempotency record.
+  Injecting a failure in `save_idempotency_record` leaves one applied resolution;
+  retrying the identical payload/key returns `409 ATTEMPT_NOT_RECONCILABLE`
+  instead of replaying success. The temporary fault-injection test reproduced
+  this failure and was removed after execution. Persist a durable replay outcome
+  with the resolution, or recover it from the recorded operation; also recheck
+  same-key replay after acquiring locks. Add failure-window and simultaneous
+  same-key regression coverage, including PostgreSQL.
+- **P2 — cancelled-order recovery lacks the external-action warning.**
+  `frontend/src/features/seller/CourierReview.tsx` shows recovered success and
+  `ORDER_NOT_CONFIRMED`, but does not explain that local cancellation has not
+  cancelled the recovered Pathao booking or that the seller must resolve it in
+  Pathao. The cancelled-order backend test asserts only the lifecycle blocker.
+  This overlaps ticket 08, which is still ready-for-agent; ticket 07's explicit
+  warning acceptance criterion cannot yet be signed off. Add component coverage
+  for cancellation followed by recovered success.
+- Fresh focused verification: **14 backend passed, 0 skipped**, including five
+  PostgreSQL tests against isolated schemas on loopback port 5432;
+  **5 seller reconciliation component tests passed**.
+- Full gate: **PASS**, all eight stages, result
+  `.cache/checks/check-aLirns/result.json`. Initial run `check-IUBonj` failed on
+  Windows system-temp permissions; the successful rerun used workspace-local
+  TEMP/TMP and the isolated PostgreSQL test fixtures. Passing existing suites
+  does not close the two uncovered acceptance gaps above.
+- Browser, physical-device, real Pathao/Clerk, sandbox lookup, and hosted
+  migration acceptance: **NOT RUN**. Evidence remains local/simulated.
+- Next action: fix the replay failure window and resolve the warning dependency,
+  add the missing regression cases, then repeat focused tests and the full gate.
 
 ## Implementation record (2026-10-27)
 

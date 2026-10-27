@@ -145,3 +145,42 @@ it('offers reconciliation from the review and shows the recovered booking', asyn
   expect(host.textContent).toContain('reviewed snapshot are preserved');
   await act(async () => root.unmount());
 });
+
+it('reuses the same key after an interrupted response and changes it for a different action', async () => {
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Response interrupted'));
+  const { host, root } = await render(
+    <CourierReconciliation orderId="order-1" token="seller" attempt={attempt} onResolved={vi.fn()} />,
+  );
+  await act(async () => host.querySelector<HTMLInputElement>('input[name="confirmedNoncreation"]')!.click());
+  await act(async () => host.querySelector<HTMLButtonElement>('[data-noncreation]')!.click());
+  await act(async () => host.querySelector<HTMLButtonElement>('[data-noncreation]')!.click());
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  const keys = fetcher.mock.calls.map(call => new Headers(call[1]?.headers).get('Idempotency-Key'));
+  expect(keys[0]).toBe(keys[1]);
+  await act(async () => setValue(host.querySelector<HTMLInputElement>('input[name="consignmentId"]')!, 'SIM-RECOVERED'));
+  await act(async () => host.querySelector<HTMLButtonElement>('[data-attach]')!.click());
+  expect(new Headers(fetcher.mock.calls[2][1]?.headers).get('Idempotency-Key')).not.toBe(keys[0]);
+  await act(async () => root.unmount());
+});
+
+it('preserves the Pathao action warning after recovering a booking for a cancelled order', async () => {
+  const cancelled = { ...review, reviewed: false, blockers: ['ORDER_NOT_CONFIRMED'] };
+  const recovered = {
+    ...cancelled,
+    latest_attempt: { ...attempt, status: 'success' as const, consignment_id: 'SIM-RECOVERED',
+      resolution_version: 1, resolution_action: 'attach_existing' as const },
+  };
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async url => {
+    if (String(url).includes('/courier-reconciliation')) return new Response(JSON.stringify(recovered));
+    if (String(url).includes('/locations?')) return new Response(JSON.stringify({ choices: [] }));
+    return new Response(JSON.stringify(cancelled));
+  });
+  const { host, root } = await render(<CourierReview orderId="order-1" token="seller" />);
+  await act(async () => setValue(host.querySelector<HTMLInputElement>('input[name="consignmentId"]')!, 'SIM-RECOVERED'));
+  await act(async () => host.querySelector<HTMLButtonElement>('[data-attach]')!.click());
+  expect(host.textContent).toContain('Existing booking attached');
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain('Local cancellation does not cancel');
+  expect(host.textContent).toContain('Resolve the booking in Pathao');
+  expect(host.querySelector('[data-submit]')).toBeNull();
+  await act(async () => root.unmount());
+});

@@ -64,10 +64,18 @@ Seller-only `POST /api/seller/orders/{id}/courier-reconciliation` resolves one p
 - Stale versions return `409 STALE_VERSION`; an already-resolved attempt returns
   `409 ATTEMPT_NOT_RECONCILABLE`. Same-key replay returns the stored review. Competing
   operators serialize on the order/shop/attempt locks, so only one resolution is recorded.
+  The attempt, audit, and idempotency receipt commit together. Review rendering happens
+  after releasing locks; if it fails, the same key resumes rendering from the committed
+  receipt without applying another resolution. The first successfully persisted review
+  is the replay snapshot, including when simultaneous requests render it. Reusing the
+  key with different input returns `409 IDEMPOTENCY_KEY_REUSED`. The seller UI retains
+  the key when retrying the same action and evidence after an interrupted response.
 - A confirmed noncreation permits a new attempt only after the normal reservation rechecks
   current lifecycle, reviewed revision, connection, address, and parcel facts. Cancelling
   the order still blocks a new booking. An existing booking can still be attached after a
   local cancellation, retaining the order-state blockers (including cancellation).
+  Recovered success on an order that is no longer confirmed also explicitly warns that
+  local cancellation does not cancel the Pathao booking and requires action in Pathao.
 - Provider I/O runs outside the database transaction. Settings changes, draft edits,
   reconnects, or a different idempotency key cannot bypass the protected attempt.
 

@@ -28,12 +28,16 @@ async def check_idempotency_record(
     scope: str,
     operation: str,
     payload_hash: str,
+    *,
+    for_update: bool = False,
 ) -> Optional[Tuple[int, Any]]:
     if not key:
         return None
     composite_key = _record_key(scope, operation, key)
     if db is not None:
         stmt = select(IdempotencyRecordTable).where(IdempotencyRecordTable.key == composite_key)
+        if for_update:
+            stmt = stmt.with_for_update().execution_options(populate_existing=True)
         result = await db.execute(stmt)
         record = result.scalar_one_or_none()
         if record:
@@ -94,3 +98,28 @@ async def save_idempotency_record(
             "status_code": status_code,
             "data": data,
         }
+
+
+async def finalize_idempotency_record(
+    db: AsyncSession | None, key: str, scope: str, operation: str,
+    payload_hash: str, pending: dict[str, str], data: Any,
+) -> Any:
+    """Replace a committed receipt once; simultaneous renderers replay the winner."""
+    cached = await check_idempotency_record(
+        db, key, scope, operation, payload_hash, for_update=True,
+    )
+    if cached is None:
+        raise RuntimeError('Cannot finalize an uncommitted idempotency receipt')
+    result = cached[1]
+    if result == pending:
+        composite_key = _record_key(scope, operation, key)
+        if db is not None:
+            record = await db.get(IdempotencyRecordTable, composite_key)
+            assert record is not None
+            record.response_json = json.dumps(data, default=str)
+        else:
+            _memory_idempotency_store[composite_key]['data'] = data
+        result = data
+    if db is not None:
+        await db.commit()
+    return result

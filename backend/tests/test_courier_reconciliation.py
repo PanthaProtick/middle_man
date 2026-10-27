@@ -82,6 +82,9 @@ async def test_confirmed_noncreation_preserves_attempt_and_reviewed_retry(client
     assert _memory_attempts[order['id']][0]['resolution_action'] == 'confirm_noncreation'
     assert _memory_attempts[order['id']][1]['status'] == 'success'
     assert attempts['latest_attempt']['attempt_number'] == 2
+    replay = await reconcile(client, order, payload, 'reconcile-noncreation')
+    assert replay.status_code == 200
+    assert replay.json() == review
 
 
 @pytest.mark.usefixtures('seller_identity')
