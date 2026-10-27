@@ -49,8 +49,14 @@
 ## Execution and orchestration guardrails
 
 - Subagents: Pass base commit, changed paths, and acceptance targets, then yield
-  the turn. Never run sleep timers (`schedule`) or status polling loops waiting for
-  subagents; both Codex and Antigravity resume automatically upon completion.
+  the turn. Never run sleep timers (`schedule`) or call status tools such as
+  `manage_task` and `manage_subagents` while waiting; both Codex and Antigravity wake
+  you automatically on completion.
+- Background tasks: After starting a background test or verification run, yield the
+  turn and wait for its completion event. Never poll status with tools such as
+  `manage_task` or `manage_subagents`, and never run sleep timers while waiting.
+  While the run is active, send no interim progress messages or partial summaries;
+  read the output and deliver one report once that event arrives.
 - Windows PowerShell: Use PowerShell-compatible syntax (comma-separated lists
   `file1, file2` instead of bash braces `{file1,file2}`). Write scratch Python to
   `.scratch/` with UTF-8 instead of nested inline quotes (`-c "..."`).
