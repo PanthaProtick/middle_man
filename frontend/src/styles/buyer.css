@@ -32,6 +32,13 @@
   gap: 16px;
 }
 
+.portal-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 .portal-notice {
   display: flex;
   gap: 10px;
@@ -96,7 +103,11 @@
   border: 1px solid rgba(99, 102, 241, 0.35);
   border-radius: var(--radius-md);
   background: rgba(99, 102, 241, 0.09);
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
+
+.buyer-order-item { min-width: 0; }
 
 /* Native searchable courier choices retain labels, touch targets and wrapping actions. */
 .pathao-locations { display: grid; gap: 12px; margin-bottom: 16px; }

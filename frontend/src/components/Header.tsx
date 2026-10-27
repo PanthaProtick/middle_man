@@ -1,6 +1,7 @@
 import React from 'react';
 import { Sparkles, ShoppingBag, LogOut } from 'lucide-react';
 import type { HealthStatus } from '../services/api';
+import { LocaleSwitch } from '../features/locale';
 
 interface HeaderProps {
   health: HealthStatus | null;
@@ -31,7 +32,8 @@ export default function Header({
         </div>
       </div>
 
-      <div className="status-badges" aria-label="System Integration Status">
+      <div className="status-badges">
+        <LocaleSwitch />
         <div
           className={`badge ${isHealthy ? 'online' : 'offline'}`}
           title={isHealthy ? 'Core commerce API operational' : 'Attempting connection to backend service'}

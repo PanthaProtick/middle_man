@@ -1,4 +1,5 @@
 import type { BuyerSubmissionInput, PublicOrder } from './types';
+import { formatBdt } from '../locale/format';
 
 export interface ApiError {
   code: string;
@@ -100,8 +101,7 @@ export async function submitBuyerDetails(
 }
 
 export function formatBDT(minor: number): string {
-  const bdt = minor / 100;
-  return `৳${bdt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return formatBdt(minor);
 }
 
 export function parseClaimedAmount(raw: string): number {

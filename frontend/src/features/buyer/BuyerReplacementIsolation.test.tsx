@@ -67,8 +67,8 @@ describe('BuyerReplacementIsolation Component', () => {
 
     expect(fetchSpy).toHaveBeenCalledWith('/api/public/orders/old-pred-token', expect.any(Object));
 
-    // Terminal status is shown prominently in Bengali and English
-    expect(container.textContent).toContain('Order Cancelled / অর্ডার বাতিল করা হয়েছে');
+    // Terminal status is shown prominently in the selected language (English by default).
+    expect(container.textContent).toContain('Order Cancelled');
     expect(container.textContent).toContain('Please contact the seller on Facebook/Messenger for further details.');
     expect(container.textContent).toContain('Original Mechanical Keyboard');
 
@@ -103,7 +103,7 @@ describe('BuyerReplacementIsolation Component', () => {
       root.render(<BuyerPortal portalToken="expired-pred-token" />);
     });
 
-    expect(container.textContent).toContain('Order Link Expired / অর্ডারের মেয়াদ শেষ');
+    expect(container.textContent).toContain('Order Link Expired');
     expect(container.textContent).toContain('Please contact the seller for a new link');
     expect(container.querySelector('form')).toBeNull();
     expect(container.querySelector('input[type="file"]')).toBeNull();
@@ -128,7 +128,7 @@ describe('BuyerReplacementIsolation Component', () => {
       root.render(<BuyerPortal portalToken="revoked-pred-token" />);
     });
 
-    expect(container.textContent).toContain('Order record unavailable. Please contact the seller. / অর্ডার পাওয়া যাচ্ছে না। বিক্রেতার সাথে যোগাযোগ করুন।');
+    expect(container.textContent).toContain('Order record unavailable. Please contact the seller.');
     expect(container.querySelector('form')).toBeNull();
   });
 });

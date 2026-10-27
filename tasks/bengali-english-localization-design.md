@@ -1,6 +1,6 @@
 # Task: Consistent Bengali and English experience
 
-Status: In-Progress (spec published ready-for-agent; implementation pending)
+Status: In-Progress (ticket 01 implemented; tickets 02–13 pending)
 
 ## Goal and settled scope
 
@@ -102,17 +102,51 @@ Status: In-Progress (spec published ready-for-agent; implementation pending)
 
 ## Current state and next action
 
-- Changed paths: this brief, GLOSSARY.md, docs/ui-audience-and-design.md, and
-  docs/adr/0006-bengali-english-presentation-boundary.md. Application unchanged.
-- Interview questions Q1-Q15 accepted; no open product-design branch identified.
-- The owner invoked to-spec to synthesize and publish the agreed design, and
-  explicitly confirmed existing rendered journeys plus backend request boundaries.
-- Published spec: ../.scratch/bengali-english-localization/spec.md, with
-  Status: ready-for-agent. This is the implementation source of scope and acceptance.
-- Next: implement from the published spec when requested; no code was changed as
-  part of specification publication.
-- Resume: inspect the current diff and published spec before beginning the first
-  bounded implementation cluster.
+- Status: ticket 01 implemented. Tickets 02–12 are independently unblocked;
+  ticket 13 follows them.
+- Shared locale foundation added under `frontend/src/features/locale/`:
+  `catalog.ts` (typed English/Bengali catalogs), `context.ts`,
+  `LocaleProvider.tsx`, `LocaleSwitch.tsx`, `storage.ts` (validated
+  device preference, browser fallback, unavailable-storage tolerance), and
+  `format.ts` (0-9 money, Asia/Dhaka dates, localized Gregorian months).
+- Both entry paths now render the switch: `App.tsx` portal header and the
+  seller `Header` (including signed-out/no-Clerk). The document language and
+  explicit preference update without login. Seller shell/navigation copy and the
+  buyer submission form remain unmigrated by design (tickets 02–12).
+- Buyer summary translated: `BuyerOrderDetails.tsx`, `BuyerStatusView.tsx`,
+  and localized loading/refresh/unavailable/policy-gate/retry states in
+  `BuyerPortal.tsx`. `usePublicOrder.ts` now exposes presentation-free failure
+  kinds; known errors no longer display raw server English. Shop, product,
+  provider/account text, numbers, IDs, amounts, and lifecycle values are
+  preserved. Delivery advance and remaining COD have explanatory copy; seller
+  acceptance does not claim independent payment-provider verification.
+- Presentation support: Bengali-capable offline font fallback and wrapping in
+  `styles/theme.css`/`styles/buyer.css`, switch announcement, preserved focus,
+  and associated copy-error text.
+- Test harness: `test/setup.ts` installs an in-memory Storage only when the
+  environment's `localStorage` lacks methods (Node 25 experimental global).
+- Changed paths: `frontend/src/App.tsx`, `frontend/src/App.locale.test.tsx`,
+  `frontend/src/components/Header.tsx`, `frontend/src/features/locale/*`,
+  `frontend/src/features/buyer/BuyerOrderDetails.tsx`,
+  `frontend/src/features/buyer/BuyerPortal.tsx`,
+  `frontend/src/features/buyer/BuyerStatusView.tsx`,
+  `frontend/src/features/buyer/api.ts`,
+  `frontend/src/features/buyer/usePublicOrder.ts`,
+  `frontend/src/features/buyer/BuyerLocaleSummary.test.tsx`,
+  `frontend/src/features/buyer/BuyerLocaleStates.test.tsx`,
+  `frontend/src/features/buyer/buyerLocaleFixtures.ts`,
+  `frontend/src/features/buyer/BuyerReplacementIsolation.test.tsx`,
+  `frontend/src/features/seller/api.ts`, `frontend/src/styles/{theme,buyer}.css`,
+  and `frontend/src/test/setup.ts`.
+- Verification: focused locale/App/buyer suites passed (14 files, 83 tests);
+  full frontend suite passed (48 files, 234 tests); backend suite passed
+  (458 passed, 170 skipped); root `npm run check` passed, result
+  `.cache/checks/check-iZEZ0B/result.json`.
+- Remaining gaps: phone-browser visual/typography/accessibility acceptance in
+  Bengali and English was NOT RUN. Real embedded Clerk sign-in/recovery was NOT
+  RUN. No live provider or deployment behavior was involved.
+- Next: ticket 02 (buyer submission and delivery locations), then the remaining
+  workflow slices; ticket 13 runs integrated vocabulary and browser acceptance.
 
 ## Verification
 
@@ -120,6 +154,10 @@ Status: In-Progress (spec published ready-for-agent; implementation pending)
 | --- | --- | --- |
 | Source inventory | Completed | Read-only source and documentation inspection |
 | Spec structure and status | PASS | Seven required sections, 47 user stories, ready-for-agent |
-| Documentation whitespace | PASS | git diff --check |
-| Root npm run check | NOT RUN | Design documentation only |
-| Browser / live-provider acceptance | NOT RUN | No implementation yet |
+| Pre-implementation documentation whitespace | PASS | git diff --check |
+| Focused locale/App/buyer tests | PASS | 14 files, 83 tests |
+| Full frontend suite | PASS | 48 files, 234 tests |
+| Backend suite (unchanged contracts) | PASS | 458 passed, 170 skipped |
+| Root `npm run check` | PASS | `.cache/checks/check-iZEZ0B/result.json` (tooling, lint, types, backend/frontend tests, build, HTTP smoke) |
+| Ticket 01 browser acceptance | NOT RUN | No phone-browser typography/focus/document-language check performed |
+| Real embedded Clerk sign-in/recovery | NOT RUN | Requires live authentication configuration; mocked paths do not establish it |

@@ -1,22 +1,31 @@
 import React, { useState } from 'react';
 import { Loader2, AlertCircle, ShieldAlert } from 'lucide-react';
 import type { BuyerFormDraft } from './types';
-import { usePublicOrder } from './usePublicOrder';
+import { usePublicOrder, type PublicOrderProblem } from './usePublicOrder';
 import { BuyerOrderDetails } from './BuyerOrderDetails';
 import { BuyerSubmissionForm } from './BuyerSubmissionForm';
 import { BuyerStatusView } from './BuyerStatusView';
 import { useBuyerSubmission } from './useBuyerSubmission';
+import { useLocale, type MessageKey } from '../locale';
 
 interface BuyerPortalProps {
   portalToken: string;
 }
+
+const PROBLEM_MESSAGES: Record<PublicOrderProblem, MessageKey> = {
+  offline: 'buyer.errors.offline',
+  refresh_failed: 'buyer.errors.refreshFailed',
+  order_unavailable: 'buyer.errors.orderUnavailable',
+  load_failed: 'buyer.errors.loadFailed',
+};
 
 export function BuyerPortal({ portalToken }: BuyerPortalProps): React.JSX.Element {
   return <BuyerPortalSession key={portalToken} portalToken={portalToken} />;
 }
 
 function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Element {
-  const { order, loading, error, gateDisabledMessage, isRefreshing, refreshError, refresh, save } = usePublicOrder(portalToken);
+  const { t } = useLocale();
+  const { order, loading, error, gateDisabled, isRefreshing, refreshError, refresh, save } = usePublicOrder(portalToken);
 
   const [editedDraft, setDraft] = useState<BuyerFormDraft | null>(null);
   const draft: BuyerFormDraft = editedDraft ?? {
@@ -35,20 +44,20 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
     return (
       <div className="portal-loading" role="status">
         <Loader2 size={36} className="spin" color="var(--primary-accent)" aria-hidden="true" />
-        <div>Loading order details / অর্ডার লোড হচ্ছে...</div>
+        <div>{t('buyer.loading')}</div>
       </div>
     );
   }
 
-  if (gateDisabledMessage) {
+  if (gateDisabled) {
     return (
       <div className="portal-notice portal-notice--warning" role="alert">
         <ShieldAlert size={24} color="var(--amber-accent)" aria-hidden="true" />
         <div>
-          <h2 style={{ margin: '0 0 4px', color: 'var(--amber-accent)', fontSize: '1.05rem' }}>Public Access Disabled</h2>
-          <p style={{ margin: 0, lineHeight: 1.5 }}>
-            {gateDisabledMessage}
-          </p>
+          <h2 style={{ margin: '0 0 4px', color: 'var(--amber-accent)', fontSize: '1.05rem' }}>
+            {t('buyer.gate.title')}
+          </h2>
+          <p style={{ margin: 0, lineHeight: 1.5 }}>{t('buyer.gate.body')}</p>
         </div>
       </div>
     );
@@ -59,12 +68,14 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
       <div className="portal-notice portal-notice--error" role="alert">
         <AlertCircle size={24} color="var(--rose-accent)" aria-hidden="true" />
         <div>
-          <h2 style={{ margin: '0 0 4px', color: 'var(--rose-accent)', fontSize: '1.05rem' }}>Unable to Load Order / অর্ডার দেখা যাচ্ছে না</h2>
+          <h2 style={{ margin: '0 0 4px', color: 'var(--rose-accent)', fontSize: '1.05rem' }}>
+            {t('buyer.loadError.title')}
+          </h2>
           <p style={{ margin: '0 0 14px', lineHeight: 1.5 }}>
-            {error || 'The requested order could not be loaded.'}
+            {t(error ? PROBLEM_MESSAGES[error] : 'buyer.errors.loadFailed')}
           </p>
           <button type="button" onClick={refresh} disabled={isRefreshing} className="btn btn-secondary">
-            Retry / পুনরায় চেষ্টা করুন
+            {t('buyer.loadError.retry')}
           </button>
         </div>
       </div>
@@ -74,7 +85,11 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   return (
     <main className="portal-main">
       <BuyerOrderDetails order={order} />
-      {refreshError && <div className="portal-notice portal-notice--error" role="alert">{refreshError}</div>}
+      {refreshError && (
+        <div className="portal-notice portal-notice--error" role="alert">
+          {t(PROBLEM_MESSAGES[refreshError])}
+        </div>
+      )}
 
       {order.lifecycle === 'awaiting_buyer' ? (
         <BuyerSubmissionForm

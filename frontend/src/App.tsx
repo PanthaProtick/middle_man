@@ -7,6 +7,7 @@ import Header from './components/Header';
 import { SellerWorkspace } from './features/seller';
 import { BuyerPortal } from './features/buyer';
 import { DemoTools } from './features/demo';
+import { LocaleProvider, LocaleSwitch, useLocale } from './features/locale';
 import { fetchHealth, type HealthStatus } from './services/api';
 
 interface AppProps {
@@ -16,7 +17,16 @@ interface AppProps {
   onSignOut?: () => void;
 }
 
-export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps = {}): React.JSX.Element {
+export default function App(props: AppProps = {}): React.JSX.Element {
+  return (
+    <LocaleProvider>
+      <AppShell {...props} />
+    </LocaleProvider>
+  );
+}
+
+function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JSX.Element {
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<'orders' | 'demo'>('orders');
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
@@ -38,20 +48,23 @@ export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps 
       <div className="portal-shell">
         <header className="portal-header">
           <div className="portal-brand">
-            <Store size={18} color="var(--primary-accent)" />
-            <span>Order confirmation / অর্ডার নিশ্চিতকরণ</span>
+            <Store size={18} color="var(--primary-accent)" aria-hidden="true" />
+            <span>{t('portal.brand')}</span>
           </div>
-          <a
-            href="/"
-            className="btn btn-secondary btn-sm"
-            style={{ textDecoration: 'none' }}
-          >
-            <ArrowLeft size={13} /> Back to Home
-          </a>
+          <div className="portal-actions">
+            <LocaleSwitch />
+            <a
+              href="/"
+              className="btn btn-secondary btn-sm"
+              style={{ textDecoration: 'none' }}
+            >
+              <ArrowLeft size={13} aria-hidden="true" /> {t('portal.backHome')}
+            </a>
+          </div>
         </header>
         <BuyerPortal portalToken={portalToken} />
         <div className="portal-footer-action">
-          <p>Never share your PIN or OTP. Your seller reviews the order and payment details.</p>
+          <p>{t('portal.footerNotice')}</p>
         </div>
       </div>
     );
