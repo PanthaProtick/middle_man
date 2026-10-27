@@ -17,23 +17,20 @@ afterEach(async () => {
   vi.restoreAllMocks();
 });
 
-function getFieldByAccessibleLabel(labelPattern: string): HTMLInputElement {
-  const ariaInput = container.querySelector<HTMLInputElement>(`input[aria-label="${labelPattern}"]`);
-  if (ariaInput) return ariaInput;
+function getFieldByAccessibleLabel(label: string): HTMLInputElement {
+  const byAria = container.querySelector<HTMLInputElement>(`input[aria-label="${label}"]`);
+  if (byAria) return byAria;
 
-  const label = Array.from(container.querySelectorAll('label')).find((l) =>
-    l.textContent?.includes(labelPattern)
-  );
-  if (label) {
-    const id = label.htmlFor || label.getAttribute('for');
+  const labels = Array.from(container.querySelectorAll('label'));
+  const matchingLabel = labels.find((l) => l.textContent?.includes(label));
+  if (matchingLabel) {
+    const id = matchingLabel.htmlFor || matchingLabel.getAttribute('for');
     if (id) {
       const el = container.querySelector<HTMLInputElement>(`#${id}`);
       if (el) return el;
     }
-    const nested = label.querySelector('input');
-    if (nested) return nested;
   }
-  return container.querySelector<HTMLInputElement>(`input[name="${labelPattern}"]`)!;
+  throw new Error(`Input field with accessible label "${label}" not found`);
 }
 
 function enter(field: HTMLInputElement, value: string) {
@@ -72,7 +69,10 @@ it('announces and associates parcel errors, focuses the first error, and preserv
   });
   await act(async () => submit());
 
-  for (const field of [weightField, quantityField]) {
+  for (const [field, expectedError] of [
+    [weightField, 'Parcel weight'],
+    [quantityField, 'Parcel quantity'],
+  ] as const) {
     expect(field.getAttribute('aria-invalid')).toBe('true');
     const descriptions = field.getAttribute('aria-describedby')!.split(' ');
     expect(descriptions).toContain('parcel-early-hint');
@@ -80,12 +80,8 @@ it('announces and associates parcel errors, focuses the first error, and preserv
       .map(id => document.getElementById(id))
       .find(element => element?.getAttribute('role') === 'alert');
     expect(errorAlert).toBeDefined();
-    expect(errorAlert?.textContent).toMatch(/Parcel (weight|quantity)/);
+    expect(errorAlert?.textContent).toContain(expectedError);
   }
-
-  const alerts = Array.from(container.querySelectorAll<HTMLElement>('[role="alert"]'));
-  expect(alerts.some(a => a.textContent?.includes('Parcel weight'))).toBe(true);
-  expect(alerts.some(a => a.textContent?.includes('Parcel quantity'))).toBe(true);
 
   expect(document.activeElement).toBe(weightField);
   expect(quantityField.value).toBe('2e0');
