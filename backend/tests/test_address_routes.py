@@ -8,7 +8,7 @@ from app.core.public_gate import verify_public_access_gate
 from app.main import app
 from app.services.address_assistance import reset_address_memory
 from app.services.address_provider import get_address_provider
-from tests.test_evidence_routes import _create_test_order, clean_memory_stores, seller_identity  # noqa: F401
+from tests.test_public_order_routes import _create_test_order, clean_memory_stores, seller_identity  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("seller_identity")
 

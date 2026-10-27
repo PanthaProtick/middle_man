@@ -9,7 +9,6 @@ import { PaymentException } from './PaymentException';
 import { PaymentHistory } from './PaymentHistory';
 import { CourierWorkspace } from './CourierWorkspace';
 import { OrderOutcomes } from './OrderOutcomes';
-import { EvidenceViewer } from './EvidenceViewer';
 import { OrderExport } from './OrderExport';
 import { BuyerLinkCopy } from './BuyerLinkCopy';
 import { BuyerLinkAccess } from './BuyerLinkAccess';
@@ -223,7 +222,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
         {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
           onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
-        {token && order.buyer_revision && <EvidenceViewer key={`evidence-${order.id}`} orderId={order.id} token={token} buyerRevision={order.buyer_revision} />}
         {token && order.buyer_revision && <BuyerCorrection key={`${order.id}-${order.version}`} orderId={order.id} token={token} courierAttemptStatus={courierAttemptStatus} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
         {token && (
           <OrderOutcomes

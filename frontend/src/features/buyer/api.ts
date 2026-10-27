@@ -1,4 +1,4 @@
-import type { BuyerSubmissionInput, EvidenceUploadResponse, PublicOrder } from './types';
+import type { BuyerSubmissionInput, PublicOrder } from './types';
 
 export interface ApiError {
   code: string;
@@ -97,44 +97,6 @@ export async function submitBuyerDetails(
     },
     idempotencyKey,
   );
-}
-
-export async function uploadBuyerEvidence(
-  portalToken: string,
-  file: File,
-  idempotencyKey?: string,
-): Promise<EvidenceUploadResponse> {
-  const key = idempotencyKey || crypto.randomUUID();
-  const headers: Record<string, string> = {
-    'Content-Type': file.type || 'image/jpeg',
-    'Idempotency-Key': key,
-  };
-
-  const res = await fetch(`/api/public/orders/${encodeURIComponent(portalToken)}/evidence`, {
-    method: 'POST',
-    headers,
-    body: file,
-  });
-
-  if (!res.ok) {
-    let errBody: { error?: ApiError; detail?: string } = {};
-    try {
-      errBody = await res.json();
-    } catch {
-      throw new BuyerApiError(res.status, {
-        code: `HTTP_${res.status}`,
-        message: `Upload failed with status ${res.status}`,
-      });
-    }
-    if (errBody.error) {
-      throw new BuyerApiError(res.status, errBody.error);
-    }
-    throw new BuyerApiError(res.status, {
-      code: `HTTP_${res.status}`,
-      message: typeof errBody.detail === 'string' ? errBody.detail : `Upload failed with status ${res.status}`,
-    });
-  }
-  return res.json();
 }
 
 export function formatBDT(minor: number): string {

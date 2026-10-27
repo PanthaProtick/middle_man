@@ -14,10 +14,10 @@ const order: PublicOrder = {
 const draft: BuyerFormDraft = {
   buyer_name: 'Buyer', contact_number: '01712345678', address_raw: 'Dhaka',
   payment_provider: 'bkash', payment_sender: '01812345678', payment_trx_id: 'ABC123',
-  claimed_advance_bdt: '100', evidence_id: 'synthetic-evidence', evidence_file_name: 'test.png',
+  claimed_advance_bdt: '100',
 };
 
-it.each([false, undefined, true])('uses backend AI availability %s while preserving manual submission with evidence', async available => {
+it.each([false, undefined, true])('uses backend AI availability %s while preserving manual payment submission', async available => {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
@@ -28,12 +28,12 @@ it.each([false, undefined, true])('uses backend AI availability %s while preserv
       order={{ ...order, ai_assistance_available: available }} draft={draft}
       onDraftChange={vi.fn()} onSubmit={submit} isSubmitting={false} submissionError={null} />));
     expect(container.querySelector('[aria-label="Optional address assistance"]') !== null).toBe(available === true);
-    expect(container.querySelector('[aria-label="Optional screenshot extraction"]') !== null).toBe(available === true);
-    expect(container.textContent).toContain('test.png');
+    expect(container.querySelector('input[type="file"]')).toBeNull();
+    expect(container.textContent).not.toMatch(/screenshot/i);
     await act(async () => container.querySelector('form')?.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })));
     expect(submit).toHaveBeenCalledWith(expect.objectContaining({
       address: { raw_text: 'Dhaka' },
-      payment_claim: expect.objectContaining({ evidence_id: 'synthetic-evidence', trx_id: 'ABC123' }),
+      payment_claim: { provider: 'bkash', trx_id: 'ABC123', sender_number: '01812345678', amount_minor: 10000 },
     }));
     // The catalog read is independent of AI; neither extraction endpoint may be called.
     expect(fetcher).toHaveBeenCalledTimes(1);

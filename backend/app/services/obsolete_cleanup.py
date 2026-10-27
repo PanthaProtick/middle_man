@@ -13,7 +13,6 @@ from app.models.courier import CourierDraftTable
 from app.models.entities import (
     AllocationTable,
     BuyerRevisionTable,
-    OrderEvidenceTable,
     OrderTable,
     ReceivedTransactionTable,
     ShopTable,
@@ -21,8 +20,6 @@ from app.models.entities import (
 )
 from app.models.sms import ImportResult
 from app.models.sms_entities import SmsEvidenceTable, SmsImportTable
-from app.services.evidence_store import delete_evidence_file
-from app.services.retention_caches import redact_replays
 from app.services.structured_retention_db import remove_order
 
 
@@ -79,7 +76,6 @@ async def cleanup_obsolete_orders(db: AsyncSession | None, targets: dict[str, st
 
     Invalid identity aborts before mutation; record failures roll back to their
     savepoint and are returned by ID, without leaking driver/private values.
-    Storage-file deletion is idempotent but cannot be rolled back by PostgreSQL.
     """
     if db is None or not targets or len(targets) > 20:
         raise ValueError('A database and 1–20 positively identified orders are required')
@@ -120,14 +116,7 @@ async def cleanup_obsolete_orders(db: AsyncSession | None, targets: dict[str, st
                 if shared or allocation:
                     raise ValueError('Receipt belongs to a preserved order')
                 await erase_associated_sms(db, row.shop_id, receipt_ids)
-                evidence = (await db.scalars(select(OrderEvidenceTable).where(
-                    OrderEvidenceTable.order_id == order_id))).all()
-                await redact_replays(db, {item.id for item in evidence}, row.shop_id)
                 await remove_order(db, row, now, obsolete_order_ids=selected)
-                for item in evidence:
-                    if item.status != 'deleted':
-                        delete_evidence_file(item.storage_key)
-                    await db.delete(item)
                 row.buyer_link_revoked_at = now
                 await db.flush()
             result['removed'].append(order_id)

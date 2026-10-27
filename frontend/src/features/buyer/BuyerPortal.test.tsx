@@ -71,7 +71,7 @@ describe('BuyerPortal Component', () => {
     // Check separate contact and payment sender fields are present
     expect(container.textContent).toContain('AI assistance is unavailable');
     expect(container.querySelector('[aria-label="Optional address assistance"]')).toBeNull();
-    expect(container.querySelector('input[type="file"]')).not.toBeNull();
+    expect(container.querySelector('input[type="file"]')).toBeNull();
     expect(container.querySelector('input[name="contact_number"]')).not.toBeNull();
     expect(container.querySelector('input[name="payment_sender"]')).not.toBeNull();
   });

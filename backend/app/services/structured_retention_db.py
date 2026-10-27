@@ -16,7 +16,6 @@ from app.models.entities import (
     ReceivedTransactionTable,
     TransactionObservationTable,
 )
-from app.models.payment_entities import PaymentExtractionTable
 from app.services.courier_retention import erase_courier_details
 from app.services.payment_marker_protection import verify_marker_key
 from app.services.receipt_identity import receipt_identities
@@ -84,7 +83,7 @@ async def remove_order(db: AsyncSession, order: OrderTable, now: datetime,
     attempts = await erase_courier_details(db, order.shop_id, order.id)
     await redact_replays(db, {order.id, *(r.id for r in revisions), *attempts}, order.shop_id)
     await db.execute(delete(CourierDraftTable).where(CourierDraftTable.order_id == order.id))
-    for model in (BuyerRevisionTable, OrderReviewReasonTable, AddressExtractionTable, PaymentExtractionTable):
+    for model in (BuyerRevisionTable, OrderReviewReasonTable, AddressExtractionTable):
         await db.execute(delete(model).where(model.order_id == order.id))
     await db.execute(delete(AuditEventTable).where(AuditEventTable.shop_id == order.shop_id,
         AuditEventTable.aggregate_id.in_({order.id, *attempts})))

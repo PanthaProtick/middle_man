@@ -118,10 +118,8 @@ copy/open link only after acknowledgement.
 All HTTP requests under `/api/public/orders` share an aggregate fixed-window quota
 per application worker, before token lookup, validation or storage access. Defaults
 (positive integer environment settings): `PUBLIC_REQUESTS_PER_WINDOW=600`,
-`PUBLIC_REQUEST_WINDOW_SECONDS=60`, `PUBLIC_REQUEST_MAX_BYTES=65536`, and
-`PUBLIC_UPLOAD_MAX_BYTES=6291456`. The upload envelope applies to `/evidence`;
-existing image validation still caps the extracted image at 5 MiB and preserves
-format, dimension and per-order limits. The 6 MiB envelope allows multipart overhead.
+`PUBLIC_REQUEST_WINDOW_SECONDS=60`, and `PUBLIC_REQUEST_MAX_BYTES=65536`.
+The same bounded request envelope applies to all public operations.
 
 Declared oversized bodies are rejected without reading; all other bodies are read
 only up to the configured bound, counting actual bytes regardless of Content-Length,
@@ -129,7 +127,7 @@ before route execution. An overflowing chunk is not copied and the rest is not d
 ASGI/server transport buffers and concurrent connections need separate server/edge
 limits; this is not a total process-memory or slow-client protection guarantee.
 
-`413 PUBLIC_BODY_TOO_LARGE` asks the buyer to reduce the request/screenshot.
+`413 PUBLIC_BODY_TOO_LARGE` asks the buyer to reduce the request.
 `429 PUBLIC_RATE_LIMITED` includes an integer `Retry-After` (seconds, exposed via
 CORS) and the delay in its readable message. Rejection is before domain mutation;
 retry after the delay, retaining an existing key when recovering an uncertain earlier
@@ -142,47 +140,6 @@ quota. One noisy caller can exhaust capacity for other buyers; boundaries permit
 burst either side of window reset. Workers/restarts have independent quotas. This is
 local self-test admission control, not distributed hosted abuse protection.
 
-## Optional screenshot extraction
-
-`POST /api/public/orders/{token}/payment-extraction` requires `Idempotency-Key`
-and `{evidence_id, ai_opt_in: true}` (literal JSON boolean). The public-access gate
-and unsubmitted/unexpired checks apply to new requests and replay. Only a retained,
-staged screenshot owned by that order/shop is eligible; rejection happens before
-private storage reads or Gemini calls.
-
-Responses include `available`, `evidence_id`, nullable typed `suggestions`,
-`review_required: true`, and `message`. Suggestions contain nullable
-`is_payment_screenshot`, `provider` (`bkash`/`nagad`), `trx_id`, `amount_minor`,
-`sender_number`, `receiver_number`, `occurred_at` (timezone-qualified ISO time),
-and an explicit `unreadable_fields` list. Unexpected fields/types fail closed to
-manual entry. Suggestions cannot create seller receipts, submit or confirm orders.
-The buyer explicitly applies reviewed fields to the ordinary form; receiver/time
-remain review context and cannot change the designated seller account. Manual
-form validation still applies. Edits to payment fields, evidence replacement,
-submission, and navigation invalidate late output.
-
-The tool-free backend Gemini adapter has a five-second HTTP timeout, a six-second
-total provider deadline, bounded response bytes, no automatic retries, and no SMS
-entry point. Five distinct attempts per order are allowed. PostgreSQL commits a
-`pending` budget reservation before external work, then rechecks order/evidence
-eligibility and holds the order/evidence locks during the bounded call. This
-trades up to six seconds of contention for serialization with submission.
-Committed results (including expected failures) replay without another call.
-An unfinished reservation returns 409 `EXTRACTION_OUTCOME_UNKNOWN`; retrying that
-key never calls Gemini again. Other keys still consume the five-attempt budget.
-A database failure returns 503 with same-key recovery guidance. This bounds
-lost-response retries and does not promise exactly-once provider billing.
-
-Migration `0014_payment_extractions.sql` stores consent through the explicit
-request contract plus mutation fingerprint, protected order/shop/evidence ownership,
-structured replay outcomes, and optional raw model output. Collection/deletion
-times inherit the screenshot's original deadline; processing never restarts it.
-`purge_payment_raw_evidence` clears due raw output inside the caller's transaction.
-Ticket 16 owns scheduling/overdue reporting and completed-order cleanup; backup
-and provider-side deletion remain launch gates. Structured suggestions remain
-personal data under the completed-order policy, never permanent audit/log content.
-Actual Gemini image/model behavior and service data terms require separate live
-acceptance; unit tests and the browser harness use explicit offline adapters.
 
 ## Optional address assistance
 
@@ -368,13 +325,11 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
 
 ## Raw evidence retention and cleanup (Ticket 18)
 
-- Raw payment screenshots, raw SMS bodies, and raw AI extraction requests/responses
+- Raw SMS bodies and address AI extraction requests/responses
   expire 30 days from original collection. Reprocessing/reimport never restarts deadlines.
-- `purge_raw_evidence` deletes raw image files and sets raw columns (`raw_text`,
+- `purge_raw_evidence` sets raw columns (`raw_text`,
   `raw_request`, `raw_response`) to NULL. Structured observations, claims, order status,
   accepted allocation, COD, and used-payment markers remain intact.
-- Deleted evidence reads via `GET /api/seller/evidence/{id}` return 410 `EVIDENCE_UNAVAILABLE`.
-  Overdue unpurged evidence returns 410 `EVIDENCE_EXPIRED`.
 - `GET /api/seller/retention/status` provides owning-seller visibility into retained vs
   purged counts, overdue items, and failure history without cross-shop or raw content leaks.
 - `POST /api/seller/retention/cleanup` runs safe, retryable cleanup for the owning shop.
@@ -406,7 +361,7 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
   order audits, token-open measurements and personal replay-cache results. Shared
   receipt observations/audits remain while any unresolved or not-yet-due order
   needs their historic identities. Standalone unmatched receipts have no new period.
-  Raw SMS, images and raw AI copies retain their separate original 30-day deadlines.
+  Raw SMS and address AI copies retain their separate original 30-day deadlines.
 - Order tombstones preserve shop/ID, token lookup digest, lifecycle, completion and
   replacement links. Remove recoverable portal tokens and commercial snapshot text.
   Owning seller detail/history/summary and buyer reads return 410 `RECORD_UNAVAILABLE`;
@@ -441,9 +396,9 @@ Tests of these demo behaviors must not be reported as live-service acceptance.
 
 ## Self-test AI policy
 
-`SELF_TEST_MODE=true` disables AI regardless of Gemini credentials. Address and
-payment extraction retain their request/response contracts and order/evidence
-eligibility checks, but return `available=false`, no suggestions and manual-entry
+`SELF_TEST_MODE=true` disables AI regardless of Gemini credentials. Address
+extraction retains its request/response contract and order eligibility checks,
+but returns `available=false`, no suggestions and manual-entry
 guidance before cached outcomes or provider work. Disabled requests do not consume
 extraction budget or retain new AI inputs. Outside self-test mode, existing enabled
 extraction behavior remains available.
@@ -451,5 +406,16 @@ extraction behavior remains available.
 Public order responses expose `ai_assistance_available`, evaluated from current
 policy and provider configuration even for cached submission responses. This is
 configuration availability, not proof of provider health. The buyer form requires
-explicit `true` to display AI controls; missing/false keeps manual entry and optional
-screenshots available. Demo Gemini calls also remain local in self-test mode.
+explicit `true` to display address AI controls; missing/false keeps manual entry
+available. Demo Gemini calls also remain local in self-test mode.
+
+
+## Payment screenshot retirement (ADR-0005)
+
+Payment claims contain manual payment details only. Legacy `evidence_id` fields
+are rejected with 422, including seller corrections. Buyer `/evidence` and
+`/payment-extraction` and seller `/evidence/{id}` routes no longer exist (404).
+Migration 0026 removes screenshot metadata, AI payment extractions, upload replay
+records, and revision screenshot references. Stop old application processes and
+erase the verified private storage directory before applying it. SMS and address
+retention, payment matching, accepted allocations and courier COD are preserved.

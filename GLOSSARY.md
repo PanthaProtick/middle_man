@@ -28,7 +28,7 @@ _Avoid_: Verified order
 Details of a received payment supplied by the seller, primarily from an incoming payment SMS or manually from the seller's payment app.
 
 **Buyer payment proof**:
-The buyer's submitted payment details, optionally supported by a screenshot. It is a claim of payment, not independent evidence of receipt by the seller.
+The buyer's submitted payment details: provider, transaction ID, sender number, and claimed amount. It is a claim of payment, not independent evidence of receipt by the seller.
 
 **Buyer contact number**:
 The phone number supplied for contacting the buyer about the order or delivery. It need not be the number used to send the advance.

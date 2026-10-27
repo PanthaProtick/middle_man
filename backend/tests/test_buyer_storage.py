@@ -110,7 +110,6 @@ def test_buyer_revision_storage_and_order_association() -> None:
             payment_sender_canonical="01899999999",
             payment_amount_minor=100000,
             payment_claimed_at=now,
-            payment_evidence_id=None,
             source="buyer",
             actor="buyer",
             reason=None,

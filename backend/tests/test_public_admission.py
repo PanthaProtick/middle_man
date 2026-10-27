@@ -49,7 +49,7 @@ async def test_stream_limit_counts_actual_bytes(monkeypatch: pytest.MonkeyPatch,
 
 @pytest.mark.asyncio
 async def test_declared_oversize_does_not_read_body(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(settings, "PUBLIC_UPLOAD_MAX_BYTES", 8)
+    monkeypatch.setattr(settings, "PUBLIC_REQUEST_MAX_BYTES", 8)
 
     async def chunks() -> AsyncIterator[bytes]:
         raise AssertionError("Declared oversized request must not be read")
@@ -86,9 +86,8 @@ async def test_quota_covers_rotating_invalid_tokens_and_recovers(monkeypatch: py
 
 
 @pytest.mark.asyncio
-async def test_exact_body_and_upload_limits_reach_route(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_exact_body_limit_reaches_route(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "PUBLIC_REQUEST_MAX_BYTES", 8)
-    monkeypatch.setattr(settings, "PUBLIC_UPLOAD_MAX_BYTES", 12)
     target = FastAPI()
 
     @target.post("/api/public/orders/{token}/{action}")
@@ -98,7 +97,5 @@ async def test_exact_body_and_upload_limits_reach_route(monkeypatch: pytest.Monk
     async with httpx.AsyncClient(transport=httpx.ASGITransport(app=PublicAdmissionMiddleware(target)), base_url="http://test") as client:
         normal = await client.post("/api/public/orders/token/submission", content=b"12345678")
         assert normal.json() == {"bytes": 8}
-        upload = await client.post("/api/public/orders/token/evidence", content=b"123456789012")
-        assert upload.json() == {"bytes": 12}
-        rejected = await client.post("/api/public/orders/token/evidence", content=b"1234567890123")
+        rejected = await client.post("/api/public/orders/token/evidence", content=b"123456789")
         assert rejected.status_code == 413

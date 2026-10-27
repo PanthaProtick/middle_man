@@ -27,7 +27,6 @@ def buyer_revision(submission: BuyerSubmission, order_id: str, now: datetime.dat
         "payment_sender_canonical": submission.payment_claim.sender_number_canonical,
         "payment_amount_minor": submission.payment_claim.amount_minor,
         "payment_claimed_at": submission.payment_claim.claimed_at,
-        "payment_evidence_id": submission.payment_claim.evidence_id,
         "source": "buyer",
         "actor": "buyer",
         "reason": None,

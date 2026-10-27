@@ -35,8 +35,7 @@ class PublicAdmissionMiddleware:
             return
         # No awaits between testing and reserving the slot on this event loop.
         self.requests += 1
-        limit = (settings.PUBLIC_UPLOAD_MAX_BYTES if path.rstrip("/").endswith("/evidence")
-                 else settings.PUBLIC_REQUEST_MAX_BYTES)
+        limit = settings.PUBLIC_REQUEST_MAX_BYTES
         headers = scope.get("headers", [])
         for name, value in headers:
             if name == b"content-length":
@@ -76,7 +75,7 @@ class PublicAdmissionMiddleware:
 
     async def too_large(self, scope: Scope, receive: Receive, send: Send) -> None:
         await self.reject(scope, receive, send, 413, "PUBLIC_BODY_TOO_LARGE",
-                          "Request is too large. Reduce the request or screenshot size and retry.")
+                          "Request is too large. Reduce the request size and retry.")
 
     async def reject(self, scope: Scope, receive: Receive, send: Send, status: int,
                      code: str, message: str, retry: int | None = None) -> None:

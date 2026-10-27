@@ -1,0 +1,39 @@
+{
+  "target": "ep-wispy-credit-a1m2la95-pooler.ap-southeast-1.aws.neon.tech",
+  "database": "neondb",
+  "environment": "development",
+  "retired_counts": {
+    "order_evidence": 1,
+    "payment_extractions": 0
+  },
+  "private_files": 1,
+  "private_bytes": 550,
+  "migration_sha256": "8c087cb7d8074d90849917498925e13f59ca4eca9fc3477edf094c78fd0bd50a",
+  "status": "PASS",
+  "unrelated_rows_preserved": true,
+  "private_files_remaining": 0,
+  "preserved_counts": {
+    "address_extractions": 0,
+    "allocations": 8,
+    "audit_events": 13,
+    "buyer_revisions": 14,
+    "courier_attempts": 0,
+    "courier_drafts": 1,
+    "courier_reconciliations": 0,
+    "evidence_cleanups": 1,
+    "idempotency_records": 47,
+    "link_measurements": 33,
+    "order_review_reasons": 3,
+    "orders": 13,
+    "pathao_connection_revisions": 3,
+    "payment_accounts": 2,
+    "payment_marker_keys": 2,
+    "payment_metrics": 2,
+    "received_transactions": 11,
+    "shops": 2,
+    "sms_evidence": 3,
+    "sms_imports": 3,
+    "transaction_observations": 11,
+    "used_payment_markers": 8
+  }
+}

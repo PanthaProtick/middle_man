@@ -94,8 +94,6 @@ def test_claim_preserves_raw_phone_and_rejects_client_internal_fields():
     saved = PaymentClaim(**claim)
     assert saved.sender_number_raw == claim["sender_number"]
     assert saved.trx_id == "Case Sensitive"
-    with_ev = PaymentClaim(**{**claim, "evidence_id": "valid-evidence-123"})
-    assert with_ev.evidence_id == "valid-evidence-123"
 
     for override in ({"sender_number_canonical": "01712345678"}, {"lifecycle": "confirmed"}, {"evidence_id": "x" * 65}, {"claimed_at": "2026-10-23T12:00:00"}):
         with pytest.raises(ValidationError):

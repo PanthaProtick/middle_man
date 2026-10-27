@@ -2,8 +2,6 @@ import React, { useState } from 'react';
 import { Send, AlertCircle, User, Phone, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import { PaymentClaimFields } from './PaymentClaimFields';
-import { EvidenceUploadField } from './EvidenceUploadField';
-import { PaymentAssistance } from './PaymentAssistance';
 import { AddressAssistance } from './AddressAssistance';
 import { PathaoLocations } from './PathaoLocations';
 import { canonicalizeBdPhone } from '../seller/api';
@@ -97,7 +95,6 @@ export function BuyerSubmissionForm({
         trx_id: draft.payment_trx_id.trim(),
         sender_number: draft.payment_sender.trim(),
         amount_minor: amountMinor,
-        ...(draft.evidence_id ? { evidence_id: draft.evidence_id } : {}),
       },
     };
 
@@ -221,23 +218,9 @@ export function BuyerSubmissionForm({
         )}
       </div>
 
-      {order.ai_assistance_available !== true && <p>AI assistance is unavailable. Enter your address and payment details manually. Screenshots are optional.</p>}
+      {order.ai_assistance_available !== true && <p>AI assistance is unavailable. Enter your address and payment details manually.</p>}
       {portalToken && order.ai_assistance_available === true && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
         onUse={value => updateField('address_raw', value)} disabled={isSubmitting || isLocked} />}
-
-      {portalToken && (
-        <EvidenceUploadField
-          portalToken={portalToken}
-          evidenceId={draft.evidence_id}
-          fileName={draft.evidence_file_name}
-          onUploaded={(id, name) => onDraftChange({ ...draft, evidence_id: id, evidence_file_name: name })}
-          onRemoved={() => onDraftChange({ ...draft, evidence_id: undefined, evidence_file_name: undefined })}
-          disabled={isSubmitting || isLocked}
-        />
-      )}
-
-      {portalToken && order.ai_assistance_available === true && draft.evidence_id && <PaymentAssistance portalToken={portalToken} draft={draft}
-        onUse={patch => onDraftChange({ ...draft, ...patch })} disabled={isSubmitting || isLocked} />}
 
       <PaymentClaimFields
         order={order}

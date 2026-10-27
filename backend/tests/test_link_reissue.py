@@ -118,22 +118,15 @@ async def test_confirmed_allocation_survives_rotation(client, seller_identity):
 
 
 @pytest.mark.asyncio
-async def test_old_token_denies_every_public_operation_and_upload_replay(client, seller_identity):
-    from tests.test_image_service import _create_minimal_png
+async def test_old_token_denies_address_assistance(client, seller_identity):
     order = await _create_test_order(client)
     public = f"/api/public/orders/{order['portal_token']}"
-    image = _create_minimal_png()
-    headers = {"Idempotency-Key": "upload", "Content-Type": "image/png"}
-    uploaded = await client.post(public + "/evidence", content=image, headers=headers)
-    assert uploaded.status_code == 201
     fresh = await client.post(f"/api/seller/orders/{order['id']}/reissue-link",
                              json={"expected_version": 1}, headers={"Idempotency-Key": "rotate"})
     assert fresh.status_code == 200
     assert fresh.headers["cache-control"] == "no-store, private"
     assert fresh.headers["referrer-policy"] == "no-referrer"
-    assert (await client.post(public + "/evidence", content=image, headers=headers)).status_code == 404
-    for suffix, payload in (("address-extraction", {"raw_text": "Synthetic Dhaka address"}),
-                            ("payment-extraction", {"evidence_id": uploaded.json()["evidence_id"]})):
+    for suffix, payload in (("address-extraction", {"raw_text": "Synthetic Dhaka address"}),):
         denied = await client.post(public + "/" + suffix, json={**payload, "ai_opt_in": True},
                                    headers={"Idempotency-Key": "extract"})
         assert denied.status_code == 404

@@ -13,7 +13,6 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
     from app.services.address_assistance import _memory as addresses
     from app.services.buyer_service import _memory_buyer_revisions
     from app.services.order_service import _memory_orders
-    from app.services.payment_extraction import _memory as payments
     from app.services.payment_marker_protection import verify_marker_key
     from app.services.receipt_identity import receipt_identities
     from app.services.reconciliation_store import (
@@ -68,9 +67,6 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
         for key, address in list(addresses.items()):
             if address.order_id == row['id']:
                 del addresses[key]
-        for key, payment in list(payments.items()):
-            if payment.order_id == row['id']:
-                del payments[key]
         for imported in _memory_imports.values():
             if imported.shop_id != shop_id:
                 continue

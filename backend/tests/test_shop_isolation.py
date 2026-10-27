@@ -11,7 +11,6 @@ from test_transaction_routes import clean_stores  # noqa: F401
 import app.core.auth as auth_module
 from app.core.auth import ClerkTokenVerifier
 from app.core.config import settings
-from tests.test_image_service import _create_minimal_png
 
 
 @pytest.mark.asyncio
@@ -23,21 +22,15 @@ async def test_signed_identities_cannot_read_or_mutate_foreign_private_surfaces(
     identities = [_make_token(key, sub=owner, issuer=issuer) for owner in ('alpha', 'beta')]
     orders = []
     receipts = []
-    evidence = []
     for token in identities:
         client.headers['Authorization'] = f'Bearer {token}'
         order = await _create_test_order(client)
         orders.append(order)
-        upload = await client.post(f"/api/public/orders/{order['portal_token']}/evidence",
-            content=_create_minimal_png(width=80, height=80),
-            headers={'Content-Type': 'image/png', 'Idempotency-Key': 'isolation-image'})
-        assert upload.status_code == 201, upload.text
-        evidence.append(upload.json()['evidence_id'])
         submission = await client.post(f"/api/public/orders/{order['portal_token']}/submission", json={
             'buyer_name': 'Synthetic Private Buyer', 'contact_number': '01799999999',
             'address': {'raw_text': 'Synthetic Dhaka Address'},
             'payment_claim': {'provider': 'bkash', 'trx_id': 'CLAIM-ISOLATION',
-                'sender_number': '01788888888', 'amount_minor': 200000, 'evidence_id': evidence[-1]},
+                'sender_number': '01788888888', 'amount_minor': 200000},
         }, headers={'Idempotency-Key': 'isolation-submission'})
         assert submission.status_code == 200, submission.text
         receipt = await client.post('/api/seller/transactions', json={
@@ -53,7 +46,6 @@ async def test_signed_identities_cannot_read_or_mutate_foreign_private_surfaces(
         receipt = receipts[1 - index]
         # Positive controls ensure denials are ownership checks, not unavailable fixtures.
         assert (await client.get(f"/api/seller/orders/{own['id']}")).status_code == 200
-        assert (await client.get(f'/api/seller/evidence/{evidence[index]}')).status_code == 200
         cases = [
             ('GET', '/orders/{id}', None, foreign['id']),
             ('GET', '/orders/{id}/history', None, foreign['id']),
@@ -73,7 +65,6 @@ async def test_signed_identities_cannot_read_or_mutate_foreign_private_surfaces(
                 {'expected_version': 1, 'reason': 'Foreign correction', 'amount_minor': 100}, receipt['id']),
             ('POST', '/transactions/{id}/resolve', {'expected_version': 1, 'reason': 'Foreign resolution',
                 'selected_observation_id': receipt['observations'][0]['id']}, receipt['id']),
-            ('GET', '/evidence/{id}', None, evidence[1 - index]),
         ]
         for method, path, payload, foreign_id in cases:
             results = []
@@ -103,7 +94,6 @@ async def test_signed_identities_cannot_read_or_mutate_foreign_private_surfaces(
             assert result.status_code == 200, result.text
         client.headers['Authorization'] = f'Bearer {identities[1 - index]}'
         assert (await client.get(f"/api/seller/orders/{foreign['id']}")).status_code == 200
-        assert (await client.get(f'/api/seller/evidence/{evidence[1 - index]}')).status_code == 200
 
     # Both shops must have eligible data: a global/no-op cleanup would otherwise pass.
     for index, token in enumerate(identities):
@@ -121,14 +111,12 @@ async def test_signed_identities_cannot_read_or_mutate_foreign_private_surfaces(
         client.headers['Authorization'] = f'Bearer {token}'
         cleaned = await client.post('/api/seller/retention/cleanup')
         assert cleaned.status_code == 200, cleaned.text
-        assert (await client.get(f'/api/seller/evidence/{evidence[index]}')).status_code == 410
         removed = await client.post('/api/seller/retention/structured/cleanup')
         assert removed.status_code == 200, removed.text
         assert removed.json()['removed'] == 1
         assert (await client.get(f"/api/seller/orders/{orders[index]['id']}")).status_code == 410
         if index == 0:
             client.headers['Authorization'] = f'Bearer {identities[1]}'
-            assert (await client.get(f'/api/seller/evidence/{evidence[1]}')).status_code == 200
             assert (await client.get(f"/api/seller/orders/{orders[1]['id']}")).status_code == 200
 
 

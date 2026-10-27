@@ -12,7 +12,7 @@ const order = {
 
 it.each([413, 429])('keeps input editable and renders admission rejection %s', async (status) => {
   const message = status === 429 ? 'Too many requests. Retry after 10 seconds.'
-    : 'Request is too large. Reduce the request or screenshot size and retry.';
+    : 'Request is too large. Reduce the request size and retry.';
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) =>
     init?.method === 'POST'
       ? new Response(JSON.stringify({ error: { code: status === 429 ? 'PUBLIC_RATE_LIMITED' : 'PUBLIC_BODY_TOO_LARGE', message } }), { status })

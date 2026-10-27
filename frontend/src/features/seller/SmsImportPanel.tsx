@@ -66,7 +66,7 @@ export function SmsImportPanel({ accounts, token, onImported, onManual }: Props)
 
   return <section className="card" aria-label="Import received payment SMS" style={{ marginBottom: 16 }}>
     <h4>Import received payment SMS</h4>
-    <p>Paste seller incoming-payment SMS only. Buyer screenshots are claims, not receipt evidence.
+    <p>Paste seller incoming-payment SMS only. Buyer payment details are claims, not receipt evidence.
       Raw SMS is private with a deletion deadline 30 days after original collection.
       Parsing uses a limited tested format; unsupported bKash and Nagad messages need manual entry.</p>
     <form onSubmit={submit}>

@@ -1,0 +1,24 @@
+{
+  "status": "PASS",
+  "boundary": "Real browser; mocked API; synthetic records",
+  "checks": [
+    {
+      "width": 375,
+      "loading": "PASS",
+      "validation": "PASS",
+      "manual_submission": "PASS",
+      "no_screenshot_controls_or_requests": "PASS",
+      "error_recovery": "PASS",
+      "overflow": "PASS"
+    },
+    {
+      "width": 1440,
+      "loading": "PASS",
+      "validation": "PASS",
+      "manual_submission": "PASS",
+      "no_screenshot_controls_or_requests": "PASS",
+      "error_recovery": "PASS",
+      "overflow": "PASS"
+    }
+  ]
+}

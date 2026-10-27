@@ -7,7 +7,7 @@ from app.core.config import settings
 from app.main import app
 from app.services.address_provider import GeminiAddressProvider, get_address_provider
 from tests.test_address_routes import SUGGESTIONS
-from tests.test_evidence_routes import _create_test_order, clean_memory_stores, seller_identity  # noqa: F401
+from tests.test_public_order_routes import _create_test_order, clean_memory_stores, seller_identity  # noqa: F401
 
 pytestmark = pytest.mark.usefixtures("seller_identity")
 

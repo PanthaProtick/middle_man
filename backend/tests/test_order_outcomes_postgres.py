@@ -4,7 +4,6 @@ import asyncio
 import json
 
 from buyer_postgres_support import wait_for_order_waiters
-from test_image_service import _create_minimal_jpeg
 from test_payment_exceptions import exception_case
 
 
@@ -105,15 +104,6 @@ async def test_postgres_replacement_atomicity_and_links(postgres_buyer):
     )
     assert sub_res.status_code == 409
     assert sub_res.json()["error"]["code"] == "ORDER_ALREADY_SUBMITTED"
-
-    # Predecessor cannot upload evidence
-    up_res = await client.post(
-        f"/api/public/orders/{order['portal_token']}/evidence",
-        content=_create_minimal_jpeg(),
-        headers={"Content-Type": "image/jpeg", "Idempotency-Key": "pg-up-pred-block"},
-    )
-    assert up_res.status_code == 409
-    assert up_res.json()["error"]["code"] == "ORDER_ALREADY_SUBMITTED"
 
     # Predecessor revocation denies public access with 410
     rev_res = await client.post(

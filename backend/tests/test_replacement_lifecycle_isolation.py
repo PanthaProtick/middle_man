@@ -2,7 +2,6 @@ import datetime
 
 import pytest
 from httpx import AsyncClient
-from test_image_service import _create_minimal_jpeg
 from test_payment_exceptions import exception_case
 from test_public_order_routes import _create_test_order, clean_memory_stores, seller_identity  # noqa: F401
 
@@ -83,14 +82,6 @@ async def test_expired_predecessor_replacement_preserves_expired_status_and_deni
     assert sub_res.status_code == 410
     assert sub_res.json()["error"]["code"] == "EXPIRED_SUBMISSION"
 
-    # Predecessor cannot upload evidence (returns 410 gone)
-    up_res = await client.post(
-        f"/api/public/orders/{order['portal_token']}/evidence",
-        content=_create_minimal_jpeg(),
-        headers={"Content-Type": "image/jpeg", "Idempotency-Key": "up-on-expired-pred"},
-    )
-    assert up_res.status_code == 410
-    assert up_res.json()["error"]["code"] == "EXPIRED_SUBMISSION"
 
 
 @pytest.mark.asyncio

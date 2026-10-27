@@ -44,7 +44,6 @@ class PaymentClaim(BaseModel):
     sender_number: str = Field(..., min_length=1, max_length=32)
     amount_minor: int = Field(..., gt=0, strict=True)
     claimed_at: Optional[AwareDatetime] = None
-    evidence_id: Optional[str] = Field(None, max_length=64)
 
     @property
     def sender_number_raw(self) -> str:
@@ -74,17 +73,6 @@ class PaymentClaim(BaseModel):
         canonicalize_bd_phone(value)
         return value
 
-    @field_validator("evidence_id")
-    @classmethod
-    def validate_evidence(cls, value: Optional[str]) -> Optional[str]:
-        if value is None:
-            return None
-        cleaned = value.strip()
-        if not cleaned:
-            return None
-        if len(cleaned) > 64:
-            raise ValueError("Evidence ID exceeds maximum limit of 64 characters")
-        return cleaned
 
 
 class BuyerSubmission(BaseModel):
@@ -140,12 +128,3 @@ class PublicOrder(BaseModel):
     created_at: datetime
     expires_at: datetime
     completed_at: Optional[datetime] = None
-
-
-class EvidenceUploadResponse(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    evidence_id: str
-    media_type: str
-    byte_size: int
-    width: int
-    height: int

@@ -22,8 +22,6 @@ describe('EvidenceRetentionPanel', () => {
     shop_id: 'shop-123',
     checked_at: '2026-10-24T12:00:00Z',
     counts: {
-      screenshots_active: 3,
-      screenshots_deleted: 7,
       sms_active: 2,
       sms_purged: 5,
       ai_extractions_active: 1,
@@ -39,8 +37,6 @@ describe('EvidenceRetentionPanel', () => {
     shop_id: 'shop-123',
     checked_at: '2026-10-24T12:00:00Z',
     counts: {
-      screenshots_active: 5,
-      screenshots_deleted: 2,
       sms_active: 3,
       sms_purged: 1,
       ai_extractions_active: 2,
@@ -51,7 +47,7 @@ describe('EvidenceRetentionPanel', () => {
     last_cleanup_at: '2026-10-23T10:00:00Z',
     overdue_items: [
       {
-        evidence_type: 'screenshot',
+        evidence_type: 'address_ai',
         evidence_id: 'ev-overdue-1',
         order_id: 'ord-101',
         delete_after: '2026-10-20T10:00:00Z',
@@ -76,7 +72,7 @@ describe('EvidenceRetentionPanel', () => {
 
     expect(container.textContent).toContain('30-Day Raw Evidence Retention');
     expect(container.textContent).toContain('Raw evidence clean');
-    expect(container.textContent).toContain('3 retained / 7 purged');
+    expect(container.textContent).toContain('2 retained / 5 purged');
   });
 
   it('displays warning and lists overdue items when cleanup is needed', async () => {
@@ -193,7 +189,7 @@ describe('EvidenceRetentionPanel', () => {
       status: 'partial_failure',
       failures: [
         {
-          evidence_type: 'screenshot',
+          evidence_type: 'address_ai',
           evidence_id: 'ev-overdue-1',
           order_id: 'ord-101',
           delete_after: '2026-10-20T10:00:00Z',

@@ -7,7 +7,6 @@ import type { CourierAttemptStatus, Review } from './courierReviewTypes';
 
 vi.mock('./CourierDraft', () => ({ CourierDraft: () => null }));
 vi.mock('./OrderExport', () => ({ OrderExport: () => null }));
-vi.mock('./EvidenceViewer', () => ({ EvidenceViewer: () => null }));
 vi.mock('./BuyerLinkAccess', () => ({ BuyerLinkAccess: () => null }));
 vi.mock('./BuyerCorrection', () => ({ BuyerCorrection: ({ courierAttemptStatus }: {
   courierAttemptStatus: CourierAttemptStatus | null;
@@ -73,4 +72,3 @@ it.each(['success', 'unknown', 'unavailable'] as const)('propagates submission a
   expect(container.textContent).not.toContain('No local courier attempt is recorded');
   await act(async () => root.unmount());
 });
-

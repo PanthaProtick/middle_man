@@ -29,7 +29,7 @@ def revision_view(raw: dict[str, Any]) -> BuyerRevisionView:
                      ('district', 'thana', 'area', 'street_line', 'landmark')}),
         payment_claim=PaymentClaim(provider=raw['payment_provider'], trx_id=raw['payment_trx_id'],
             sender_number=raw['payment_sender_raw'], amount_minor=raw['payment_amount_minor'],
-            claimed_at=raw['payment_claimed_at'], evidence_id=raw['payment_evidence_id']),
+            claimed_at=raw['payment_claimed_at']),
         actor=raw['actor'], reason=raw['reason'], created_at=raw['created_at'],
         claim_accepted_at=raw['claim_accepted_at'])
 

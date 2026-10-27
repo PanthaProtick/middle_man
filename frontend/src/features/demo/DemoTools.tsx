@@ -42,7 +42,7 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
             <span>Demo Sandbox & Technical Tools</span>
           </div>
           <p className="card-subtitle">
-            Diagnostic tools, AI vision sandboxes, database views, and automated retention policies preserved for demonstration and technical evaluation.
+            Diagnostic tools, AI address assistance, database views, and automated retention policies preserved for demonstration and technical evaluation.
           </p>
         </div>
       </div>
@@ -108,10 +108,10 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
         <section aria-labelledby="demo-gemini-title">
           <div style={{ marginBottom: '14px', padding: '12px 16px', background: 'rgba(255, 71, 126, 0.08)', border: '1px solid rgba(255, 71, 126, 0.2)', borderRadius: 'var(--radius-sm)' }}>
             <h4 id="demo-gemini-title" style={{ fontSize: '0.88rem', color: 'var(--primary-accent)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Flame size={14} /> AI OCR & Text Extraction Capabilities
+              <Flame size={14} /> AI Assistance Capabilities
             </h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Test Gemini 1.5/2.0 multimodal reasoning for automated extraction of TrxIDs, amounts, and sender accounts from buyer screenshot uploads and raw SMS alerts.
+              Test optional address assistance with synthetic delivery addresses. Enter payment details manually.
             </p>
           </div>
           <GeminiPlayground />
@@ -188,13 +188,13 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
 
             <div style={{ background: 'var(--bg-surface)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Google Gemini Vision</span>
+                <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Google Gemini</span>
                 <span className={`badge ${health?.gemini_configured ? 'online' : 'active'}`}>
                   <Sparkles size={11} /> {health?.gemini_configured ? 'Ready' : 'Mock Mode'}
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Structured vision prompt inference for reading bKash/Nagad app screenshot evidence uploaded by buyers.
+                Optional address suggestions require buyer consent and review.
               </p>
             </div>
           </div>

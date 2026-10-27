@@ -165,8 +165,6 @@ export interface RetentionStatusResponse {
   shop_id: string;
   checked_at: string;
   counts: {
-    screenshots_active: number;
-    screenshots_deleted: number;
     sms_active: number;
     sms_purged: number;
     ai_extractions_active: number;

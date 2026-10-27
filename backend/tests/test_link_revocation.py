@@ -6,7 +6,6 @@ from test_public_order_routes import _create_test_order, clean_memory_stores, se
 
 from app.core.auth import SellerIdentity, get_seller_identity
 from app.main import app
-from tests.test_image_service import _create_minimal_png
 
 __all__ = ["clean_memory_stores", "seller_identity"]
 
@@ -46,22 +45,13 @@ async def test_revoke_preserves_order_and_blocks_submission_replay(client, selle
 
 
 @pytest.mark.asyncio
-async def test_revoked_link_denies_upload_replay_and_both_assistance_paths(client, seller_identity):
+async def test_revoked_link_denies_address_assistance(client, seller_identity):
     order = await _create_test_order(client)
     public = f"/api/public/orders/{order['portal_token']}"
-    image = _create_minimal_png()
-    headers = {"Idempotency-Key": "upload", "Content-Type": "image/png"}
-    uploaded = await client.post(public + "/evidence", content=image, headers=headers)
-    assert uploaded.status_code == 201
     result = await client.post(f"/api/seller/orders/{order['id']}/revoke-link",
                               json={"expected_version": 1}, headers={"Idempotency-Key": "revoke"})
     assert result.status_code == 200
-    for key in ("upload", "fresh-upload"):
-        denied = await client.post(public + "/evidence", content=image, headers={**headers, "Idempotency-Key": key})
-        assert denied.status_code == 410
-        assert denied.headers["cache-control"] == "no-store, private"
-    for suffix, payload in (("address-extraction", {"raw_text": "Synthetic Dhaka address"}),
-                            ("payment-extraction", {"evidence_id": uploaded.json()["evidence_id"]})):
+    for suffix, payload in (("address-extraction", {"raw_text": "Synthetic Dhaka address"}),):
         denied = await client.post(public + "/" + suffix, json={**payload, "ai_opt_in": True}, headers={"Idempotency-Key": "extract"})
         assert denied.status_code == 410, denied.text
         assert denied.json()["error"]["code"] == "BUYER_LINK_REVOKED"

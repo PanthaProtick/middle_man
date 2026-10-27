@@ -116,7 +116,7 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
       </div>
 
       <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 12px' }}>
-        Original raw SMS text, uploaded payment screenshots, and AI requests/responses are retained for up to 30 days from collection. Reprocessing never resets this deadline. Structured claims, accepted allocations, and COD remain intact after deletion.
+        Original raw SMS text and address AI requests/responses are retained for up to 30 days from collection. Reprocessing never resets this deadline. Structured claims, accepted allocations, and COD remain intact after deletion.
       </p>
 
       {error && (
@@ -134,12 +134,6 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
       {status && (
         <div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '12px' }}>
-            <div style={{ padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Screenshots</span>
-              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                {status.counts.screenshots_active} retained / {status.counts.screenshots_deleted} purged
-              </strong>
-            </div>
             <div style={{ padding: '10px', background: 'var(--bg-surface)', borderRadius: '6px', border: '1px solid var(--border-subtle)' }}>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>Raw SMS</span>
               <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>

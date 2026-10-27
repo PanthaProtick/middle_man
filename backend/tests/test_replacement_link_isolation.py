@@ -1,10 +1,9 @@
 import pytest
 from httpx import AsyncClient
-from test_image_service import _create_minimal_jpeg
 from test_public_order_routes import _create_test_order, clean_memory_stores, seller_identity  # noqa: F401
 
 
-def _buyer_submission(buyer_name: str, contact: str, trx_id: str, evidence_id: str | None = None) -> dict:
+def _buyer_submission(buyer_name: str, contact: str, trx_id: str) -> dict:
     payload: dict = {
         "buyer_name": buyer_name,
         "contact_number": contact,
@@ -16,8 +15,6 @@ def _buyer_submission(buyer_name: str, contact: str, trx_id: str, evidence_id: s
             "amount_minor": 200000,
         },
     }
-    if evidence_id:
-        payload["payment_claim"]["evidence_id"] = evidence_id
     return payload
 
 
@@ -75,7 +72,7 @@ async def test_replacement_creates_distinct_order_and_link_without_disclosing_su
 
 @pytest.mark.asyncio
 @pytest.mark.usefixtures("seller_identity")
-async def test_predecessor_cannot_submit_or_upload_after_replacement(client: AsyncClient):
+async def test_predecessor_cannot_submit_after_replacement(client: AsyncClient):
     order = await _create_test_order(client)
     path = f"/api/seller/orders/{order['id']}"
 
@@ -102,27 +99,9 @@ async def test_predecessor_cannot_submit_or_upload_after_replacement(client: Asy
     assert sub_res.status_code == 409
     assert sub_res.json()["error"]["code"] == "ORDER_ALREADY_SUBMITTED"
 
-    # Predecessor cannot upload evidence
-    up_res = await client.post(
-        f"/api/public/orders/{order['portal_token']}/evidence",
-        content=_create_minimal_jpeg(),
-        headers={"Content-Type": "image/jpeg", "Idempotency-Key": "up-on-cancelled-predecessor"},
-    )
-    assert up_res.status_code == 409
-    assert up_res.json()["error"]["code"] == "ORDER_ALREADY_SUBMITTED"
-
-    # Meanwhile successor CAN upload and submit
-    new_up_res = await client.post(
-        f"/api/public/orders/{new_order['portal_token']}/evidence",
-        content=_create_minimal_jpeg(),
-        headers={"Content-Type": "image/jpeg", "Idempotency-Key": "up-on-new-successor"},
-    )
-    assert new_up_res.status_code == 201
-    evidence_id = new_up_res.json()["evidence_id"]
-
     new_sub_res = await client.post(
         f"/api/public/orders/{new_order['portal_token']}/submission",
-        json=_buyer_submission("Valid Successor Buyer", "01711113333", "TXNEW123", evidence_id=evidence_id),
+        json=_buyer_submission("Valid Successor Buyer", "01711113333", "TXNEW123"),
         headers={"Idempotency-Key": "sub-on-new-successor"},
     )
     assert new_sub_res.status_code == 200

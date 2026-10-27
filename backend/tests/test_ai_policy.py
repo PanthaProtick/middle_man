@@ -7,7 +7,6 @@ from app.core.config import settings
 from app.models.buyer import PublicOrder
 from app.services.address_provider import GeminiAddressProvider
 from app.services.gemini import gemini_service
-from app.services.payment_provider import GeminiPaymentProvider
 
 
 @pytest.mark.asyncio
@@ -23,8 +22,6 @@ async def test_disabled_policy_blocks_all_provider_boundaries(monkeypatch):
     client.interactions.create.assert_not_called()
     with pytest.raises(ValueError, match="Provider unavailable"):
         await GeminiAddressProvider().extract("Dhaka")
-    with pytest.raises(ValueError, match="Provider unavailable"):
-        await GeminiPaymentProvider().extract(b"synthetic", "image/png")
 
 
 def test_public_availability_uses_current_policy_even_for_cached_responses(monkeypatch):

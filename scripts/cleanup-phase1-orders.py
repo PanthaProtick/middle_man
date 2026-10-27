@@ -24,7 +24,6 @@ from app.core.database_engine import create_database_engine  # noqa: E402
 from app.core.tokens import decrypt_token  # noqa: E402
 from app.models.entities import OrderTable  # noqa: E402
 from app.services.buyer_service import BuyerService  # noqa: E402
-from app.services.evidence_store import init_evidence_storage  # noqa: E402
 from app.services.obsolete_cleanup import associated_receipts, cleanup_obsolete_orders  # noqa: E402
 from app.services.payment_marker_protection import reject_used_identity, verify_marker_key  # noqa: E402
 from app.services.receipt_identity import receipt_identities  # noqa: E402
@@ -59,7 +58,6 @@ def allowed_rows(data, receipt_ids):
     """Build an exact row allowlist; every other row must remain byte-equivalent."""
     ids = set(TARGETS) | receipt_ids
     ids.update(r['id'] for r in data['buyer_revisions'] if r['order_id'] in TARGETS)
-    ids.update(r['id'] for r in data['order_evidence'] if r['order_id'] in TARGETS)
     sms_ids = set()
     for row in data['sms_imports']:
         for item in json.loads(row['result_json'])['items']:
@@ -73,8 +71,8 @@ def allowed_rows(data, receipt_ids):
             matches = False
             if table == 'orders':
                 matches = row['id'] in TARGETS
-            elif table in {'buyer_revisions', 'order_evidence', 'order_review_reasons',
-                           'address_extractions', 'payment_extractions', 'allocations'}:
+            elif table in {'buyer_revisions', 'order_review_reasons',
+                           'address_extractions', 'allocations'}:
                 matches = row['order_id'] in TARGETS
             elif table == 'received_transactions':
                 matches = row['id'] in receipt_ids
@@ -149,7 +147,6 @@ async def main():
             reviewed = json.loads(REPORT.read_text(encoding='utf-8'))
             if reviewed['snapshot_digest'] != digest(before) or reviewed['targets'] != TARGETS:
                 raise ValueError('Database changed since dry run; repeat inventory before mutation')
-            init_evidence_storage()
             for shop_id in sorted(set(TARGETS.values())):
                 await verify_marker_key(db, shop_id)
             result = await cleanup_obsolete_orders(db, TARGETS)

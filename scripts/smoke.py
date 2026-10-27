@@ -33,10 +33,7 @@ def request(url: str, payload: dict[str, object] | None = None) -> tuple[int, by
         return error.code, error.read()
 
 
-def smoke() -> None:
-    distribution = ROOT / "frontend" / "dist"
-    if not (distribution / "index.html").exists():
-        raise RuntimeError("Build the frontend first: npm run build")
+def standby_environment() -> dict[str, str]:
     environment = os.environ.copy()
     for name in (
         "DATABASE_URL", "DIRECT_URL", "PGHOST", "PGDATABASE", "PGUSER", "PGPASSWORD",
@@ -46,8 +43,17 @@ def smoke() -> None:
         environment[name] = ""
     environment.update(
         ENV="test", DEBUG="false", API_PREFIX="/api", PGPORT="5432", PGSSLMODE="require",
+        SELF_TEST_MODE="false",
         CORS_ORIGINS='["http://localhost:5173"]', GEMINI_MODEL="gemini-2.5-flash",
     )
+    return environment
+
+
+def smoke() -> None:
+    distribution = ROOT / "frontend" / "dist"
+    if not (distribution / "index.html").exists():
+        raise RuntimeError("Build the frontend first: npm run build")
+    environment = standby_environment()
     with socket.socket() as reservation:
         reservation.bind(("127.0.0.1", 0))
         api_port = reservation.getsockname()[1]

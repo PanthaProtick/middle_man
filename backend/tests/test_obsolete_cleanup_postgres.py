@@ -3,7 +3,6 @@ import pytest
 from test_structured_retention_postgres import confirm_case
 
 from app.services.obsolete_cleanup import cleanup_obsolete_orders
-from tests.test_image_service import _create_minimal_png
 
 
 async def test_early_cleanup_is_scoped_repeatable_and_keeps_payment_protection(postgres_buyer):
@@ -45,14 +44,8 @@ async def test_unknown_target_or_memory_fails_closed(postgres_buyer):
     assert await connection.fetchval('SELECT retained_at FROM orders WHERE id=$1', order['id']) is None
 
 
-async def test_evidence_and_sms_copies_are_erased(postgres_buyer):
+async def test_sms_copies_are_erased(postgres_buyer):
     client, connection, sessions, order = postgres_buyer
-    evidence = await client.post(f"/api/public/orders/{order['portal_token']}/evidence",
-        content=_create_minimal_png(width=40, height=30),
-        headers={'Content-Type': 'image/png', 'Idempotency-Key': 'obsolete-image'})
-    assert evidence.status_code == 201
-    from app.services.evidence_store import read_evidence_file
-    storage_key = await connection.fetchval('SELECT storage_key FROM order_evidence')
     imported = await client.post('/api/seller/transactions/sms-import', json={
         'payment_account_id': order['payment_account_id'],
         'messages': ['bKash: You have received Tk 2000.00 from 01822222222. TrxID OLDTEST001 at 2026-10-25T10:00:00+06:00']},
@@ -70,8 +63,6 @@ async def test_evidence_and_sms_copies_are_erased(postgres_buyer):
     async with sessions() as db:
         result = await cleanup_obsolete_orders(db, {order['id']: order['shop_id']})
     assert result['failed'] == []
-    assert read_evidence_file(storage_key) is None
-    assert await connection.fetchval('SELECT count(*) FROM order_evidence') == 0
     assert await connection.fetchval('SELECT count(*) FROM sms_evidence') == 0
     assert await connection.fetchval('SELECT count(*) FROM transaction_observations') == 0
     assert await connection.fetchval('SELECT count(*) FROM received_transactions') == 0

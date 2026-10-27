@@ -9,7 +9,7 @@ export interface BuyerDetails {
   address: {raw_text: string; district?: string | null; thana?: string | null; area?: string | null;
     street_line?: string | null; landmark?: string | null; pathao?: PathaoResolution | null};
   payment_claim: {provider: 'bkash' | 'nagad'; trx_id: string; sender_number: string;
-    amount_minor: number; claimed_at?: string | null; evidence_id?: string | null};
+    amount_minor: number; claimed_at?: string | null};
 }
 export interface Revision extends BuyerDetails {
   id: string; revision_number: number; actor: string; reason: string | null;
