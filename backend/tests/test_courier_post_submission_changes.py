@@ -135,7 +135,7 @@ async def test_correction_while_submission_in_flight(client, monkeypatch):
 
     original_submit = pathao_provider.submit_booking
 
-    async def delayed_submit(shop_id, environment, snapshot):
+    async def delayed_submit(shop_id, environment, snapshot, credentials=None):
         # While in flight, seller corrects the delivery address
         fresh = (await client.get(f"/api/seller/orders/{order['id']}")).json()
         await client.patch(
@@ -147,7 +147,7 @@ async def test_correction_while_submission_in_flight(client, monkeypatch):
             },
             headers={'Idempotency-Key': 'corr-in-flight-3'},
         )
-        return await original_submit(shop_id, environment, snapshot)
+        return await original_submit(shop_id, environment, snapshot, credentials)
 
     monkeypatch.setattr(pathao_provider, 'submit_booking', delayed_submit)
 
@@ -179,7 +179,7 @@ async def test_cancellation_while_submission_in_flight(client, monkeypatch):
 
     original_submit = pathao_provider.submit_booking
 
-    async def delayed_submit(shop_id, environment, snapshot):
+    async def delayed_submit(shop_id, environment, snapshot, credentials=None):
         fresh = (await client.get(f"/api/seller/orders/{order['id']}")).json()
         await client.post(
             f"/api/seller/orders/{order['id']}/decisions",
@@ -190,7 +190,7 @@ async def test_cancellation_while_submission_in_flight(client, monkeypatch):
             },
             headers={'Idempotency-Key': 'cancel-in-flight-4'},
         )
-        return await original_submit(shop_id, environment, snapshot)
+        return await original_submit(shop_id, environment, snapshot, credentials)
 
     monkeypatch.setattr(pathao_provider, 'submit_booking', delayed_submit)
 

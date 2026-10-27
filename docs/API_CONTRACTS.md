@@ -31,7 +31,8 @@ editable. Same key and payload replay the stored response; a reused key with a
 different payload returns 409 `IDEMPOTENCY_KEY_REUSED`; a stale version returns
 409 `STALE_VERSION`; foreign/missing orders return 404.
 
-There is no courier submission endpoint in this ticket. Any missing parcel field
+Submission is a separate protected operation; see
+[the submission contract](pathao-submission-contract.md). Any missing parcel field
 sets `PARCEL_DETAILS_REQUIRED`; merchant connection/pickup store and Pathao
 location IDs always block booking. Cancelled orders additionally return
 `ORDER_NOT_CONFIRMED`.
@@ -56,7 +57,9 @@ immediately, rejects late responses, and reloads when the order version changes.
 submission attempt and requires the owning seller plus `Idempotency-Key`. The body is
 `{attempt_id, expected_version, action}`. `attach_existing` also requires
 `environment`, `consignment_id`, and `merchant_order_id`; the courier adapter must
-confirm the consignment for that shop, order reference, store, and environment.
+confirm the consignment for that shop, order reference, and environment with the
+current connection. Sandbox uses `/aladdin/api/v1/orders/{consignment_id}/info`;
+the pickup store is compared only when the provider returns it.
 `confirm_noncreation` records an explicit seller confirmation and requires no
 consignment fields. Responses use the existing `CourierReview` shape.
 

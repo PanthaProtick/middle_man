@@ -219,3 +219,37 @@ it('displays session loss error and enables retry when submission is unauthorize
   expect(submitBtn.disabled).toBe(false);
   await act(async () => root.unmount());
 });
+
+it('submits a reviewed sandbox draft and reports a non-simulated consignment', async () => {
+  const sandboxReview = {
+    ...review,
+    reviewed: true,
+    submission_enabled: true,
+    choices: { ...review.choices, environment: 'sandbox' },
+    connection: { ...review.connection, simulated: false, merchant_hint: 'masked' },
+  };
+  const bookedReview = {
+    ...sandboxReview,
+    submission_enabled: false,
+    latest_attempt: {
+      id: 'att-sandbox', order_id: 'a', attempt_number: 1, status: 'success' as const,
+      environment: 'sandbox' as const, simulated: false, reviewed_token: review.token,
+      correlation_id: 'a-1', consignment_id: 'PT-SANDBOX-1', booking_snapshot: null,
+      error_code: null, error_message: null, created_at: '', updated_at: '',
+    },
+  };
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url) => {
+    if (String(url).includes('/courier-submission')) return new Response(JSON.stringify(bookedReview));
+    if (String(url).includes('/locations?')) return new Response(JSON.stringify({ choices: [] }));
+    return new Response(JSON.stringify(sandboxReview));
+  });
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<CourierReview orderId="a" token="seller" />));
+  const submitBtn = host.querySelector<HTMLButtonElement>('[data-submit]')!;
+  expect(submitBtn.textContent).toContain('Pathao sandbox');
+  await act(async () => submitBtn.click());
+  expect(host.textContent).toContain('Booking confirmed in Pathao sandbox');
+  expect(host.textContent).toContain('PT-SANDBOX-1');
+  expect(host.textContent).not.toContain('Simulated consignment');
+  await act(async () => root.unmount());
+});

@@ -50,6 +50,7 @@ class CourierBookingSnapshot(BaseModel):
     item_quantity: int
     amount_to_collect_bdt: int
     remaining_cod_minor: int
+    connection_version: int = 0
 
 
 class CourierAttemptView(BaseModel):

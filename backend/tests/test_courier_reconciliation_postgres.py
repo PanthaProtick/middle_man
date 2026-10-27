@@ -124,7 +124,23 @@ async def test_postgres_confirmed_noncreation_allows_retry(postgres_buyer, monke
         'attempt_id': attempt['id'], 'expected_version': 0, 'action': 'confirm_noncreation',
     }, 'pg-noncreation-resolve')
     assert replay.status_code == 200
-    assert replay.json() == response.json()
+    # Replay projects current facts without repeating the committed resolution.
+    current = await client.get(path)
+    assert current.status_code == 200
+    assert replay.json() == current.json()
+    assert replay.json()['latest_attempt']['id'] == retried.json()['latest_attempt']['id']
+    assert replay.json()['latest_attempt']['status'] == 'success'
+    assert replay.json()['submission_enabled'] is False
+    assert await connection.fetchval(
+        'SELECT count(*) FROM courier_attempts WHERE order_id = $1', order['id'],
+    ) == 2
+    assert await connection.fetchval(
+        'SELECT count(*) FROM courier_reconciliations WHERE attempt_id = $1', attempt['id'],
+    ) == 1
+    receipt = await connection.fetchval(
+        "SELECT response_json FROM idempotency_records WHERE operation = 'courier_reconciliation'",
+    )
+    assert evidence_value(receipt) == response.json()
 
 
 async def test_postgres_competing_resolutions_serialize(postgres_buyer, monkeypatch):

@@ -12,6 +12,7 @@ from app.models.pathao import (
     DefaultsInput,
     DeliveryType,
     Environment,
+    MerchantCredentials,
     PathaoConnectionTable,
     PickupStore,
     StoreChoices,
@@ -19,6 +20,15 @@ from app.models.pathao import (
 from app.services.pathao_provider import list_stores
 from app.services.pathao_secrets import seal, unseal
 from app.services.seller_service import SellerDomainException, StaleVersionError
+
+
+class CourierSetupError(SellerDomainException):
+    """The reviewed connection can no longer be used for an external booking."""
+
+    def __init__(self, status_code: int, code: str, message: str) -> None:
+        super().__init__(status_code, code, message)
+        self.code = code
+        self.message = message
 
 
 @dataclass(frozen=True)
@@ -87,6 +97,28 @@ async def append(db: AsyncSession | None, shop: str, env: Environment, expected:
 async def stores_for(shop: str, env: Environment, revision: Revision) -> list[PickupStore]:
     credentials = unseal(revision.encrypted_credentials) if env != 'offline' else None
     return await list_stores(shop, env, credentials)
+
+
+async def submission_credentials(
+    db: AsyncSession | None, shop: str, env: Environment, expected_version: int,
+) -> MerchantCredentials | None:
+    """Releases the read transaction before returning; no provider call is made here."""
+    if env == 'offline':
+        return None
+    revision = await latest(db, shop, env)
+    if not revision.version:
+        raise CourierSetupError(422, 'COURIER_CONNECTION_REQUIRED', 'Connect Pathao before submitting.')
+    if revision.version != expected_version:
+        raise CourierSetupError(
+            409, 'COURIER_SETUP_CHANGED', 'Pathao settings changed after review. Reload and review current details.',
+        )
+    try:
+        return unseal(revision.encrypted_credentials)
+    except SellerDomainException:
+        raise CourierSetupError(
+            503, 'PATHAO_KEY_UNAVAILABLE',
+            'Courier credentials cannot be decrypted. Contact the operator before submitting.',
+        ) from None
 
 
 async def connect(db: AsyncSession | None, shop: str, env: Environment, data: ConnectInput) -> ConnectionView:

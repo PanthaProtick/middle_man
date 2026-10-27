@@ -140,7 +140,7 @@ async def test_submission_rejects_stale_review_cancellation_and_unreviewed(clien
 
 
 @pytest.mark.usefixtures('seller_identity')
-async def test_submission_rejects_sandbox_and_production_environments(client):
+async def test_submission_requires_a_ready_sandbox_connection(client):
     order = await parcel_order(client, 'submit-sandbox', parcel_weight_grams=800, parcel_quantity=1)
     await confirm_automatically(client, order, 'SUBMIT-ENV')
     path = f"/api/seller/orders/{order['id']}/courier-review"
@@ -159,7 +159,7 @@ async def test_submission_rejects_sandbox_and_production_environments(client):
         headers={'Idempotency-Key': 'key-sandbox'},
     )
     assert res.status_code in (409, 422)
-    assert res.json()['error']['code'] in ('REAL_BOOKING_DISABLED', 'COURIER_NOT_READY', 'REVIEW_REQUIRED')
+    assert res.json()['error']['code'] in ('COURIER_NOT_READY', 'REVIEW_REQUIRED')
 
 
 @pytest.mark.usefixtures('seller_identity')

@@ -331,7 +331,7 @@ async def test_postgres_correction_while_submission_in_flight(postgres_buyer, mo
 
     original_submit = pathao_provider.submit_booking
 
-    async def hooked_submit(shop_id, environment, snapshot):
+    async def hooked_submit(shop_id, environment, snapshot, credentials=None):
         fresh = (await client.get(f"/api/seller/orders/{order['id']}")).json()
         patch_res = await client.patch(
             f"/api/seller/orders/{order['id']}/buyer-details",
@@ -343,7 +343,7 @@ async def test_postgres_correction_while_submission_in_flight(postgres_buyer, mo
             headers={'Idempotency-Key': 'pg-corr-inflight-key'},
         )
         assert patch_res.status_code == 200
-        return await original_submit(shop_id, environment, snapshot)
+        return await original_submit(shop_id, environment, snapshot, credentials)
 
     monkeypatch.setattr(pathao_provider, 'submit_booking', hooked_submit)
 
@@ -372,7 +372,7 @@ async def test_postgres_cancellation_while_submission_in_flight(postgres_buyer, 
 
     original_submit = pathao_provider.submit_booking
 
-    async def hooked_submit(shop_id, environment, snapshot):
+    async def hooked_submit(shop_id, environment, snapshot, credentials=None):
         fresh = (await client.get(f"/api/seller/orders/{order['id']}")).json()
         cancel_res = await client.post(
             f"/api/seller/orders/{order['id']}/decisions",
@@ -384,7 +384,7 @@ async def test_postgres_cancellation_while_submission_in_flight(postgres_buyer, 
             headers={'Idempotency-Key': 'pg-cancel-inflight-key'},
         )
         assert cancel_res.status_code == 200
-        return await original_submit(shop_id, environment, snapshot)
+        return await original_submit(shop_id, environment, snapshot, credentials)
 
     monkeypatch.setattr(pathao_provider, 'submit_booking', hooked_submit)
 
@@ -400,6 +400,3 @@ async def test_postgres_cancellation_while_submission_in_flight(postgres_buyer, 
     mismatch = body.get('delivery_mismatch')
     assert mismatch is not None
     assert mismatch['cancelled'] is True
-
-
-

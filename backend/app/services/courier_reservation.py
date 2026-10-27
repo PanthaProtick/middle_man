@@ -39,8 +39,8 @@ async def reserve_attempt(
         raise SellerDomainException(409, "REVIEW_REQUIRED", "Review must be approved before submission.")
     if review.blockers:
         raise SellerDomainException(409, "COURIER_NOT_READY", "Resolve all readiness blockers before submission.")
-    if review.choices.environment != "offline":
-        raise SellerDomainException(422, "REAL_BOOKING_DISABLED", "Real and production booking is not yet available.")
+    if review.choices.environment == "production":
+        raise SellerDomainException(422, "REAL_BOOKING_DISABLED", "Production booking remains disabled.")
 
     # Phase 2: Hold locks through final validation and reservation commit.
     if db is not None:
@@ -113,6 +113,7 @@ async def reserve_attempt(
         item_quantity=record.parcel_quantity or 0,
         amount_to_collect_bdt=record.remaining_cod_minor // 100,
         remaining_cod_minor=record.remaining_cod_minor,
+        connection_version=version or 0,
     )
 
     if db is not None:

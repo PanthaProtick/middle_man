@@ -50,6 +50,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
   const review = state?.identity === identity ? state.review : undefined;
   const choices = editing?.identity === identity ? editing.choices : undefined;
   const dirty = review && choices && JSON.stringify(review.choices) !== JSON.stringify(choices);
+  const target = review?.choices?.environment === 'sandbox' ? 'Pathao sandbox' : 'Pathao (simulated)';
 
   const mutate = async (method: 'PUT' | 'POST') => {
     if (!review || !choices || busy) return;
@@ -158,10 +159,10 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
       {review.reviewed && !dirty && !review.latest_attempt && <p role="status">Review complete. This remains a local draft; no Pathao booking exists.</p>}
       {review.reviewed && !dirty && review.submission_enabled && (
         <button type="button" data-submit disabled={busy} onClick={() => void submitBooking()}>
-          Submit booking to Pathao (simulated)
+          Submit booking to {target}
         </button>
       )}
-      {busy && <p role="status">Submitting booking to Pathao (simulated)…</p>}
+      {busy && <p role="status">Submitting booking to {target}…</p>}
       {review.delivery_mismatch && (
         <div role="alert" className="delivery-mismatch-warning" style={{
           marginBottom: '12px', padding: '10px 12px', background: 'rgba(239, 68, 68, 0.1)',
@@ -181,9 +182,11 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
       {review.latest_attempt?.status === 'success' && (
         <div role="status" className="booking-result">
           <p><strong>{review.latest_attempt.resolution_action === 'attach_existing'
-            ? 'Existing booking attached (simulated offline).'
-            : 'Booking confirmed (simulated offline).'}</strong></p>
-          <p>Simulated consignment: <code>{review.latest_attempt.consignment_id}</code></p>
+            ? `Existing booking attached (${review.latest_attempt.simulated ? 'simulated offline' : 'Pathao sandbox'}).`
+            : review.latest_attempt.simulated
+              ? 'Booking confirmed (simulated offline).'
+              : 'Booking confirmed in Pathao sandbox.'}</strong></p>
+          <p>{review.latest_attempt.simulated ? 'Simulated consignment' : 'Consignment'}: <code>{review.latest_attempt.consignment_id}</code></p>
           {review.latest_attempt.resolution_action === 'attach_existing' && (
             <p>The original unknown attempt and its reviewed snapshot are preserved.</p>
           )}

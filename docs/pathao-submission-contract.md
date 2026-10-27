@@ -1,8 +1,34 @@
-# Offline courier submission contract
+# Courier submission contract
 
 Seller-only `POST /api/seller/orders/{id}/courier-submission` executes the protected
-submission workflow against the offline courier adapter. Real and production booking
-is unavailable and rejected server-side.
+submission workflow against the selected offline or Pathao sandbox connection.
+Production submission remains disabled and is rejected server-side.
+
+## Sandbox transport
+
+- Base URL `https://courier-api-sandbox.pathao.com`; credentials come from the
+  reviewed sandbox connection revision. Production (`api-hermes.pathao.com`) is
+  never used by a submission.
+- Authentication is a password grant to `/aladdin/api/v1/issue-token`. The token is
+  held only for that operation and discarded; no refresh or persistence occurs.
+- Create order is a single `POST /aladdin/api/v1/orders` per attempt. HTTP transport
+  retries are disabled, redirects are not followed, and application code does not
+  replay it. The complete operation has a 15-second deadline with 10-second read
+  and 4-second connect timeouts.
+- Payload uses server-derived facts: store ID, order ID as `merchant_order_id`,
+  canonical recipient name/phone/address, the resolved city/zone/area IDs, service
+  `48`/`12`, item type `2` (parcel), integer quantity, weight in kg, and exact
+  whole-taka COD. Non-whole-taka COD, out-of-contract names/phones/addresses,
+  weights outside 0.5–10 kg, unresolved destinations, and unsupported service codes
+  are rejected before any network call rather than rounded, guessed, or substituted.
+- `200`/`201` with a consignment ID is success. `400`, `401`, `403`, `404`, `422`,
+  and `429` are definitive noncreation rejections only after no create-order call is
+  retried. Timeouts, connection errors, redirects, other statuses, malformed bodies,
+  and mismatched returned merchant references are ambiguous and must remain
+  `unknown`; success is never inferred from an HTTP status alone.
+- The credentials are loaded after the attempt reservation commits and the
+  connection revision must still match the reviewed snapshot. Provider I/O never
+  runs inside a database transaction.
 
 ## Idempotency and payload contract
 
@@ -20,7 +46,8 @@ is unavailable and rejected server-side.
 1. **Preflight rechecks (Transaction 1, with row locks):**
    - Locks shop, order, and draft (`with_for_update`).
    - Revalidates order lifecycle (`confirmed`), review freshness (`expected_token` matches current
-     token), absence of readiness blockers, store membership, and environment (`offline`).
+     token), absence of readiness blockers, store membership, and environment (`offline` or
+     `sandbox`; production is rejected with `REAL_BOOKING_DISABLED`).
    - Rejects if an active booking (`success`), protected unknown outcome (`unknown`), or
      in-flight attempt (`submitting`) exists for the order.
    - Snapshots the reviewed payload (recipient contact, address, location hierarchy, store,
@@ -36,8 +63,9 @@ is unavailable and rejected server-side.
      zero collection for fully prepaid orders, overpayment rejection).
 
 3. **Outcome persistence (Transaction 2):**
-   - **Success**: Provider returns valid simulated consignment ID (`SIM-PATHAO-...`). Persists
-     `status = 'success'`, updates consignment association and snapshot, caches idempotency record.
+   - **Success**: Offline returns a simulated consignment ID (`SIM-PATHAO-...`); sandbox returns
+     the provider consignment ID. Persists `status = 'success'`, updates consignment association
+     and snapshot, caches idempotency record.
    - **Definitive failure**: Provider definitively rejects request (e.g. inactive store / validation
      failure). Persists `status = 'failed'` with error details. Draft remains editable and retryable.
    - **Unknown outcome**: Provider timeout, network disconnect, malformed response, or provider
@@ -53,6 +81,10 @@ Seller-only `POST /api/seller/orders/{id}/courier-reconciliation` resolves one p
 - `action = attach_existing` additionally requires `environment`, `consignment_id`, and
   `merchant_order_id`. The offline adapter verifies that the consignment belongs to the
   authenticated shop, the order reference, the selected store, and the attempt environment.
+  Sandbox verifies `GET /aladdin/api/v1/orders/{consignment_id}/info` with the current
+  sandbox connection: consignment and merchant order references must match, and the pickup
+  store is compared only when the provider returns it. Consignment lookup fields the provider
+  does not expose are not claimed as verified.
   A missing, foreign, or mismatched consignment leaves the attempt `unknown` and returns a
   controlled `422 EVIDENCE_UNAVAILABLE`/`EVIDENCE_MISMATCH`. One consignment cannot be
   associated with another order (`409 CONSIGNMENT_ALREADY_ASSOCIATED`).
@@ -117,6 +149,12 @@ Seller-only `POST /api/seller/orders/{id}/courier-reconciliation` resolves one p
 
 ## Verification and acceptance boundaries
 
-- **Zero live network calls**: Ordinary tests reject all external socket connections (`reject_network` fixture).
-- **Offline adapter only**: Real and production booking remains unavailable and rejected server-side (`REAL_BOOKING_DISABLED`).
-- **Provider acceptance disclaimer**: External courier provider acceptance is NOT established by this ticket; Ticket 06 delivers only authenticated seller submission actions and UI progress/result states against the offline courier simulation.
+- **Zero live network calls in tests**: Ordinary tests reject external sockets and use
+  `httpx.MockTransport` at the provider boundary.
+- **Sandbox transport, production disabled**: Sandbox booking can be selected only with a
+  verified sandbox connection. Production submission is rejected with
+  `REAL_BOOKING_DISABLED` before provider I/O.
+- **Provider acceptance disclaimer**: Mocked transport tests prove request mapping,
+  classification, and the absence of automatic create-order replay. They do not prove
+  that Pathao sandbox accepted a live request. An actual sandbox booking requires verified
+  account-owned sandbox credentials and a usable test store, and is recorded separately.

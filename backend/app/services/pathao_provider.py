@@ -1,4 +1,7 @@
-"""Bounded async authentication/store adapter. No bookings, retries or token retention."""
+"""Courier adapter boundary: bounded auth/stores plus offline and sandbox bookings.
+
+No automatic retries or token retention; production booking remains rejected.
+"""
 import asyncio
 import hashlib
 import json
@@ -132,9 +135,17 @@ class CourierBookingResult(BaseModel):
     is_simulated: bool = False
 
 
-async def submit_booking(shop: str, env: Environment, request: CourierBookingSnapshot) -> CourierBookingResult:
+async def submit_booking(
+    shop: str, env: Environment, request: CourierBookingSnapshot,
+    credentials: MerchantCredentials | None = None,
+) -> CourierBookingResult:
     if env != 'offline':
-        raise CourierDefinitiveFailure('Real and production booking is not yet available.')
+        if env == 'production':
+            raise CourierDefinitiveFailure('Production booking is disabled.')
+        if credentials is None:
+            raise CourierDefinitiveFailure('Pathao merchant credentials are required.')
+        from app.services import pathao_booking_transport
+        return await pathao_booking_transport.submit(env, request, credentials)
     if request.remaining_cod_minor < 0:
         raise CourierDefinitiveFailure('Remaining COD balance cannot be negative.')
     expected_bdt = request.remaining_cod_minor // 100
@@ -158,10 +169,16 @@ async def submit_booking(shop: str, env: Environment, request: CourierBookingSna
 
 async def lookup_booking(
     shop: str, env: Environment, consignment_id: str, merchant_order_id: str, store_id: int,
+    credentials: MerchantCredentials | None = None,
 ) -> CourierBookingEvidence:
     """Verifies an existing consignment against the account, order reference, and environment."""
     if env != 'offline':
-        raise CourierEvidenceUnavailable('Real consignment verification is not yet available.')
+        if env == 'production' or credentials is None:
+            raise CourierEvidenceUnavailable('Consignment verification is unavailable for this connection.')
+        from app.services import pathao_booking_transport
+        return await pathao_booking_transport.lookup(
+            env, credentials, consignment_id, merchant_order_id, store_id,
+        )
     expected = simulated_consignment(shop, merchant_order_id, store_id)
     if consignment_id.strip().upper() != expected:
         raise CourierEvidenceUnavailable('No matching consignment was found for this account and order reference.')

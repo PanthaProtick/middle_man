@@ -13,7 +13,7 @@ from app.models.courier_submission import (
     CourierAttemptView,
     to_attempt_view,
 )
-from app.services import courier_review, pathao_provider
+from app.services import courier_review, pathao_connections, pathao_provider
 from app.services.courier_outcomes import (
     sanitize_definitive_error,
     sanitize_unexpected_error,
@@ -127,8 +127,19 @@ async def execute_submission(
     attempt, snapshot = await reserve_attempt(db, shop, order_id, expected_token)
 
     try:
+        try:
+            credentials = await pathao_connections.submission_credentials(
+                db, shop, attempt.environment, snapshot.connection_version,
+            )
+        except pathao_connections.CourierSetupError as err:
+            await record_outcome(
+                db, attempt, 'failed',
+                error_code='COURIER_SETUP_REQUIRED',
+                error_message='Courier connection is not usable. Fix Pathao settings and review again.',
+            )
+            raise SellerDomainException(err.status_code, err.code, err.message) from None
         # Phase 3: Provider I/O strictly outside the transaction.
-        result = await pathao_provider.submit_booking(shop, attempt.environment, snapshot)
+        result = await pathao_provider.submit_booking(shop, attempt.environment, snapshot, credentials)
         is_valid, validation_err = validate_booking_result(result, attempt, snapshot)
         if not is_valid:
             await record_outcome(

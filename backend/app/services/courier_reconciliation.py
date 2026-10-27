@@ -8,7 +8,7 @@ from app.models.courier_reconciliation import CourierReconciliationInput
 from app.models.courier_review import CourierReview
 from app.models.courier_submission import CourierAttemptTable, CourierAttemptView, to_attempt_view
 from app.models.entities import OrderTable, ShopTable
-from app.services import courier_review, pathao_provider
+from app.services import courier_review, pathao_connections, pathao_provider
 from app.services.courier_reconciliation_replay import ReconciliationReplay
 from app.services.courier_reconciliation_resolution import (
     _apply,
@@ -19,6 +19,7 @@ from app.services.courier_reconciliation_resolution import (
 )
 from app.services.seller_service import (
     NotFoundError,
+    SellerDomainException,
     StaleVersionError,
     compute_payload_hash,
 )
@@ -77,7 +78,11 @@ async def _assert_consignment_unused(
 
 
 async def _verify_existing(
-    shop: str, order_id: str, attempt: CourierAttemptView, payload: CourierReconciliationInput,
+    db: AsyncSession | None,
+    shop: str,
+    order_id: str,
+    attempt: CourierAttemptView,
+    payload: CourierReconciliationInput,
 ) -> pathao_provider.CourierBookingEvidence:
     if payload.environment != attempt.environment:
         raise _conflict(
@@ -95,9 +100,19 @@ async def _verify_existing(
             422,
         )
     try:
+        credentials = await pathao_connections.submission_credentials(
+            db, shop, attempt.environment, snapshot.connection_version,
+        )
+    except SellerDomainException:
+        raise _conflict(
+            'EVIDENCE_UNAVAILABLE',
+            'The courier connection cannot verify this consignment now. Reload and try again.',
+            422,
+        ) from None
+    try:
         evidence = await pathao_provider.lookup_booking(
             shop, attempt.environment, payload.consignment_id or '',
-            payload.merchant_order_id or '', snapshot.store_id,
+            payload.merchant_order_id or '', snapshot.store_id, credentials,
         )
     except pathao_provider.CourierEvidenceUnavailable:
         raise _conflict(
@@ -106,7 +121,7 @@ async def _verify_existing(
             422,
         ) from None
     if (
-        evidence.consignment_id != (payload.consignment_id or '').strip().upper()
+        evidence.consignment_id.strip().upper() != (payload.consignment_id or '').strip().upper()
         or evidence.merchant_order_id != order_id
         or evidence.environment != attempt.environment
         or evidence.store_id != snapshot.store_id
@@ -163,7 +178,7 @@ async def execute(
 
     evidence = None
     if payload.action == 'attach_existing':
-        evidence = await _verify_existing(shop, order_id, attempt, payload)
+        evidence = await _verify_existing(db, shop, order_id, attempt, payload)
 
     locked, raw = await _lock_attempt(db, shop, order_id, payload.attempt_id)
     cached = await replay.read(db)
