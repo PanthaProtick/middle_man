@@ -1,0 +1,133 @@
+{
+  "status": "READ_ONLY_INVENTORY",
+  "endpoint_matches_record": true,
+  "identity": {
+    "database": "neondb",
+    "schema": "public",
+    "recovery": false
+  },
+  "counts": {
+    "address_extractions": 0,
+    "allocations": 7,
+    "audit_events": 11,
+    "buyer_revisions": 10,
+    "courier_drafts": 0,
+    "evidence_cleanups": 1,
+    "idempotency_records": 38,
+    "link_measurements": 28,
+    "order_evidence": 1,
+    "order_review_reasons": 3,
+    "orders": 11,
+    "pathao_connection_revisions": 0,
+    "payment_accounts": 2,
+    "payment_extractions": 0,
+    "payment_marker_keys": 2,
+    "payment_metrics": 2,
+    "received_transactions": 10,
+    "shops": 2,
+    "sms_evidence": 3,
+    "sms_imports": 3,
+    "transaction_observations": 10,
+    "used_payment_markers": 7
+  },
+  "shops": [
+    {
+      "id": "bd3042b7-a963-40c6-9bb7-aea4af65abd3"
+    },
+    {
+      "id": "beb74169-97ae-4ef9-8421-9f62e36fc26b"
+    }
+  ],
+  "orders": [
+    {
+      "id": "e0e926f5-ac4c-402d-91a8-1e0854d72270",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "confirmed",
+      "created_at": "2026-10-25 10:07:36.319464+00:00",
+      "completed_at": "2026-10-25 10:11:28.892837+00:00",
+      "retained_at": null
+    },
+    {
+      "id": "2e48472f-f043-459a-8dcd-cc71d4cdd335",
+      "shop_id": "bd3042b7-a963-40c6-9bb7-aea4af65abd3",
+      "lifecycle": "pending",
+      "created_at": "2026-10-25 10:18:23.942107+00:00",
+      "completed_at": null,
+      "retained_at": null
+    },
+    {
+      "id": "7b2e3bd9-fbf9-4e03-bad6-1303526e4ff1",
+      "shop_id": "bd3042b7-a963-40c6-9bb7-aea4af65abd3",
+      "lifecycle": "confirmed",
+      "created_at": "2026-10-25 11:15:56.556869+00:00",
+      "completed_at": "2026-10-25 11:16:29.845758+00:00",
+      "retained_at": null
+    },
+    {
+      "id": "4d466a34-8a80-4860-b03e-a4f3bc200b8a",
+      "shop_id": "bd3042b7-a963-40c6-9bb7-aea4af65abd3",
+      "lifecycle": "confirmed",
+      "created_at": "2026-10-25 11:17:13.866463+00:00",
+      "completed_at": "2026-10-25 11:18:36.493982+00:00",
+      "retained_at": null
+    },
+    {
+      "id": "c22effff-10a9-42ff-b87e-2ffc258f53d0",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "confirmed",
+      "created_at": "2026-10-25 11:24:59.219718+00:00",
+      "completed_at": "2026-10-25 11:26:07.346219+00:00",
+      "retained_at": null
+    },
+    {
+      "id": "33311ee1-ab50-4777-b0fe-c619809e3214",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "confirmed",
+      "created_at": "2026-10-26 12:18:24.056254+00:00",
+      "completed_at": "2026-10-26 12:37:57.012369+00:00",
+      "retained_at": null
+    },
+    {
+      "id": "2e370516-3f96-4ed0-8f68-61a5d1f8c88a",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "cancelled",
+      "created_at": "2026-10-26 12:51:24.352991+00:00",
+      "completed_at": "2026-10-26 12:52:51.116355+00:00",
+      "retained_at": null
+    },
+    {
+      "id": "ab68b132-d923-4dac-9721-0f1ef8ddb234",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "confirmed",
+      "created_at": "2026-10-26 12:51:33.722233+00:00",
+      "completed_at": "2026-10-26 12:55:12.871657+00:00",
+      "retained_at": null
+    },
+    {
+      "id": "23981d27-cb66-4329-9113-b2ca54b37364",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "pending",
+      "created_at": "2026-10-26 12:55:53.025266+00:00",
+      "completed_at": null,
+      "retained_at": null
+    },
+    {
+      "id": "4b98464f-c5bd-4693-8bb9-e45fe9350d99",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "pending",
+      "created_at": "2026-10-26 13:02:34.932657+00:00",
+      "completed_at": null,
+      "retained_at": null
+    },
+    {
+      "id": "c5d24d3d-39dd-48d5-a022-f4e3b97509ab",
+      "shop_id": "beb74169-97ae-4ef9-8421-9f62e36fc26b",
+      "lifecycle": "confirmed",
+      "created_at": "2026-10-26 13:09:48.967580+00:00",
+      "completed_at": "2026-10-26 13:11:46.453574+00:00",
+      "retained_at": null
+    }
+  ],
+  "classification": "UNCONFIRMED: no authoritative obsolete-record allowlist",
+  "removed": 0
+}
