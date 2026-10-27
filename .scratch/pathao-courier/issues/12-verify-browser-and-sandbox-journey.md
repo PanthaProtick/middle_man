@@ -148,3 +148,63 @@
   target with bounded locks/timeouts and preservation checks, restart self-test
   mode, then resume the synthetic order's buyer/seller browser journey. Do not
   attempt actual sandbox booking without verified account/store access.
+
+## Migration and buyer acceptance — 2026-10-27
+
+- Owner authorized applying exact development migrations 0024 and 0025. Applied
+  both in one transaction to the recorded Neon development target, neondb/public,
+  after confirming the two tables remained absent and the target was primary.
+  Used a migration advisory lock, 5s lock timeout, 30s statement timeout and SHARE
+  locks over existing tables. Existing table counts and deterministic row hashes
+  matched before/after. Both new tables were empty. Fresh-connection SQLAlchemy
+  model reads passed. Source hashes and safe counts: ticket12-migrations-result.json.
+- Restarted through npm run dev:backend with session-only SELF_TEST_MODE=true,
+  PUBLIC_BUYER_ACCESS_POLICY=self_test_link_possession and DEBUG=false. No saved
+  environment file changed. The first browser reload still reached an old worker:
+  netstat showed both old and new listeners. Confirmed worker 25152 was spawned by
+  old server 27028, stopped that worker, and verified only the new listener remained.
+  Buyer portal then loaded successfully. Do not infer browser readiness from a
+  successful new-server startup alone when old workers retain inherited sockets.
+- Actual phone browser (390x844): empty submit displayed required name, contact,
+  address, sender and TrxID errors. Filled synthetic buyer/address data, with
+  contact 01700000012 and different sender 01800000012. Location retry visibly
+  disabled controls while loading, returned unavailable, and retained the inputs.
+  Checked unsupported/needs-seller-help and submitted the written-address/payment
+  fallback by keyboard. Pending Seller Review with ACK-8673D47C appeared.
+- Actual desktop buyer browser (1365x900): refresh recovered the same pending
+  submission, product, BDT 1,000 total / 200 required advance / 800 expected COD.
+  Refresh-status control entered Checking. Buyer screen showed public terms and
+  acknowledgement, without seller courier account fields. This bounded observation
+  does not establish all tenant/session or API privacy acceptance cases.
+- Location unavailability was observed with a disconnected shop, not an induced
+  Pathao provider outage. No valid catalog/store acceptance is claimed.
+- Actual authenticated seller browser recovered the buyer revision after reload,
+  including the distinct contact/sender and unsupported written address. Recorded
+  a synthetic T12SYN1027A receipt for BDT 250 (no occurrence time) through its UI;
+  loaded payment count rose 7 to 8. Order remained pending. This prepares an
+  explicit accepted-advance exception; it does not claim confirmation or COD 750.
+- Native seller receipt selection could not be verified: keyboard/accessibility
+  selection left Select a receipt, and screenshot capture timed out. No payment
+  acceptance, confirmation, courier draft, booking or retention operation was
+  attempted through an alternate API shortcut. Opened seller app in the in-app
+  browser and requested owner sign-in to continue with reliable browser controls.
+- Focused sandbox-adapter/retention tests: 26 passed, 0 skipped using disposable
+  loopback PostgreSQL on 55447. Provider tests use simulations, not live Pathao.
+  Full final root gate is being recorded separately below.
+- Current unresolved scope: actual sandbox credentials/store unavailable; manual/
+  automatic confirmation, accepted exception, zero COD, courier review/blockers,
+  staleness, cancellation/correction, duplicate/unknown recovery, tenant denial,
+  seller viewport matrix and user-facing retention remain unverified here.
+  Ticket 11 cleanup remains independent and NOT EXECUTED per its recorded status.
+- In-app seller session loaded as Synthetic Shop B, showing only its three orders;
+  the notebook order from Shop A was absent. Requested owner switch to Shop A.
+  This demonstrates separated lists, not direct cross-shop request denial.
+- Saved buyer proof screenshot: ticket12-buyer-pending.png. Temporary browser
+  viewport overrides were reset; buyer and seller tabs retained for continuation.
+- Final root npm run check PASS: .cache/checks/check-nMDgHW/result.json,
+  all eight stages; backend 700 passed, 0 skipped; frontend 210 passed.
+  PostgreSQL cases used isolated disposable loopback schemas, not the Neon
+  acceptance dataset. The remote migration checks above are separate evidence.
+- Independent Standards review: 0 findings. Independent Spec review: 0 findings.
+  No application code changed and no new TDD slice was needed. Ticket 12 remains
+  incomplete; continue after owner switches the in-app seller session to Shop A.
