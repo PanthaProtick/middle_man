@@ -44,13 +44,15 @@ export function BuyerLinkAccess({ order, token, onUpdated }: Props) {
     <p>Revoking blocks public access to this link. The order and its payment stay unchanged.</p>
     {reissuable && <p>Reissue permanently disables previous links. The original deadline and submission state stay unchanged.</p>}
     {error && <p role="alert">{error}</p>}
-    {!order.buyer_link_revoked_at && <button className="btn btn-secondary"
-      disabled={busy || stale || pendingAction === 'reissue'} onClick={() => void changeAccess('revoke')}>
-      {busy && pendingAction === 'revoke' ? 'Revoking…' : error && pendingAction === 'revoke' ? 'Retry revocation' : 'Revoke buyer link'}
-    </button>}
-    {reissuable && <button className="btn btn-secondary"
-      disabled={busy || stale || pendingAction === 'revoke'} onClick={() => void changeAccess('reissue')}>
-      {busy && pendingAction === 'reissue' ? 'Reissuing…' : error && pendingAction === 'reissue' ? 'Retry reissue' : 'Reissue buyer link'}
-    </button>}
+    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
+      {!order.buyer_link_revoked_at && <button className="btn btn-secondary"
+        disabled={busy || stale || pendingAction === 'reissue'} onClick={() => void changeAccess('revoke')}>
+        {busy && pendingAction === 'revoke' ? 'Revoking…' : error && pendingAction === 'revoke' ? 'Retry revocation' : 'Revoke buyer link'}
+      </button>}
+      {reissuable && <button className="btn btn-secondary"
+        disabled={busy || stale || pendingAction === 'revoke'} onClick={() => void changeAccess('reissue')}>
+        {busy && pendingAction === 'reissue' ? 'Reissuing…' : error && pendingAction === 'reissue' ? 'Retry reissue' : 'Reissue buyer link'}
+      </button>}
+    </div>
   </section>;
 }

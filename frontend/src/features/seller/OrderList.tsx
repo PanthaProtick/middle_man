@@ -174,6 +174,7 @@ export function OrderList({
                         fontSize: '0.7rem',
                         textDecoration: 'underline',
                         padding: '0 2px',
+                        whiteSpace: 'nowrap',
                       }}
                       aria-expanded={Boolean(expandedReviewIds[ord.id])}
                       title="Toggle raw technical review codes"

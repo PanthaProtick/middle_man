@@ -81,11 +81,28 @@ export function OrderExport({ orderId, status, token }: {
     } finally { setBusy(false); }
   }
 
-  return <div>
-    <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void run()}>
-      {busy ? 'Preparing…' : orderId ? 'Copy delivery summary' : 'Download filtered CSV'}
-    </button>
-    <small> Manual delivery aid only; no courier booking, update or delivery-price calculation.</small>
-    {message && <p role={failed ? 'alert' : 'status'}>{message}</p>}
-  </div>;
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void run()}>
+          {busy ? 'Preparing…' : orderId ? 'Copy delivery summary' : 'Download filtered CSV'}
+        </button>
+      </div>
+      <small style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: 1.4 }}>
+        Manual delivery aid only; no courier booking, update or delivery-price calculation.
+      </small>
+      {message && (
+        <p
+          role={failed ? 'alert' : 'status'}
+          style={{
+            margin: '2px 0 0',
+            fontSize: '0.8rem',
+            color: failed ? 'var(--rose-accent)' : 'var(--emerald-accent)',
+          }}
+        >
+          {message}
+        </p>
+      )}
+    </div>
+  );
 }

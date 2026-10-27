@@ -170,29 +170,31 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
       )}
 
       {activeAction === 'none' && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-          {!isTerminal && (
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--rose-accent)' }} onClick={() => { setError(null); setActiveAction('cancel'); }}>
-              <Ban size={14} style={{ marginRight: '4px' }} /> Cancel Order
-            </button>
-          )}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+            {!isTerminal && (
+              <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--rose-accent)' }} onClick={() => { setError(null); setActiveAction('cancel'); }}>
+                <Ban size={14} style={{ marginRight: '4px' }} /> Cancel Order
+              </button>
+            )}
 
-          {order.lifecycle === 'pending' && !isAllocated && (
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--amber-accent)' }} onClick={() => { setError(null); setActiveAction('reject'); }}>
-              <XCircle size={14} style={{ marginRight: '4px' }} /> Reject Submission
-            </button>
-          )}
+            {order.lifecycle === 'pending' && !isAllocated && (
+              <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--amber-accent)' }} onClick={() => { setError(null); setActiveAction('reject'); }}>
+                <XCircle size={14} style={{ marginRight: '4px' }} /> Reject Submission
+              </button>
+            )}
 
-          {!isReplaced && (
-            isAllocated ? (
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-                <AlertTriangle size={12} color="var(--amber-accent)" /> Allocated orders require payment resolution before replacement
-              </span>
-            ) : (
+            {!isReplaced && !isAllocated && (
               <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--primary-accent)' }} onClick={() => { setError(null); setActiveAction('replace'); }}>
                 <RefreshCw size={14} style={{ marginRight: '4px' }} /> Replace Order
               </button>
-            )
+            )}
+          </div>
+
+          {!isReplaced && isAllocated && (
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+              <AlertTriangle size={12} color="var(--amber-accent)" /> Allocated orders require payment resolution before replacement
+            </div>
           )}
         </div>
       )}

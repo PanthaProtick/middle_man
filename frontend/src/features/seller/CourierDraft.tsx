@@ -138,9 +138,20 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
     <p>This is a local proposal awaiting seller review, not an accepted Pathao booking.
       Payment acceptance does not independently verify receipt with the payment provider.</p>
     {!current && <p role="status">Loading courier proposal…</p>}
-    {current?.error && <p role="alert">{current.error} <button type="button" onClick={() => {
-      setState(undefined); setSaveFailure(undefined); setAttempt(value => value + 1);
-    }}>Retry proposal</button></p>}
+    {current?.error && (
+      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}>
+        <span>{current.error}</span>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => {
+            setState(undefined); setSaveFailure(undefined); setAttempt(value => value + 1);
+          }}
+        >
+          Retry proposal
+        </button>
+      </div>
+    )}
     {proposal && <>
       <p>{proposal.recipient_name} · {proposal.contact_number}</p>
       <p>{proposal.address}</p>
@@ -184,10 +195,25 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
             />
           </div>
         </div>
-        {saveError && <p id="courier-parcel-error" role="alert">{saveError.message} <button type="button" onClick={() => {
-          setState(undefined); setInputs(undefined); setSaveFailure(undefined);
-          saveKeyRef.current = null; setAttempt(value => value + 1);
-        }}>Reload current details</button></p>}
+        {saveError && (
+          <div
+            id="courier-parcel-error"
+            role="alert"
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}
+          >
+            <span>{saveError.message}</span>
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => {
+                setState(undefined); setInputs(undefined); setSaveFailure(undefined);
+                saveKeyRef.current = null; setAttempt(value => value + 1);
+              }}
+            >
+              Reload current details
+            </button>
+          </div>
+        )}
         <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save parcel details'}</button>
       </form>}
       <ul>{proposal.blockers.filter(blocker => !reviewManaged ||

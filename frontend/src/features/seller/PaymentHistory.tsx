@@ -31,7 +31,18 @@ export function PaymentHistory({orderId,token}:{orderId:string;token:string}) {
   return <section className="buyer-correction" aria-label="Accepted payment history">
     <h4>Accepted payment history</h4>
     {loading && <p role="status">Loading decision history…</p>}
-    {error && <p role="alert">{error} <button type="button" onClick={()=>{setError('');setLoading(true);setAttempt(a=>a+1);}}>Retry history</button></p>}
+    {error && (
+      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}>
+        <span>{error}</span>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => { setError(''); setLoading(true); setAttempt(a => a + 1); }}
+        >
+          Retry history
+        </button>
+      </div>
+    )}
     {events.map(event=><article key={event.created_at}>
       <p>Accepted advance: BDT {(event.accepted_amount_minor/100).toFixed(2)} · Remaining COD: BDT {(event.actual_cod_minor/100).toFixed(2)}</p>
       <p>Accepted exceptions: {event.exceptions.join(', ') || 'None'}</p>
