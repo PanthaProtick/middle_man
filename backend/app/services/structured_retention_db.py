@@ -24,13 +24,17 @@ from app.services.retention_caches import redact_replays
 from app.services.structured_retention import calendar_deadline
 
 
-async def remove_receipt(db: AsyncSession, receipt: ReceivedTransactionTable, now: datetime) -> bool:
+async def remove_receipt(db: AsyncSession, receipt: ReceivedTransactionTable, now: datetime,
+                         *, obsolete_order_ids: frozenset[str] = frozenset()) -> bool:
+    if receipt.retained_at:
+        return True
     identities = await receipt_identities(db, receipt.shop_id, receipt.id, receipt.provider, receipt.trx_id)
     claims = (await db.scalars(select(OrderTable).join(BuyerRevisionTable,
         BuyerRevisionTable.order_id == OrderTable.id).where(OrderTable.shop_id == receipt.shop_id,
         OrderTable.retained_at.is_(None), tuple_(BuyerRevisionTable.payment_provider,
         BuyerRevisionTable.payment_trx_id).in_(identities)))).all()
-    if any(not o.completed_at or calendar_deadline(o.completed_at) > now for o in claims):
+    if any(o.id not in obsolete_order_ids and
+           (not o.completed_at or calendar_deadline(o.completed_at) > now) for o in claims):
         return False
     allocation = await db.scalar(select(AllocationTable).where(AllocationTable.transaction_id == receipt.id))
     if allocation:
@@ -61,7 +65,8 @@ async def remove_receipt(db: AsyncSession, receipt: ReceivedTransactionTable, no
     return True
 
 
-async def remove_order(db: AsyncSession, order: OrderTable, now: datetime) -> None:
+async def remove_order(db: AsyncSession, order: OrderTable, now: datetime,
+                       *, obsolete_order_ids: frozenset[str] = frozenset()) -> None:
     await verify_marker_key(db, order.shop_id)
     revisions = (await db.scalars(select(BuyerRevisionTable).where(BuyerRevisionTable.order_id == order.id))).all()
     claim_ids = {(r.payment_provider, r.payment_trx_id) for r in revisions}
@@ -75,7 +80,7 @@ async def remove_order(db: AsyncSession, order: OrderTable, now: datetime) -> No
         or_(ReceivedTransactionTable.id.in_(receipt_ids), ReceivedTransactionTable.id.in_(allocated),
             tuple_(ReceivedTransactionTable.provider, ReceivedTransactionTable.trx_id).in_(claim_ids))))).all()
     for receipt in receipts:
-        await remove_receipt(db, receipt, now)
+        await remove_receipt(db, receipt, now, obsolete_order_ids=obsolete_order_ids)
     attempts = await erase_courier_details(db, order.shop_id, order.id)
     await redact_replays(db, {order.id, *(r.id for r in revisions), *attempts}, order.shop_id)
     await db.execute(delete(CourierDraftTable).where(CourierDraftTable.order_id == order.id))
