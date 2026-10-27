@@ -21,6 +21,7 @@ from app.api.sms import router as sms_router
 from app.api.structured_retention import router as structured_retention_router
 from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
+from app.core.auth_diagnostics import rejection_reason
 from app.core.config import settings
 from app.core.database import DurableStorageUnavailableError, check_database_readiness
 from app.core.public_admission import PublicAdmissionMiddleware
@@ -86,7 +87,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Retry-After"],
+    expose_headers=["Retry-After", "X-Seller-Auth-Reason"],
 )
 
 
@@ -103,7 +104,10 @@ async def http_exception_handler(request: Request, exc: HTTPException) -> JSONRe
             detail=message,
             request_id=request_id,
         )
-        return JSONResponse(status_code=exc.status_code, content=resp_model.model_dump())
+        headers = {"X-Seller-Auth-Reason": rejection_reason(message)} if (
+            exc.status_code == 401 and code == 'UNAUTHORIZED'
+        ) else None
+        return JSONResponse(status_code=exc.status_code, content=resp_model.model_dump(), headers=headers)
 
     resp_model = StandardErrorResponse(
         error=ErrorBody(code="HTTP_ERROR", message=str(exc.detail)),

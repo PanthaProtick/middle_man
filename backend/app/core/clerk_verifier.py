@@ -13,6 +13,10 @@ from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from fastapi import HTTPException, status
 
+# Clerk documents a 5000ms clock-skew allowance. Bound nbf tolerance to that
+# window; expiration remains strict so this does not extend session lifetime.
+NOT_BEFORE_SKEW_SECONDS = 5
+
 
 @dataclass(frozen=True)
 class SellerIdentity:
@@ -178,13 +182,14 @@ class ClerkTokenVerifier:
             isinstance(exp, float) and not math.isfinite(exp)
         ):
             raise AuthenticationError("Token missing or invalid expiration (exp) claim")
-        now = int(time.time())
+        now = time.time()
         if now >= exp:
             raise AuthenticationError("Token has expired")
         nbf = payload.get("nbf")
         if nbf is not None and (
             isinstance(nbf, bool) or not isinstance(nbf, (int, float))
-            or (isinstance(nbf, float) and not math.isfinite(nbf)) or now < nbf
+            or (isinstance(nbf, float) and not math.isfinite(nbf))
+            or now + NOT_BEFORE_SKEW_SECONDS < nbf
         ):
             raise AuthenticationError("Token is not yet valid")
 

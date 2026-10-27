@@ -140,3 +140,58 @@ it('clears private content when periodic token acquisition fails', async () => {
     expect(container.textContent).toContain('Unable to obtain your seller session');
   } finally { vi.useRealTimers(); }
 });
+
+it('makes Sign in recover a rejected session when Clerk still considers the user signed in', async () => {
+  vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
+    ? Response.json({ error: { code: 'UNAUTHORIZED', message: 'Rejected' } }, { status: 401 })
+    : Response.json({ status: 'healthy' }));
+  await act(async () => root.render(<SellerSession />));
+  expect(container.textContent).toContain('Your seller session has expired');
+  vi.mocked(fetch).mockImplementation(async () => Response.json({ setup_needed: true, shop: null }));
+  const signIn = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Sign in');
+  await act(async () => signIn?.click());
+  expect(container.textContent).toContain('Shop Setup');
+  expect(clerk.openSignIn).not.toHaveBeenCalled();
+});
+
+it('shows the safe rejection category without needing the aborted response body', async () => {
+  vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
+    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'not_yet_valid' } })
+    : Response.json({ status: 'healthy' }));
+  await act(async () => root.render(<SellerSession />));
+  expect(container.textContent).toContain('Session diagnostic: not_yet_valid');
+  expect(container.textContent).not.toContain('Shop Setup');
+});
+
+it('preserves an unfinished courier form when the same Clerk session renews its token', async () => {
+  vi.useFakeTimers();
+  try {
+    vi.mocked(fetch).mockImplementation(async (url) => Response.json(
+      String(url).includes('/seller/shop')
+        ? { setup_needed: false, shop: { id: 'alpha', display_name: 'Alpha' } }
+        : String(url).includes('/courier/pathao/')
+          ? { environment: 'sandbox', version: 0, status: 'disconnected', simulated: false }
+          : String(url).includes('payment-accounts') ? [] : { items: [], next_cursor: null },
+    ));
+    await act(async () => root.render(<SellerSession />));
+    const accounts = Array.from(container.querySelectorAll('button')).find(b => b.textContent?.includes('Accounts'));
+    expect(accounts).toBeDefined();
+    await act(async () => accounts?.click());
+    const env = container.querySelector<HTMLSelectElement>('[aria-label="Pathao courier settings"] select')!;
+    await act(async () => { env.value = 'sandbox'; env.dispatchEvent(new Event('change', { bubbles: true })); });
+    const password = container.querySelector<HTMLInputElement>('[name="password"]')!;
+    password.value = 'unfinished-synthetic-password';
+    password.focus();
+    clerk.getToken.mockResolvedValue('renewed-session-token');
+    await act(async () => vi.advanceTimersByTimeAsync(60000));
+    expect(container.querySelector('[name="password"]')).toBe(password);
+    expect(password.value).toBe('unfinished-synthetic-password');
+    expect(document.activeElement).toBe(password);
+    expect(container.querySelector<HTMLSelectElement>('[aria-label="Pathao courier settings"] select')?.value).toBe('sandbox');
+    const reload = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Reload settings');
+    await act(async () => reload?.click());
+    expect(fetch).toHaveBeenLastCalledWith(expect.stringContaining('/courier/pathao/sandbox'), expect.objectContaining({
+      headers: expect.objectContaining({ Authorization: 'Bearer renewed-session-token' }),
+    }));
+  } finally { vi.useRealTimers(); }
+});
