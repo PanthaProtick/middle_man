@@ -3,6 +3,8 @@ import { requestJson } from './api';
 import type { CourierAttemptStatus, ParcelRevision, Review, ReviewChoices } from './courierReviewTypes';
 import { CourierReconciliation } from './CourierReconciliation';
 import { CourierReviewLocations } from './CourierReviewLocations';
+import { DeliverySummary } from './DeliverySummary';
+import './DeliveryDetails.css';
 
 const blockerLabels: Record<string, string> = {
   PARCEL_DETAILS_REQUIRED: 'Save explicit parcel weight and quantity above.',
@@ -114,20 +116,23 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
     }
   };
 
-  return <section className="buyer-correction" aria-label="Booking draft review" aria-busy={busy}>
+  return <section className="buyer-correction delivery-details" aria-label="Booking draft review" aria-busy={busy}>
     <h4>Review current delivery draft</h4>
     {!review?.submission_enabled && !review?.latest_attempt && (
-      <p>External booking is unavailable until the review is complete.</p>
+      <p className="delivery-note">External booking is unavailable until the review is complete.</p>
     )}
-    <button type="button" disabled={busy} onClick={() => { setState(undefined); setAttempt(value => value + 1); }}>Reload current review</button>
+    <button className="btn btn-secondary btn-sm" type="button" disabled={busy} onClick={() => { setState(undefined); setAttempt(value => value + 1); }}>Reload current review</button>
     {state?.identity === identity && state.error && <p role="alert">{state.error}</p>}
     {!review && !state?.error && <p role="status">Loading review…</p>}
     {review && choices && <>
-      <p>{review.draft.recipient_name} · {review.draft.contact_number}<br />{review.draft.address}</p>
-      <p>Parcel: {review.draft.parcel_weight_grams ?? 'Missing'} grams · {review.draft.parcel_quantity ?? 'Missing'} items</p>
-      <p>Collect on delivery: ৳{(review.draft.remaining_cod_minor / 100).toFixed(2)} (accepted advance applied)</p>
-      <p>Account: {review.connection.status} · {review.connection.merchant_hint} · revision {review.connection.version}</p>
-      {review.connection.simulated && <p>Simulated account and locations — offline only.</p>}
+      <DeliverySummary {...review.draft} />
+      <p className="delivery-note">Accepted advance deducted. Payment acceptance does not verify receipt with the payment provider.</p>
+      <dl className="delivery-summary">
+        <div><dt>Parcel</dt><dd>{review.draft.parcel_weight_grams === null ? 'Weight missing' : `${review.draft.parcel_weight_grams} g`}
+          {' · '}{review.draft.parcel_quantity === null ? 'Quantity missing' : `${review.draft.parcel_quantity} ${review.draft.parcel_quantity === 1 ? 'item' : 'items'}`}</dd></div>
+        <div><dt>Pathao account</dt><dd>{review.connection.status}<span>{review.connection.merchant_hint}</span></dd></div>
+      </dl>
+      {review.connection.simulated && <p className="delivery-note">Simulated account and locations — offline only.</p>}
       <fieldset disabled={busy || review.blockers.includes('ORDER_NOT_CONFIRMED')}>
         <legend>Pickup and delivery choices</legend>
         <label>Environment<select value={choices.environment} onChange={event => {
@@ -136,7 +141,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
             setEditing({ identity, choices: { environment, store_id: null, delivery_type: null, location: {} } });
           }
         }}>{['offline', 'sandbox', 'production'].map(env => <option key={env}>{env}</option>)}</select></label>
-        <p>Save an environment change to load that account’s stores and location choices.</p>
+        {choices.environment !== review.choices.environment && <p className="delivery-note">Save the environment change to load its pickup stores and delivery locations.</p>}
         <label>Pickup store<select value={choices.store_id ?? ''} disabled={choices.environment !== review.choices.environment}
           onChange={event => setEditing({ identity, choices: { ...choices, store_id: Number(event.target.value) || null } })}>
           <option value="">Choose pickup store</option>
@@ -150,11 +155,11 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
         {review.connection.version > 0 && choices.environment === review.choices.environment &&
           <CourierReviewLocations key={`${identity}:${review.token}`} path={path} token={token} review={review} value={choices.location}
             onChange={location => setEditing({ identity, choices: { ...choices, location } })} />}
-        <button type="button" disabled={!dirty} onClick={() => void mutate('PUT')}>Save delivery choices</button>
+        <button className="btn btn-secondary" type="button" disabled={!dirty} onClick={() => void mutate('PUT')}>Save delivery choices</button>
       </fieldset>
       <ul>{review.blockers.map(code => <li key={code}>{blockerLabels[code] ?? code}</li>)}</ul>
       {dirty && <p>Save changes before reviewing.</p>}
-      <button type="button" data-review disabled={busy || dirty || review.blockers.length > 0 || review.reviewed}
+      <button className="btn btn-primary" type="button" data-review disabled={busy || dirty || review.blockers.length > 0 || review.reviewed}
         onClick={() => void mutate('POST')}>Confirm current review</button>
       {review.reviewed && !dirty && !review.latest_attempt && <p role="status">Review complete. This remains a local draft; no Pathao booking exists.</p>}
       {review.reviewed && !dirty && review.submission_enabled && (

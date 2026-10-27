@@ -26,6 +26,12 @@ it('retries an uncertain revocation with the identical payload and key', async (
   const host = document.createElement('div'); document.body.append(host);
   const root = createRoot(host);
   await act(async () => root.render(<BuyerLinkAccess order={order} token="session" onUpdated={onUpdated} />));
+  expect(host.querySelector('h4')?.textContent).toBe('Buyer link access');
+  for (const button of host.querySelectorAll('button')) {
+    const description = host.querySelector(`#${button.getAttribute('aria-describedby')}`);
+    expect(description?.parentElement).toBe(button.parentElement);
+    expect(description?.textContent).toBeTruthy();
+  }
   await act(async () => host.querySelector('button')!.click());
   expect(host.textContent).toContain('Retry');
   expect(onUpdated).not.toHaveBeenCalled();

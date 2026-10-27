@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { requestJson, SellerApiError } from './api';
 import type { SellerOrder } from './types';
+import './DeliveryDetails.css';
 
 interface Props {
   order: SellerOrder;
@@ -39,20 +40,24 @@ export function BuyerLinkAccess({ order, token, onUpdated }: Props) {
   }
 
   const reissuable = !['expired', 'cancelled'].includes(order.lifecycle) && !order.replaced_by_order_id;
-  return <section aria-label="Buyer link access">
+  return <section className="buyer-correction delivery-details" aria-label="Buyer link access">
+    <h4>Buyer link access</h4>
+    <p className="delivery-note">These actions keep the order and payment unchanged.</p>
     {order.buyer_link_revoked_at && <p role="status">Buyer link revoked. Seller access remains available.</p>}
-    <p>Revoking blocks public access to this link. The order and its payment stay unchanged.</p>
-    {reissuable && <p>Reissue permanently disables previous links. The original deadline and submission state stay unchanged.</p>}
     {error && <p role="alert">{error}</p>}
-    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-      {!order.buyer_link_revoked_at && <button className="btn btn-secondary"
+    <div className="buyer-link-actions">
+      {!order.buyer_link_revoked_at && <div className="buyer-link-action">
+        <p id="revoke-link-description">Block buyer access to the current link.</p>
+        <button className="btn btn-secondary" aria-describedby="revoke-link-description"
         disabled={busy || stale || pendingAction === 'reissue'} onClick={() => void changeAccess('revoke')}>
         {busy && pendingAction === 'revoke' ? 'Revoking…' : error && pendingAction === 'revoke' ? 'Retry revocation' : 'Revoke buyer link'}
-      </button>}
-      {reissuable && <button className="btn btn-secondary"
+      </button></div>}
+      {reissuable && <div className="buyer-link-action">
+        <p id="reissue-link-description">Create a new link and permanently disable previous links. The deadline and submission state stay unchanged.</p>
+        <button className="btn btn-secondary" aria-describedby="reissue-link-description"
         disabled={busy || stale || pendingAction === 'revoke'} onClick={() => void changeAccess('reissue')}>
         {busy && pendingAction === 'reissue' ? 'Reissuing…' : error && pendingAction === 'reissue' ? 'Retry reissue' : 'Reissue buyer link'}
-      </button>}
+      </button></div>}
     </div>
   </section>;
 }

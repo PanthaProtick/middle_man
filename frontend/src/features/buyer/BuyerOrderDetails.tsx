@@ -22,7 +22,7 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
   };
 
   return (
-    <div className="card" style={{ marginBottom: '20px', border: '1px solid var(--border-subtle)' }}>
+    <div className="card" style={{ border: '1px solid var(--border-subtle)' }}>
       {/* Shop & Product Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

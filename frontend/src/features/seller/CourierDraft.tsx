@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { requestJson, SellerApiError } from './api';
 import { MAX_PARCEL_QUANTITY, MAX_PARCEL_WEIGHT_GRAMS, parseParcelQuantity, parseParcelWeightKg } from './parcel';
 import type { ParcelRevision } from './courierReviewTypes';
+import { DeliverySummary } from './DeliverySummary';
+import './DeliveryDetails.css';
 
 const blockerLabels = {
   PARCEL_DETAILS_REQUIRED: 'Add parcel weight and quantity before booking.',
@@ -133,10 +135,9 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
     }
   };
 
-  return <section className="buyer-correction" aria-label="Courier proposal">
-    <h4>Local courier proposal</h4>
-    <p>This is a local proposal awaiting seller review, not an accepted Pathao booking.
-      Payment acceptance does not independently verify receipt with the payment provider.</p>
+  return <section className="buyer-correction delivery-details" aria-label="Courier proposal">
+    <h4>{reviewManaged ? 'Parcel details' : 'Local courier proposal'}</h4>
+    {!reviewManaged && <p className="delivery-note">Draft only. Review and submit to book with Pathao.</p>}
     {!current && <p role="status">Loading courier proposal…</p>}
     {current?.error && (
       <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}>
@@ -153,15 +154,14 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
       </div>
     )}
     {proposal && <>
-      <p>{proposal.recipient_name} · {proposal.contact_number}</p>
-      <p>{proposal.address}</p>
-      <p>Remaining COD: BDT {(proposal.remaining_cod_minor / 100).toFixed(2)}</p>
-      <p>Optional when creating the buyer link; both parcel fields are required before booking.</p>
+      {!reviewManaged && <><DeliverySummary {...proposal} />
+        <p className="delivery-note">Payment acceptance does not independently verify receipt with the payment provider.</p></>}
+      <p className="delivery-note">Optional when creating the buyer link; both parcel fields are required before booking.</p>
       {proposal.missing_parcel_fields.length > 0
         ? <p id="courier-missing-parcel">Missing parcel fields: {proposal.missing_parcel_fields.map(field => fieldNames[field]).join(', ')}</p>
         : <p id="courier-missing-parcel">Parcel details complete for booking.</p>}
       {editable && parcelInputs && <form onSubmit={(event) => { event.preventDefault(); void save(); }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '10px' }}>
+        <div className="parcel-fields">
           <div>
             <label htmlFor="courier-weight">Parcel weight (kg)</label>
             <input
@@ -214,7 +214,7 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
             </button>
           </div>
         )}
-        <button type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save parcel details'}</button>
+        <button className="btn btn-secondary" type="submit" disabled={saving}>{saving ? 'Saving…' : 'Save parcel details'}</button>
       </form>}
       <ul>{proposal.blockers.filter(blocker => !reviewManaged ||
         blocker === 'PARCEL_DETAILS_REQUIRED' || blocker === 'ORDER_NOT_CONFIRMED')

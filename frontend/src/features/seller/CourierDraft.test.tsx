@@ -152,6 +152,6 @@ it('handles access denial without details and retries to show zero COD', async (
   expect(host.textContent).toContain('access denied');
   expect(host.textContent).not.toContain('Synthetic Buyer');
   await act(async () => host.querySelector('button')!.click());
-  expect(host.textContent).toContain('Remaining COD: BDT 0.00');
+  expect(host.querySelector('.delivery-summary-amount')?.textContent).toBe('BDT 0.00');
   await act(async () => root.unmount());
 });

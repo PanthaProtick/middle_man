@@ -47,7 +47,7 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
         </div>
       </div>
 
-      <nav className="tabs-nav" style={{ marginTop: '16px', marginBottom: '20px' }} role="tablist" aria-label="Demo Sub-navigation">
+      <nav className="tabs-nav" style={{ marginTop: 'var(--section-gap)', marginBottom: 'var(--section-gap)' }} role="tablist" aria-label="Demo Sub-navigation">
         <button
           type="button"
           role="tab"
