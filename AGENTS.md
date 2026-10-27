@@ -7,6 +7,9 @@
 - Make one testable behavior work at a time. Preserve unrelated code, comments,
   and checkout changes. Add regression tests for bugs and success/failure cases
   for changed endpoints or domain logic; keep meaningful existing assertions.
+- Decompose broad visual or architectural changes into bounded feature clusters.
+  Run focused test commands after each feature cluster before modifying subsequent
+  files or screens.
 - After two failures with the same hypothesis, gather new evidence and revise it.
   Escalate an unresolved decision with a reproducer and the remaining uncertainty.
 - Use focused tests while editing. Before completing code or tooling changes, run
@@ -33,6 +36,9 @@
 - Start with `git status --short` and scoped `rg` searches. `npm run context`
   lists source paths; `npm run context -- <file> "<file>#L10-L40"` emits bounded,
   numbered text for handoffs. Follow callers and tests before choosing an edit.
+- Navigation discipline: mandate bounded line-range queries for large files and
+  prohibit consecutive redundant reads of identical files in a single turn.
+  Establish a target inventory before inspecting leaf components.
 - Keep conventions intact; reduce retrieved material, not verification coverage.
   Read failure tails and relevant files instead of dumping lockfiles, all skills,
   generated assets, or entire logs. Never include real environment/credential files.
@@ -49,7 +55,7 @@
   `file1, file2` instead of bash braces `{file1,file2}`). Write scratch Python to
   `.scratch/` with UTF-8 instead of nested inline quotes (`-c "..."`).
 - Context and diffs: Run `git diff --stat` before full diffs; scope diffs to
-  target files. Bound large reads with `npm run context` to avoid truncation.
+  target files. Bound large reads with `StartLine`/`EndLine` or `npm run context` to avoid truncation.
 - Testing tier: Use focused test commands (`npm run test:backend`,
   `npm run test:frontend`) during inner iteration; run root `npm run check` strictly
   as the final pre-handoff verification gate.

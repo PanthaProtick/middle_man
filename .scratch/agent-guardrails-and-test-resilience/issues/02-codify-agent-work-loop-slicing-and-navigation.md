@@ -4,9 +4,9 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** complete
 
-- [ ] Agent instructions require broad visual or architectural changes to be decomposed into bounded feature clusters.
-- [ ] Agent instructions require running focused test commands after each feature cluster before modifying subsequent files.
-- [ ] Navigation instructions mandate bounded line-range queries for large files and prohibit consecutive redundant reads of identical files in a single turn.
-- [ ] Agent instructions remain strictly below the repository line-count invariant.
+- [x] Agent instructions require broad visual or architectural changes to be decomposed into bounded feature clusters.
+- [x] Agent instructions require running focused test commands after each feature cluster before modifying subsequent files.
+- [x] Navigation instructions mandate bounded line-range queries for large files and prohibit consecutive redundant reads of identical files in a single turn.
+- [x] Agent instructions remain strictly below the repository line-count invariant.
