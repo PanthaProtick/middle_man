@@ -19,7 +19,7 @@ it('switches correction drafts and history without changing user text or sending
   const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify(order)))
     .mockResolvedValueOnce(new Response(JSON.stringify({items: [revision], next_cursor: null})));
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
-  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate}}>
+  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate, provided: true}}>
     <BuyerCorrection orderId={order.id} token="seller" />
   </LocaleContext.Provider>);
   await act(async () => render('en'));
@@ -48,7 +48,7 @@ it('switches a selected outcome and retries the frozen request after an uncertai
   });
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   const updated = vi.fn();
-  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate}}>
+  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate, provided: true}}>
     <OrderOutcomes order={order} token="seller" onUpdated={updated} />
   </LocaleContext.Provider>);
   await act(async () => render('en'));
@@ -135,7 +135,7 @@ it('keeps a rejection in flight through a language switch without sending it aga
   });
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   const updated = vi.fn();
-  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate}}>
+  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate, provided: true}}>
     <OrderOutcomes order={order} token="seller" onUpdated={updated} />
   </LocaleContext.Provider>);
   await act(async () => render('en'));
@@ -163,7 +163,7 @@ it('localizes a coded correction field error and associates it with the field', 
       fields: [{field: 'buyer_name', code: 'string_too_long', message: 'unsafe field prose'},
         {field: 'payment_claim', code: 'value_error', message: 'unsafe payment prose'}]}}), {status: 422}));
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
-  await act(async () => root.render(<LocaleContext.Provider value={{locale: 'bn', setLocale: vi.fn(), t: englishTranslate}}>
+  await act(async () => root.render(<LocaleContext.Provider value={{locale: 'bn', setLocale: vi.fn(), t: englishTranslate, provided: true}}>
     <BuyerCorrection orderId={order.id} token="seller" />
   </LocaleContext.Provider>));
   const reason = host.querySelector<HTMLTextAreaElement>('label:last-child textarea')!;

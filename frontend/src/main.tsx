@@ -1,9 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App'
-import { ClerkProvider } from '@clerk/react';
-import { SellerSession } from './features/seller/SellerSession';
+import { LocaleProvider } from './features/locale'
+import { Root } from './Root'
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -15,10 +14,8 @@ const publicPortal = window.location.pathname.startsWith('/orders/');
 
 createRoot(rootElement).render(
   <StrictMode>
-    {publishableKey && !publishableKey.includes('your_clerk') && !publicPortal ? (
-      <ClerkProvider publishableKey={publishableKey}>
-        <SellerSession />
-      </ClerkProvider>
-    ) : <App />}
+    <LocaleProvider>
+      <Root publishableKey={publishableKey} publicPortal={publicPortal} />
+    </LocaleProvider>
   </StrictMode>,
 )

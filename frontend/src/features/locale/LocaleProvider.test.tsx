@@ -17,6 +17,11 @@ function Probe(): React.JSX.Element {
   );
 }
 
+function NestedProbe(): React.JSX.Element {
+  const { locale } = useLocale();
+  return <span data-testid="nested-locale">{locale}</span>;
+}
+
 let container: HTMLDivElement;
 let root: Root;
 
@@ -106,6 +111,25 @@ describe('LocaleProvider and language switch', () => {
     await mount();
 
     expect(container.querySelector('[data-testid="locale"]')?.textContent).toBe('bn');
+  });
+
+  it('reuses an enclosing provider so nested mounts share one locale state', async () => {
+    await act(async () => root.render(
+      <LocaleProvider>
+        <Probe />
+        <LocaleProvider><NestedProbe /></LocaleProvider>
+      </LocaleProvider>,
+    ));
+
+    expect(container.querySelectorAll('[role="group"]')).toHaveLength(1);
+    expect(container.querySelector('[data-testid="nested-locale"]')?.textContent).toBe('en');
+
+    await act(async () => languageButton('বাংলা').click());
+
+    expect(container.querySelector('[data-testid="locale"]')?.textContent).toBe('bn');
+    expect(container.querySelector('[data-testid="nested-locale"]')?.textContent).toBe('bn');
+    expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bn');
+    expect(document.documentElement.lang).toBe('bn-BD');
   });
 
   it('keeps switching available when browser storage is unavailable', async () => {
