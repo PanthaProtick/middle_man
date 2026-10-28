@@ -170,7 +170,7 @@ describe('Order Reconciliation and Review UI', () => {
     });
 
     expect(container.textContent).toContain('Order & Link Details');
-    expect(container.textContent).toContain('Actual Remaining COD');
+    expect(container.textContent).toContain('Remaining COD balance');
     expect(container.textContent).toContain('BDT 4,000');
     expect(container.textContent).toContain('Confirmed Payment Allocation');
     expect(container.textContent).toContain('Automatic match');
@@ -187,6 +187,6 @@ describe('Order Reconciliation and Review UI', () => {
     expect(container.textContent).toContain('Review Required');
     expect(container.textContent).toContain('SENDER_MISMATCH');
     expect(container.textContent).toContain('TIME_UNCLEAR');
-    expect(container.textContent).toContain('Expected Remaining COD');
+    expect(container.textContent).toContain('Expected remaining COD balance');
   });
 });

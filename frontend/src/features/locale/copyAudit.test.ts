@@ -134,6 +134,9 @@ describe('approved glossary vocabulary is used consistently', () => {
     expect(courierBengali['Courier proposal']).toBe('কুরিয়ার অনুরোধের খসড়া');
     expect(orderCopy.en.actualCod).toContain('Remaining COD balance');
     expect(orderCopy.en.expectedCod).toContain('Expected remaining COD balance');
+    expect(orderCopy.en.actualRemaining).toBe('Remaining COD balance');
+    expect(orderCopy.en.expectedRemaining).toBe('Expected remaining COD balance');
+    expect(orderCreationCopy.en.cod).toContain('Expected remaining COD balance');
     expect(exportCopy.en.actualCod).toBe('Remaining COD balance');
     expect(exportCopy.en.expectedCod).toBe('Expected remaining COD balance');
   });

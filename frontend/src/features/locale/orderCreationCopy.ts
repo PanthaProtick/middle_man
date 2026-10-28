@@ -3,7 +3,7 @@ const en = {
   noAccounts: 'No active payment accounts available. Please add or activate a bKash or Nagad receiving account first.',
   product: 'Product Name / Agreed Items', productExample: 'e.g. Leather Laptop Bag (Black)',
   total: 'Total Agreed Price (BDT)', advance: 'Required Advance (BDT)',
-  totalExample: 'e.g. 2500', advanceExample: 'e.g. 300', cod: 'Expected Remaining COD:',
+  totalExample: 'e.g. 2500', advanceExample: 'e.g. 300', cod: 'Expected remaining COD balance:',
   account: 'Receiving Payment Account (Fixed Snapshot)',
   snapshot: 'This account destination will be permanently snapshotted to the buyer link.',
   creating: 'Creating Link...', create: 'Generate Buyer Link',

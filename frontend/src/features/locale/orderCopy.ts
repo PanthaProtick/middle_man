@@ -9,7 +9,7 @@ const en = {
   created: 'Created:', expiredAt: 'Expired at:', deadline: 'Deadline:', more: 'Load More Orders',
   details: 'Order & Link Details', closeDetails: 'Close order details', close: 'Close',
   predecessor: 'Replaces predecessor order:', product: 'Product Name', agreed: 'Total Agreed',
-  required: 'Required Advance', actualRemaining: 'Actual Remaining COD', expectedRemaining: 'Expected Remaining COD',
+  required: 'Required Advance', actualRemaining: 'Remaining COD balance', expectedRemaining: 'Expected remaining COD balance',
   allocation: 'Confirmed Payment Allocation', basis: 'Basis:', accepted: 'Accepted Advance:', confirmedAt: 'Confirmed At:',
   reviewRequired: 'Review Required', hideErrors: 'Hide error codes', showErrors: 'Show error codes (for dev)',
   snapshot: 'Fixed Receiving Account Snapshot', immutable: 'Immutable destination for this order (deactivating or editing accounts later does not alter this).',
