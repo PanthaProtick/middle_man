@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Language switching and buyer order summary
 
-**Status:** resolved
+**Status:** reopened — live authentication acceptance failures
 
 - [x] Use supported Clerk localization resources for reachable sign-in, verification, resend, password/alternative methods, recovery, errors, and session-expiry paths.
 
@@ -12,13 +12,13 @@
 
 - [x] Keep provider/brand names and IDs intact, retain authentication/authorization behavior, and leave the public buyer path independent of Clerk.
 
-- [x] Switch without signing out, resetting partial sign-in/recovery, dropping verification input, or repeating authentication/session actions. Report unsupported behavior as an acceptance gap rather than weakening the requirement.
+- [ ] Switch without signing out, resetting partial sign-in/recovery, dropping verification input, or repeating authentication/session actions. Report unsupported behavior as an acceptance gap rather than weakening the requirement.
 
 - [x] Use existing rendered app boundaries to test observable locale selection and authentication integration. Resource parity and mocked widgets supplement but do not prove live coverage.
 
-- [ ] Perform real-session acceptance for reachable embedded sign-in, verification, error, and recovery paths in both locales using existing authorized development access. Record unavailable credentials/configuration as a precise gap; external identity-provider sites remain outside application control. **Not run — see Comments.**
+- [ ] Perform real-session acceptance for reachable embedded sign-in, verification, error, and recovery paths in both locales using existing authorized development access. Record unavailable credentials/configuration as a precise gap; external identity-provider sites remain outside application control. **Partially run; failures and remaining cases recorded below.**
 
-- [x] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details.
+- [ ] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details.
 
 - [x] Run focused repository tests for changed behavior, then root npm run check as the final pre-handoff gate. Record changed paths, exact results, and failed/blocked/unrun browser or provider acceptance in the existing task record. Mocks and HTTP smoke do not prove live acceptance.
 
@@ -55,3 +55,62 @@
   recovery, error, and expiry paths were not run in a browser with live Clerk.
   Mocked rendering proves prop wiring and session preservation only, not live
   Clerk coverage or Bengali widget layout.
+
+## Live verification — 2026-10-28
+
+- Real local browser verification used the configured Clerk development instance
+  at `http://localhost:5173/` and the existing development account. The backend
+  was started with `npm run dev:backend`; frontend with `npm run dev:frontend`.
+- PASS: English sign-in and forgot-password alternative-method screens render.
+- PASS: Selecting Bengali before opening sign-in renders Bengali identifier,
+  password, recovery-method and email-code screens; Google and account identifiers
+  remain unchanged. Email-code verification completed successfully with user input.
+- PASS: Authenticated development backend access loaded the existing synthetic
+  shop. Switching Bengali to English preserved the signed-in workspace and data.
+- FAIL: `openSignIn()` opens a modal that makes the application's external language
+  switch inaccessible. The modal accessibility tree exposes only the language
+  status, not either language control. Switching during partial sign-in/recovery
+  therefore requires closing the modal; in-flow switching is not accepted.
+- FAIL: Bengali modal still exposes English accessibility names `Close modal`
+  and `Enter verification code`; verification submission also exposes `Loading`.
+- NOT RUN: wrong/expired-code errors, resend completion, full password reset,
+  English verification completion, session expiry, phone viewport and screen-reader
+  acceptance. A password change requires user completion; no password was changed.
+- Evidence: `.scratch/bengali-english-localization/verification/ticket12-live-session.png`.
+  No credentials or verification codes are recorded here.
+- Earlier local verification on this checkout: focused Root/resource/SellerSession
+  tests passed 22 tests. Full `npm run check` passed with repository-local TEMP/TMP:
+  `.cache/checks/check-GWFvo5/result.json`. Initial default-temp run failed only
+  on pytest Windows temp-directory permission. No application source changed.
+- Next action: provide an accessible locale switch within the authentication
+  surface using supported Clerk composition, cover missing accessible strings,
+  then repeat interrupted-flow preservation and the remaining live acceptance.
+
+
+## Fix and reverification — 2026-10-28
+
+- Replaced `openSignIn()` with supported embedded `<SignIn routing="hash">` in
+  `SellerSignIn.tsx`. Language controls and a localized home link remain outside
+  the widget and reachable throughout recovery and verification. Widget identity
+  is stable across locale changes; no locale key or credential copying is used.
+- The modal's English close control is removed by this composition.
+- Live Clerk PASS: switched both ways on the recovery screen without leaving it;
+  switched both ways on email verification with three partial digits still visibly
+  present and the resend countdown continuing. Document title and form copy follow
+  the selected locale. Final recovery screen also checked after the last source edit.
+- Evidence: `verification/ticket12-embedded-switch.png` relative to the localization
+  scratch directory. Browser value reads redact input, so visible digits and screen
+  continuity are the live evidence rather than comparisons against redacted values.
+- Regression tests cover reachable switching, unchanged input node/value and focus,
+  stable provider mount, and no repeated token request or modal invocation. Focused
+  Root/SellerSession suite passed 21 tests.
+- Final `npm run check` PASS with repository-local TEMP/TMP:
+  `.cache/checks/check-U7oVIM/result.json`. Initial implementation hit the lint rule
+  against synchronous effect state updates; reset now occurs in the sign-out action.
+- Remaining acceptance gap: installed Clerk localization types expose no keys for
+  the hardcoded `Enter verification code` and `Loading` accessibility labels. These
+  remain untranslated. No generated DOM patch or unsupported localization keys were
+  added. Resolving them requires Clerk support or a separately designed custom auth
+  flow with equivalent methods, recovery, MFA, error and security coverage.
+- Ticket remains reopened; earlier unrun phone/screen-reader, expiry/error and full
+  password-reset acceptance remain open. No password was changed or order modified.

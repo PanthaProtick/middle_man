@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { useAuth, useClerk } from '@clerk/react';
+import { SellerSignIn } from './SellerSignIn';
 import { AppShell } from '../../App';
 import { LocaleProvider, LocaleSwitch, useLocale } from '../locale';
 import { sessionReason } from './sessionReason';
@@ -15,7 +16,8 @@ function SellerSessionContent(): React.JSX.Element {
   const { locale, t } = useLocale();
   const text = sellerCopy[locale];
   const { isLoaded, isSignedIn, sessionId, getToken } = useAuth();
-  const { openSignIn, signOut } = useClerk();
+  const { signOut } = useClerk();
+  const [signInOpen, setSignInOpen] = useState(false);
   const [credential, setCredential] = useState<{ sessionId: string; token: string; bearerToken: string }>();
   const [error, setError] = useState<'token' | 'signOut'>();
   const [signingOut, setSigningOut] = useState(false);
@@ -64,6 +66,7 @@ function SellerSessionContent(): React.JSX.Element {
     if (token && credential) renewSellerSessionToken(token, credential.bearerToken);
   }, [token, credential]);
   const handleSignOut = async () => {
+    setSignInOpen(false);
     setSigningOut(true);
     setSignedOutSession(sessionId);
     setCredential(undefined);
@@ -83,6 +86,7 @@ function SellerSessionContent(): React.JSX.Element {
   };
 
   if (!isLoaded) return <><LocaleSwitch /><p role="status">{text.sessionLoading}</p></>;
+  if (signInOpen && !isSignedIn) return <SellerSignIn />;
 
   return <>
     {error && <p role="alert">{error === 'token' ? text.sessionToken : text.sessionSignOut}</p>}
@@ -96,7 +100,7 @@ function SellerSessionContent(): React.JSX.Element {
     <AppShell token={token} sessionId={token ? sessionId ?? undefined : undefined}
       onSignIn={() => {
         if (isSignedIn && sessionId !== signedOutSession) retrySession();
-        else void openSignIn();
+        else setSignInOpen(true);
       }}
       onSignOut={() => { void handleSignOut(); }} />
   </>;

@@ -11,6 +11,7 @@ const clerk = vi.hoisted(() => ({
   isLoaded: true,
 }));
 vi.mock('@clerk/react', () => ({
+  SignIn: () => <div data-testid="embedded-sign-in">Embedded sign-in</div>,
   useAuth: () => ({ ...clerk }),
   useClerk: () => clerk,
 }));
@@ -54,7 +55,7 @@ it('does not invent a verification failure for an absent signed-out session', as
   expect(container.textContent).not.toContain('Session verification is unavailable');
   const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Sign in');
   await act(async () => button?.click());
-  expect(clerk.openSignIn).toHaveBeenCalled();
+  expect(container.querySelector('[data-testid="embedded-sign-in"]')).not.toBeNull();
 });
 it('obtains a Clerk token for shop access and signs out through Clerk', async () => {
   await act(async () => root.render(<SellerSession />));
@@ -74,7 +75,7 @@ it('opens Clerk sign-in without sending a development credential', async () => {
   await act(async () => root.render(<SellerSession />));
   const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Sign in');
   await act(async () => button?.click());
-  expect(clerk.openSignIn).toHaveBeenCalled();
+  expect(container.querySelector('[data-testid="embedded-sign-in"]')).not.toBeNull();
   expect(clerk.getToken).not.toHaveBeenCalled();
   expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('/seller/'), expect.anything());
 });

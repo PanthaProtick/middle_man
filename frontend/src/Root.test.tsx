@@ -19,6 +19,7 @@ const clerk = vi.hoisted(() => ({
 vi.mock('@clerk/react', async () => {
   const React = await import('react');
   return {
+    SignIn: () => React.createElement('input', { 'aria-label': 'Verification code' }),
     ClerkProvider: ({ children, localization }: {
       children: import('react').ReactNode;
       localization?: unknown;
@@ -71,6 +72,33 @@ function languageButton(name: string): HTMLButtonElement {
 }
 
 describe('application root locale and Clerk integration', () => {
+  it('keeps the embedded verification input and locale controls mounted while switching', async () => {
+    clerk.isSignedIn = false;
+    clerk.sessionId = null;
+    await act(async () => root.render(
+      <LocaleProvider><Root publishableKey="pk_test_synthetic" /></LocaleProvider>,
+    ));
+    const signIn = Array.from(container.querySelectorAll('button'))
+      .find(button => button.textContent === 'Sign in');
+    await act(async () => signIn?.click());
+    const input = container.querySelector('input');
+    if (!input) throw new Error('Missing embedded verification input');
+    input.value = '123';
+    const bengali = languageButton('বাংলা');
+    bengali.focus();
+    await act(async () => bengali.click());
+    expect(container.querySelector('input')).toBe(input);
+    expect(input.value).toBe('123');
+    expect(document.activeElement).toBe(bengali);
+    expect(clerk.localizations.at(-1)).toBe(clerkBengaliLocalization);
+    await act(async () => languageButton('English').click());
+    expect(container.querySelector('input')).toBe(input);
+    expect(input.value).toBe('123');
+    expect(clerk.providerMounts).toBe(1);
+    expect(clerk.getToken).not.toHaveBeenCalled();
+    expect(clerk.openSignIn).not.toHaveBeenCalled();
+  });
+
   it('switches the Clerk localization with the shared selection without remounting the session', async () => {
     await act(async () => root.render(
       <LocaleProvider><Root publishableKey="pk_test_synthetic" /></LocaleProvider>,
