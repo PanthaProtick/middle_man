@@ -230,3 +230,13 @@ Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 0
   responses; `npm run test:frontend -- src/features/buyer/AddressAssistance.test.tsx src/features/buyer/AddressAssistanceLocale.test.tsx` passed (15 tests).
 - Final root `npm run check` passed: `.cache/checks/check-v8aMlg/result.json`
   (tooling, backend lint/types/tests, frontend lint/tests/build, HTTP smoke).
+
+### Ticket 04 — seller shell localization
+
+- Localized seller chrome, setup, navigation, loaded-record metrics and session states; stable workspace error codes re-render in the selected language. Session loading now shares the locale provider with the workspace.
+- Changed paths: `frontend/src/App.tsx`, `frontend/src/components/Header.tsx`, `frontend/src/features/locale/sellerCopy.ts`, `frontend/src/features/seller/{SellerSession,sessionReason,SellerWorkspace,ShopSetupForm,ShopMetricsBar,WorkspaceHeader,WorkspaceSectionNav,WorkspaceAccountsSummary}.tsx` (sessionReason is `.ts`), corresponding seller tests, and `frontend/src/styles/theme.css`.
+- Focused checks: seller locale (3 tests), workspace error (1 test), and session (15 tests) passed; `npm run typecheck` passed. Two-axis review identified error masking, misleading storage guidance and phone grid issues; these were corrected. Session diagnostics were translated.
+- Initial review left pending setup, session failure, focus, metrics and history coverage and workspace decomposition for follow-up.
+- Root verification: initial `npm run check` stopped at a Windows pytest temp permission error (459 passed, 170 skipped, 1 error). With repository-local TEMP/TMP, the next run found a frontend lint issue, then a further run found two outdated test expectations; these were fixed. Final `npm run check` passed all gates: `.cache/checks/check-RytJFm/result.json`.
+- Follow-up added those rendered checks and extracted workspace state and error presentation. Review also identified setup-key conflict recovery, shop-name validation and misleading session expiry guidance; these were corrected. A setup conflict requires checking shop state before rotating the key, with input retained and failed checks retryable. Physical phone, screen reader, real Clerk and hosted/provider acceptance remain unrun.
+- Follow-up focused tests: seller locale and session suites passed (22 tests); workspace suites passed (17 tests); typecheck passed. Final root `npm run check` passed with repository-local TEMP/TMP: `.cache/checks/check-mUGwRm/result.json`.

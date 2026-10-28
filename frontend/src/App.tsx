@@ -8,6 +8,7 @@ import { SellerWorkspace } from './features/seller';
 import { BuyerPortal } from './features/buyer';
 import { DemoTools } from './features/demo';
 import { LocaleProvider, LocaleSwitch, useLocale } from './features/locale';
+import { sellerCopy } from './features/locale/sellerCopy';
 import { fetchHealth, type HealthStatus } from './services/api';
 
 interface AppProps {
@@ -25,8 +26,9 @@ export default function App(props: AppProps = {}): React.JSX.Element {
   );
 }
 
-function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JSX.Element {
-  const { t } = useLocale();
+export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JSX.Element {
+  const { t, locale } = useLocale();
+  const text = sellerCopy[locale];
   const [activeTab, setActiveTab] = useState<'orders' | 'demo'>('orders');
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
@@ -72,7 +74,7 @@ function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JS
 
   return (
     <div className="app-container">
-      <a href="#workspace" className="skip-link">Skip to workspace</a>
+      <a href="#workspace" className="skip-link">{text.skip}</a>
       {/* Navbar with Clean Store Status & Demo Trigger */}
       <Header
         health={health}
@@ -84,16 +86,16 @@ function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JS
 
       <section className="app-masthead" aria-labelledby="workspace-heading">
         <div>
-          <p className="eyebrow">A little order. A lot less back-and-forth.</p>
-          <h2 id="workspace-heading">Your shop, <em>in good order.</em></h2>
+          <p className="eyebrow">{text.eyebrow}</p>
+          <h2 id="workspace-heading">{text.heading} <em>{text.headingEm}</em></h2>
           <p className="masthead-copy">
-            From a conversation to a confirmed order. Collect buyer details, check advances, and get ready to deliver.
+            {text.intro}
           </p>
         </div>
-        <ol className="workflow-guide" aria-label="How order confirmation works">
-          <li><span>01</span> Share an order link</li>
-          <li><span>02</span> Buyer adds details &amp; payment</li>
-          <li><span>03</span> Review, confirm &amp; deliver</li>
+        <ol className="workflow-guide" aria-label={text.guide}>
+          <li><span>01</span> {text.step1}</li>
+          <li><span>02</span> {text.step2}</li>
+          <li><span>03</span> {text.step3}</li>
         </ol>
       </section>
 
@@ -108,7 +110,7 @@ function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JS
 
       {/* Footer */}
       <footer className="footer">
-        <p>middleman · Made for the way you sell. Seller confirmation does not imply payment-provider verification.</p>
+        <p>{text.footer}</p>
       </footer>
     </div>
   );

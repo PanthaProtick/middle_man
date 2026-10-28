@@ -195,3 +195,31 @@ it('preserves an unfinished courier form when the same Clerk session renews its 
     }));
   } finally { vi.useRealTimers(); }
 });
+it('keeps the language switch available while sign-in loads without requesting a token', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  clerk.isLoaded = false;
+  await act(async () => root.render(<SellerSession />));
+  await act(async () => Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
+  expect(container.querySelector('[role=status]:not(.sr-only)')?.textContent).toContain('সাইন ইন লোড হচ্ছে');
+  expect(clerk.getToken).not.toHaveBeenCalled();
+  localStorage.clear();
+});
+it('translates a rejected session without repeating authentication or requests', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
+    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'not_yet_valid' } })
+    : Response.json({ status: 'healthy' }));
+  try {
+    await act(async () => root.render(<SellerSession />));
+    expect(container.textContent).toContain('Session diagnostic: not_yet_valid');
+    const calls = vi.mocked(fetch).mock.calls.length;
+    const tokens = clerk.getToken.mock.calls.length;
+    const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!;
+    button.focus();
+    await act(async () => button.click());
+    expect(container.textContent).toContain('এখনও কার্যকর নয়');
+    expect(document.activeElement).toBe(button);
+    expect(fetch).toHaveBeenCalledTimes(calls);
+    expect(clerk.getToken).toHaveBeenCalledTimes(tokens);
+  } finally { localStorage.clear(); }
+});

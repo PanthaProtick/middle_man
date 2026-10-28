@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLocale } from '../locale';
+import { sellerCopy } from '../locale/sellerCopy';
 import type { PaymentAccount } from './types';
 
 interface WorkspaceAccountsSummaryProps {
@@ -10,12 +12,13 @@ export function WorkspaceAccountsSummary({
   accounts,
   onManageAccounts,
 }: WorkspaceAccountsSummaryProps): React.JSX.Element {
+  const text = sellerCopy[useLocale().locale];
   const activeAccounts = accounts.filter((a) => a.is_active);
 
   return (
     <div className="workspace-accounts-summary">
       <div className="accounts-summary-left">
-        <span className="summary-label">Active Receiving Accounts:</span>
+        <span className="summary-label">{text.activeAccounts}</span>
         <div className="summary-pills">
           {activeAccounts.map((a) => (
             <span key={a.id} className="summary-account-pill">
@@ -23,7 +26,7 @@ export function WorkspaceAccountsSummary({
             </span>
           ))}
           {activeAccounts.length === 0 && (
-            <span className="summary-account-empty">No active receiving accounts configured</span>
+            <span className="summary-account-empty">{text.noAccounts}</span>
           )}
         </div>
       </div>
@@ -32,7 +35,7 @@ export function WorkspaceAccountsSummary({
         className="btn btn-secondary btn-sm"
         onClick={onManageAccounts}
       >
-        Manage Accounts &rarr;
+        {text.manageAccounts} &rarr;
       </button>
     </div>
   );

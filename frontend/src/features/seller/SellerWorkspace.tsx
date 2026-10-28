@@ -1,12 +1,16 @@
+import { useLocale } from '../locale';
+import { sellerCopy } from '../locale/sellerCopy';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { AlertCircle, RefreshCw } from 'lucide-react';
 import type { PaymentAccount, ReceiptView, SellerOrder, Shop } from './types';
-import { fetchShop, createShop, fetchPaymentAccounts, fetchOrders, fetchTransactions } from './api';
+import { fetchShop, createShop, fetchPaymentAccounts, fetchOrders, fetchTransactions, SellerApiError } from './api';
 import { OrderList } from './OrderList';
 import { CreateOrderModal } from './CreateOrderModal';
 import { ManualTransactionModal } from './ManualTransactionModal';
 import { BuyerCorrection } from './BuyerCorrection';
 import { ShopMetricsBar } from './ShopMetricsBar';
+import { WorkspaceErrorBanner } from './WorkspaceErrorBanner';
+import { workspaceErrorText } from './workspaceErrorText';
+import { WorkspaceState } from './WorkspaceState';
 import { WorkspaceHeader } from './WorkspaceHeader';
 import { ShopSetupForm } from './ShopSetupForm';
 import { WorkspaceSectionNav } from './WorkspaceSectionNav';
@@ -30,14 +34,14 @@ export function SellerWorkspace({
   onSectionChange,
   onSignIn,
 }: SellerWorkspaceProps): React.JSX.Element {
+  const { locale } = useLocale();
+  const text = sellerCopy[locale];
   const [internalSection, setInternalSection] = useState<WorkspaceSection>('orders');
   const currentSection = activeSection ?? internalSection;
-
   const handleSectionSelect = (section: WorkspaceSection) => {
     setInternalSection(section);
     onSectionChange?.(section);
   };
-
   const [loading, setLoading] = useState<boolean>(() => Boolean(token));
   const [shop, setShop] = useState<Shop | null>(null);
   const [setupNeeded, setSetupNeeded] = useState<boolean>(false);
@@ -52,12 +56,13 @@ export function SellerWorkspace({
   const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
   const [manualAccountId, setManualAccountId] = useState<string>();
   const [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
+  const [error, setError] = useState<string | { code: string } | null>(null);
+  const workspaceError = typeof error === 'object' && error ? error.code : null;
+  const errorText = workspaceErrorText(error, locale);
+  const captureWorkspaceError = useCallback((err: unknown) => setError({ code: err instanceof SellerApiError ? err.code : 'UNKNOWN' }), []);
   const [shopName, setShopName] = useState<string>('');
   const [setupSubmitting, setSetupSubmitting] = useState<boolean>(false);
   const shopIdempotencyKeyRef = useRef<string>(crypto.randomUUID());
-
   const loadOrders = useCallback(
     async (status?: string, cursor?: string) => {
       if (!token) return;
@@ -66,12 +71,11 @@ export function SellerWorkspace({
         setOrders((prev) => (cursor ? [...prev, ...res.items] : res.items));
         setOrdersNextCursor(res.next_cursor);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load orders');
+        captureWorkspaceError(err);
       }
     },
-    [token],
+    [token, captureWorkspaceError],
   );
-
   const loadTransactions = useCallback(
     async (filterKey?: string, cursor?: string) => {
       if (!token) return;
@@ -84,46 +88,45 @@ export function SellerWorkspace({
         setTransactions((prev) => (cursor ? [...prev, ...res.items] : res.items));
         setTransactionsNextCursor(res.next_cursor || null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load received payments');
+        captureWorkspaceError(err);
       } finally {
         setTransactionsLoading(false);
       }
     },
-    [token],
+    [token, captureWorkspaceError],
   );
-
   const loadData = useCallback(() => {
     if (!token) return;
     fetchShop(token)
       .then(async (status) => {
         setSetupNeeded(status.setup_needed);
         setShop(status.shop);
+        setError(null);
         if (status.shop) {
           const accs = await fetchPaymentAccounts(token);
           setAccounts(accs);
           await loadOrders(ordersFilter);
           await loadTransactions(transactionsFilter);
         }
-        setError(null);
       })
-      .catch((err) => setError(err instanceof Error ? err.message : 'Failed to load shop workspace'))
+      .catch((err: unknown) => captureWorkspaceError(err))
       .finally(() => setLoading(false));
-  }, [token, ordersFilter, transactionsFilter, loadOrders, loadTransactions]);
+  }, [token, ordersFilter, transactionsFilter, loadOrders, loadTransactions, captureWorkspaceError]);
 
   useEffect(() => {
     if (!token) return;
     loadData();
   }, [token, loadData]);
-
   const handleFilterChange = (status: string) => {
     setOrdersFilter(status);
     loadOrders(status);
   };
-
   const handleCreateShop = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!token) return setError('Authentication required');
-    if (!shopName.trim()) return setError('Shop display name cannot be blank');
+    if (!token) return setError({ code: 'UNKNOWN' });
+    if (workspaceError === 'IDEMPOTENCY_KEY_REUSED' || workspaceError === 'RECOVERY_FAILED') return;
+    if (!shopName.trim()) return setError({ code: 'INVALID_NAME' });
+    if (shopName.trim().length > 200) return setError({ code: 'NAME_LIMIT' });
     setSetupSubmitting(true);
     setError(null);
     try {
@@ -134,75 +137,46 @@ export function SellerWorkspace({
       setShopName('');
       loadData();
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create shop');
+      if (err instanceof SellerApiError && err.code === 'VALIDATION_ERROR') setError({ code: 'NAME_LIMIT' });
+      else captureWorkspaceError(err);
     } finally {
       setSetupSubmitting(false);
     }
   };
-
-  if (!token) {
-    return (
-      <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ maxWidth: '420px', margin: '0 auto' }}>
-          <h3 style={{ marginBottom: '12px', fontSize: '1.25rem' }}>Sign in to your shop</h3>
-          <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '0.95rem' }}>
-            Please authenticate to manage your orders, receiving accounts, and shop settings.
-          </p>
-          <button
-            type="button"
-            className="btn btn-primary"
-            disabled={!onSignIn}
-            onClick={() => onSignIn?.()}
-          >
-            Sign in
-          </button>
-          {!onSignIn && <p>Seller sign-in is unavailable. Configure Clerk to connect your shop.</p>}
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) {
-    return (
-      <div className="card" style={{ padding: '40px', textAlign: 'center' }}>
-        <RefreshCw size={28} className="spin" style={{ color: 'var(--primary-accent)', margin: '0 auto 12px' }} />
-        <p style={{ color: 'var(--text-secondary)' }}>Loading shop workspace...</p>
-      </div>
-    );
-  }
-
-  if (error && !shop && !setupNeeded) {
-    return (
-      <div className="card" style={{ padding: '36px', textAlign: 'center' }}>
-        <AlertCircle size={32} style={{ color: 'var(--rose-accent)', margin: '0 auto 12px' }} />
-        <h4 style={{ color: 'var(--rose-accent)', marginBottom: '8px' }}>Workspace Error</h4>
-        <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>{error}</p>
-        <button className="btn btn-primary btn-sm" onClick={() => { setLoading(true); loadData(); }}>
-          <RefreshCw size={14} /> Retry
-        </button>
-      </div>
-    );
-  }
+  const checkSetup = async () => {
+    if (!token) return;
+    setSetupSubmitting(true);
+    try {
+      const status = await fetchShop(token);
+      if (status.shop) { setShop(status.shop); setSetupNeeded(false); loadData(); }
+      else if (status.setup_needed) shopIdempotencyKeyRef.current = crypto.randomUUID();
+      else throw new Error('Invalid shop status');
+      setError(null);
+    } catch { setError({ code: 'RECOVERY_FAILED' }); }
+    finally { setSetupSubmitting(false); }
+  };
+  if (!token) return <WorkspaceState state="signedOut" onSignIn={onSignIn} onRetry={() => undefined} />;
+  const state = loading ? 'loading' : errorText && !shop && !setupNeeded ? 'error' : null;
+  if (state) return <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn}
+    onRetry={() => { setError(null); setLoading(true); loadData(); }} />;
 
   return (
     <div className="card">
       <WorkspaceHeader
-        displayTitle={setupNeeded ? 'Shop Setup' : (shop?.display_name || 'Seller Workspace')}
+        displayTitle={setupNeeded ? text.setup : (shop?.display_name || text.workspace)}
         setupNeeded={setupNeeded}
         onOpenRecordModal={() => setIsRecordModalOpen(true)}
         onOpenCreateModal={() => setIsCreateModalOpen(true)}
         onRefresh={() => { setLoading(true); loadData(); }}
       />
 
-      {error && (
-        <div role="alert" style={{ margin: '16px 0', padding: '12px 16px', background: 'rgba(239, 68, 68, 0.12)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '8px', color: 'var(--rose-accent)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <AlertCircle size={18} />
-          <span>{error}</span>
-        </div>
-      )}
+      {errorText && <WorkspaceErrorBanner message={errorText} />}
 
       {setupNeeded ? (
         <ShopSetupForm
+          error={workspaceError === 'INVALID_NAME' || workspaceError === 'NAME_LIMIT'}
+          showRecovery={workspaceError === 'IDEMPOTENCY_KEY_REUSED' || workspaceError === 'RECOVERY_FAILED'}
+          onRecover={() => { void checkSetup(); }}
           shopName={shopName}
           setupSubmitting={setupSubmitting}
           onShopNameChange={setShopName}

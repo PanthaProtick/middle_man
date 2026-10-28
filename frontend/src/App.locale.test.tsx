@@ -49,7 +49,7 @@ describe('Both application entry paths expose the language switch', () => {
 
     expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bn');
     expect(document.documentElement.lang).toBe('bn-BD');
-    expect(container.textContent).toContain('Sign in to your shop');
+    expect(container.textContent).toContain('আপনার দোকানে সাইন ইন করুন');
   });
 
   it('uses the saved device preference for a shared buyer link without extra requests', async () => {

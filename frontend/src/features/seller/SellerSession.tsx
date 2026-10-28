@@ -1,14 +1,23 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { useAuth, useClerk } from '@clerk/react';
-import App from '../../App';
+import { AppShell } from '../../App';
+import { LocaleProvider, LocaleSwitch, useLocale } from '../locale';
+import { sessionReason } from './sessionReason';
+import { sellerCopy } from '../locale/sellerCopy';
 import { bindSellerSession, renewSellerSessionToken, type AuthReason, type SessionFailure } from './sessionRequest';
 
 /** The SDK owns session persistence; application bearer tokens stay in memory. */
 export function SellerSession(): React.JSX.Element {
+  return <LocaleProvider><SellerSessionContent /></LocaleProvider>;
+}
+
+function SellerSessionContent(): React.JSX.Element {
+  const { locale } = useLocale();
+  const text = sellerCopy[locale];
   const { isLoaded, isSignedIn, sessionId, getToken } = useAuth();
   const { openSignIn, signOut } = useClerk();
   const [credential, setCredential] = useState<{ sessionId: string; token: string; bearerToken: string }>();
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<'token' | 'signOut'>();
   const [signingOut, setSigningOut] = useState(false);
   const [signedOutSession, setSignedOutSession] = useState<string | null>();
   const [failure, setFailure] = useState<{ sessionId: string; kind: SessionFailure; reason?: AuthReason }>();
@@ -29,7 +38,7 @@ export function SellerSession(): React.JSX.Element {
       } catch {
         if (!active) return;
         setCredential(undefined);
-        setError('Unable to obtain your seller session. Please sign in again.');
+        setError('token');
       }
     };
     void refresh();
@@ -57,7 +66,7 @@ export function SellerSession(): React.JSX.Element {
       await signOut();
     } catch {
       setSignedOutSession(undefined);
-      setError('Unable to sign out. Please retry.');
+      setError('signOut');
     } finally {
       setSigningOut(false);
     }
@@ -68,18 +77,18 @@ export function SellerSession(): React.JSX.Element {
     setRetry(value => value + 1);
   };
 
-  if (!isLoaded) return <p role="status">Loading seller sign-in…</p>;
+  if (!isLoaded) return <><LocaleSwitch /><p role="status">{text.sessionLoading}</p></>;
 
   return <>
-    {error && <p role="alert">{error}</p>}
+    {error && <p role="alert">{error === 'token' ? text.sessionToken : text.sessionSignOut}</p>}
     {blocked && <div role="alert">
       <p>{failure?.kind === 'unauthorized'
-        ? 'Your seller session has expired. Please sign in again.'
-        : 'Session verification is unavailable. Please retry.'}</p>
-      {failure?.reason && <p>Session diagnostic: {failure.reason}</p>}
-      <button onClick={retrySession}>Retry seller session</button>
+        ? failure?.reason && failure.reason !== 'expired' ? text.sessionRejected : text.sessionExpired
+        : text.sessionUnavailable}</p>
+      {failure?.reason && <p>{text.diagnostic}: {sessionReason(failure.reason, locale)}</p>}
+      <button onClick={retrySession}>{text.sessionRetry}</button>
     </div>}
-    <App token={token} sessionId={token ? sessionId ?? undefined : undefined}
+    <AppShell token={token} sessionId={token ? sessionId ?? undefined : undefined}
       onSignIn={() => {
         if (isSignedIn && sessionId !== signedOutSession) retrySession();
         else void openSignIn();

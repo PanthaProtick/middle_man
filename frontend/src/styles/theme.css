@@ -176,7 +176,7 @@ input, textarea, fieldset { min-width: 0; }
   .status-badges { justify-content: flex-start; }
   .app-masthead h2 { font-size: 1.85rem; }
   .metrics-ribbon { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .metric-chip:last-child { grid-column: 1 / -1; }
+  .metric-chip:nth-child(5) { grid-column: 1 / -1; }
   .metric-chip { padding: 12px 10px; }
   .metric-val { font-size: 1.25rem; }
   .card { padding: 16px; }
@@ -201,3 +201,5 @@ fieldset { border: 0; }
 .chat-container, .idea-box, .member-card { background: var(--bg-surface); }
 .message-bubble.ai { color: var(--text-primary); background: white; }
 .message-bubble.user { color: var(--primary-accent); background: #e3eee8; }
+
+.metrics-explanation { grid-column: 1 / -1; }

@@ -277,7 +277,8 @@ describe('SellerWorkspace Component', () => {
     });
 
     expect(container.textContent).toContain('Workspace Error');
-    expect(container.textContent).toContain('Network offline');
+    expect(container.textContent).toContain('Unable to complete this request. Please retry.');
+    expect(container.textContent).not.toContain('Network offline');
     expect(container.textContent).toContain('Retry');
   });
 

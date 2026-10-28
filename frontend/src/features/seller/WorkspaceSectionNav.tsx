@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLocale } from '../locale';
+import { sellerCopy } from '../locale/sellerCopy';
 import { ShoppingBag, Smartphone, CreditCard, ShieldCheck } from 'lucide-react';
 import type { WorkspaceSection } from './SellerWorkspace';
 
@@ -17,8 +19,9 @@ export function WorkspaceSectionNav({
   transactionsCount,
   accountsCount,
 }: WorkspaceSectionNavProps): React.JSX.Element {
+  const text = sellerCopy[useLocale().locale];
   return (
-    <div className="workspace-section-tabs" role="navigation" aria-label="Seller Desk Sections">
+    <div className="workspace-section-tabs" role="navigation" aria-label={text.sections}>
       <button
         type="button"
         
@@ -27,7 +30,7 @@ export function WorkspaceSectionNav({
         onClick={() => onSelectSection('orders')}
       >
         <ShoppingBag size={14} />
-        <span>Orders &amp; Links</span>
+        <span>{text.orders}</span>
         <span className="section-tab-count">{ordersCount}</span>
       </button>
 
@@ -39,7 +42,7 @@ export function WorkspaceSectionNav({
         onClick={() => onSelectSection('payments')}
       >
         <Smartphone size={14} />
-        <span>Payments &amp; SMS</span>
+        <span>{text.payments}</span>
         <span className="section-tab-count">{transactionsCount}</span>
       </button>
 
@@ -51,7 +54,7 @@ export function WorkspaceSectionNav({
         onClick={() => onSelectSection('accounts')}
       >
         <CreditCard size={14} />
-        <span>Receiving Accounts</span>
+        <span>{text.accounts}</span>
         <span className="section-tab-count">{accountsCount}</span>
       </button>
 
@@ -63,7 +66,7 @@ export function WorkspaceSectionNav({
         onClick={() => onSelectSection('retention')}
       >
         <ShieldCheck size={14} />
-        <span>Data Retention</span>
+        <span>{text.retention}</span>
       </button>
     </div>
   );
