@@ -1,6 +1,12 @@
+import { enBuyerErrors, bnBuyerErrors } from './buyerErrors';
+import { enBuyerLocations, bnBuyerLocations } from './buyerLocations';
 import type { Locale } from './storage';
+import { enBuyerMessages, bnBuyerMessages } from './buyerMessages';
 
 const englishCatalog = {
+  ...enBuyerMessages,
+  ...enBuyerLocations,
+  ...enBuyerErrors,
   'locale.label': 'Language',
   'locale.bengali': 'বাংলা',
   'locale.english': 'English',
@@ -65,6 +71,9 @@ const englishCatalog = {
 export type MessageKey = keyof typeof englishCatalog;
 
 const bengaliCatalog: Record<MessageKey, string> = {
+  ...bnBuyerMessages,
+  ...bnBuyerLocations,
+  ...bnBuyerErrors,
   'locale.label': 'ভাষা',
   'locale.bengali': 'বাংলা',
   'locale.english': 'English',

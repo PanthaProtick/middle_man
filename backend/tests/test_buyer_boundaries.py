@@ -62,3 +62,22 @@ async def test_demo_adapter_refuses_configured_database(client: AsyncClient, mon
     monkeypatch.setattr(settings, "DATABASE_URL", "postgresql://synthetic.invalid/synthetic")
     app.dependency_overrides[verify_public_access_gate] = allow_synthetic_buyer_demo
     assert (await client.get("/api/public/orders/unknown")).status_code == 503
+
+
+async def test_public_validation_exposes_only_safe_localization_parameters(client: AsyncClient):
+    app.dependency_overrides[verify_public_access_gate] = allow_synthetic_buyer_demo
+    response = await client.post(
+        "/api/public/orders/synthetic/submission", headers={"Idempotency-Key": "invalid-fields"},
+        json={
+            "buyer_name": "x" * 201, "contact_number": "private invalid phone",
+            "address": {"raw_text": "Synthetic address"},
+            "payment_claim": {"provider": "bkash", "trx_id": "Tx১২ab", "sender_number": "01822222222", "amount_minor": 1201},
+        },
+    )
+    assert response.status_code == 422
+    fields = {field["field"]: field for field in response.json()["error"]["fields"]}
+    assert fields["buyer_name"]["code"] == "string_too_long"
+    assert fields["buyer_name"]["params"] == {"max_length": 200}
+    assert fields["contact_number"]["code"] == "value_error"
+    assert fields["contact_number"]["params"] == {}
+    assert "private invalid phone" not in response.text

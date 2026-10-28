@@ -118,4 +118,7 @@
 .pathao-location-help { display: flex; align-items: flex-start; gap: 8px; }
 .pathao-location-help input { flex: 0 0 auto; margin-top: 4px; }
 .pathao-location-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.portal-main form { min-width: 0; overflow-wrap: anywhere; }
+.portal-main form label, .pathao-locations { min-width: 0; overflow-wrap: anywhere; }
+.portal-main form .btn, .pathao-location-actions .btn { white-space: normal; min-height: 44px; }
 

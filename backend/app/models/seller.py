@@ -116,6 +116,7 @@ class ErrorFieldItem(BaseModel):
     field: Optional[str] = None
     code: str
     message: str
+    params: dict[Literal["min_length", "max_length"], int] = Field(default_factory=dict)
 
 
 class ErrorBody(BaseModel):

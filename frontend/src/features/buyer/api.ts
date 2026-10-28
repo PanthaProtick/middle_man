@@ -8,6 +8,7 @@ export interface ApiError {
     field: string;
     code: string;
     message: string;
+    params?: { min_length?: number; max_length?: number };
   }>;
 }
 
@@ -15,6 +16,7 @@ export class BuyerApiError extends Error {
   code: string;
   fields?: ApiError['fields'];
   statusCode: number;
+  retryAfterSeconds?: number;
 
   constructor(statusCode: number, error: ApiError) {
     super(error.message);
@@ -67,7 +69,10 @@ async function readJson<T>(
       });
     }
     if (errBody.error) {
-      throw new BuyerApiError(res.status, errBody.error);
+      const error = new BuyerApiError(res.status, errBody.error);
+      const retry = res.headers.get('Retry-After');
+      if (retry && /^\d+$/.test(retry) && Number.isSafeInteger(Number(retry))) error.retryAfterSeconds = Number(retry);
+      throw error;
     }
     throw new BuyerApiError(res.status, {
       code: `HTTP_${res.status}`,
@@ -105,7 +110,7 @@ export function formatBDT(minor: number): string {
 }
 
 export function parseClaimedAmount(raw: string): number {
-  const value = raw.trim();
+  const value = raw.trim().replace(/[০-৯]/g, digit => String(digit.charCodeAt(0) - 0x09e6));
   if (!/^\d+(\.\d{1,2})?$/.test(value)) throw new Error('Enter a positive BDT amount with at most two decimal places.');
   const [whole, fraction = ''] = value.split('.');
   const minor = BigInt(whole) * 100n + BigInt(fraction.padEnd(2, '0'));

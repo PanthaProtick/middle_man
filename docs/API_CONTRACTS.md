@@ -115,6 +115,16 @@ copy/open link only after acknowledgement.
 
 ## Public request admission
 
+Public validation errors keep stable `error.code` and `fields[].code`/`field`
+values. `fields[].params` adds only integer `min_length` and `max_length`
+constraints for localized presentation; validator context and submitted values
+are never copied into these parameters. Other errors have an empty parameter map.
+The buyer UI localizes codes and the existing `Retry-After` seconds header, with
+safe guidance for unknown failures. Locale changes do not send requests or reset
+submission attempts. Bengali digits are accepted when parsing decimal BDT input
+to exact integer minor units; names, addresses, TrxIDs and raw phone evidence stay
+unchanged. Phones already accept Bengali digits at their validation boundary.
+
 All HTTP requests under `/api/public/orders` share an aggregate fixed-window quota
 per application worker, before token lookup, validation or storage access. Defaults
 (positive integer environment settings): `PUBLIC_REQUESTS_PER_WINDOW=600`,

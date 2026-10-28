@@ -1,6 +1,6 @@
 # Task: Consistent Bengali and English experience
 
-Status: In-Progress (ticket 01 implemented; tickets 02–13 pending)
+Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 03–13 pending)
 
 ## Goal and settled scope
 
@@ -102,7 +102,7 @@ Status: In-Progress (ticket 01 implemented; tickets 02–13 pending)
 
 ## Current state and next action
 
-- Status: ticket 01 implemented. Tickets 02–12 are independently unblocked;
+- Status: tickets 01–02 implemented and locally verified. Tickets 03–12 are independently unblocked;
   ticket 13 follows them.
 - Shared locale foundation added under `frontend/src/features/locale/`:
   `catalog.ts` (typed English/Bengali catalogs), `context.ts`,
@@ -145,7 +145,7 @@ Status: In-Progress (ticket 01 implemented; tickets 02–13 pending)
 - Remaining gaps: phone-browser visual/typography/accessibility acceptance in
   Bengali and English was NOT RUN. Real embedded Clerk sign-in/recovery was NOT
   RUN. No live provider or deployment behavior was involved.
-- Next: ticket 02 (buyer submission and delivery locations), then the remaining
+- Next: ticket 03 (address assistance), followed by the remaining
   workflow slices; ticket 13 runs integrated vocabulary and browser acceptance.
 
 ## Verification
@@ -161,3 +161,45 @@ Status: In-Progress (ticket 01 implemented; tickets 02–13 pending)
 | Root `npm run check` | PASS | `.cache/checks/check-iZEZ0B/result.json` (tooling, lint, types, backend/frontend tests, build, HTTP smoke) |
 | Ticket 01 browser acceptance | NOT RUN | No phone-browser typography/focus/document-language check performed |
 | Real embedded Clerk sign-in/recovery | NOT RUN | Requires live authentication configuration; mocked paths do not establish it |
+
+## Ticket 02 implementation and verification
+
+- Buyer identity/address/payment fields, placeholders, help, validation, pending,
+  failure and retry copy now follow the selected locale. Pathao loading, empty,
+  unavailable, retry, search and saved-choice descriptions also translate.
+- Error state retains codes rather than translated strings. Public field errors
+  expose only typed min/max length constraints; retry timing uses the existing
+  Retry-After header. Unknown errors receive safe localized guidance.
+- Bengali digits are normalized only while parsing exact BDT minor units;
+  phone validation already supports them. User text, TrxIDs, provider names,
+  authoritative location labels/IDs, raw phone evidence and frozen retry
+  body/idempotency key are preserved. Focus follows the first invalid control
+  in document order and language changes do not move it or repeat requests.
+- Changed paths: `backend/app/{main.py,models/seller.py}`,
+  `backend/tests/test_buyer_boundaries.py`,
+  `frontend/src/features/buyer/{BuyerSubmissionForm,PaymentClaimFields,PathaoLocations}.tsx`,
+  `frontend/src/features/buyer/{api,useBuyerSubmission,submissionErrors,validateBuyerDraft}.ts`,
+  `frontend/src/features/buyer/{BuyerLocaleSubmission,BuyerRetry,PathaoLocations,PathaoLocaleStates}.test.tsx`,
+  `frontend/src/features/buyer/api.test.ts`,
+  `frontend/src/features/locale/{catalog,buyerMessages,buyerErrors,buyerLocations}.ts`,
+  `frontend/src/styles/buyer.css`, `docs/API_CONTRACTS.md`, and ticket 02.
+- Exact focused checks: `npm run test:frontend -- src/features/buyer src/features/locale`
+  passed (15 files, 99 tests); `npm run test:backend -- tests/test_buyer_boundaries.py tests/test_public_order_routes.py tests/test_pathao_locations.py`
+  passed (25 tests); `npm run typecheck` passed. After the focus-order correction,
+  `npm run test:frontend -- src/features/buyer/BuyerLocaleSubmission.test.tsx`
+  passed (8 tests). `git diff --check` passed.
+- Two-axis code review against starting commit `153aabc1fb1d6ba98fd8f14d7d31bca8a0a2177e`
+  (staged diff): Standards 0 findings; Spec 0 findings.
+- Final `npm run check`: PASS, `.cache/checks/check-kAjJYU/result.json`.
+  Backend: 459 passed, 170 skipped. Frontend: 50 files, 252 tests passed.
+  Tooling, backend lint/types, frontend lint/build and HTTP smoke all passed.
+  The initial run `.cache/checks/check-srOFAb/result.json` failed on a Windows
+  pytest temp-directory permission error (458 passed, 170 skipped, 1 error).
+  Passing command: `TEMP=E:\middle_man\.cache\temp-ticket02`, same `TMP`,
+  `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-ticket02`, then
+  `npm run check` (set as PowerShell environment variables).
+- Next: ticket 03 (address assistance); no implementation work remains in ticket 02.
+- Unrun acceptance: phone-browser wrapping/font/keyboard/screen-reader behavior,
+  physical devices, live Pathao/provider and hosted deployment. Existing offline
+  Bengali-capable font fallback is retained; rendered tests and HTTP smoke do not
+  establish those acceptance gates. Address assistance remains ticket 03.
