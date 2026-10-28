@@ -379,10 +379,10 @@ remain unrun and unclaimed.
   `buyerMessages`, and `paymentExceptionCopy`; courier-draft wording in
   `courierCopy` and `correctionOutcomeCopy`. The seller name-limit copy now uses
   0-9 digits. No provider or booking certainty was added.
-- Owner-review vocabulary retained rather than silently rewritten: seller UI
+- Owner-review vocabulary approved and documented: seller UI
   uses English “payment claim”/Bengali “পেমেন্টের দাবি” for the claim concept,
   while GLOSSARY.md’s approved noun is “buyer payment proof”/“ক্রেতার দেওয়া
-  পেমেন্টের তথ্য” (used in the comparison caption). Compact labels such as
+  পেমেন্টের তথ্য” (used in comparison caption and annotated in GLOSSARY.md). Compact labels such as
   “গৃহীত অগ্রিম” remain inside courier sentences. English/CSV also retain “COD”;
   Bengali uses the approved remaining-balance phrase.
 - Changed paths: `frontend/src/App.tsx`,
@@ -390,14 +390,14 @@ remain unrun and unclaimed.
   `frontend/src/features/seller/{BuyerCorrection,ManualTransactionModal,SellerSession}.tsx`,
   `frontend/src/features/locale/{copyAudit.test.ts,integration.test.tsx,format.test.ts}`,
   `frontend/src/features/seller/{CorrectionOutcomeLocale,ManualTransactionLocale,SellerWorkspace,OrderExport,SellerSession}.test.tsx`,
-  `docs/adr/0006-bengali-english-presentation-boundary.md`,
+  `GLOSSARY.md`, `docs/adr/0006-bengali-english-presentation-boundary.md`,
   `docs/ui-audience-and-design.md`, this record, and ticket 13.
 - Focused checks: `npm run test:frontend -- src/features/locale src/App.locale.test.tsx src/features/seller/CorrectionOutcomeLocale.test.tsx src/features/seller/ManualTransactionLocale.test.tsx src/features/seller/SellerWorkspace.test.tsx src/features/seller/OrderExport.test.tsx src/features/seller/PaymentException.test.tsx`
   passed (13 files, 123 tests); a follow-up seller-session/locale run
   `npm run test:frontend -- src/features/seller/SellerSession.test.tsx src/features/locale src/App.locale.test.tsx`
   passed (9 files, 95 tests). `npm run typecheck` passed (111 source files);
   `npm run lint:frontend` passed.
-- Root `npm run check` PASS: `.cache/checks/check-FvRozu/result.json`
+- Root `npm run check` PASS: `.cache/checks/check-ysJlOM/result.json`
   (tooling, backend lint/types, 465 backend passed/170 skipped, frontend lint,
   69 frontend files/389 tests, build, HTTP smoke).
 - Unrun gates: phone-browser font/wrapping/control/focus/reduced-motion/

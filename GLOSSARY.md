@@ -35,6 +35,7 @@ Details of a received payment supplied by the seller, primarily from an incoming
 
 **Buyer payment proof**:
 _Bengali_: ক্রেতার দেওয়া পেমেন্টের তথ্য
+_UI label_: English surfaces use "payment claim" (buyer-facing) or "claim" (seller-facing comparison column). Bengali buyer-facing copy uses the neutral "পেমেন্টের তথ্য"; seller-facing correction labels use "পেমেন্টের দাবি".
 
 The buyer's submitted payment details: provider, transaction ID, sender number, and claimed amount. It is a claim of payment, not independent evidence of receipt by the seller.
 
