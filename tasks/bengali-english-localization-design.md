@@ -240,3 +240,25 @@ Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 0
 - Root verification: initial `npm run check` stopped at a Windows pytest temp permission error (459 passed, 170 skipped, 1 error). With repository-local TEMP/TMP, the next run found a frontend lint issue, then a further run found two outdated test expectations; these were fixed. Final `npm run check` passed all gates: `.cache/checks/check-RytJFm/result.json`.
 - Follow-up added those rendered checks and extracted workspace state and error presentation. Review also identified setup-key conflict recovery, shop-name validation and misleading session expiry guidance; these were corrected. A setup conflict requires checking shop state before rotating the key, with input retained and failed checks retryable. Physical phone, screen reader, real Clerk and hosted/provider acceptance remain unrun.
 - Follow-up focused tests: seller locale and session suites passed (22 tests); workspace suites passed (17 tests); typecheck passed. Final root `npm run check` passed with repository-local TEMP/TMP: `.cache/checks/check-mUGwRm/result.json`.
+
+### Ticket 05 — partial buyer-link localization (2026-10-28)
+
+- Localized buyer-link access, uncertainty/stale warnings, retry controls, copy
+  feedback, manual copy label, and the portal-opening label. Error state remains
+  coded so switching languages does not repeat or replace a pending operation.
+- Changed: `frontend/src/features/locale/buyerLinkCopy.ts`,
+  `frontend/src/features/seller/BuyerLinkAccess.tsx`, `BuyerLinkCopy.tsx`,
+  `OrderDetailModal.tsx`, and their buyer-link rendered tests.
+- Focused `npm run test:frontend -- src/features/seller/BuyerLinkAccess.test.tsx`
+  passed (5 tests); `npm run test:frontend -- src/features/seller/BuyerLinkCopy.test.tsx`
+  passed (1 test); `npm run typecheck` passed before the last link label change.
+- Ticket remains open: creation, list, details, parcel fields, numeric input and
+  server field errors, and their bilingual journeys still require implementation.
+  Browser, physical-device and live-provider acceptance remain unrun.
+- Next: trace and localize the order creation form and parcel validation, retaining
+  values and idempotency across language changes; then list/details and endpoint
+  coverage. Run the root gate again after completing the ticket.
+- Root `npm run check` initially stopped at backend pytest setup due to Windows
+  default temporary-directory access; rerun with
+  `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.scratch/pytest-link-locale-20261028`
+  passed all configured gates (`.cache/checks/check-UMdQX3/result.json`).

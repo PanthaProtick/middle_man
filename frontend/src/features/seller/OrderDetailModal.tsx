@@ -12,6 +12,8 @@ import { OrderOutcomes } from './OrderOutcomes';
 import { OrderExport } from './OrderExport';
 import { BuyerLinkCopy } from './BuyerLinkCopy';
 import { BuyerLinkAccess } from './BuyerLinkAccess';
+import { useLocale } from '../locale/context';
+import { buyerLinkCopy } from '../locale/buyerLinkCopy';
 import { DeveloperDetailsPanel } from './DeveloperDetailsPanel';
 
 interface OrderDetailModalProps {
@@ -22,6 +24,7 @@ interface OrderDetailModalProps {
 }
 
 export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected }: OrderDetailModalProps): React.JSX.Element {
+  const { locale } = useLocale();
   const [order, setOrder] = useState(initialOrder);
   const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(null);
   const [showReviewCodes, setShowReviewCodes] = useState(false);
@@ -245,7 +248,7 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
             style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', textDecoration: 'none' }}
           >
             <ExternalLink size={14} />
-            <span>Open Portal</span>
+            <span>{buyerLinkCopy[locale].open}</span>
           </a>
         </div>
         <button className="btn btn-secondary" onClick={onClose}>

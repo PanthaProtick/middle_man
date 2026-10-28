@@ -88,3 +88,23 @@ it('blocks a stale action and tells the seller to refresh before starting again'
   expect(onUpdated).not.toHaveBeenCalled();
   await act(async () => root.unmount());
 });
+import { LocaleProvider } from '../locale/LocaleProvider';
+import { LocaleSwitch } from '../locale/LocaleSwitch';
+
+it('translates an uncertain outcome after switching without repeating the request', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  const fetchMock = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('offline'));
+  const host = document.createElement('div'); document.body.append(host);
+  const root = createRoot(host);
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><BuyerLinkAccess order={order} token="session" onUpdated={vi.fn()} /></LocaleProvider>));
+  const revoke = Array.from(host.querySelectorAll('button')).find(button => button.textContent === 'Revoke buyer link')!;
+  await act(async () => revoke.click());
+  await act(async () => Array.from(host.querySelectorAll('button')).find(button => button.textContent === 'বাংলা')!.click());
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain('নিশ্চিত');
+  expect(fetchMock).toHaveBeenCalledTimes(1);
+  await act(async () => revoke.click());
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  expect(fetchMock.mock.calls[1][1]).toEqual(fetchMock.mock.calls[0][1]);
+  await act(async () => root.unmount());
+  localStorage.clear();
+});
