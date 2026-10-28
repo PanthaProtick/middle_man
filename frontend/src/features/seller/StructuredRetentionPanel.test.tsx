@@ -31,7 +31,7 @@ it('shows loading, an unavailable response and a working retry', async () => {
   await act(async () => root.render(<StructuredRetentionPanel />));
   expect(container.textContent).toContain('Loading');
   await act(async () => finish?.(new Response(JSON.stringify({ error: { message: 'Service unavailable' } }), { status: 503 })));
-  expect(container.textContent).toContain('Service unavailable');
+  expect(container.textContent).toContain('Failed to load retention status');
   await act(async () => container.querySelector('button')?.click());
   expect(container.textContent).toContain('0 overdue');
   await act(async () => root.unmount());

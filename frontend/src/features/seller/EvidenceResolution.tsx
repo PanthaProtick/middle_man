@@ -1,21 +1,21 @@
-import { formatBangladeshDateTime } from '../locale/format';
+import { formatBangladeshDateTime, formatBdt } from '../locale/format';
 import { paymentReason } from '../locale/paymentExceptionCopy';
 import { useLocale } from '../locale/context';
-import { receiptText, receiptError } from '../locale/receiptCopy';
+import { receiptText, receiptError, receiptCode } from '../locale/receiptCopy';
 import './EvidenceResolution.css';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { SellerApiError } from './api';
 import { compareReceipt, resolveReceipt } from './resolution';
 import type { ReceiptComparison, ResolutionInput } from './resolution';
 import type { PaymentAccount } from './types';
 import { ReceiptCorrection } from './ReceiptCorrection';
 
-const formatBdt = (minor: number) => `BDT ${(minor / 100).toFixed(2)}`;
 
 interface Props { receiptId: string; token: string; onResolved: () => void; accounts?: PaymentAccount[] }
 
 export function EvidenceResolution({receiptId, token, onResolved, accounts = []}: Props) {
   const { locale } = useLocale();
+  const errorId = useId();
   const formatBangladeshTime = (value: string) => formatBangladeshDateTime(value, locale);
   const tr = (value: string) => receiptText(locale, value);
   const [comparison, setComparison] = useState<ReceiptComparison>();
@@ -64,7 +64,7 @@ export function EvidenceResolution({receiptId, token, onResolved, accounts = []}
     } finally { if (alive.current) setBusy(false); }
   }
 
-  if (!comparison) return <section aria-label={tr("Evidence resolution")}>
+  if (!comparison) return <section lang={locale} aria-label={tr("Evidence resolution")}>
     {error ? (
       <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}>
         <span>{tr(error)}</span>
@@ -75,27 +75,27 @@ export function EvidenceResolution({receiptId, token, onResolved, accounts = []}
     ) : <p role="status">{tr("Loading evidence comparison…")}</p>}
   </section>;
   const locked = Boolean(comparison.allocated_order_id) || comparison.receipt.reconciliation_state === 'used';
-  return <section className="evidence-resolution" aria-label={tr("Evidence resolution")}>
+  return <section className="evidence-resolution" lang={locale} aria-label={tr("Evidence resolution")}>
     <h4>{tr("Compare and resolve / তুলনা ও সিদ্ধান্ত")}</h4>
     <p>{locked ? `${tr('Accepted allocation')}: ${comparison.allocated_order_id ?? tr('locked')}. ${tr('Later evidence cannot change accepted funds.')}`
       : tr("Select received evidence. Choosing a claim explicitly holds the other current claims; exact matching rules still apply.")}</p>
     {comparison.receipt.has_conflict && <p role="status">{tr("Conflicting observations require seller review.")}</p>}
     <ul>{comparison.claims.map(claim => <li key={claim.revision_id}>
-      {claim.buyer_name} — {claim.order_id}: {tr(claim.lifecycle)}; {tr("Sender")} {claim.sender_number}; {formatBdt(claim.amount_minor)}.
+      {claim.buyer_name} — {claim.order_id}: {receiptCode(locale, claim.lifecycle)}; {tr("Sender")} {claim.sender_number}; {formatBdt(claim.amount_minor)}.
       {' '}{claim.review_reasons.map(code => paymentReason(code, locale)).join(', ')} {claim.held_by_resolution && tr("Held by seller decision.")}
     </li>)}</ul>
-    {error && <p role="alert">{tr(error)}</p>}
+    {error && <p id={errorId} role="alert">{tr(error)}</p>}
     {!locked && <ReceiptCorrection key={comparison.receipt.version} receipt={comparison.receipt} accounts={accounts}
       token={token} disabled={busy || Boolean(pending)} onPending={setCorrecting} onStale={refetch}
       onCorrected={result => { setComparison(result); setObservation(''); setOrder(''); onResolved(); }} />}
-    {!locked && <form aria-label={tr("Resolve evidence")} onSubmit={event => { event.preventDefault(); void submit(); }}>
+    {!locked && <form aria-label={tr("Resolve evidence")} aria-describedby={error ? errorId : undefined} onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy || Boolean(pending) || correcting}>
         <label>{tr("Received observation")}{!observation && <small>{tr(" — select complete evidence to continue.")}</small>}<select aria-label={tr("Received observation")} value={observation} onChange={e => setObservation(e.target.value)}>
           <option value="">{tr("Select complete observation")}</option>
           {comparison.receipt.observations.map(obs => <option key={obs.id} value={obs.id}
             disabled={obs.parse_state !== 'valid' || !obs.sender_number_canonical || !obs.occurred_at
               || (obs.trx_id !== undefined && (obs.provider !== comparison.receipt.provider || obs.trx_id !== comparison.receipt.trx_id))}>
-            {tr(obs.source)}: {formatBdt(obs.amount_minor)}, {obs.sender_number_canonical ?? tr("Unknown sender")},
+            {receiptCode(locale, obs.source)}: {formatBdt(obs.amount_minor)}, {obs.sender_number_canonical ?? tr("Unknown sender")},
             {' '}{obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : tr("Unknown time")}, {tr("Account")} {obs.payment_account_id}
           </option>)}
         </select></label>

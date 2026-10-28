@@ -56,3 +56,8 @@ export function formatBangladeshDateTime(isoString: string, locale: Locale): str
   if (!day || !year || !month || !hour || !minute) return isoString;
   return `${day} ${month} ${year}, ${hour}:${minute} ${period} (BST / UTC+6)`;
 }
+
+/** Operational counts use 0-9 digits in either language. */
+export function formatCount(count: number): string {
+  return count.toLocaleString('en-US');
+}

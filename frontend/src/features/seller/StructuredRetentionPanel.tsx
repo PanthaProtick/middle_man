@@ -1,3 +1,6 @@
+import { formatCount } from '../locale/format';
+import { useLocale } from '../locale/context';
+import { historyText, historyError } from '../locale/historyCopy';
 import { useEffect, useState } from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { structuredRetention } from './retentionApi';
@@ -9,6 +12,8 @@ interface Props {
 }
 
 export function StructuredRetentionPanel({ token, onCleaned }: Props) {
+  const { locale } = useLocale();
+  const tr = (text: string) => historyText(locale, text);
   const [status, setStatus] = useState<StructuredRetentionStatus | null>(null);
   const [busy, setBusy] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -18,7 +23,7 @@ export function StructuredRetentionPanel({ token, onCleaned }: Props) {
     void structuredRetention(token).then((result) => {
       if (active) setStatus(result);
     }).catch((failure: unknown) => {
-      if (active) setError(failure instanceof Error ? failure.message : 'Unable to load retention status');
+      if (active) setError(historyError(failure, 'Failed to load retention status'));
     }).finally(() => { if (active) setBusy(false); });
     return () => { active = false; };
   }, [token]);
@@ -34,38 +39,38 @@ export function StructuredRetentionPanel({ token, onCleaned }: Props) {
         onCleaned?.();
       }
     } catch (failure: unknown) {
-      setError(failure instanceof Error ? failure.message : 'Cleanup unavailable. Please retry.');
+      setError(historyError(failure, 'Retention unavailable. Please retry.'));
     } finally { setBusy(false); }
   }
 
   return (
-    <section className="isolated-section" aria-label="Completed record retention">
+    <section className="isolated-section" lang={locale} aria-label={tr("Completed record retention")}>
       <div className="isolated-section-header" style={{ marginBottom: '10px' }}>
         <div>
           <h3 className="isolated-section-title">
-            <ShieldCheck size={18} /> Completed record retention
+            <ShieldCheck size={18} /> {tr("Completed record retention")}
           </h3>
           <p className="isolated-section-desc">
-            Completed personal records are removed after 12 calendar months. Unresolved orders stay available. Used payments remain protected.
+            {tr("Completed personal records are removed after 12 calendar months. Unresolved orders stay available. Used payments remain protected.")}
           </p>
         </div>
       </div>
-      {busy && <p role="status" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>Loading retention status…</p>}
-      {error && <p role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.85rem' }}>{error}</p>}
+      {busy && <p role="status" style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{tr("Loading retention status…")}</p>}
+      {error && <p role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.85rem' }}>{tr(error)}</p>}
       {status && (
         <div className="isolated-subcard" style={{ margin: '12px 0' }}>
           <p role="status" style={{ margin: 0, fontWeight: 600, fontSize: '0.875rem' }}>
-            {status.overdue} overdue · {status.failed} failed{status.standby ? ' · Offline demonstration' : ''}
+            {formatCount(status.overdue)} {tr("overdue")} · {formatCount(status.failed)} {tr("failed")}{status.standby ? ` · ${tr('Offline demonstration')}` : ''}
           </p>
         </div>
       )}
       {removed !== null && (
         <p role="status" style={{ color: 'var(--emerald-accent)', fontSize: '0.85rem' }}>
-          Removed {removed} completed records.
+          {tr("Removed")} {formatCount(removed)} {tr("completed records.")}
         </p>
       )}
       <button className="btn btn-primary btn-sm" type="button" disabled={busy} onClick={() => { void retry(); }}>
-        {status ? 'Run / retry completed record cleanup' : 'Retry retention status'}
+        {tr(status ? 'Run / retry completed record cleanup' : 'Retry retention status')}
       </button>
     </section>
   );

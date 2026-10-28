@@ -1,6 +1,12 @@
 import { SellerApiError } from '../seller/api';
 import type { Locale } from './storage';
 const bn: Record<string, string> = {
+  "Invalid Bangladeshi phone number":"সঠিক বাংলাদেশি ফোন নম্বর লিখুন",
+  "Unknown status or source; review the original evidence.":"অবস্থা বা উৎস অজানা; মূল তথ্য যাচাই করুন।",
+  "used":"ব্যবহৃত", "unmatched":"অমিল", "conflicted":"বিরোধপূর্ণ", "incomplete":"অসম্পূর্ণ", "valid":"সঠিক", "sms_import":"SMS থেকে যোগ করা",
+  "Select complete evidence":"সম্পূর্ণ তথ্য বেছে নিন",
+  "Refetch current claims":"বর্তমান দাবি আবার আনুন",
+  "Access denied":"প্রবেশের অনুমতি নেই",
   "Seller sign-in required":"বিক্রেতাকে সাইন ইন করতে হবে",
   "Refetch evidence":"তথ্য আবার আনুন",
   "Compare and explicitly resolve existing receipt":"বর্তমান পেমেন্ট রেকর্ড তুলনা করে সিদ্ধান্ত নিন",
@@ -30,7 +36,6 @@ const bn: Record<string, string> = {
   "Unknown sender": "প্রেরক অজানা",
   "Unknown time": "সময় অজানা",
   "no claim selected": "কোনো দাবি বাছা হয়নি",
-  "conflicted": "বিরোধপূর্ণ",
   "consistent": "সামঞ্জস্যপূর্ণ",
   "Receipt correction": "পেমেন্ট রেকর্ড সংশোধন",
   "Correct unallocated receipt": "বরাদ্দ না হওয়া পেমেন্ট রেকর্ড সংশোধন করুন",
@@ -79,6 +84,12 @@ export const receiptText = (locale: Locale, value: string): string => locale ===
 
 export function receiptError(error: unknown, fallback: string): string {
   if (!(error instanceof SellerApiError)) return fallback;
-  const messages: Record<string, string> = {UNAUTHORIZED:'Seller sign-in required', STALE_VERSION:'Refetch evidence', RECEIPT_IDENTITY_COLLISION:'Compare and explicitly resolve existing receipt', PAYMENT_USED:'Payment already used', VALIDATION_ERROR:'Check corrected fields'};
+  const messages: Record<string, string> = {UNAUTHORIZED:'Seller sign-in required', STALE_VERSION:'Refetch evidence', RECEIPT_IDENTITY_COLLISION:'Compare and explicitly resolve existing receipt', PAYMENT_USED:'Payment already used', VALIDATION_ERROR:'Check corrected fields', INVALID_RECEIPT:'Check corrected fields', FORBIDDEN:'Access denied', CLAIM_CHANGED:'Refetch current claims', INCOMPLETE_EVIDENCE:'Select complete evidence', OBSERVATION_IDENTITY_CHANGED:'Refetch evidence'};
   return messages[error.code] ?? fallback;
+}
+
+/** Only translate known domain codes; never apply this to free-form evidence. */
+export function receiptCode(locale: Locale, code: string): string {
+  const known = ["pending", "confirmed", "cancelled", "rejected", "manual", "sms", "sms_import", "used", "unmatched", "conflicted", "incomplete", "valid"];
+  return receiptText(locale, known.includes(code) ? code : "Unknown status or source; review the original evidence.");
 }

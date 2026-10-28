@@ -1,3 +1,5 @@
+import { LocaleProvider } from '../locale/LocaleProvider';
+import { LocaleSwitch } from '../locale/LocaleSwitch';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -8,7 +10,7 @@ const account: PaymentAccount = {
   id: 'a1', shop_id: 's1', provider: 'bkash', receiving_number: '01711111111',
   label: 'Primary', version: 1, is_active: true, created_at: '', updated_at: '',
 };
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
 
 it('pastes a batch, shows per-item failures and opens manual fallback', async () => {
   const manual = vi.fn();
@@ -21,7 +23,7 @@ it('pastes a batch, shows per-item failures and opens manual fallback', async ()
   }), { status: 200 }));
   const container = document.createElement('div');
   const root = createRoot(container);
-  await act(async () => root.render(<SmsImportPanel accounts={[account]} token="seller-token" onImported={imported} onManual={manual} />));
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><SmsImportPanel accounts={[account]} token="seller-token" onImported={imported} onManual={manual} /></LocaleProvider>));
   const textarea = container.querySelector('textarea')!;
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(textarea, 'first SMS\n\nsecond SMS');
@@ -46,7 +48,7 @@ it('keeps the retry key after failure, disables controls while pending, and rota
   const root = createRoot(container);
   let resolveRequest: (r: Response) => void = () => {};
   const fetchSpy = vi.spyOn(globalThis, 'fetch').mockImplementationOnce(() => new Promise<Response>(resolve => { resolveRequest = resolve; }));
-  await act(async () => root.render(<SmsImportPanel accounts={[account]} token="token" onImported={() => {}} onManual={() => {}} />));
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><SmsImportPanel accounts={[account]} token="token" onImported={() => {}} onManual={() => {}} /></LocaleProvider>));
   const textarea = container.querySelector('textarea')!;
   const change = async (value: string) => act(async () => {
     Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(textarea, value);
@@ -59,6 +61,10 @@ it('keeps the retry key after failure, disables controls while pending, and rota
   expect(container.textContent).toContain('Processing request');
   await act(async () => resolveRequest(new Response(JSON.stringify({error: {code: 'UNAVAILABLE', message: 'Retry this batch'}}), {status: 503})));
   expect(container.querySelector('[role="alert"]')?.textContent).toContain('Retry the same batch');
+  expect(textarea.value).toBe('unknown SMS');
+  await act(async () => Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain('একই ব্যাচ আবার পাঠান');
+  expect(fetchSpy).toHaveBeenCalledTimes(1);
   expect(textarea.value).toBe('unknown SMS');
   fetchSpy.mockRejectedValue(new Error('Offline'));
   await submit();

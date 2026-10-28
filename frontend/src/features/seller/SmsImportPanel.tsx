@@ -1,7 +1,8 @@
+import { historyError, historyText } from '../locale/historyCopy';
 import { useLocale } from '../locale/context';
-import { formatBangladeshDateTime } from '../locale/format';
+import { formatCount, formatBangladeshDateTime, formatBdt } from '../locale/format';
 import { usePaymentInboxCopy } from '../locale/paymentInboxCopy';
-import { useRef, useState } from 'react';
+import { useId, useRef, useState } from 'react';
 import type { PaymentAccount } from './types';
 import type { ImportResult } from './smsTypes';
 import { importSms, fetchSmsImports } from './api';
@@ -16,6 +17,7 @@ interface Props {
 export function SmsImportPanel({ accounts, token, onImported, onManual }: Props) {
   const c = usePaymentInboxCopy();
   const { locale } = useLocale();
+  const errorId = useId();
   const formatBangladeshTime = (value: string) => formatBangladeshDateTime(value, locale);
   const [accountId, setAccountId] = useState(accounts.find(a => a.is_active)?.id ?? '');
   const [text, setText] = useState('');
@@ -49,8 +51,8 @@ export function SmsImportPanel({ accounts, token, onImported, onManual }: Props)
       setText('');
       mutation.current = { payload: '', key: '' };
       onImported();
-    } catch {
-      setError('Import failed. Retry the same batch.');
+    } catch (err) {
+      setError(historyError(err, 'Import failed. Retry the same batch.'));
     } finally {
       setBusy(false);
     }
@@ -64,21 +66,21 @@ export function SmsImportPanel({ accounts, token, onImported, onManual }: Props)
       const history = await fetchSmsImports(next, token);
       setResults(prev => next ? [...prev, ...history.items] : history.items);
       setCursor(history.next_cursor);
-    } catch {
-      setError('Could not load import results.');
+    } catch (err) {
+      setError(historyError(err, 'Could not load import results.'));
     } finally {
       setBusy(false);
     }
   }
 
-  return <section className="isolated-section" aria-label={c("Import received payment SMS")} style={{ marginBottom: 20 }}>
+  return <section className="isolated-section" lang={locale} aria-label={c("Import received payment SMS")} style={{ marginBottom: 20 }}>
     <div className="isolated-section-header" style={{ marginBottom: 12 }}>
       <div>
         <h4 className="isolated-section-title">{c("Import received payment SMS")}</h4>
         <p className="isolated-section-desc">{c("SMS import guidance")}</p>
       </div>
     </div>
-    <form onSubmit={submit}>
+    <form onSubmit={submit} aria-describedby={error ? errorId : undefined}>
       <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '10px' }}>{c("SMS receiving account")}
         <select aria-label={c("SMS receiving account")} className="form-control" style={{ marginTop: '4px', maxWidth: '420px' }} value={accountId} disabled={busy} onChange={e => setAccountId(e.target.value)}>
           <option value="">{c("Select account")}</option>
@@ -98,15 +100,15 @@ export function SmsImportPanel({ accounts, token, onImported, onManual }: Props)
         <button className="btn btn-secondary btn-sm" type="button" disabled={busy} onClick={() => onManual(accountId)}>{c("Enter manually from payment app")}</button>
       </div>
     </form>
-    {error && <p role="alert" style={{ marginTop: '12px', color: 'var(--rose-accent)' }}>{c(error)}</p>}
+    {error && <p id={errorId} role="alert" style={{ marginTop: '12px', color: 'var(--rose-accent)' }}>{historyText(locale, c(error))}</p>}
     {busy && <p role="status" style={{ marginTop: '12px', color: 'var(--text-secondary)' }}>{c("Processing request…")}</p>}
     <div aria-live="polite" style={{ marginTop: results.length > 0 ? '16px' : 0 }}>
       {results.map(result => <div key={result.id} className="isolated-subcard">
         <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 8px' }}>{c("Import")} {result.id}</p>
         <ol style={{ paddingLeft: '20px', fontSize: '0.825rem', color: 'var(--text-secondary)' }}>{result.items.map(item => <li key={item.index} style={{ marginBottom: '4px' }}>
-          {c("Message")} {item.index + 1}: <strong style={{ color: item.state === 'imported' ? 'var(--emerald-accent)' : 'var(--amber-accent)' }}>{state(item.state)}</strong>
+          {c("Message")} {formatCount(item.index + 1)}: <strong style={{ color: item.state === 'imported' ? 'var(--emerald-accent)' : 'var(--amber-accent)' }}>{state(item.state)}</strong>
           {item.issues.length > 0 && <span> — {c("Review in the payment app and enter manually.")}</span>}
-          {item.fields && <span> — {item.fields.provider} / {item.fields.trx_id} / BDT {(item.fields.amount_minor / 100).toFixed(2)} / {item.fields.sender_number} / {item.fields.occurred_at ? formatBangladeshTime(item.fields.occurred_at) : c("Unknown time")}</span>}
+          {item.fields && <span> — {item.fields.provider} / {item.fields.trx_id} / {formatBdt(item.fields.amount_minor)} / {item.fields.sender_number} / {item.fields.occurred_at ? formatBangladeshTime(item.fields.occurred_at) : c("Unknown time")}</span>}
           {item.order_ids?.length > 0 && <span> — {c("Confirmed orders:")} {item.order_ids.join(', ')}</span>}
         </li>)}</ol>
       </div>)}

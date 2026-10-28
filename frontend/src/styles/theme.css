@@ -203,3 +203,7 @@ fieldset { border: 0; }
 .message-bubble.user { color: var(--primary-accent); background: #e3eee8; }
 
 .metrics-explanation { grid-column: 1 / -1; }
+
+/* Payment evidence and retention may contain long opaque identifiers. */
+.isolated-section, .buyer-correction { min-width: 0; overflow-wrap: anywhere; }
+.isolated-section select { max-width: 100%; min-width: 0; }
