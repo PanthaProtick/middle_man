@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Language switching and buyer order summary
 
-**Status:** implemented — local verification passed; browser/device acceptance not run
+**Status:** resolved
 
 - [x] Translate history, comparisons, evidence resolution, receipt corrections, incoming SMS import results, retention controls, progress/counts, empty/loading/error/retry states.
 
@@ -34,3 +34,10 @@
 - Two-axis code review: Standards 0 findings; Spec 3 findings (paired English comparison heading, empty import guidance, focus coverage), all addressed with focused regressions before the final full gate.
 - NOT RUN: live browser, physical phone, screen reader, offline font rendering, hosted database/provider acceptance. DOM tests and HTTP smoke do not establish those gates. No migrations, hosted changes, provider calls or real-data deletion performed.
 - Next acceptance action: verify both languages in a real browser/phone with open comparisons and correction/SMS drafts, partial purge failures, keyboard/screen-reader navigation and offline Bengali rendering.
+
+## Resolution (2026-10-28)
+
+- Implementation, focused checks, two-axis review and the root gate recorded above
+  are complete. The remaining browser/phone/screen-reader/hosted evidence is
+  integrated cross-workflow acceptance and is carried by ticket 13; it is
+  explicitly not claimed by this ticket.
