@@ -60,10 +60,10 @@ export function AccountsSection({
         <div className="isolated-section-header" style={{ marginBottom: '12px' }}>
           <div>
             <h4 className="isolated-section-title">
-              <Truck size={18} /> Courier Logistics Integration
+              <Truck size={18} /> {c("Courier Logistics Integration")}
             </h4>
             <p className="isolated-section-desc">
-              Connect your courier accounts to automate parcel dispatch and delivery tracking.
+              {c("Connect your courier accounts to automate parcel dispatch and delivery tracking.")}
             </p>
           </div>
         </div>

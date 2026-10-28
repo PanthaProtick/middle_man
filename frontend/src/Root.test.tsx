@@ -4,7 +4,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { Root } from './Root';
 import { awaitingOrder } from './features/buyer/buyerLocaleFixtures';
 import { LOCALE_STORAGE_KEY, LocaleProvider } from './features/locale';
-import { clerkBengaliLocalization } from './features/locale/clerkLocalization';
+import { clerkBengaliLocalization, type ClerkLocalizationResource } from './features/locale/clerkLocalization';
 import { sellerCopy } from './features/locale/sellerCopy';
 
 const clerk = vi.hoisted(() => ({
@@ -13,7 +13,7 @@ const clerk = vi.hoisted(() => ({
   isSignedIn: true,
   isLoaded: true,
   providerMounts: 0,
-  localizations: [] as unknown[],
+  localizations: [] as Array<ClerkLocalizationResource | undefined>,
 }));
 
 vi.mock('@clerk/react', async () => {
@@ -21,7 +21,7 @@ vi.mock('@clerk/react', async () => {
   return {
     ClerkProvider: ({ children, localization }: {
       children: import('react').ReactNode;
-      localization?: unknown;
+      localization?: ClerkLocalizationResource;
     }) => {
       React.useEffect(() => {
         clerk.providerMounts += 1;

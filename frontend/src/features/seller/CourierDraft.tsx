@@ -164,7 +164,7 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
             setState(undefined); setSaveFailure(undefined); setAttempt(value => value + 1);
           }}
         >
-          Retry proposal
+          {t('Retry proposal')}
         </button>
       </div>
     )}
@@ -227,7 +227,7 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
                 saveKeyRef.current = null; setAttempt(value => value + 1);
               }}
             >
-              Reload current details
+              {t('Reload current details')}
             </button>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useLocale } from './context';
+import { keyedCopy } from './keyedCopy';
 
 export const courierBengali = {
   "Pathao courier settings": "Pathao কুরিয়ার সেটিংস",
@@ -165,7 +166,8 @@ export const courierBengali = {
 } as const;
 
 export type CourierMessage = keyof typeof courierBengali;
+const courierCopy = { en: {}, bn: courierBengali };
 export function useCourierText() {
   const { locale } = useLocale();
-  return (message: CourierMessage): string => locale === 'bn' ? courierBengali[message] : message;
+  return (message: CourierMessage): string => keyedCopy(locale, courierCopy, message);
 }

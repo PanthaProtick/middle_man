@@ -1,3 +1,4 @@
+import { keyedCopy } from './keyedCopy';
 import { SellerApiError } from '../seller/api';
 import type { Locale } from './storage';
 const bn: Record<string, string> = {
@@ -85,7 +86,8 @@ const bn: Record<string, string> = {
 };
 /** Exposed for the centralized copy audit; runtime lookups go through receiptText. */
 export const receiptBengali = bn;
-export const receiptText = (locale: Locale, value: string): string => locale === 'bn' ? bn[value] ?? value : value;
+const receiptCopy = { en: {}, bn };
+export const receiptText = (locale: Locale, value: string): string => keyedCopy(locale, receiptCopy, value);
 
 export function receiptError(error: unknown, fallback: string): string {
   if (!(error instanceof SellerApiError)) return fallback;

@@ -39,6 +39,9 @@ it('translates validation in place, retaining text, associated errors and first-
   )));
   await render();
   expect(container.textContent).toContain('ডেলিভারি ও পেমেন্টের তথ্য');
+  const contactPlaceholder = () => container.querySelector<HTMLInputElement>('[name="contact_number"]')!.placeholder;
+  expect(contactPlaceholder()).toBe('যেমন: 017XXXXXXXX');
+  expect(contactPlaceholder()).not.toMatch(/[০-৯]/);
   await act(async () => edit(container, 'address_raw', 'বাড়ি ১২, Road 5'));
   await submit();
   const name = container.querySelector<HTMLInputElement>('[name="buyer_name"]')!;
@@ -48,6 +51,7 @@ it('translates validation in place, retaining text, associated errors and first-
   const calls = fetchMock.mock.calls.length;
   await act(async () => findLanguageButton(container, 'English').click());
   expect(container.querySelector('#buyer_name-error')?.textContent).toBe('Enter your full name.');
+  expect(contactPlaceholder()).toBe('017XXXXXXXX');
   expect(container.querySelector<HTMLTextAreaElement>('[name="address_raw"]')?.value).toBe('বাড়ি ১২, Road 5');
   expect(fetchMock).toHaveBeenCalledTimes(calls);
   expect(document.documentElement.lang).toBe('en');

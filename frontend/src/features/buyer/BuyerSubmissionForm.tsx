@@ -162,7 +162,7 @@ export function BuyerSubmissionForm({
               type="tel"
               value={draft.contact_number}
               onChange={(e) => updateField('contact_number', e.target.value)}
-              placeholder="017XXXXXXXX or ০১৭XXXXXXXX"
+              placeholder={t('buyer.form.contactPlaceholder')}
               maxLength={32}
               aria-describedby={`contact_number-help${fieldErrors.contact_number ? ' contact_number-error' : ''}`}
               aria-invalid={!!fieldErrors.contact_number}

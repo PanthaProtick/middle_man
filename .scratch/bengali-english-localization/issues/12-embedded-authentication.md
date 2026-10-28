@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Language switching and buyer order summary
 
-**Status:** resolved
+**Status:** implemented - release acceptance pending
 
 - [x] Use supported Clerk localization resources for reachable sign-in, verification, resend, password/alternative methods, recovery, errors, and session-expiry paths.
 
@@ -18,7 +18,7 @@
 
 - [ ] Perform real-session acceptance for reachable embedded sign-in, verification, error, and recovery paths in both locales using existing authorized development access. Record unavailable credentials/configuration as a precise gap; external identity-provider sites remain outside application control. **Not run — see Comments.**
 
-- [x] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details.
+- [ ] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details. Copy, offline font fallback, document language, and preserved focus are implemented and tested; phone wrapping/control reachability and announcements were not verified on a real phone or screen reader.
 
 - [x] Run focused repository tests for changed behavior, then root npm run check as the final pre-handoff gate. Record changed paths, exact results, and failed/blocked/unrun browser or provider acceptance in the existing task record. Mocks and HTTP smoke do not prove live acceptance.
 
@@ -54,4 +54,9 @@
   hosted session were available, so real Bengali/English sign-in, verification,
   recovery, error, and expiry paths were not run in a browser with live Clerk.
   Mocked rendering proves prop wiring and session preservation only, not live
-  Clerk coverage or Bengali widget layout.
+  Clerk coverage or Bengali widget layout. Static resource parity does not prove
+  the installed Clerk widgets render every reachable path in Bengali.
+- Status is implemented with release acceptance pending, not resolved. The
+  unchecked boxes above are the remaining phone-browser, screen-reader, and
+  real-session gates; a review pass changed no Clerk contract or provider
+  behavior and added no live coverage.

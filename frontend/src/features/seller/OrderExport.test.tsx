@@ -93,8 +93,8 @@ it('copies an authenticated summary with every label in English', async () => {
   expect(copied).toContain('Fixed total: BDT 100.00');
   expect(copied).toContain('Required advance: BDT 20.00');
   expect(copied).toContain('Accepted advance: BDT 30.00');
-  expect(copied).toContain('Expected COD: BDT 80.00');
-  expect(copied).toContain('Actual COD: BDT 70.00');
+  expect(copied).toContain('Expected remaining COD balance: BDT 80.00');
+  expect(copied).toContain('Remaining COD balance: BDT 70.00');
   expect(copied).toContain('Manual delivery aid only; no courier booking');
   expect(copied).not.toContain('confirmed');
   expect(statusText(host)).toContain('Summary copied.');
@@ -145,7 +145,7 @@ it.each(['en', 'bn'] as const)('shows unaccepted advance and COD without inventi
   const copied = writeText.mock.calls[0][0] as string;
   const notAccepted = locale === 'bn' ? 'গ্রহণ করা হয়নি' : 'Not accepted';
   expect(copied).toContain(`${locale === 'bn' ? 'গৃহীত ডেলিভারির আগে অগ্রিম' : 'Accepted advance'}: ${notAccepted}`);
-  expect(copied).toContain(`${locale === 'bn' ? 'ডেলিভারির সময় বাকি পরিশোধ' : 'Actual COD'}: ${notAccepted}`);
+  expect(copied).toContain(`${locale === 'bn' ? 'ডেলিভারির সময় বাকি পরিশোধ' : 'Remaining COD balance'}: ${notAccepted}`);
   expect(copied).not.toContain('BDT undefined');
   await act(async () => root.unmount());
 });

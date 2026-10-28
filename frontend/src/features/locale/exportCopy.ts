@@ -26,8 +26,8 @@ const en = {
   fixedTotal: 'Fixed total',
   requiredAdvance: 'Required advance',
   acceptedAdvance: 'Accepted advance',
-  expectedCod: 'Expected COD',
-  actualCod: 'Actual COD',
+  expectedCod: 'Expected remaining COD balance',
+  actualCod: 'Remaining COD balance',
   notAccepted: 'Not accepted',
 } as const;
 
