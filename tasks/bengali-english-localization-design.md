@@ -336,3 +336,10 @@ Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 0
   `.cache/checks/check-kVjAi8/result.json`.
 - Browser/physical-phone wrapping, screen-reader, real-session and live-provider
   acceptance remain unrun; rendered tests and HTTP smoke do not establish them.
+
+### Ticket 08 — completion (2026-10-28)
+
+- Baseline `1e7d7ca4fa9d2ca06970cb976c7fb224175b8250`. Changed `frontend/src/features/locale/courierCopy.ts`, `frontend/src/features/seller/courierErrorText.ts`, `CourierError.tsx`, `CourierOutcomes.tsx`, `CourierDraft.tsx`, `CourierReview.tsx`, `CourierReviewLocations.tsx`, `CourierReconciliation.tsx`, `DeliverySummary.tsx`, and `DeliveryDetails.css`. Added `CourierLocale.test.tsx` and `CourierRecoveryLocale.test.tsx`; extended backend courier submission/failure tests. Ticket file updated.
+- Language changes render from saved state; courier requests remain keyed to order/session/revision, and switch does not run review, submission, reconciliation, or location requests. Known blocker/error codes receive selected-language guidance. Unknown provider text is behind an original-evidence disclosure on authenticated seller screens. Pathao names/IDs, contact/address evidence, parcel values, and recorded attempts are preserved. Draft numeric boundaries accept Bengali digits.
+- Focused frontend courier runs passed (latest 4 files / 20 tests). Focused backend submission/failure/replay passed (26 tests); root `npm run typecheck` passed. First root gate failed frontend lint on an exported helper; moved it into its own module. Final root `npm run check` passed every stage with repository-local pytest basetemp: `.cache/checks/check-LcGcaV/result.json`.
+- Manual browser, phone wrapping/font, screen-reader, real Clerk, sandbox Pathao, and live-provider acceptance: NOT RUN. Rendered tests and HTTP smoke do not establish these gates.

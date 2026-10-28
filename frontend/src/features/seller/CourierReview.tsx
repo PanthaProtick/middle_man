@@ -1,12 +1,15 @@
+import { CourierError } from './CourierError';
+import type { CourierMessage } from '../locale/courierCopy';
+import { useCourierText } from '../locale/courierCopy';
 import { useEffect, useRef, useState } from 'react';
 import { requestJson } from './api';
 import type { CourierAttemptStatus, ParcelRevision, Review, ReviewChoices } from './courierReviewTypes';
-import { CourierReconciliation } from './CourierReconciliation';
+import { CourierOutcomes } from './CourierOutcomes';
 import { CourierReviewLocations } from './CourierReviewLocations';
 import { DeliverySummary } from './DeliverySummary';
 import './DeliveryDetails.css';
 
-const blockerLabels: Record<string, string> = {
+const blockerLabels: Record<string, CourierMessage> = {
   PARCEL_DETAILS_REQUIRED: 'Save explicit parcel weight and quantity above.',
   COURIER_CONNECTION_REQUIRED: 'Connect your merchant account in Pathao settings.',
   PICKUP_STORE_REQUIRED: 'Choose an active pickup store for this connection.',
@@ -15,13 +18,14 @@ const blockerLabels: Record<string, string> = {
   LOCATION_CHOICES_INVALID: 'Choose destination IDs from their current city and zone.',
   METADATA_UNAVAILABLE: 'Metadata could not be validated. Retry after restoring the connection.',
   ORDER_NOT_CONFIRMED: 'This order is no longer confirmed.',
-};
+} as const;
 
 export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onReviewLoaded, onAttemptStatusChanged }: {
   orderId: string; token: string; refresh?: number; onChoicesSaved?: (parcel: ParcelRevision) => void;
   onReviewLoaded?: (review: Review) => void;
   onAttemptStatusChanged?: (status: CourierAttemptStatus | null) => void;
 }) {
+  const t = useCourierText();
   const identity = `${orderId}:${token}:${refresh}`;
   const currentIdentity = useRef(identity);
   const onReviewLoadedRef = useRef(onReviewLoaded);
@@ -31,10 +35,10 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
   const generation = useRef(0);
   useEffect(() => { currentIdentity.current = identity; generation.current += 1; }, [identity]);
   const [attempt, setAttempt] = useState(0);
-  const [state, setState] = useState<{ identity: string; review?: Review; error?: string }>();
+  const [state, setState] = useState<{ identity: string; review?: Review; error?: CourierMessage | Error }>();
   const [editing, setEditing] = useState<{ identity: string; choices: ReviewChoices }>();
-  const [busyIdentity, setBusy] = useState<string>();
-  const busy = busyIdentity === identity;
+  const [operation, setBusy] = useState<{ identity: string; kind: 'PUT' | 'POST' | 'submit' }>();
+  const busy = operation?.identity === identity;
   const path = `/api/seller/orders/${orderId}/courier-review`;
   useEffect(() => {
     let active = true;
@@ -57,7 +61,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
   const mutate = async (method: 'PUT' | 'POST') => {
     if (!review || !choices || busy) return;
     const requestGeneration = generation.current;
-    setBusy(identity);
+    setBusy({ identity, kind: method });
     try {
       const updated = await requestJson<Review>(path, { method, body: JSON.stringify({
         expected_token: review.token, ...(method === 'PUT' ? choices : {}),
@@ -80,7 +84,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
     if (!review || busy || !review.submission_enabled) return;
     statusCallback.current?.('submitting');
     const requestGeneration = generation.current;
-    setBusy(identity);
+    setBusy({ identity, kind: 'submit' });
     try {
       const updated = await requestJson<Review>(
         `/api/seller/orders/${orderId}/courier-submission`,
@@ -98,8 +102,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
       statusCallback.current?.(updated.latest_attempt?.status ?? 'unsubmitted');
     } catch (err: unknown) {
       if (currentIdentity.current === identity && generation.current === requestGeneration) {
-        const errorObj = err as { message?: string };
-        const msg = errorObj?.message || 'Submission could not be completed. Reload current details.';
+        const msg = err instanceof Error ? err : new Error('Submission could not be completed. Reload current details.');
         setState({ identity, error: msg });
         statusCallback.current?.('unknown');
         requestJson<Review>(path, {}, token).then(refreshed => {
@@ -116,116 +119,66 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
     }
   };
 
-  return <section className="buyer-correction delivery-details" aria-label="Booking draft review" aria-busy={busy}>
-    <h4>Review current delivery draft</h4>
+  return <section className="buyer-correction delivery-details" aria-label={t("Booking draft review")} aria-busy={busy}>
+    <h4>{t("Review current delivery draft")}</h4>
     {!review?.submission_enabled && !review?.latest_attempt && (
-      <p className="delivery-note">External booking is unavailable until the review is complete.</p>
+      <p className="delivery-note">{t("External booking is unavailable until the review is complete.")}</p>
     )}
-    <button className="btn btn-secondary btn-sm" type="button" disabled={busy} onClick={() => { setState(undefined); setAttempt(value => value + 1); }}>Reload current review</button>
-    {state?.identity === identity && state.error && <p role="alert">{state.error}</p>}
-    {!review && !state?.error && <p role="status">Loading review…</p>}
+    <button className="btn btn-secondary btn-sm" type="button" disabled={busy} onClick={() => { setState(undefined); setAttempt(value => value + 1); }}>{t("Reload current review")}</button>
+    {state?.identity === identity && state.error && <div role="alert">{typeof state.error === 'string' ? t(state.error) : <CourierError error={state.error} />}</div>}
+    {!review && !state?.error && <p role="status">{t("Loading review…")}</p>}
     {review && choices && <>
       <DeliverySummary {...review.draft} />
-      <p className="delivery-note">Accepted advance deducted. Payment acceptance does not verify receipt with the payment provider.</p>
+      <p className="delivery-note">{t("Accepted advance deducted. Payment acceptance does not verify receipt with the payment provider.")}</p>
       <dl className="delivery-summary">
-        <div><dt>Parcel</dt><dd>{review.draft.parcel_weight_grams === null ? 'Weight missing' : `${review.draft.parcel_weight_grams} g`}
-          {' · '}{review.draft.parcel_quantity === null ? 'Quantity missing' : `${review.draft.parcel_quantity} ${review.draft.parcel_quantity === 1 ? 'item' : 'items'}`}</dd></div>
-        <div><dt>Pathao account</dt><dd>{review.connection.status}<span>{review.connection.merchant_hint}</span></dd></div>
+        <div><dt>{t("Parcel")}</dt><dd>{review.draft.parcel_weight_grams === null ? t('Weight missing') : `${review.draft.parcel_weight_grams} ${t('g')}`}
+          {' · '}{review.draft.parcel_quantity === null ? t('Quantity missing') : `${review.draft.parcel_quantity} ${t(review.draft.parcel_quantity === 1 ? 'item' : 'items')}`}</dd></div>
+        <div><dt>{t("Pathao account")}</dt><dd>{t(review.connection.status)}<span>{review.connection.merchant_hint}</span></dd></div>
       </dl>
-      {review.connection.simulated && <p className="delivery-note">Simulated account and locations — offline only.</p>}
+      {review.connection.simulated && <p className="delivery-note">{t("Simulated account and locations — offline only.")}</p>}
       <fieldset disabled={busy || review.blockers.includes('ORDER_NOT_CONFIRMED')}>
-        <legend>Pickup and delivery choices</legend>
-        <label>Environment<select value={choices.environment} onChange={event => {
+        <legend>{t("Pickup and delivery choices")}</legend>
+        <label>{t("Environment")}<select value={choices.environment} onChange={event => {
           const environment = event.target.value;
           if (environment === 'offline' || environment === 'sandbox' || environment === 'production') {
             setEditing({ identity, choices: { environment, store_id: null, delivery_type: null, location: {} } });
           }
-        }}>{['offline', 'sandbox', 'production'].map(env => <option key={env}>{env}</option>)}</select></label>
-        {choices.environment !== review.choices.environment && <p className="delivery-note">Save the environment change to load its pickup stores and delivery locations.</p>}
-        <label>Pickup store<select value={choices.store_id ?? ''} disabled={choices.environment !== review.choices.environment}
+        }}>{(['offline', 'sandbox', 'production'] as const).map(env => <option key={env} value={env}>{t(env)}</option>)}</select></label>
+        {choices.environment !== review.choices.environment && <p className="delivery-note">{t("Save the environment change to load its pickup stores and delivery locations.")}</p>}
+        <label>{t("Pickup store")}<select value={choices.store_id ?? ''} disabled={choices.environment !== review.choices.environment}
           onChange={event => setEditing({ identity, choices: { ...choices, store_id: Number(event.target.value) || null } })}>
-          <option value="">Choose pickup store</option>
+          <option value="">{t("Choose pickup store")}</option>
           {review.stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
         </select></label>
-        <label>Delivery service<select value={choices.delivery_type ?? ''} onChange={event => {
+        <label>{t("Delivery service")}<select value={choices.delivery_type ?? ''} onChange={event => {
           const service = Number(event.target.value);
           setEditing({ identity, choices: { ...choices, delivery_type: service === 48 || service === 12 ? service : null } });
-        }}><option value="">Choose service</option><option value="48">Normal delivery</option><option value="12">On-demand delivery</option></select></label>
-        <p>Destination: {[review.location.city_name, review.location.zone_name, review.location.area_name].filter(Boolean).join(' / ') || 'Unresolved'}</p>
+        }}><option value="">{t("Choose service")}</option><option value="48">{t("Normal delivery")}</option><option value="12">{t("On-demand delivery")}</option></select></label>
+        <p>{t("Destination:")} {[review.location.city_name, review.location.zone_name, review.location.area_name].filter(Boolean).join(' / ') || t('Unresolved')}</p>
         {review.connection.version > 0 && choices.environment === review.choices.environment &&
           <CourierReviewLocations key={`${identity}:${review.token}`} path={path} token={token} review={review} value={choices.location}
             onChange={location => setEditing({ identity, choices: { ...choices, location } })} />}
-        <button className="btn btn-secondary" type="button" disabled={!dirty} onClick={() => void mutate('PUT')}>Save delivery choices</button>
+        <button className="btn btn-secondary" type="button" disabled={!dirty} onClick={() => void mutate('PUT')}>{t("Save delivery choices")}</button>
       </fieldset>
-      <ul>{review.blockers.map(code => <li key={code}>{blockerLabels[code] ?? code}</li>)}</ul>
-      {dirty && <p>Save changes before reviewing.</p>}
+      <ul>{review.blockers.map(code => <li key={code}>{t(blockerLabels[code as keyof typeof blockerLabels] ?? 'Courier response could not be interpreted. Reload current details and check Pathao before taking further action.')}</li>)}</ul>
+      {dirty && <p>{t("Save changes before reviewing.")}</p>}
       <button className="btn btn-primary" type="button" data-review disabled={busy || dirty || review.blockers.length > 0 || review.reviewed}
-        onClick={() => void mutate('POST')}>Confirm current review</button>
-      {review.reviewed && !dirty && !review.latest_attempt && <p role="status">Review complete. This remains a local draft; no Pathao booking exists.</p>}
+        onClick={() => void mutate('POST')}>{t("Confirm current review")}</button>
+      {review.reviewed && !dirty && !review.latest_attempt && <p role="status">{t("Review complete. This remains a local draft; no Pathao booking exists.")}</p>}
       {review.reviewed && !dirty && review.submission_enabled && (
         <button type="button" data-submit disabled={busy} onClick={() => void submitBooking()}>
-          Submit booking to {target}
+          {t('Submit booking to')} {t(target)}
         </button>
       )}
-      {busy && <p role="status">Submitting booking to {target}…</p>}
-      {review.delivery_mismatch && (
-        <div role="alert" className="delivery-mismatch-warning" style={{
-          marginBottom: '12px', padding: '10px 12px', background: 'rgba(239, 68, 68, 0.1)',
-          border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: 'var(--rose-accent)',
-        }}>
-          <p style={{ margin: 0, fontWeight: 600 }}>Action required in Pathao / পাঠাও-এ সমাধান প্রয়োজন</p>
-          <p style={{ margin: '4px 0 0' }}>{review.delivery_mismatch.message}</p>
-          {review.delivery_mismatch.booked_snapshot && (
-            <p style={{ margin: '4px 0 0', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-              Original booked details: {review.delivery_mismatch.booked_snapshot.recipient_name} ·{' '}
-              {review.delivery_mismatch.booked_snapshot.recipient_phone} ·{' '}
-              {review.delivery_mismatch.booked_snapshot.recipient_address}
-            </p>
-          )}
-        </div>
-      )}
-      {review.latest_attempt?.status === 'success' && (
-        <div role="status" className="booking-result">
-          <p><strong>{review.latest_attempt.resolution_action === 'attach_existing'
-            ? `Existing booking attached (${review.latest_attempt.simulated ? 'simulated offline' : 'Pathao sandbox'}).`
-            : review.latest_attempt.simulated
-              ? 'Booking confirmed (simulated offline).'
-              : 'Booking confirmed in Pathao sandbox.'}</strong></p>
-          <p>{review.latest_attempt.simulated ? 'Simulated consignment' : 'Consignment'}: <code>{review.latest_attempt.consignment_id}</code></p>
-          {review.latest_attempt.resolution_action === 'attach_existing' && (
-            <p>The original unknown attempt and its reviewed snapshot are preserved.</p>
-          )}
-          {review.blockers.includes('ORDER_NOT_CONFIRMED') && (
-            <p role="alert">Local cancellation does not cancel this existing Pathao booking.
-              Resolve the booking in Pathao before dispatching or creating a replacement.</p>
-          )}
-        </div>
-      )}
-      {review.latest_attempt?.status === 'unknown' && (
-        <div className="booking-unknown">
-          <p role="alert"><strong>Booking outcome unknown.</strong> The submission was sent, but the courier
-            response was interrupted or could not be verified. Further attempts are blocked to prevent duplicate booking.</p>
-          <CourierReconciliation key={`${identity}:${review.latest_attempt.id}`}
-            orderId={orderId} token={token} attempt={review.latest_attempt}
-            onResolved={updated => {
+      {busy && <p role="status">{operation.kind === 'submit'
+        ? <>{t('Submitting booking to')} {t(target)}…</>
+        : t(operation.kind === 'PUT' ? 'Saving delivery choices…' : 'Confirming current review…')}</p>}
+      <CourierOutcomes review={review} orderId={orderId} token={token} onResolved={updated => {
               setState({ identity, review: updated });
               setEditing({ identity, choices: updated.choices });
               onReviewLoadedRef.current?.(updated);
               statusCallback.current?.(updated.latest_attempt?.status ?? 'unsubmitted');
             }} />
-        </div>
-      )}
-      {review.latest_attempt?.status === 'failed' && (
-        review.latest_attempt.error_code === 'CONFIRMED_NONCREATION'
-          ? <div role="status" className="booking-noncreation">
-            <p><strong>Confirmed noncreation recorded.</strong> Current lifecycle, connection, address, and parcel
-              details are revalidated before another attempt. Review again if anything changed.</p>
-          </div>
-          : <div role="alert" className="booking-failed">
-            <p>Previous submission rejected: {review.latest_attempt.error_message || 'Courier rejected booking'}.
-              You may review and try again.</p>
-          </div>
-      )}
     </>}
   </section>;
 }

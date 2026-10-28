@@ -21,9 +21,11 @@ def offline_settings(monkeypatch):
 
 
 @pytest.mark.usefixtures('seller_identity')
-async def test_definitive_failure_leaves_draft_editable_and_retryable(client, monkeypatch):
+@pytest.mark.parametrize('locale', ['en', 'bn'])
+async def test_definitive_failure_leaves_draft_editable_and_retryable(client, monkeypatch, locale):
     from app.services import pathao_provider
 
+    client.headers['Accept-Language'] = locale
     order = await parcel_order(client, 'submit-fail', parcel_weight_grams=1000, parcel_quantity=1)
     await confirm_automatically(client, order, 'SUBMIT-FAIL')
     path, ready, _ = await ready_review(client, order)
@@ -47,6 +49,9 @@ async def test_definitive_failure_leaves_draft_editable_and_retryable(client, mo
     review = (await client.get(path)).json()
     assert review['latest_attempt'] is not None
     assert review['latest_attempt']['status'] == 'failed'
+    assert review['latest_attempt']['error_code'] == 'COURIER_REJECTED'
+    client.headers['Accept-Language'] = 'bn' if locale == 'en' else 'en'
+    assert (await client.get(path)).json() == review
 
     patched = await client.patch(
         path.replace('courier-review', 'courier-draft'),
@@ -57,15 +62,21 @@ async def test_definitive_failure_leaves_draft_editable_and_retryable(client, mo
 
 
 @pytest.mark.usefixtures('seller_identity')
-async def test_unknown_outcome_from_timeout_blocks_resubmission(client, monkeypatch):
+@pytest.mark.parametrize('locale', ['en', 'bn'])
+async def test_unknown_outcome_from_timeout_blocks_resubmission(client, monkeypatch, locale):
     from app.services import pathao_provider
 
+    client.headers['Accept-Language'] = locale
     order = await parcel_order(client, 'submit-timeout', parcel_weight_grams=1000, parcel_quantity=1)
     await confirm_automatically(client, order, 'SUBMIT-TIMEOUT')
     path, ready, _ = await ready_review(client, order)
     await client.post(path, json={'expected_token': ready['token']})
 
+    calls = 0
+
     async def timeout_booking(*args, **kwargs):
+        nonlocal calls
+        calls += 1
         raise TimeoutError('Connection to courier timed out.')
 
     monkeypatch.setattr(pathao_provider, 'submit_booking', timeout_booking)
@@ -83,6 +94,16 @@ async def test_unknown_outcome_from_timeout_blocks_resubmission(client, monkeypa
     assert review['latest_attempt'] is not None
     assert review['latest_attempt']['status'] == 'unknown'
     assert review['submission_enabled'] is False
+    assert review['latest_attempt']['error_code'] == 'COURIER_TIMEOUT'
+    client.headers['Accept-Language'] = 'bn' if locale == 'en' else 'en'
+    assert (await client.get(path)).json() == review
+    replay = await client.post(
+        submit_path, json={'expected_token': ready['token']},
+        headers={'Idempotency-Key': 'key-timeout-1'},
+    )
+    assert replay.status_code == 409
+    assert replay.json()['error']['code'] == 'COURIER_OUTCOME_UNKNOWN'
+    assert (await client.get(path)).json() == review
 
     blocked = await client.post(
         submit_path,
@@ -91,6 +112,7 @@ async def test_unknown_outcome_from_timeout_blocks_resubmission(client, monkeypa
     )
     assert blocked.status_code == 409
     assert blocked.json()['error']['code'] == 'COURIER_OUTCOME_UNKNOWN'
+    assert calls == 1
 
 
 @pytest.mark.usefixtures('seller_identity')
