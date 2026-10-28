@@ -35,7 +35,7 @@ export function BuyerLinkCopy({ portalUrl, detail = false }: BuyerLinkCopyProps)
       <button type="button" className={detail ? 'btn btn-primary' : 'btn btn-secondary btn-sm'}
         title={text.copyTitle} disabled={status === 'copying'} onClick={() => { void copy(); }}>
         {status === 'copied' ? <Check size={14} /> : <Copy size={14} />}
-        <span>{status === 'copied' ? (detail ? text.copiedDetail : text.copied)
+        <span role="status" aria-live="polite">{status === 'copied' ? (detail ? text.copiedDetail : text.copied)
           : status === 'copying' ? text.copying : detail ? text.copyDetail : text.copy}</span>
       </button>
       {status === 'failed' && (

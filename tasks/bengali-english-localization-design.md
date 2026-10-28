@@ -262,3 +262,44 @@ Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 0
   default temporary-directory access; rerun with
   `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.scratch/pytest-link-locale-20261028`
   passed all configured gates (`.cache/checks/check-UMdQX3/result.json`).
+
+### Ticket 05 — remaining order workflows (2026-10-28)
+
+- Baseline for this continuation: `d75ae6e`; whole-ticket review baseline:
+  `50544e2`. The earlier link commit and its hook completed successfully.
+- Localized order creation, optional parcel guidance and errors, order list/filter/
+  pagination/empty states, lifecycle/review labels, details, allocation labels,
+  account snapshots, dates, parcel values and visible diagnostic controls.
+  Existing search behavior is unchanged (the order list has no search control).
+- Extracted creation state into `useOrderCreation.ts`; numeric inputs retain raw
+  Bengali/English drafts and parse exactly to safe integer minor units/grams.
+  Display formatting preserves cents even at the supported safe-integer boundary.
+  Validation uses stable codes, associated errors and first-invalid focus.
+  Pending controls, retry keys, URLs and opaque data survive language changes.
+- New files: locale `orderCopy.ts`, `orderCreationCopy.ts`,
+  `orderDiagnosticCopy.ts`, `orderCatalogs.test.ts`; seller `useOrderCreation.ts`,
+  `orderCreationError.ts`, `orderNumbers.ts`, `CreateOrderLocale.test.tsx`,
+  `OrderLocale.test.tsx`; backend `tests/test_order_locale_contracts.py`.
+  Existing creation/parcel/list/details/diagnostic presentation and tests updated.
+- Focused frontend run passed: 10 files, 43 tests. Focused endpoint contracts:
+  `npm run test:backend -- tests/test_order_locale_contracts.py` passed (2 tests).
+  Typechecking passed. Later parcel-code refinement passed its focused 7 tests.
+- Summary/CSV controls (11), payment/history (06–07), courier (08–09) and correction/
+  outcome panels (10) remain separately tracked; their embedded presence does not
+  expand this ticket into all seller workflows. Diagnostic payloads stay English.
+- Next: complete the required two-axis review, address findings, run the root
+  final gate, record its exact result, then commit. Phone/browser, screen-reader,
+  real-session and live-provider acceptance remain unrun.
+- Two-axis review: Standards found one first-invalid ordering defect; Spec found
+  that defect plus the modal's unreachable outside language switch. Reordered
+  server-field selection and added switches inside both dialogs. Rendered tests
+  cover out-of-order server errors and in-dialog switching with retained focus.
+  Both reviewers rechecked the fixes: no remaining actionable findings.
+- Post-review focused creation/list/details run: 5 files, 27 tests passed.
+- Final root `npm run check`: initial run failed import ordering in the new
+  endpoint test; corrected. Final run passed every configured stage with
+  `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.scratch/pytest-ticket05-final`:
+  `.cache/checks/check-ijKqoo/result.json`.
+- Ticket 05 implementation is complete and locally verified. Manual browser,
+  phone/font/wrapping, screen-reader, real Clerk and live-provider acceptance
+  remain unrun. These are not established by rendered tests or HTTP smoke.

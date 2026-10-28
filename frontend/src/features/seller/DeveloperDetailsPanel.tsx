@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { Terminal, Copy, Check, ChevronDown, ChevronUp } from 'lucide-react';
 import type { SellerOrder } from './types';
-import { formatBangladeshTime } from './api';
+import { formatBangladeshDateTime } from '../locale/format';
+import { useLocale } from '../locale/context';
+import { orderDiagnosticCopy } from '../locale/orderDiagnosticCopy';
+import { orderCopy, allocationLabel } from '../locale/orderCopy';
 
 interface DeveloperDetailsPanelProps {
   order: SellerOrder;
@@ -9,6 +12,8 @@ interface DeveloperDetailsPanelProps {
 }
 
 export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperDetailsPanelProps): React.JSX.Element {
+  const { locale } = useLocale();
+  const text = orderDiagnosticCopy[locale];
   const [isOpen, setIsOpen] = useState(initialOpen);
   const [copied, setCopied] = useState(false);
 
@@ -92,7 +97,7 @@ export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperD
           }}
         >
           <Terminal size={14} color="var(--primary-accent)" />
-          <span>Developer details (for support / কারিগরি তথ্য)</span>
+          <span>{text.title}</span>
           {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
 
@@ -101,11 +106,11 @@ export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperD
             type="button"
             className="btn btn-secondary btn-sm"
             onClick={handleCopyDiagnostics}
-            title="Copy diagnostic information for technical support"
+            title={text.copyTitle}
             style={{ fontSize: '0.725rem', padding: '3px 8px' }}
           >
             {copied ? <Check size={12} color="var(--emerald-accent)" /> : <Copy size={12} />}
-            <span>{copied ? 'Copied to clipboard' : 'Copy dev info'}</span>
+            <span>{copied ? text.copied : text.copy}</span>
           </button>
         )}
       </div>
@@ -113,7 +118,7 @@ export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperD
       <div
         id={`dev-panel-${order.id}`}
         role="region"
-        aria-label="Developer diagnostic details"
+        aria-label={text.region}
         style={{
           display: isOpen ? 'block' : 'none',
           padding: '12px 14px',
@@ -122,44 +127,44 @@ export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperD
           color: 'var(--text-secondary)',
         }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '8px', marginBottom: '8px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))', gap: '8px', marginBottom: '8px' }}>
           <div>
-            <span style={{ color: 'var(--text-secondary)' }}>Order ID: </span>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.orderId} </span>
             <code style={{ color: 'var(--primary-accent)', wordBreak: 'break-all' }}>{order.id}</code>
           </div>
           <div>
-            <span style={{ color: 'var(--text-secondary)' }}>Version: </span>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.version} </span>
             <span style={{ color: 'var(--text-primary)', fontWeight: 600 }}>v{order.version}</span>
           </div>
           <div>
-            <span style={{ color: 'var(--text-secondary)' }}>Allocation Basis: </span>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.basis} </span>
             <span style={{ color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-              {order.allocation_basis ?? 'automatic'}
+              {allocationLabel(order.allocation_basis, orderCopy[locale])}
             </span>
           </div>
           <div>
-            <span style={{ color: 'var(--text-secondary)' }}>Payment Account ID: </span>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.accountId} </span>
             <code style={{ color: 'var(--text-primary)', wordBreak: 'break-all' }}>{order.payment_account_id}</code>
           </div>
           {order.predecessor_order_id && (
             <div>
-              <span style={{ color: 'var(--text-secondary)' }}>Predecessor Order ID: </span>
+              <span style={{ color: 'var(--text-secondary)' }}>{text.predecessor} </span>
               <code style={{ color: 'var(--primary-accent)' }}>{order.predecessor_order_id}</code>
             </div>
           )}
           {order.replaced_by_order_id && (
             <div>
-              <span style={{ color: 'var(--text-secondary)' }}>Replaced by Order ID: </span>
+              <span style={{ color: 'var(--text-secondary)' }}>{text.replacement} </span>
               <code style={{ color: 'var(--rose-accent)' }}>{order.replaced_by_order_id}</code>
             </div>
           )}
           <div>
-            <span style={{ color: 'var(--text-secondary)' }}>Portal Token: </span>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.token} </span>
             <code style={{ color: 'var(--text-primary)' }}>{order.portal_token}</code>
           </div>
           {order.buyer_revision && (
             <div>
-              <span style={{ color: 'var(--text-secondary)' }}>Buyer Revision: </span>
+              <span style={{ color: 'var(--text-secondary)' }}>{text.revision} </span>
               <span style={{ color: 'var(--text-primary)' }}>#{order.buyer_revision}</span>
             </div>
           )}
@@ -167,7 +172,7 @@ export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperD
 
         {order.review_reasons && order.review_reasons.length > 0 && (
           <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border-subtle)' }}>
-            <span style={{ color: 'var(--rose-accent)', fontWeight: 600 }}>Raw Review Reasons: </span>
+            <span style={{ color: 'var(--rose-accent)', fontWeight: 600 }}>{text.reasons} </span>
             <div style={{ display: 'inline-flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
               {order.review_reasons.map((r) => (
                 <span
@@ -189,7 +194,7 @@ export function DeveloperDetailsPanel({ order, initialOpen = false }: DeveloperD
         )}
 
         <div style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px dashed var(--border-subtle)', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-          Server Deadlines: Created {formatBangladeshTime(order.created_at)} · Expires {formatBangladeshTime(order.expires_at)}
+          {text.deadlines} {text.created} {formatBangladeshDateTime(order.created_at, locale)} · {text.expires} {formatBangladeshDateTime(order.expires_at, locale)}
         </div>
       </div>
     </div>

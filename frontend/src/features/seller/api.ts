@@ -1,3 +1,4 @@
+import { formatOrderAmount } from './orderNumbers';
 import { sellerFetch } from './sessionRequest';
 import { formatBangladeshDateTime } from '../locale/format';
 import type { ImportList, ImportResult } from './smsTypes';
@@ -76,7 +77,7 @@ export function formatRemainingCod(order: {
     order.lifecycle === 'confirmed' && order.actual_cod_minor !== null
       ? order.actual_cod_minor
       : order.expected_cod_minor;
-  return `BDT ${(minor / 100).toLocaleString()}`;
+  return `BDT ${formatOrderAmount(minor)}`;
 }
 
 export class SellerApiError extends Error {

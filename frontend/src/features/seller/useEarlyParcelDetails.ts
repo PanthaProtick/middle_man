@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { parseParcelQuantity, parseParcelWeightKg } from './parcel';
+import { parseParcelQuantity, parseParcelWeightKg, ParcelValidationError, type ParcelErrorCode } from './parcel';
 
-export type ParcelErrors = Partial<Record<'weight' | 'quantity', string>>;
+export type ParcelErrors = Partial<Record<'weight' | 'quantity', ParcelErrorCode>>;
 
 export function useEarlyParcelDetails() {
   const [weightKg, setWeightKg] = useState('');
@@ -15,12 +15,12 @@ export function useEarlyParcelDetails() {
     try {
       if (weightKg.trim()) values.parcel_weight_grams = parseParcelWeightKg(weightKg);
     } catch (cause) {
-      nextErrors.weight = cause instanceof Error ? cause.message : 'Parcel weight is invalid';
+      nextErrors.weight = cause instanceof ParcelValidationError ? cause.code : 'weightRange';
     }
     try {
       if (quantity.trim()) values.parcel_quantity = parseParcelQuantity(quantity);
     } catch (cause) {
-      nextErrors.quantity = cause instanceof Error ? cause.message : 'Parcel quantity is invalid';
+      nextErrors.quantity = cause instanceof ParcelValidationError ? cause.code : 'quantityRange';
     }
     setErrors(nextErrors);
     setValidationAttempt(current => current + 1);
