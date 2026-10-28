@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Language switching and buyer order summary
 
-**Status:** implemented locally; browser and live-provider acceptance remain
+**Status:** resolved
 
 - [x] Translate revision history, review reasons, correction forms, locked fields, courier notices, retry guidance, and rejection/replacement/cancellation confirmations.
 
@@ -30,3 +30,10 @@
 - Root gate: `npm run check` passed after setting repository-local `TEMP`, `TMP`, and absolute forward-slash `PYTEST_ADDOPTS=--basetemp=...` to avoid this Windows host's pytest temp permission error. Result: `.cache/checks/check-oTUScD/result.json` (tooling, backend lint/types/tests, frontend lint/tests/build, HTTP smoke all passed).
 - Review fixes: split outcome forms to keep the parent below 250 lines; retry a frozen replacement without revalidating current fields; hide replacement on rejected/cancelled orders; add a correction-load retry, localized coded field errors, field associations, and in-flight rejection coverage.
 - Browser and physical-phone acceptance, screen reader behavior, hosted Clerk/Neon, live Pathao, and real payment-provider verification were not run. The local rendered tests and HTTP smoke do not prove those gates.
+
+## Resolution (2026-10-28)
+
+- All ticket acceptance work is implemented, reviewed and covered by the root
+  gate recorded above. Browser, physical-phone, screen-reader and live-provider
+  evidence remains unrun and is carried explicitly by ticket 13; this ticket does
+  not claim it.
