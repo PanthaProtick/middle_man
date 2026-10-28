@@ -15,7 +15,7 @@ const bn: Record<string, string> = {
   "Evidence resolution": "তথ্যের বিরোধের সিদ্ধান্ত",
   "Retry comparison": "আবার তুলনা করুন",
   "Loading evidence comparison…": "তথ্য তুলনা করা হচ্ছে…",
-  "Compare and resolve / তুলনা ও সিদ্ধান্ত": "তুলনা করে সিদ্ধান্ত নিন",
+  "Compare and resolve": "তুলনা করে সিদ্ধান্ত নিন",
   "Select received evidence. Choosing a claim explicitly holds the other current claims; exact matching rules still apply.": "প্রাপ্ত তথ্য বেছে নিন। একটি দাবি বাছলে অন্য বর্তমান দাবিগুলো স্থগিত থাকবে; সঠিক মিলের নিয়ম প্রযোজ্য থাকবে।",
   "Conflicting observations require seller review.": "পরস্পরবিরোধী তথ্য বিক্রেতাকে পর্যালোচনা করতে হবে।",
   "Held by seller decision.": "বিক্রেতার সিদ্ধান্তে স্থগিত।",

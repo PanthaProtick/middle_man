@@ -83,7 +83,8 @@ const bengali: Record<string, string> = {
   "Observation #": "প্রাপ্ত তথ্য #",
   "Confirmed orders:": "নিশ্চিত অর্ডার:",
   "Import": "আমদানি",
-  "Message": "বার্তা"
+  "Message": "বার্তা",
+  "No previous SMS imports.": "আগের কোনো SMS আমদানি নেই।"
 };
 export function usePaymentInboxCopy() {
   const { locale } = useLocale();

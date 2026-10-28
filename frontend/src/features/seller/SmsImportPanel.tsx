@@ -24,6 +24,7 @@ export function SmsImportPanel({ accounts, token, onImported, onManual }: Props)
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState<ImportResult[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const [cursor, setCursor] = useState<string | null>(null);
   const state = (value: string) => ({ imported: c('Imported'), duplicate: c('Duplicate'), unsupported: c('Unsupported'), invalid: c('Invalid'), conflicting: c('Conflicted'), missing: c('Missing fields'), masked: c('masked'), ambiguous: c('Ambiguous'), provider_mismatch: c('Provider mismatch') })[value] ?? c('Needs review');
   const mutation = useRef({ payload: '', key: '' });
@@ -64,6 +65,7 @@ export function SmsImportPanel({ accounts, token, onImported, onManual }: Props)
     setError(null);
     try {
       const history = await fetchSmsImports(next, token);
+      setHistoryLoaded(true);
       setResults(prev => next ? [...prev, ...history.items] : history.items);
       setCursor(history.next_cursor);
     } catch (err) {
@@ -103,6 +105,7 @@ export function SmsImportPanel({ accounts, token, onImported, onManual }: Props)
     {error && <p id={errorId} role="alert" style={{ marginTop: '12px', color: 'var(--rose-accent)' }}>{historyText(locale, c(error))}</p>}
     {busy && <p role="status" style={{ marginTop: '12px', color: 'var(--text-secondary)' }}>{c("Processing request…")}</p>}
     <div aria-live="polite" style={{ marginTop: results.length > 0 ? '16px' : 0 }}>
+      {historyLoaded && !busy && !error && results.length === 0 && <p>{c('No previous SMS imports.')}</p>}
       {results.map(result => <div key={result.id} className="isolated-subcard">
         <p style={{ fontWeight: 600, fontSize: '0.85rem', margin: '0 0 8px' }}>{c("Import")} {result.id}</p>
         <ol style={{ paddingLeft: '20px', fontSize: '0.825rem', color: 'var(--text-secondary)' }}>{result.items.map(item => <li key={item.index} style={{ marginBottom: '4px' }}>

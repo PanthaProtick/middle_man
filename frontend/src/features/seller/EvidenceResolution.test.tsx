@@ -45,6 +45,8 @@ it('compares claims and retains the identical decision after an unknown outcome'
       ...comparison, allocated_order_id: 'order-a',
     })); });
   const ui = await mount();
+  expect(ui.container.textContent).toContain('Compare and resolve');
+  expect(ui.container.textContent).not.toContain('তুলনা ও সিদ্ধান্ত');
   expect(ui.container.textContent).toContain('Buyer A');
   expect(ui.container.textContent).toContain('Sender does not match or is missing');
   await ui.change('Received observation', 'obs');

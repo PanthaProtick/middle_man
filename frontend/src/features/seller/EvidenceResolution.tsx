@@ -76,7 +76,7 @@ export function EvidenceResolution({receiptId, token, onResolved, accounts = []}
   </section>;
   const locked = Boolean(comparison.allocated_order_id) || comparison.receipt.reconciliation_state === 'used';
   return <section className="evidence-resolution" lang={locale} aria-label={tr("Evidence resolution")}>
-    <h4>{tr("Compare and resolve / তুলনা ও সিদ্ধান্ত")}</h4>
+    <h4>{tr("Compare and resolve")}</h4>
     <p>{locked ? `${tr('Accepted allocation')}: ${comparison.allocated_order_id ?? tr('locked')}. ${tr('Later evidence cannot change accepted funds.')}`
       : tr("Select received evidence. Choosing a claim explicitly holds the other current claims; exact matching rules still apply.")}</p>
     {comparison.receipt.has_conflict && <p role="status">{tr("Conflicting observations require seller review.")}</p>}
