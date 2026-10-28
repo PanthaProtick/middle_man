@@ -1,3 +1,6 @@
+import { useLocale } from '../locale/context';
+import { formatBangladeshDateTime } from '../locale/format';
+import { usePaymentInboxCopy } from '../locale/paymentInboxCopy';
 import React, { useState } from 'react';
 import {
   AlertTriangle,
@@ -7,7 +10,7 @@ import {
   ChevronUp,
 } from 'lucide-react';
 import type { ReceiptView } from './types';
-import { formatBangladeshTime } from './api';
+
 
 interface TransactionCardProps {
   transaction: ReceiptView;
@@ -20,12 +23,17 @@ export function TransactionCard({
   isExpanded,
   onToggleExpand,
 }: TransactionCardProps): React.JSX.Element {
+  const c = usePaymentInboxCopy();
+  const { locale } = useLocale();
+  const formatBangladeshTime = (value: string) => formatBangladeshDateTime(value, locale);
   const [showSystemDetails, setShowSystemDetails] = useState(false);
+  const state = (value: string) => ['unmatched', 'used', 'allocated', 'conflicted', 'incomplete', 'matched', 'conflicting', 'identical', 'consistent', 'initial', 'none'].includes(value) ? c(value) : c('Needs review');
   const isIncomplete = !tx.sender_number_canonical || !tx.occurred_at;
 
   return (
     <div
       style={{
+        overflowWrap: 'anywhere', minWidth: 0,
         background: 'var(--bg-surface)',
         border: tx.has_conflict
           ? '1px solid rgba(239, 68, 68, 0.4)'
@@ -45,6 +53,8 @@ export function TransactionCard({
           cursor: 'pointer',
           userSelect: 'none',
         }}
+        role="button" tabIndex={0} aria-expanded={isExpanded}
+        onKeyDown={event => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); onToggleExpand(); } }}
         onClick={onToggleExpand}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -83,7 +93,7 @@ export function TransactionCard({
                 border: '1px solid rgba(239, 68, 68, 0.4)',
               }}
             >
-              <AlertTriangle size={12} /> Conflicting Observations
+              <AlertTriangle size={12} /> {c("Conflicting Observations")}
             </span>
           )}
 
@@ -101,7 +111,7 @@ export function TransactionCard({
                 border: '1px solid rgba(245, 158, 11, 0.4)',
               }}
             >
-              <Clock size={12} /> Incomplete
+              <Clock size={12} /> {c("Incomplete")}
             </span>
           )}
 
@@ -118,14 +128,14 @@ export function TransactionCard({
                 color: 'var(--emerald-accent)',
               }}
             >
-              <CheckCircle size={12} /> {tx.reconciliation_state}
+              <CheckCircle size={12} /> {state(tx.reconciliation_state)}
             </span>
           )}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
           <span style={{ fontSize: '0.8rem' }}>
-            {tx.observations.length} observation{tx.observations.length > 1 ? 's' : ''}
+            {tx.observations.length} {c(tx.observations.length === 1 ? "observation" : "observations")}
           </span>
           {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
         </div>
@@ -143,19 +153,19 @@ export function TransactionCard({
         }}
       >
         <div>
-          Sender:{' '}
+          {c("Sender:")} {' '}
           <span style={{ color: tx.sender_number_canonical ? 'var(--text-primary)' : 'var(--amber-accent)' }}>
-            {tx.sender_number_canonical || 'Unknown (Incomplete)'}
+            {tx.sender_number_canonical || c("Unknown (Incomplete)")}
           </span>
         </div>
         <div>
-          Occurred At:{' '}
+          {c("Occurred At:")} {' '}
           <span style={{ color: tx.occurred_at ? 'var(--text-primary)' : 'var(--amber-accent)' }}>
-            {tx.occurred_at ? formatBangladeshTime(tx.occurred_at) : 'Unknown (Incomplete)'}
+            {tx.occurred_at ? formatBangladeshTime(tx.occurred_at) : c("Unknown (Incomplete)")}
           </span>
         </div>
         <div>
-          Recorded:{' '}
+          {c("Recorded:")} {' '}
           <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshTime(tx.created_at)}</span>
         </div>
       </div>
@@ -171,7 +181,7 @@ export function TransactionCard({
         >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
             <h5 style={{ margin: 0, fontSize: '0.85rem', color: 'var(--primary-accent)' }}>
-              Recorded Observations ({tx.observations.length})
+              {c("Recorded Observations")} ({tx.observations.length})
             </h5>
             <button
               type="button"
@@ -187,7 +197,7 @@ export function TransactionCard({
               }}
               aria-expanded={showSystemDetails}
             >
-              {showSystemDetails ? 'Hide dev details' : 'Show dev details'}
+              {showSystemDetails ? c("Hide dev details") : c("Show dev details")}
             </button>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -210,7 +220,7 @@ export function TransactionCard({
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
                   <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
-                    Observation #{idx + 1} ({obs.source.toUpperCase()})
+                    {c("Observation #")}{idx + 1} ({locale === "en" ? obs.source.toUpperCase() : c(obs.source)})
                   </span>
                   <span
                     style={{
@@ -223,19 +233,19 @@ export function TransactionCard({
                       fontWeight: 500,
                     }}
                   >
-                    Status: {obs.conflict_state}
+                    {c("Status:")} {state(obs.conflict_state)}
                   </span>
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '4px' }}>
-                  <div>Amount: ৳{(obs.amount_minor / 100).toFixed(2)}</div>
+                  <div>{c("Amount:")} ৳{(obs.amount_minor / 100).toFixed(2)}</div>
                   <div>
-                    Sender: {obs.sender_number_canonical || <span style={{ color: 'var(--amber-accent)' }}>Unknown</span>}
+                    {c("Sender:")} {obs.sender_number_canonical || <span style={{ color: 'var(--amber-accent)' }}>{c("Unknown")}</span>}
                   </div>
                   <div>
-                    Time: {obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : <span style={{ color: 'var(--amber-accent)' }}>Unknown</span>}
+                    {c("Time:")} {obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : <span style={{ color: 'var(--amber-accent)' }}>{c("Unknown")}</span>}
                   </div>
-                  <div style={{ display: showSystemDetails ? 'block' : 'none' }}>Actor: {obs.actor}</div>
-                  <div>Recorded: {formatBangladeshTime(obs.created_at)}</div>
+                  <div style={{ display: showSystemDetails ? 'block' : 'none' }}>{c("Actor:")} {obs.actor}</div>
+                  <div>{c("Recorded:")} {formatBangladeshTime(obs.created_at)}</div>
                 </div>
               </div>
             ))}

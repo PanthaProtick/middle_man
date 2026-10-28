@@ -1,6 +1,8 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { LocaleProvider, useLocale } from '../locale';
+import { sellerCopy } from '../locale/sellerCopy';
 import { SellerSession } from './SellerSession';
 
 const clerk = vi.hoisted(() => ({
@@ -9,12 +11,15 @@ const clerk = vi.hoisted(() => ({
   isLoaded: true,
 }));
 vi.mock('@clerk/react', () => ({
+  SignIn: () => <div data-testid="embedded-sign-in">Embedded sign-in</div>,
   useAuth: () => ({ ...clerk }),
   useClerk: () => clerk,
 }));
 let container: HTMLDivElement;
 let root: Root;
 beforeEach(() => {
+  window.localStorage.clear();
+  document.title = '';
   clerk.sessionId = 'session-alpha';
   clerk.isSignedIn = true;
   clerk.isLoaded = true;
@@ -38,6 +43,7 @@ it('shows initialization rather than a missing-configuration diagnosis while Cle
   clerk.sessionId = undefined;
   await act(async () => root.render(<SellerSession />));
   expect(container.textContent).toContain('Loading seller sign-in');
+  expect(document.title).toBe('Seller workspace · middleman');
   expect(container.textContent).not.toContain('Configure Clerk');
   expect(container.textContent).not.toContain('Session verification is unavailable');
   expect(clerk.getToken).not.toHaveBeenCalled();
@@ -49,7 +55,7 @@ it('does not invent a verification failure for an absent signed-out session', as
   expect(container.textContent).not.toContain('Session verification is unavailable');
   const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Sign in');
   await act(async () => button?.click());
-  expect(clerk.openSignIn).toHaveBeenCalled();
+  expect(container.querySelector('[data-testid="embedded-sign-in"]')).not.toBeNull();
 });
 it('obtains a Clerk token for shop access and signs out through Clerk', async () => {
   await act(async () => root.render(<SellerSession />));
@@ -69,7 +75,7 @@ it('opens Clerk sign-in without sending a development credential', async () => {
   await act(async () => root.render(<SellerSession />));
   const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Sign in');
   await act(async () => button?.click());
-  expect(clerk.openSignIn).toHaveBeenCalled();
+  expect(container.querySelector('[data-testid="embedded-sign-in"]')).not.toBeNull();
   expect(clerk.getToken).not.toHaveBeenCalled();
   expect(fetch).not.toHaveBeenCalledWith(expect.stringContaining('/seller/'), expect.anything());
 });
@@ -129,7 +135,7 @@ it.each(['sign-out', 'identity-change', 'expiry'])('discards a late private resp
   expect(container.textContent).toContain(change === 'identity-change' ? 'Shop Setup' : 'Sign in to your shop');
 });
 
-it('clears private content when periodic token acquisition fails', async () => {
+it('recovers automatically after a transient periodic token acquisition failure', async () => {
   vi.useFakeTimers();
   try {
     await act(async () => root.render(<SellerSession />));
@@ -138,6 +144,10 @@ it('clears private content when periodic token acquisition fails', async () => {
     await act(async () => vi.advanceTimersByTimeAsync(30000));
     expect(container.textContent).not.toContain('Shop Setup');
     expect(container.textContent).toContain('Unable to obtain your seller session');
+    clerk.getToken.mockResolvedValue('renewed-session-token');
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(container.textContent).toContain('Shop Setup');
+    expect(container.textContent).not.toContain('Unable to obtain your seller session');
   } finally { vi.useRealTimers(); }
 });
 
@@ -194,4 +204,56 @@ it('preserves an unfinished courier form when the same Clerk session renews its 
       headers: expect.objectContaining({ Authorization: 'Bearer renewed-session-token' }),
     }));
   } finally { vi.useRealTimers(); }
+});
+it('keeps the language switch available while sign-in loads without requesting a token', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  clerk.isLoaded = false;
+  await act(async () => root.render(<SellerSession />));
+  await act(async () => Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
+  expect(container.querySelector('[role=status]:not(.sr-only)')?.textContent).toContain('সাইন ইন লোড হচ্ছে');
+  expect(clerk.getToken).not.toHaveBeenCalled();
+  localStorage.clear();
+});
+it('shares the enclosing locale selection without reacquiring the seller token', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  function OuterLocale(): React.JSX.Element {
+    const { locale } = useLocale();
+    return <span data-testid="outer-locale">{locale}</span>;
+  }
+  try {
+    await act(async () => root.render(
+      <LocaleProvider>
+        <OuterLocale />
+        <SellerSession />
+      </LocaleProvider>,
+    ));
+    expect(container.textContent).toContain('Shop Setup');
+    const tokens = clerk.getToken.mock.calls.length;
+
+    await act(async () => Array.from(container.querySelectorAll('button'))
+      .find(b => b.textContent === 'বাংলা')!.click());
+
+    expect(container.querySelector('[data-testid="outer-locale"]')?.textContent).toBe('bn');
+    expect(container.textContent).toContain(sellerCopy.bn.setup);
+    expect(clerk.getToken).toHaveBeenCalledTimes(tokens);
+  } finally { localStorage.clear(); }
+});
+it('translates a rejected session without repeating authentication or requests', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
+    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'not_yet_valid' } })
+    : Response.json({ status: 'healthy' }));
+  try {
+    await act(async () => root.render(<SellerSession />));
+    expect(container.textContent).toContain('Session diagnostic: not_yet_valid');
+    const calls = vi.mocked(fetch).mock.calls.length;
+    const tokens = clerk.getToken.mock.calls.length;
+    const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!;
+    button.focus();
+    await act(async () => button.click());
+    expect(container.textContent).toContain('এখনও কার্যকর নয়');
+    expect(document.activeElement).toBe(button);
+    expect(fetch).toHaveBeenCalledTimes(calls);
+    expect(clerk.getToken).toHaveBeenCalledTimes(tokens);
+  } finally { localStorage.clear(); }
 });

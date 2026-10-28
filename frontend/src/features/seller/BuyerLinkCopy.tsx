@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
+import { useLocale } from '../locale/context';
+import { buyerLinkCopy } from '../locale/buyerLinkCopy';
 
 interface BuyerLinkCopyProps {
   portalUrl: string;
@@ -7,6 +9,8 @@ interface BuyerLinkCopyProps {
 }
 
 export function BuyerLinkCopy({ portalUrl, detail = false }: BuyerLinkCopyProps) {
+  const { locale } = useLocale();
+  const text = buyerLinkCopy[locale];
   const [status, setStatus] = useState<'idle' | 'copying' | 'copied' | 'failed'>('idle');
   const fullUrl = `${window.location.origin}${portalUrl}`;
 
@@ -29,15 +33,15 @@ export function BuyerLinkCopy({ portalUrl, detail = false }: BuyerLinkCopyProps)
   return (
     <div>
       <button type="button" className={detail ? 'btn btn-primary' : 'btn btn-secondary btn-sm'}
-        title="Copy buyer link to clipboard" disabled={status === 'copying'} onClick={() => { void copy(); }}>
+        title={text.copyTitle} disabled={status === 'copying'} onClick={() => { void copy(); }}>
         {status === 'copied' ? <Check size={14} /> : <Copy size={14} />}
-        <span>{status === 'copied' ? (detail ? 'Copied Buyer Link' : 'Copied!')
-          : status === 'copying' ? 'Copying…' : detail ? 'Copy Buyer Link' : 'Copy Link'}</span>
+        <span role="status" aria-live="polite">{status === 'copied' ? (detail ? text.copiedDetail : text.copied)
+          : status === 'copying' ? text.copying : detail ? text.copyDetail : text.copy}</span>
       </button>
       {status === 'failed' && (
         <div role="alert">
-          <p>Could not copy the buyer link. Select and copy it below, or retry.</p>
-          <input aria-label="Buyer link to copy manually" readOnly value={fullUrl}
+          <p>{text.copyFailed}</p>
+          <input aria-label={text.manual} readOnly value={fullUrl}
             onFocus={event => event.currentTarget.select()} style={{ width: '100%', minWidth: 0 }} />
         </div>
       )}

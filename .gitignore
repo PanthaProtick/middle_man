@@ -54,6 +54,8 @@ Thumbs.db
 # Agent Ephemeral Scratchpads (Tier 3 local session state)
 .agent-scratch/
 *.scratch.*
+.scratch/tmp/
+.scratch/pytest-*/
 tasks/local/
 .cache/
 .mypy_cache/

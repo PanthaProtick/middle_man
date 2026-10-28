@@ -1,3 +1,4 @@
+import { usePaymentInboxCopy } from '../locale/paymentInboxCopy';
 import React from 'react';
 import { CreditCard, Truck } from 'lucide-react';
 import { PaymentAccountList } from './PaymentAccountList';
@@ -22,20 +23,21 @@ export function AccountsSection({
   onError,
   onReload,
 }: AccountsSectionProps): React.JSX.Element {
+  const c = usePaymentInboxCopy();
   return (
     <section aria-labelledby="section-accounts-title">
       <div className="isolated-section">
         <div className="isolated-section-header">
           <div>
             <h4 id="section-accounts-title" className="isolated-section-title">
-              <CreditCard size={18} /> Designated Receiving Accounts
+              <CreditCard size={18} /> {c("Designated Receiving Accounts")}
             </h4>
             <p className="isolated-section-desc">
-              Manage the bKash, Nagad, and Rocket numbers given to buyers on their confirmation link.
+              {c("Manage the bKash, Nagad, and Rocket numbers given to buyers on their confirmation link.")}
             </p>
           </div>
           <span className="section-tab-count" style={{ alignSelf: 'center', fontSize: '0.78rem', padding: '3px 8px' }}>
-            {accounts.length} {accounts.length === 1 ? 'account' : 'accounts'}
+            {accounts.length} {accounts.length === 1 ? c("account") : c("accounts")}
           </span>
         </div>
 

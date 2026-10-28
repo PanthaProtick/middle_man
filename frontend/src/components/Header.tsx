@@ -1,6 +1,8 @@
 import React from 'react';
 import { Sparkles, ShoppingBag, LogOut } from 'lucide-react';
 import type { HealthStatus } from '../services/api';
+import { sellerCopy } from '../features/locale/sellerCopy';
+import { LocaleSwitch, useLocale } from '../features/locale';
 
 interface HeaderProps {
   health: HealthStatus | null;
@@ -17,6 +19,7 @@ export default function Header({
   isAuthenticated,
   onSignOut,
 }: HeaderProps): React.JSX.Element {
+  const text = sellerCopy[useLocale().locale];
   const isHealthy = health?.status === 'healthy';
 
   return (
@@ -27,17 +30,18 @@ export default function Header({
         </div>
         <div className="brand-text">
           <h1>middleman</h1>
-          <p>Your everyday order desk</p>
+          <p>{text.tagline}</p>
         </div>
       </div>
 
-      <div className="status-badges" aria-label="System Integration Status">
+      <div className="status-badges">
+        <LocaleSwitch />
         <div
           className={`badge ${isHealthy ? 'online' : 'offline'}`}
-          title={isHealthy ? 'Core commerce API operational' : 'Attempting connection to backend service'}
+          title={isHealthy ? text.onlineTitle : text.offlineTitle}
         >
           <span className="badge-dot" aria-hidden="true"></span>
-          <span>{isHealthy ? 'Connected' : 'Connecting'}</span>
+          <span>{isHealthy ? text.connected : text.connecting}</span>
         </div>
 
         {isAuthenticated && onSignOut && (
@@ -45,10 +49,10 @@ export default function Header({
             type="button"
             onClick={onSignOut}
             className="demo-pill-btn"
-            title="Sign out of seller account"
+            title={text.signOutTitle}
           >
             <LogOut size={13} color="var(--rose-accent)" aria-hidden="true" />
-            <span>Sign out</span>
+            <span>{text.signOut}</span>
           </button>
         )}
 
@@ -56,10 +60,10 @@ export default function Header({
           type="button"
           onClick={onOpenDemo}
           className={`demo-pill-btn ${isDemoActive ? 'active' : ''}`}
-          title="Open interactive Gemini AI playground, database explorer, and diagnostic tools"
+          title={text.demoTitle}
         >
           <Sparkles size={13} color="var(--primary-accent)" aria-hidden="true" />
-          <span>{isDemoActive ? 'Back to shop' : 'Demo & tools'}</span>
+          <span>{isDemoActive ? text.back : text.demo}</span>
         </button>
       </div>
     </header>

@@ -1,3 +1,5 @@
+import { useLocale } from '../locale/context';
+import { orderCreationCopy } from '../locale/orderCreationCopy';
 import { useEffect, useRef } from 'react';
 import { MAX_PARCEL_QUANTITY, MAX_PARCEL_WEIGHT_GRAMS } from './parcel';
 import type { ParcelErrors } from './useEarlyParcelDetails';
@@ -10,6 +12,8 @@ interface ParcelEarlyFieldsProps {
   disabled: boolean;
   errors: ParcelErrors;
   validationAttempt: number;
+  serverField?: string | null;
+  serverErrorId?: string;
 }
 
 const inputStyle = {
@@ -29,7 +33,10 @@ export function ParcelEarlyFields({
   disabled,
   errors,
   validationAttempt,
+  serverField,
+  serverErrorId,
 }: ParcelEarlyFieldsProps) {
+  const text = orderCreationCopy[useLocale().locale];
   const fieldsRef = useRef<HTMLFieldSetElement>(null);
   useEffect(() => {
     fieldsRef.current?.querySelector<HTMLInputElement>('[aria-invalid="true"]')?.focus();
@@ -37,55 +44,57 @@ export function ParcelEarlyFields({
   return (
     <fieldset ref={fieldsRef} style={{ border: 'none', padding: 0, margin: '0 0 14px' }}>
       <legend style={{ fontSize: '0.85rem', color: 'var(--text-primary)', marginBottom: '4px' }}>
-        Parcel details (optional now)
+        {text.parcel}
       </legend>
       <p id="parcel-early-hint" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: '8px' }}>
-        Optional when creating the buyer link. A valid weight and quantity are both required before booking.
+        {text.parcelHint}
       </p>
       <div className="form-grid-2">
         <div>
           <label htmlFor="parcel-weight-kg" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            Weight (kg)
+            {text.weight}
           </label>
           <input
             id="parcel-weight-kg"
-            type="number"
+            type="text"
+            inputMode="decimal"
             name="parcelWeightKg"
-            aria-label="Weight (kg)"
-            placeholder="e.g. 1.5"
+            aria-label={text.weight}
+            placeholder={text.weightExample}
             min="0.001"
             max={MAX_PARCEL_WEIGHT_GRAMS / 1000}
             step="0.001"
             value={weightKg}
             onChange={(e) => onWeightChange(e.target.value)}
             disabled={disabled}
-            aria-invalid={Boolean(errors.weight)}
-            aria-describedby={`parcel-early-hint${errors.weight ? ' parcel-weight-error' : ''}`}
+            aria-invalid={Boolean(errors.weight) || serverField === 'parcelWeightKg'}
+            aria-describedby={`parcel-early-hint${errors.weight ? ' parcel-weight-error' : ''}${serverField === 'parcelWeightKg' ? ` ${serverErrorId}` : ''}`}
             style={inputStyle}
           />
-          {errors.weight && <p id="parcel-weight-error" role="alert">{errors.weight}</p>}
+          {errors.weight && <p id="parcel-weight-error" role="alert">{text[errors.weight]}</p>}
         </div>
         <div>
           <label htmlFor="parcel-quantity" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
-            Quantity
+            {text.quantity}
           </label>
           <input
             id="parcel-quantity"
-            type="number"
+            type="text"
+            inputMode="numeric"
             name="parcelQuantity"
-            aria-label="Quantity"
-            placeholder="e.g. 2"
+            aria-label={text.quantity}
+            placeholder={text.quantityExample}
             min="1"
             max={MAX_PARCEL_QUANTITY}
             step="1"
             value={quantity}
             onChange={(e) => onQuantityChange(e.target.value)}
             disabled={disabled}
-            aria-invalid={Boolean(errors.quantity)}
-            aria-describedby={`parcel-early-hint${errors.quantity ? ' parcel-quantity-error' : ''}`}
+            aria-invalid={Boolean(errors.quantity) || serverField === 'parcelQuantity'}
+            aria-describedby={`parcel-early-hint${errors.quantity ? ' parcel-quantity-error' : ''}${serverField === 'parcelQuantity' ? ` ${serverErrorId}` : ''}`}
             style={inputStyle}
           />
-          {errors.quantity && <p id="parcel-quantity-error" role="alert">{errors.quantity}</p>}
+          {errors.quantity && <p id="parcel-quantity-error" role="alert">{text[errors.quantity]}</p>}
         </div>
       </div>
     </fieldset>

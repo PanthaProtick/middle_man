@@ -1,3 +1,5 @@
+import { CourierError } from './CourierError';
+import { useCourierText } from '../locale/courierCopy';
 import { useEffect, useRef, useState } from 'react';
 import { requestJson } from './api';
 import type { CourierAttempt, Review } from './courierReviewTypes';
@@ -19,6 +21,7 @@ export function CourierReconciliation({ orderId, token, attempt, onResolved }: {
   attempt: CourierAttempt;
   onResolved: (review: Review) => void;
 }) {
+  const t = useCourierText();
   const mounted = useRef(true);
   const retryKeys = useRef(new Map<string, string>());
   useEffect(() => {
@@ -28,7 +31,7 @@ export function CourierReconciliation({ orderId, token, attempt, onResolved }: {
   const [consignmentId, setConsignmentId] = useState('');
   const [confirmed, setConfirmed] = useState(false);
   const [busy, setBusy] = useState<ReconciliationAction>();
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<Error>();
 
   const send = async (action: ReconciliationAction) => {
     if (busy) return;
@@ -60,40 +63,38 @@ export function CourierReconciliation({ orderId, token, attempt, onResolved }: {
       if (mounted.current) onResolved(review);
     } catch (err: unknown) {
       if (mounted.current) {
-        setError(err instanceof Error ? err.message
-          : 'Reconciliation could not be validated. The attempt remains protected.');
+        setError(err instanceof Error ? err : new Error('Reconciliation could not be validated. The attempt remains protected.'));
       }
     } finally {
       if (mounted.current) setBusy(undefined);
     }
   };
 
-  return <section className="courier-reconciliation" aria-label="Reconcile unknown booking outcome">
-    <p><strong>Check Pathao before recording a resolution.</strong> An empty or reloaded merchant panel,
-      a timeout, or the absence of a local attempt is not proof by itself.</p>
-    {error && <p role="alert">{error}</p>}
+  return <section className="courier-reconciliation" aria-label={t("Reconcile unknown booking outcome")}>
+    <p><strong>{t("Check Pathao before recording a resolution.")}</strong> {t('An empty or reloaded merchant panel, a timeout, or the absence of a local attempt is not proof by itself.')}</p>
+    {error && <div role="alert"><CourierError error={error} /></div>}
     <fieldset disabled={Boolean(busy)}>
-      <legend>Attach an existing booking</legend>
-      <p>Account environment: {attempt.environment}</p>
-      <p>Merchant order reference: <code>{orderId}</code></p>
-      <label>Consignment ID
+      <legend>{t("Attach an existing booking")}</legend>
+      <p>{t("Account environment:")} {t(attempt.environment)}</p>
+      <p>{t("Merchant order reference:")} <code>{orderId}</code></p>
+      <label>{t("Consignment ID")}
         <input name="consignmentId" value={consignmentId}
           onChange={event => setConsignmentId(event.target.value)} />
       </label>
       <button type="button" data-attach
         disabled={Boolean(busy) || !consignmentId.trim()}
-        onClick={() => void send('attach_existing')}>Attach existing booking</button>
+        onClick={() => void send('attach_existing')}>{t("Attach existing booking")}</button>
     </fieldset>
     <fieldset disabled={Boolean(busy)}>
-      <legend>Confirm no booking was created</legend>
+      <legend>{t("Confirm no booking was created")}</legend>
       <label>
         <input type="checkbox" name="confirmedNoncreation" checked={confirmed}
           onChange={event => setConfirmed(event.target.checked)} />
-        I checked the Pathao merchant panel for this account and confirmed no consignment exists for this order.
+        {t("I checked the Pathao merchant panel for this account and confirmed no consignment exists for this order.")}
       </label>
       <button type="button" data-noncreation disabled={Boolean(busy) || !confirmed}
-        onClick={() => void send('confirm_noncreation')}>Record confirmed noncreation</button>
+        onClick={() => void send('confirm_noncreation')}>{t("Record confirmed noncreation")}</button>
     </fieldset>
-    {busy && <p role="status">Recording reconciliation…</p>}
+    {busy && <p role="status">{t("Recording reconciliation…")}</p>}
   </section>;
 }

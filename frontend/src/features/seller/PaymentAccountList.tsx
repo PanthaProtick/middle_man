@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { usePaymentInboxCopy } from '../locale/paymentInboxCopy';
+import React, { useState, useRef } from 'react';
 import { Edit2, Check, X } from 'lucide-react';
 import { updatePaymentAccount, SellerApiError } from './api';
 import type { PaymentAccount } from './types';
@@ -18,6 +19,11 @@ export function PaymentAccountList({
   onError,
   onReload,
 }: PaymentAccountListProps): React.JSX.Element {
+  const pending = useRef(false);
+  const [busy, setBusy] = useState(false);
+  const c = usePaymentInboxCopy();
+  const [error, setError] = useState<string | null>(null);
+  const fail = (key: string) => { setError(key); onError(null); };
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editLabel, setEditLabel] = useState<string>('');
 
@@ -28,11 +34,13 @@ export function PaymentAccountList({
   };
 
   const handleSaveLabel = async (account: PaymentAccount) => {
+    if (pending.current) return;
     if (!editLabel.trim()) {
-      onError('Account label cannot be blank');
+      fail("Account label cannot be blank");
       return;
     }
-    onError(null);
+    pending.current = true; setBusy(true);
+    setError(null); onError(null);
     try {
       const updated = await updatePaymentAccount(
         account.id,
@@ -43,16 +51,18 @@ export function PaymentAccountList({
       setEditingId(null);
     } catch (err) {
       if (err instanceof SellerApiError && err.code === 'STALE_VERSION') {
-        onError('Account was modified by another session. Refetching latest version...');
+        fail("Account was modified by another session. Refetching latest version...");
         onReload();
       } else {
-        onError(err instanceof Error ? err.message : 'Failed to update label');
+        fail("Failed to update label");
       }
-    }
+    } finally { pending.current = false; setBusy(false); }
   };
 
   const handleToggleActive = async (account: PaymentAccount) => {
-    onError(null);
+    if (pending.current) return;
+    pending.current = true; setBusy(true);
+    setError(null); onError(null);
     try {
       const updated = await updatePaymentAccount(
         account.id,
@@ -62,24 +72,25 @@ export function PaymentAccountList({
       onAccountUpdated(updated);
     } catch (err) {
       if (err instanceof SellerApiError && err.code === 'STALE_VERSION') {
-        onError('Account was modified in another session. Refetching latest state...');
+        fail("Account was modified in another session. Refetching latest state...");
         onReload();
       } else {
-        onError(err instanceof Error ? err.message : 'Failed to update account');
+        fail("Failed to update account");
       }
-    }
+    } finally { pending.current = false; setBusy(false); }
   };
 
   if (accounts.length === 0) {
     return (
       <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginBottom: '16px' }}>
-        No receiving accounts configured. Add a bKash or Nagad receiving account below.
+        {c("No receiving accounts configured. Add a bKash or Nagad receiving account below.")}
       </p>
     );
   }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '20px' }}>
+      {error && <p role="alert">{c(error)}</p>}
       {accounts.map((acc) => (
         <div
           key={acc.id}
@@ -110,7 +121,7 @@ export function PaymentAccountList({
               {editingId === acc.id ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <input
-                    type="text"
+                    aria-label={c("Account label")} disabled={busy} type="text"
                     value={editLabel}
                     onChange={(e) => setEditLabel(e.target.value)}
                     style={{
@@ -122,11 +133,11 @@ export function PaymentAccountList({
                       fontSize: '0.85rem',
                     }}
                   />
-                  <button className="btn btn-primary btn-sm" onClick={() => handleSaveLabel(acc)}>
-                    <Check size={12} />
+                  <button disabled={busy} className="btn btn-primary btn-sm" onClick={() => handleSaveLabel(acc)}>
+                    <span className="sr-only">{c("Save label")}</span><Check size={12} />
                   </button>
-                  <button className="btn btn-secondary btn-sm" onClick={() => setEditingId(null)}>
-                    <X size={12} />
+                  <button disabled={busy} className="btn btn-secondary btn-sm" onClick={() => setEditingId(null)}>
+                    <span className="sr-only">{c("Cancel editing")}</span><X size={12} />
                   </button>
                 </div>
               ) : (
@@ -136,7 +147,7 @@ export function PaymentAccountList({
                     className="btn btn-secondary btn-sm"
                     style={{ padding: '2px 4px' }}
                     onClick={() => handleStartEdit(acc)}
-                    title="Edit Label"
+                    title={c("Edit Label")}
                   >
                     <Edit2 size={12} />
                   </button>
@@ -149,10 +160,10 @@ export function PaymentAccountList({
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '0.75rem', color: acc.is_active ? 'var(--emerald-accent)' : 'var(--text-secondary)' }}>
-              {acc.is_active ? 'Active' : 'Inactive'}
+              {acc.is_active ? c("Active") : c("Inactive")}
             </span>
-            <button className="btn btn-secondary btn-sm" onClick={() => handleToggleActive(acc)}>
-              {acc.is_active ? 'Deactivate' : 'Activate'}
+            <button disabled={busy} className="btn btn-secondary btn-sm" onClick={() => handleToggleActive(acc)}>
+              {acc.is_active ? c("Deactivate") : c("Activate")}
             </button>
           </div>
         </div>

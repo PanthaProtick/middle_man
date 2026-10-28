@@ -1,7 +1,11 @@
+import { formatOrderAmount } from './orderNumbers';
 import React, { useState } from 'react';
 import { Clock, AlertTriangle, Eye, ShoppingBag } from 'lucide-react';
 import type { OrderLifecycle, SellerOrder } from './types';
-import { formatBangladeshTime, formatRemainingCod } from './api';
+import { formatRemainingCod } from './api';
+import { formatBangladeshDateTime } from '../locale/format';
+import { useLocale } from '../locale/context';
+import { orderCopy, lifecycleLabel, reviewLabel } from '../locale/orderCopy';
 import { OrderDetailModal } from './OrderDetailModal';
 import { OrderExport } from './OrderExport';
 import { BuyerLinkCopy } from './BuyerLinkCopy';
@@ -16,13 +20,13 @@ interface OrderListProps {
   onLoadMore: () => void;
 }
 
-const LIFECYCLE_BADGES: Record<OrderLifecycle, { label: string; bg: string; color: string }> = {
-  awaiting_buyer: { label: 'Awaiting Buyer', bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--amber-accent)' },
-  pending: { label: 'Pending Verification', bg: 'rgba(59, 130, 246, 0.15)', color: 'var(--primary-accent)' },
-  confirmed: { label: 'Confirmed', bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-accent)' },
-  rejected: { label: 'Rejected', bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
-  cancelled: { label: 'Cancelled', bg: 'rgba(107, 114, 128, 0.2)', color: 'var(--text-secondary)' },
-  expired: { label: 'Expired', bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
+const LIFECYCLE_BADGES: Record<OrderLifecycle, { bg: string; color: string }> = {
+  awaiting_buyer: { bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--amber-accent)' },
+  pending: { bg: 'rgba(59, 130, 246, 0.15)', color: 'var(--primary-accent)' },
+  confirmed: { bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-accent)' },
+  rejected: { bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
+  cancelled: { bg: 'rgba(107, 114, 128, 0.2)', color: 'var(--text-secondary)' },
+  expired: { bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
 };
 
 export function OrderList({
@@ -33,6 +37,8 @@ export function OrderList({
   nextCursor,
   onLoadMore,
 }: OrderListProps): React.JSX.Element {
+  const { locale } = useLocale();
+  const text = orderCopy[locale];
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
   const [expandedReviewIds, setExpandedReviewIds] = useState<Record<string, boolean>>({});
 
@@ -48,16 +54,16 @@ export function OrderList({
       <div className="isolated-section-header">
         <div>
           <h4 className="isolated-section-title">
-            <ShoppingBag size={18} /> Orders &amp; Active Buyer Links ({orders.length})
+            <ShoppingBag size={18} /> {text.list} ({orders.length})
           </h4>
           <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ color: 'var(--emerald-accent)' }}>✓ Confirmed: {confirmedCount}</span>
-            {exceptionCount > 0 && <span style={{ color: 'var(--rose-accent)' }}>⚠ Review Exceptions: {exceptionCount}</span>}
+            <span style={{ color: 'var(--emerald-accent)' }}>✓ {text.confirmed}: {confirmedCount}</span>
+            {exceptionCount > 0 && <span style={{ color: 'var(--rose-accent)' }}>⚠ {text.exceptions} {exceptionCount}</span>}
           </div>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <label htmlFor="order-status-filter" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>Status:</label>
+          <label htmlFor="order-status-filter" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{text.status}</label>
           <select
             id="order-status-filter"
             value={statusFilter}
@@ -70,13 +76,13 @@ export function OrderList({
               width: 'auto',
             }}
           >
-            <option value="">All Statuses</option>
-            <option value="awaiting_buyer">Awaiting Buyer</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="rejected">Rejected</option>
-            <option value="expired">Expired</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="">{text.all}</option>
+            <option value="awaiting_buyer">{lifecycleLabel("awaiting_buyer", text)}</option>
+            <option value="pending">{lifecycleLabel("pending", text)}</option>
+            <option value="confirmed">{lifecycleLabel("confirmed", text)}</option>
+            <option value="rejected">{lifecycleLabel("rejected", text)}</option>
+            <option value="expired">{lifecycleLabel("expired", text)}</option>
+            <option value="cancelled">{lifecycleLabel("cancelled", text)}</option>
           </select>
         </div>
       </div>
@@ -85,13 +91,13 @@ export function OrderList({
       {orders.length === 0 ? (
         <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            No orders found. Click &quot;Create Order Link&quot; above to create an order and share its link with a buyer.
+            {text.empty}
           </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {orders.map((ord) => {
-            const badge = LIFECYCLE_BADGES[ord.lifecycle] || { label: ord.lifecycle, bg: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)' };
+            const badge = Object.hasOwn(LIFECYCLE_BADGES, ord.lifecycle) ? LIFECYCLE_BADGES[ord.lifecycle] : { bg: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)' };
             const isAwaiting = ord.lifecycle === 'awaiting_buyer';
             const isExpired = ord.lifecycle === 'expired';
 
@@ -116,7 +122,7 @@ export function OrderList({
                       }}
                     >
                       {isExpired && <AlertTriangle size={11} />}
-                      {badge.label}
+                      {lifecycleLabel(ord.lifecycle, text)}
                     </span>
                   </div>
 
@@ -124,10 +130,10 @@ export function OrderList({
                     <button
                       className="btn btn-secondary btn-sm"
                       onClick={() => setSelectedOrder(ord)}
-                      title="Inspect order details and snapshot"
+                      title={text.inspectTitle}
                     >
                       <Eye size={13} />
-                      <span>Inspect</span>
+                      <span>{text.inspect}</span>
                     </button>
                     <BuyerLinkCopy key={ord.portal_url} portalUrl={ord.portal_url} />
                   </div>
@@ -135,23 +141,23 @@ export function OrderList({
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '8px', marginBottom: '10px', fontSize: '0.825rem' }}>
                   <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>Total: </span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>BDT {(ord.total_minor / 100).toLocaleString()}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{text.total}</span>
+                    <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>BDT {formatOrderAmount(ord.total_minor)}</span>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>Advance: </span>
-                    <span style={{ color: 'var(--cyan-accent)', fontWeight: 500 }}>BDT {(ord.required_advance_minor / 100).toLocaleString()}</span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{text.advance}</span>
+                    <span style={{ color: 'var(--cyan-accent)', fontWeight: 500 }}>BDT {formatOrderAmount(ord.required_advance_minor)}</span>
                   </div>
                   <div>
                     <span style={{ color: 'var(--text-secondary)' }}>
-                      {ord.lifecycle === 'confirmed' ? 'Actual COD: ' : 'Expected COD: '}
+                      {ord.lifecycle === 'confirmed' ? text.actualCod : text.expectedCod}
                     </span>
                     <span style={{ color: ord.lifecycle === 'confirmed' ? 'var(--emerald-accent)' : 'var(--primary-accent)', fontWeight: 600 }}>
                       {formatRemainingCod(ord)}
                     </span>
                   </div>
                   <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>Account: </span>
+                    <span style={{ color: 'var(--text-secondary)' }}>{text.account}</span>
                     <span style={{ color: 'var(--text-primary)' }}>
                       {ord.account_provider.toUpperCase()} ({ord.account_receiving_number})
                     </span>
@@ -161,7 +167,7 @@ export function OrderList({
                 {ord.lifecycle === 'pending' && ord.review_reasons && ord.review_reasons.length > 0 && (
                   <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.725rem', color: 'var(--rose-accent)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                      <AlertTriangle size={11} /> Review:
+                      <AlertTriangle size={11} /> {text.review}
                     </span>
                     <button
                       type="button"
@@ -174,13 +180,13 @@ export function OrderList({
                         fontSize: '0.7rem',
                         textDecoration: 'underline',
                         padding: '0 2px',
-                        whiteSpace: 'nowrap',
                       }}
                       aria-expanded={Boolean(expandedReviewIds[ord.id])}
-                      title="Toggle raw technical review codes"
+                      title={text.toggleCodes}
                     >
-                      {expandedReviewIds[ord.id] ? 'Hide codes' : 'Show codes'}
+                      {expandedReviewIds[ord.id] ? text.hideCodes : text.showCodes}
                     </button>
+                    <span>{ord.review_reasons.map(reason => reviewLabel(reason, text)).join(" · ")}</span>
                     <div style={{ display: expandedReviewIds[ord.id] ? 'inline-flex' : 'none', gap: '4px', flexWrap: 'wrap' }}>
                       {ord.review_reasons.map((r) => (
                         <span
@@ -203,12 +209,12 @@ export function OrderList({
                 )}
 
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)', paddingTop: '6px' }}>
-                  <div>Created: {formatBangladeshTime(ord.created_at)}</div>
+                  <div>{text.created} {formatBangladeshDateTime(ord.created_at, locale)}</div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isExpired ? 'var(--rose-accent)' : isAwaiting ? 'var(--amber-accent)' : 'var(--text-secondary)' }}>
                     <Clock size={12} />
                     <span>
-                      {isExpired ? 'Expired at: ' : 'Deadline (BST): '}
-                      {formatBangladeshTime(ord.expires_at)}
+                      {isExpired ? text.expiredAt : text.deadline}
+                      {formatBangladeshDateTime(ord.expires_at, locale)}
                     </span>
                   </div>
                 </div>
@@ -219,7 +225,7 @@ export function OrderList({
           {nextCursor && (
             <div style={{ textAlign: 'center', marginTop: '12px' }}>
               <button className="btn btn-secondary btn-sm" onClick={onLoadMore}>
-                Load More Orders
+                {text.more}
               </button>
             </div>
           )}

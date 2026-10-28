@@ -74,7 +74,7 @@ describe('DeveloperDetailsPanel and toggle buttons', () => {
     expect(region.style.display).toBe('block');
     expect(region.textContent).toContain('ord-test-uuid-12345');
     expect(region.textContent).toContain('v3');
-    expect(region.textContent).toContain('manual');
+    expect(region.textContent).toContain('Seller accepted');
     expect(region.textContent).toContain('acc-uuid-67890');
     expect(region.textContent).toContain('ord-pred-uuid-000');
     expect(region.textContent).toContain('ord-repl-uuid-999');

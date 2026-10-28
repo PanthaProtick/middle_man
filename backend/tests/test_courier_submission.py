@@ -23,7 +23,20 @@ def offline_settings(monkeypatch):
 
 
 @pytest.mark.usefixtures('seller_identity')
-async def test_successful_simulated_submission_and_replay(client):
+@pytest.mark.parametrize('locale', ['en', 'bn'])
+async def test_successful_simulated_submission_and_replay(client, monkeypatch, locale):
+    from app.services import pathao_provider
+
+    original_submit = pathao_provider.submit_booking
+    calls = 0
+
+    async def counted_submit(*args, **kwargs):
+        nonlocal calls
+        calls += 1
+        return await original_submit(*args, **kwargs)
+
+    monkeypatch.setattr(pathao_provider, 'submit_booking', counted_submit)
+    client.headers['Accept-Language'] = locale
     order = await parcel_order(client, 'submit-order', parcel_weight_grams=1200, parcel_quantity=3)
     await confirm_automatically(client, order, 'SUBMIT-ONE')
     path, ready, _ = await ready_review(client, order)
@@ -57,6 +70,7 @@ async def test_successful_simulated_submission_and_replay(client):
     assert snapshot['delivery_type'] == 48
 
     # Same-key replay returns cached identical response
+    client.headers['Accept-Language'] = 'bn' if locale == 'en' else 'en'
     replay = await client.post(
         submit_path,
         json={'expected_token': ready['token']},
@@ -64,6 +78,7 @@ async def test_successful_simulated_submission_and_replay(client):
     )
     assert replay.status_code == 200
     assert replay.json() == result
+    assert calls == 1
 
     # Different idempotency key rejected because order is already booked
     diff_key = await client.post(
@@ -73,6 +88,7 @@ async def test_successful_simulated_submission_and_replay(client):
     )
     assert diff_key.status_code == 409
     assert diff_key.json()['error']['code'] in ('ALREADY_BOOKED', 'COURIER_ATTEMPT_PROTECTED')
+    assert calls == 1
 
 
 @pytest.mark.usefixtures('seller_identity')

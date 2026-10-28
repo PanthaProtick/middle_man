@@ -29,8 +29,8 @@
   --radius-xl: 24px;
   --pill-gap: 4px;
   --section-gap: 12px;
-  --font-heading: 'Manrope', 'Nirmala UI', system-ui, sans-serif;
-  --font-body: 'Manrope', 'Nirmala UI', system-ui, sans-serif;
+  --font-heading: 'Manrope', 'Nirmala UI', 'Noto Sans Bengali', 'Vrinda', 'Shonar Bangla', 'Bangla Sangam MN', system-ui, sans-serif;
+  --font-body: 'Manrope', 'Nirmala UI', 'Noto Sans Bengali', 'Vrinda', 'Shonar Bangla', 'Bangla Sangam MN', system-ui, sans-serif;
 }
 body { background: var(--bg-main); font-size: 15px; }
 button, input, select, textarea { font: inherit; }
@@ -111,6 +111,43 @@ input::placeholder, textarea::placeholder { color: #687d73; opacity: 1; }
 .footer { display: flex; justify-content: space-between; gap: 16px; color: var(--text-secondary); font-size: .73rem; border-top: 1px solid var(--border-subtle); padding-top: 20px; }
 .skip-link { position: absolute; left: 24px; top: -100px; background: white; padding: 12px; z-index: 1000; }
 .skip-link:focus { top: 12px; }
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* Language stays discoverable in either mode, including on narrow phones. */
+.locale-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 2px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  background: var(--bg-surface);
+  flex: 0 0 auto;
+}
+.locale-switch button {
+  min-height: 44px;
+  min-width: 52px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-secondary);
+  font-weight: 700;
+  font-size: 0.8rem;
+  line-height: 1.3;
+}
+.locale-switch button:hover { background: #e3eee8; color: var(--primary-accent); }
+.locale-switch button[aria-pressed="true"] { background: white; color: var(--primary-accent); box-shadow: 0 1px 4px #193b2912; }
+body:lang(bn) { line-height: 1.7; }
 img, svg { max-width: 100%; }
 input, textarea, fieldset { min-width: 0; }
 
@@ -139,7 +176,7 @@ input, textarea, fieldset { min-width: 0; }
   .status-badges { justify-content: flex-start; }
   .app-masthead h2 { font-size: 1.85rem; }
   .metrics-ribbon { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .metric-chip:last-child { grid-column: 1 / -1; }
+  .metric-chip:nth-child(5) { grid-column: 1 / -1; }
   .metric-chip { padding: 12px 10px; }
   .metric-val { font-size: 1.25rem; }
   .card { padding: 16px; }
@@ -164,3 +201,9 @@ fieldset { border: 0; }
 .chat-container, .idea-box, .member-card { background: var(--bg-surface); }
 .message-bubble.ai { color: var(--text-primary); background: white; }
 .message-bubble.user { color: var(--primary-accent); background: #e3eee8; }
+
+.metrics-explanation { grid-column: 1 / -1; }
+
+/* Payment evidence and retention may contain long opaque identifiers. */
+.isolated-section, .buyer-correction { min-width: 0; overflow-wrap: anywhere; }
+.isolated-section select { max-width: 100%; min-width: 0; }

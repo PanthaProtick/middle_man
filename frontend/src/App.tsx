@@ -7,6 +7,8 @@ import Header from './components/Header';
 import { SellerWorkspace } from './features/seller';
 import { BuyerPortal } from './features/buyer';
 import { DemoTools } from './features/demo';
+import { LocaleProvider, LocaleSwitch, useLocale } from './features/locale';
+import { sellerCopy } from './features/locale/sellerCopy';
 import { fetchHealth, type HealthStatus } from './services/api';
 
 interface AppProps {
@@ -16,13 +18,28 @@ interface AppProps {
   onSignOut?: () => void;
 }
 
-export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps = {}): React.JSX.Element {
+export default function App(props: AppProps = {}): React.JSX.Element {
+  return (
+    <LocaleProvider>
+      <AppShell {...props} />
+    </LocaleProvider>
+  );
+}
+
+export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JSX.Element {
+  const { t, locale } = useLocale();
+  const text = sellerCopy[locale];
   const [activeTab, setActiveTab] = useState<'orders' | 'demo'>('orders');
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const isOrderPortal = pathname.startsWith('/orders/');
   const portalToken = isOrderPortal ? pathname.replace('/orders/', '').trim() : '';
+  const showingPortal = isOrderPortal && Boolean(portalToken);
+
+  useEffect(() => {
+    document.title = t(showingPortal ? 'document.title.buyer' : 'document.title.seller');
+  }, [showingPortal, t]);
 
   useEffect(() => {
     if (isOrderPortal) return;
@@ -33,25 +50,28 @@ export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps 
     return () => clearInterval(interval);
   }, [isOrderPortal]);
 
-  if (isOrderPortal && portalToken) {
+  if (showingPortal) {
     return (
       <div className="portal-shell">
         <header className="portal-header">
           <div className="portal-brand">
-            <Store size={18} color="var(--primary-accent)" />
-            <span>Order confirmation / অর্ডার নিশ্চিতকরণ</span>
+            <Store size={18} color="var(--primary-accent)" aria-hidden="true" />
+            <span>{t('portal.brand')}</span>
           </div>
-          <a
-            href="/"
-            className="btn btn-secondary btn-sm"
-            style={{ textDecoration: 'none' }}
-          >
-            <ArrowLeft size={13} /> Back to Home
-          </a>
+          <div className="portal-actions">
+            <LocaleSwitch />
+            <a
+              href="/"
+              className="btn btn-secondary btn-sm"
+              style={{ textDecoration: 'none' }}
+            >
+              <ArrowLeft size={13} aria-hidden="true" /> {t('portal.backHome')}
+            </a>
+          </div>
         </header>
         <BuyerPortal portalToken={portalToken} />
         <div className="portal-footer-action">
-          <p>Never share your PIN or OTP. Your seller reviews the order and payment details.</p>
+          <p>{t('portal.footerNotice')}</p>
         </div>
       </div>
     );
@@ -59,7 +79,7 @@ export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps 
 
   return (
     <div className="app-container">
-      <a href="#workspace" className="skip-link">Skip to workspace</a>
+      <a href="#workspace" className="skip-link">{text.skip}</a>
       {/* Navbar with Clean Store Status & Demo Trigger */}
       <Header
         health={health}
@@ -71,16 +91,16 @@ export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps 
 
       <section className="app-masthead" aria-labelledby="workspace-heading">
         <div>
-          <p className="eyebrow">A little order. A lot less back-and-forth.</p>
-          <h2 id="workspace-heading">Your shop, <em>in good order.</em></h2>
+          <p className="eyebrow">{text.eyebrow}</p>
+          <h2 id="workspace-heading">{text.heading} <em>{text.headingEm}</em></h2>
           <p className="masthead-copy">
-            From a conversation to a confirmed order. Collect buyer details, check advances, and get ready to deliver.
+            {text.intro}
           </p>
         </div>
-        <ol className="workflow-guide" aria-label="How order confirmation works">
-          <li><span>01</span> Share an order link</li>
-          <li><span>02</span> Buyer adds details &amp; payment</li>
-          <li><span>03</span> Review, confirm &amp; deliver</li>
+        <ol className="workflow-guide" aria-label={text.guide}>
+          <li><span>01</span> {text.step1}</li>
+          <li><span>02</span> {text.step2}</li>
+          <li><span>03</span> {text.step3}</li>
         </ol>
       </section>
 
@@ -95,7 +115,7 @@ export default function App({ token, sessionId, onSignIn, onSignOut }: AppProps 
 
       {/* Footer */}
       <footer className="footer">
-        <p>middleman · Made for the way you sell. Seller confirmation does not imply payment-provider verification.</p>
+        <p>{text.footer}</p>
       </footer>
     </div>
   );

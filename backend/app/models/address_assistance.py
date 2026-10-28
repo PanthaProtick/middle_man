@@ -8,6 +8,7 @@ class AddressExtractionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
     raw_text: str = Field(min_length=1, max_length=2000)
     ai_opt_in: Literal[True]
+    language: Literal["en", "bn"] = "en"
 
     @field_validator("ai_opt_in", mode="before")
     @classmethod
@@ -38,6 +39,7 @@ class AddressSuggestions(BaseModel):
 class AddressExtractionResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
     available: bool
+    explanation_language: Literal["en", "bn"] | None = None
     suggestions: AddressSuggestions | None = None
     review_required: Literal[True] = True
     message: str

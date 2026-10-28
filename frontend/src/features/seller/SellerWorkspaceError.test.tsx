@@ -31,7 +31,7 @@ describe('SellerWorkspace Error Handling', () => {
             JSON.stringify({
               error: {
                 code: 'DURABLE_STORAGE_UNAVAILABLE',
-                message: 'Durable storage is required in integration mode: Database configuration is missing.',
+                message: 'Shop storage is unavailable. Check the service configuration and try again.',
               },
               detail: 'Durable storage is required in integration mode.',
             }),
@@ -70,7 +70,7 @@ describe('SellerWorkspace Error Handling', () => {
     const alert = container.querySelector('div[role="alert"]');
     expect(alert).not.toBeNull();
     expect(alert?.textContent).toContain(
-      'Durable storage is required in integration mode: Database configuration is missing.',
+      'Shop storage is unavailable. Check the service configuration and try again.',
     );
   });
 });

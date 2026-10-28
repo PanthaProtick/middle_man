@@ -15,7 +15,7 @@ it.each([413, 429])('keeps input editable and renders admission rejection %s', a
     : 'Request is too large. Reduce the request size and retry.';
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) =>
     init?.method === 'POST'
-      ? new Response(JSON.stringify({ error: { code: status === 429 ? 'PUBLIC_RATE_LIMITED' : 'PUBLIC_BODY_TOO_LARGE', message } }), { status })
+      ? new Response(JSON.stringify({ error: { code: status === 429 ? 'PUBLIC_RATE_LIMITED' : 'PUBLIC_BODY_TOO_LARGE', message } }), { status, headers: {'Retry-After': '10'} })
       : new Response(JSON.stringify(order)));
   const page = await filledPortal();
   try {
@@ -149,7 +149,8 @@ it('preserves input and shows server field validation before allowing a correcte
     await page.submit();
     expect(page.container.querySelector<HTMLInputElement>('[name="buyer_name"]')?.value).toBe('Synthetic buyer');
     expect(page.container.querySelector('fieldset')?.disabled).toBe(false);
-    expect(page.container.querySelector('#payment_trx_id-error')?.textContent).toBe('Synthetic TrxID validation');
+    expect(page.container.querySelector('#payment_trx_id-error')?.textContent).toBe('Check this value and try again.');
+    expect(page.container.textContent).not.toContain('Synthetic TrxID validation');
     await act(async () => edit(page.container, 'payment_trx_id', 'CORRECTED'));
     await page.submit();
     const posts = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
@@ -165,7 +166,7 @@ it.each([413, 429])('preserves uncertain attempt after admission rejection %s', 
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
     if (init?.method === 'POST') {
       posts++;
-      if (posts === 2) return new Response(JSON.stringify({ error: { code: 'PUBLIC_ADMISSION_REJECTED', message: 'Retry after 10 seconds.' } }), { status });
+      if (posts === 2) return new Response(JSON.stringify({ error: { code: status === 429 ? 'PUBLIC_RATE_LIMITED' : 'PUBLIC_BODY_TOO_LARGE', message: 'Raw technical detail' } }), { status, headers: {'Retry-After': '10'} });
       if (posts > 2) return new Response(JSON.stringify({ ...order, lifecycle: 'pending', submission_acknowledgement: 'ACK-RETRY' }));
     } else if (++reads === 1) return new Response(JSON.stringify(order));
     else if (posts === 2) throw new TypeError('Status still unavailable');
@@ -186,7 +187,8 @@ it.each([413, 429])('preserves uncertain attempt after admission rejection %s', 
     expect(attempts[1][1]?.body).toBe(attempts[0][1]?.body);
     expect(attempts[1][1]?.headers).toEqual(attempts[0][1]?.headers);
     expect(page.container.querySelector('fieldset')?.disabled).toBe(true);
-    expect(page.container.textContent).toContain('Retry after 10 seconds.');
+    expect(page.container.textContent).toContain(status === 429 ? 'Retry after 10 seconds.' : 'Reduce the request size and retry.');
+    expect(page.container.textContent).toContain('Submission outcome unknown.');
     await page.submit();
     const finalAttempt = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')[2];
     expect(finalAttempt[1]?.body).toBe(attempts[0][1]?.body);

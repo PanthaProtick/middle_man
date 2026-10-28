@@ -1,0 +1,36 @@
+import { act } from 'react';
+import { createRoot } from 'react-dom/client';
+import { afterEach, expect, it, vi } from 'vitest';
+import { LocaleProvider } from '../locale/LocaleProvider';
+import { LocaleSwitch } from '../locale/LocaleSwitch';
+import { SmsImportPanel } from './SmsImportPanel';
+afterEach(()=>{vi.restoreAllMocks();localStorage.clear();});
+it('switches saved SMS results without importing again or changing extracted evidence',async()=>{
+ localStorage.setItem('middleman.locale','en');
+ const fetcher=vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response(JSON.stringify({items:[{id:'batch-১২',items:[{index:0,state:'imported',issues:[],fields:{provider:'bkash',trx_id:'SMS-১২',amount_minor:150000,sender_number:'01799998877',occurred_at:'2026-10-24T00:00:00Z'},order_ids:[]},{index:1,state:'future',issues:['unknown'],fields:null,order_ids:[]}]}],next_cursor:null})));
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ await act(async()=>root.render(<LocaleProvider><LocaleSwitch/><SmsImportPanel accounts={[]} token="seller" onImported={vi.fn()} onManual={vi.fn()}/></LocaleProvider>));
+ await act(async()=>Array.from(host.querySelectorAll('button')).find(b=>b.textContent==='Previous import results')!.click());
+ expect(host.textContent).toContain('৳1,500.00');
+ await act(async()=>Array.from(host.querySelectorAll('button')).find(b=>b.textContent==='বাংলা')!.click());
+ expect(host.textContent).toContain('যোগ হয়েছে');expect(host.textContent).toContain('পর্যালোচনা প্রয়োজন');
+ expect(host.textContent).toContain('SMS-১২');expect(host.textContent).toContain('01799998877');expect(host.textContent).toContain('অক্টোবর');
+ expect(fetcher).toHaveBeenCalledTimes(1);
+ await act(async()=>root.unmount());host.remove();
+});
+
+it('announces empty import history in either language and keeps the focused SMS draft',async()=>{
+ localStorage.setItem('middleman.locale','en');
+ const fetcher=vi.spyOn(globalThis,'fetch').mockResolvedValue(new Response(JSON.stringify({items:[],next_cursor:null})));
+ const host=document.createElement('div');document.body.append(host);const root=createRoot(host);
+ await act(async()=>root.render(<LocaleProvider><LocaleSwitch/><SmsImportPanel accounts={[]} token="seller" onImported={vi.fn()} onManual={vi.fn()}/></LocaleProvider>));
+ await act(async()=>Array.from(host.querySelectorAll('button')).find(b=>b.textContent==='Previous import results')!.click());
+ expect(host.textContent).toContain('No previous SMS imports.');
+ const field=host.querySelector('textarea')!;
+ await act(async()=>{Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')!.set!.call(field,'Original SMS ১২');field.dispatchEvent(new Event('input',{bubbles:true}));});
+ field.focus();
+ await act(async()=>Array.from(host.querySelectorAll('button')).find(b=>b.textContent==='বাংলা')!.click());
+ expect(host.textContent).toContain('আগের কোনো SMS আমদানি নেই।');
+ expect(document.activeElement).toBe(field);expect(field.value).toBe('Original SMS ১২');expect(fetcher).toHaveBeenCalledTimes(1);
+ await act(async()=>root.unmount());host.remove();
+});

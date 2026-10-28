@@ -122,6 +122,8 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         ErrorFieldItem(
             field=".".join(str(loc) for loc in err["loc"] if loc != "body"),
             code=err["type"],
+            params={key: value for key, value in err.get("ctx", {}).items()
+                    if is_public_order and key in ("min_length", "max_length") and type(value) is int},
             # Custom validators can include the raw phone/address in their message.
             message="Invalid value" if is_courier_settings or is_public_order and err["type"] == "value_error" else str(err["msg"]),
         )

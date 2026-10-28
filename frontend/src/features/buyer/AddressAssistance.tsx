@@ -1,11 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
+import { useLocale } from '../locale';
+import { addressAssistanceCopy } from '../locale/addressAssistanceCopy';
+import type { Locale } from '../locale/storage';
 
 const fields = ['district', 'thana', 'area', 'street_line', 'landmark'] as const;
 type AddressField = typeof fields[number];
 type Suggestions = Record<AddressField, string | null> & { needs_clarification: boolean; clarification_question: string | null };
-type Review = { source: string; token: string; values: Suggestions };
+type Review = { source: string; token: string; values: Suggestions; language: Locale | null };
 
-function parseSuggestions(value: unknown): Suggestions {
+
+function parseSuggestions(value: unknown): { values: Suggestions; language: Locale | null } {
   if (!value || typeof value !== 'object') throw new Error('Invalid suggestions');
   const body = value as Record<string, unknown>;
   if (body.available !== true || body.review_required !== true || !body.suggestions || typeof body.suggestions !== 'object') throw new Error('Unavailable');
@@ -16,20 +20,18 @@ function parseSuggestions(value: unknown): Suggestions {
     const max = field === 'clarification_question' ? 500 : field === 'street_line' || field === 'landmark' ? 200 : 100;
     if (text !== null && (typeof text !== 'string' || text.length > max)) throw new Error('Invalid field');
   }
-  return result as Suggestions;
+  return { values: result as Suggestions, language: body.explanation_language === 'bn' || body.explanation_language === 'en' ? body.explanation_language : null };
 }
 
-interface Props {
-  portalToken: string;
-  address: string;
-  onUse: (value: string) => void;
-  disabled: boolean;
-}
+interface Props { portalToken: string; address: string; onUse: (value: string) => void; disabled: boolean }
 
 export function AddressAssistance({ portalToken, address, onUse, disabled }: Props) {
+  const { locale } = useLocale();
+  const text = addressAssistanceCopy[locale];
   const [review, setReview] = useState<Review | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [showOriginal, setShowOriginal] = useState<boolean | null>(null);
   const controller = useRef<AbortController | null>(null);
   const mutation = useRef<{ source: string; token: string; key: string } | null>(null);
   useEffect(() => () => { controller.current?.abort(); }, [address, portalToken, disabled]);
@@ -37,51 +39,54 @@ export function AddressAssistance({ portalToken, address, onUse, disabled }: Pro
 
   async function requestSuggestions() {
     controller.current?.abort();
-    const request = new AbortController();
-    controller.current = request;
-    if (mutation.current?.source !== address || mutation.current.token !== portalToken) {
-      mutation.current = { source: address, token: portalToken, key: crypto.randomUUID() };
-    }
+    const request = new AbortController(); controller.current = request;
+    if (mutation.current?.source !== address || mutation.current.token !== portalToken) mutation.current = { source: address, token: portalToken, key: crypto.randomUUID() };
     const timeout = window.setTimeout(() => request.abort(), 10000);
-    setLoading(true); setError(''); setReview(null);
+    setLoading(true); setError(null); setReview(null); setShowOriginal(null);
     try {
       const response = await fetch(`/api/public/orders/${encodeURIComponent(portalToken)}/address-extraction`, {
-        method: 'POST', signal: request.signal,
-        headers: { 'Content-Type': 'application/json', 'Idempotency-Key': mutation.current.key },
-        body: JSON.stringify({ raw_text: address, ai_opt_in: true }),
+        method: 'POST', signal: request.signal, headers: { 'Content-Type': 'application/json', 'Idempotency-Key': mutation.current.key },
+        body: JSON.stringify({ raw_text: address, ai_opt_in: true, language: locale }),
       });
-      if (!response.ok) throw new Error('Assistance unavailable');
-      const values = parseSuggestions(await response.json());
-      if (!request.signal.aborted) setReview({ source: address, token: portalToken, values });
+      if (!response.ok) {
+        const body: unknown = await response.json().catch(() => null);
+        const data = body && typeof body === 'object' ? body as Record<string, unknown> : {};
+        const detail = data.error ?? data.detail;
+        const code = detail && typeof detail === 'object' ? (detail as Record<string, unknown>).code : null;
+        if (controller.current === request) setError(typeof code === 'string' ? code : 'UNKNOWN');
+        return;
+      }
+      const result = parseSuggestions(await response.json());
+      if (!request.signal.aborted) setReview({ source: address, token: portalToken, ...result });
     } catch {
-      if (controller.current === request) setError('Address assistance unavailable. Enter your address manually. Retry uses the same request key.');
+      if (controller.current === request) setError('UNKNOWN');
     } finally {
       window.clearTimeout(timeout);
       if (controller.current === request) setLoading(false);
     }
   }
-
-  return <section aria-label="Optional address assistance" style={{ marginBottom: 16 }}>
-    <p>Optional: send only your address text to Google Gemini for suggestions. Our raw request and response evidence is retained for up to 30 days from collection. Google processes it under the configured service terms. Review suggestions before use; you can always enter your address manually.</p>
-    <button type="button" disabled={disabled || loading || !address.trim()} onClick={() => { void requestSuggestions(); }}>
-      {loading ? 'Getting suggestions…' : 'Send address to Gemini (I agree)'}
-    </button>
-    {loading && <p role="status">You can keep editing or submit manually while assistance loads.</p>}
-    {error && <p role="alert">{error}</p>}
+  const errorText = error === 'ADDRESS_ASSISTANCE_LIMIT' ? text.limit : error === 'IDEMPOTENCY_KEY_REUSED' ? text.conflict : error === 'EXPIRED_SUBMISSION' || error === 'BUYER_LINK_REVOKED' || error === 'RECORD_UNAVAILABLE' || error === 'NOT_FOUND' ? text.expired : error === 'ORDER_ALREADY_SUBMITTED' ? text.submitted : text.unavailable;
+  return <section lang={locale} aria-label={text.label} style={{ marginBottom: 16 }}>
+    <p>{text.consent}</p>
+    <button type="button" disabled={disabled || loading || !address.trim()} onClick={() => { void requestSuggestions(); }}>{loading ? text.loading : text.send}</button>
+    {loading && <p role="status">{text.pending}</p>}
+    {error && <p role="alert">{errorText}</p>}
     {visibleReview && <fieldset>
-      <legend>Review and edit suggestions</legend>
-      {fields.map(field => <label key={field} style={{ display: 'block' }}>{field.replace('_', ' ')}
-        <input aria-label={`Suggested ${field}`} value={visibleReview.values[field] ?? ''}
-          maxLength={field === 'street_line' || field === 'landmark' ? 200 : 100}
+      <legend>{text.review}</legend>
+      {fields.map(field => <label key={field} style={{ display: 'block' }}>{text[field]}
+        <input value={visibleReview.values[field] ?? ''} maxLength={field === 'street_line' || field === 'landmark' ? 200 : 100}
           onChange={event => setReview({ ...visibleReview, values: { ...visibleReview.values, [field]: event.target.value || null } })} />
       </label>)}
-      {visibleReview.values.clarification_question && <p>{visibleReview.values.clarification_question}</p>}
+      {visibleReview.values.clarification_question && <div>
+        {visibleReview.language !== locale && <p>{text.originalNotice}</p>}
+        <button type="button" aria-expanded={showOriginal ?? visibleReview.language === locale} onClick={() => setShowOriginal(!(showOriginal ?? visibleReview.language === locale))}>{(showOriginal ?? visibleReview.language === locale) ? text.hide : text.show}</button>
+        {(showOriginal ?? visibleReview.language === locale) && <p lang={visibleReview.language ?? undefined}>{visibleReview.values.clarification_question}</p>}
+      </div>}
       <button type="button" onClick={() => {
-        const value = (['street_line', 'area', 'thana', 'district', 'landmark'] as const)
-          .map(field => visibleReview.values[field]?.trim()).filter(Boolean).join(', ');
+        const value = (['street_line', 'area', 'thana', 'district', 'landmark'] as const).map(field => visibleReview.values[field]?.trim()).filter(Boolean).join(', ');
         if (value) { onUse(value); setReview(null); }
-      }}>Use reviewed suggestions</button>
-      <button type="button" onClick={() => setReview(null)}>Keep manual address</button>
+      }}>{text.use}</button>
+      <button type="button" onClick={() => setReview(null)}>{text.manual}</button>
     </fieldset>}
   </section>;
 }

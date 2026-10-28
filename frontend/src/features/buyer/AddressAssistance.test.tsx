@@ -18,7 +18,7 @@ function button(text: string): HTMLButtonElement {
   if (!result) throw new Error(`Missing button ${text}`);
   return result;
 }
-const result = { available: true, review_required: true, message: 'Review', suggestions: {
+const result = { available: true, review_required: true, explanation_language: 'en', message: 'Review', suggestions: {
   district: 'Dhaka', thana: null, area: 'Mirpur', street_line: null, landmark: null, needs_clarification: true, clarification_question: 'Which road?',
 } };
 
@@ -73,4 +73,3 @@ it.each([{}, { ...result, suggestions: { district: 42 } }, { ...result, availabl
   await act(async () => button('Manual edit').click());
   expect(container.querySelector('output')?.textContent).toBe('Reviewed manually');
 });
-

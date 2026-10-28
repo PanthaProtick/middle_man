@@ -1,3 +1,5 @@
+import { LocaleProvider } from '../locale/LocaleProvider';
+import { LocaleSwitch } from '../locale/LocaleSwitch';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -10,14 +12,14 @@ const receipt: ReceiptView = {
   reconciliation_state: 'unmatched', has_conflict: false, version: 2, observations: [], related_claims_count: 1,
   created_at: '2026-10-24T09:00:00Z', updated_at: '2026-10-24T10:00:00Z',
 };
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
 
 async function mount() {
   const onCorrected = vi.fn(); const onStale = vi.fn().mockResolvedValue(undefined); const onPending = vi.fn();
   const container = document.createElement('div'); document.body.append(container);
   const root = createRoot(container);
-  await act(async () => root.render(<ReceiptCorrection receipt={receipt} accounts={[]} token="seller"
-    disabled={false} onCorrected={onCorrected} onPending={onPending} onStale={onStale} />));
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><ReceiptCorrection receipt={receipt} accounts={[]} token="seller"
+    disabled={false} onCorrected={onCorrected} onPending={onPending} onStale={onStale} /></LocaleProvider>));
   async function change(label: string, value: string) {
     await act(async () => {
       const node = container.querySelector<HTMLInputElement | HTMLTextAreaElement>(`[aria-label="${label}"]`)!;
@@ -45,6 +47,10 @@ it('preserves exact correction key and payload for unstructured server outages a
   await ui.submit();
   expect(ui.container.textContent).toContain('Retry same correction');
   expect(ui.container.querySelector('fieldset')?.disabled).toBe(true);
+  await act(async () => Array.from(ui.container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
+  expect(ui.container.textContent).toContain('একই সংশোধন আবার পাঠান');
+  expect(ui.container.querySelector<HTMLTextAreaElement>('textarea')!.value).toBe('Checked app amount');
+  expect(requests).toHaveLength(1);
   await ui.submit();
   expect(requests[0]?.body).toBe(requests[1]?.body);
   expect(requests[0]?.headers).toEqual(requests[1]?.headers);

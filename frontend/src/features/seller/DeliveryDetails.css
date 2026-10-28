@@ -40,6 +40,11 @@
 .delivery-details legend { margin-bottom: 4px; font-weight: 600; }
 .delivery-details ul { padding-left: 20px; margin: 12px 0; }
 .delivery-details li + li { margin-top: 6px; }
+.delivery-details fieldset { min-width: 0; }
+.delivery-details label, .delivery-details select, .delivery-details input { max-width: 100%; }
+.delivery-details button, .delivery-details summary { white-space: normal; overflow-wrap: anywhere; }
+.delivery-details button { min-height: 44px; }
+.delivery-details details p { white-space: pre-wrap; }
 .parcel-fields, .buyer-link-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

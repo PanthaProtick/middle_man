@@ -1,11 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Send, AlertCircle, User, Phone, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import { PaymentClaimFields } from './PaymentClaimFields';
 import { AddressAssistance } from './AddressAssistance';
 import { PathaoLocations } from './PathaoLocations';
-import { canonicalizeBdPhone } from '../seller/api';
-import { parseClaimedAmount } from './api';
+import { useLocale } from '../locale';
+import { validateBuyerDraft } from './validateBuyerDraft';
+import { parseClaimedAmount, type ApiError } from './api';
+import { formFieldName, fieldMessage } from './submissionErrors';
+import type { MessageKey } from '../locale';
 
 interface BuyerSubmissionFormProps {
   portalToken?: string;
@@ -15,8 +18,13 @@ interface BuyerSubmissionFormProps {
   onSubmit: (submission: BuyerSubmissionInput) => Promise<void>;
   isSubmitting: boolean;
   isLocked?: boolean;
-  serverFields?: Record<string, string>;
+  serverFields?: ApiError['fields'];
   submissionError: string | null;
+}
+
+function focusFirstError(form: HTMLFormElement | null, errors: Record<string, unknown>): void {
+  Array.from(form?.querySelectorAll<HTMLInputElement>('input[name], textarea[name], select[name]') ?? [])
+    .find(input => errors[input.name])?.focus();
 }
 
 export function BuyerSubmissionForm({
@@ -27,60 +35,29 @@ export function BuyerSubmissionForm({
   onSubmit,
   isSubmitting,
   isLocked = false,
-  serverFields = {},
+  serverFields,
   submissionError,
 }: BuyerSubmissionFormProps): React.JSX.Element {
-  const [localErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const fieldErrors = { ...serverFields, ...localErrors };
-
-  const validate = (): boolean => {
-    const errors: Record<string, string> = {};
-
-    if (!draft.buyer_name.trim()) {
-      errors.buyer_name = 'Full name is required / আপনার নাম লিখুন';
-    }
-
-    if (!draft.contact_number.trim()) {
-      errors.contact_number = 'Contact number is required / যোগাযোগের নাম্বার লিখুন';
-    } else {
-      try {
-        canonicalizeBdPhone(draft.contact_number);
-      } catch {
-        errors.contact_number = 'Valid 11-digit BD phone number required / সঠিক ১১ ডিজিটের নাম্বার দিন';
-      }
-    }
-
-    if (!draft.address_raw.trim()) {
-      errors.address_raw = 'Delivery address is required / সম্পূর্ণ ডেলিভারি ঠিকানা লিখুন';
-    }
-
-    if (!draft.payment_sender.trim()) {
-      errors.payment_sender = 'Payment sender number is required / টাকা পাঠানো নাম্বার লিখুন';
-    } else {
-      try {
-        canonicalizeBdPhone(draft.payment_sender);
-      } catch {
-        errors.payment_sender = 'Valid 11-digit BD sender number required / সঠিক ১১ ডিজিটের নাম্বার দিন';
-      }
-    }
-
-    if (!draft.payment_trx_id.trim()) {
-      errors.payment_trx_id = 'Transaction ID is required / TrxID লিখুন';
-    }
-
-    try {
-      parseClaimedAmount(draft.claimed_advance_bdt);
-    } catch {
-      errors.claimed_advance_bdt = 'Valid payment amount is required / সঠিক টাকার পরিমাণ দিন';
-    }
-
-    setFieldErrors(errors);
-    return Object.keys(errors).length === 0;
+  const { t, locale } = useLocale();
+  const form = useRef<HTMLFormElement>(null);
+  const [validation, setValidation] = useState<{fields: Record<string, MessageKey | ''>; serverFields: ApiError['fields']}>({fields: {}, serverFields});
+  const localErrors = validation.serverFields === serverFields ? validation.fields : {};
+  const fieldErrors = {
+    ...Object.fromEntries((serverFields ?? []).map(field => [formFieldName(field.field), fieldMessage(t, field)])),
+    ...Object.fromEntries(Object.entries(localErrors).map(([field, code]) => [field, code ? t(code) : ''])),
   };
+  useEffect(() => {
+    focusFirstError(form.current, Object.fromEntries((serverFields ?? []).map(field => [formFieldName(field.field), true])));
+  }, [serverFields]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!validate()) return;
+    const errors = validateBuyerDraft(draft);
+    setValidation({fields: errors, serverFields});
+    if (Object.keys(errors).length) {
+      focusFirstError(form.current, errors);
+      return;
+    }
 
     const amountMinor = parseClaimedAmount(draft.claimed_advance_bdt);
     const submission: BuyerSubmissionInput = {
@@ -104,18 +81,18 @@ export function BuyerSubmissionForm({
   const updateField = (field: keyof BuyerFormDraft, value: string) => {
     onDraftChange({ ...draft, [field]: value });
     if (fieldErrors[field]) {
-      setFieldErrors({ ...fieldErrors, [field]: '' });
+      setValidation({fields: { ...localErrors, [field]: '' }, serverFields});
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="card" style={{ border: '1px solid var(--border-subtle)' }} noValidate>
+    <form ref={form} lang={locale} onSubmit={handleSubmit} className="card" style={{ border: '1px solid var(--border-subtle)' }} noValidate>
       <div style={{ marginBottom: '18px' }}>
         <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
-          Delivery &amp; Payment Confirmation / ডেলিভারি ও পেমেন্ট তথ্য
+          {t('buyer.form.title')}
         </h3>
         <p style={{ margin: '4px 0 0 0', fontSize: '0.825rem', color: 'var(--text-secondary)' }}>
-          Please complete your details in the sections below to confirm this order.
+          {t('buyer.form.intro')}
         </p>
       </div>
 
@@ -146,15 +123,15 @@ export function BuyerSubmissionForm({
           <div className="buyer-form-section-header">
             <div className="buyer-form-section-badge">1</div>
             <div>
-              <h4 className="buyer-form-section-title">Recipient Information / আপনার তথ্য</h4>
-              <p className="buyer-form-section-subtitle">Name and phone number for delivery confirmation</p>
+              <h4 className="buyer-form-section-title">{t('buyer.form.recipient')}</h4>
+              <p className="buyer-form-section-subtitle">{t('buyer.form.recipientHelp')}</p>
             </div>
           </div>
 
           <div className="form-group" style={{ marginBottom: '14px' }}>
             <label htmlFor="buyer_name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
               <User size={15} color="var(--primary-accent)" />
-              <span>Your Full Name / আপনার নাম <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
+              <span>{t('buyer.form.name')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
             </label>
             <input
               id="buyer_name"
@@ -162,7 +139,7 @@ export function BuyerSubmissionForm({
               type="text"
               value={draft.buyer_name}
               onChange={(e) => updateField('buyer_name', e.target.value)}
-              placeholder="e.g. Rahim Uddin"
+              placeholder={t('buyer.form.namePlaceholder')}
               maxLength={200}
               aria-describedby={fieldErrors.buyer_name ? "buyer_name-error" : undefined}
               aria-invalid={!!fieldErrors.buyer_name}
@@ -177,7 +154,7 @@ export function BuyerSubmissionForm({
           <div className="form-group">
             <label htmlFor="contact_number" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
               <Phone size={15} color="var(--primary-accent)" />
-              <span>Your Contact Number / যোগাযোগের ফোন নাম্বার <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
+              <span>{t('buyer.form.contact')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
             </label>
             <input
               id="contact_number"
@@ -187,13 +164,13 @@ export function BuyerSubmissionForm({
               onChange={(e) => updateField('contact_number', e.target.value)}
               placeholder="017XXXXXXXX or ০১৭XXXXXXXX"
               maxLength={32}
-              aria-describedby={fieldErrors.contact_number ? "contact_number-error" : undefined}
+              aria-describedby={`contact_number-help${fieldErrors.contact_number ? ' contact_number-error' : ''}`}
               aria-invalid={!!fieldErrors.contact_number}
               className="form-control"
               style={{ marginTop: '6px', width: '100%' }}
             />
-            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-              For courier call &amp; delivery updates (কুরিয়ার কলের জন্য)
+            <div id="contact_number-help" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+              {t('buyer.form.contactHelp')}
             </div>
             {fieldErrors.contact_number && (
               <div id="contact_number-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
@@ -206,8 +183,8 @@ export function BuyerSubmissionForm({
           <div className="buyer-form-section-header">
             <div className="buyer-form-section-badge">2</div>
             <div>
-              <h4 className="buyer-form-section-title">Delivery Location / ডেলিভারির ঠিকানা</h4>
-              <p className="buyer-form-section-subtitle">Full destination address for courier dispatch</p>
+              <h4 className="buyer-form-section-title">{t('buyer.form.location')}</h4>
+              <p className="buyer-form-section-subtitle">{t('buyer.form.locationHelp')}</p>
             </div>
           </div>
 
@@ -217,7 +194,7 @@ export function BuyerSubmissionForm({
           <div className="form-group" style={{ marginBottom: '10px' }}>
             <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
               <MapPin size={15} color="var(--primary-accent)" />
-              <span>Full Delivery Address / সম্পূর্ণ ডেলিভারি ঠিকানা <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
+              <span>{t('buyer.form.address')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
             </label>
             <textarea
               id="address_raw"
@@ -225,7 +202,7 @@ export function BuyerSubmissionForm({
               rows={3}
               value={draft.address_raw}
               onChange={(e) => updateField('address_raw', e.target.value)}
-              placeholder="House/Holding, Road, Area/Thana, District (e.g. বাড়ি ১২, রোড ৫, ধানমন্ডি, ঢাকা)"
+              placeholder={t('buyer.form.addressPlaceholder')}
               maxLength={2000}
               aria-describedby={fieldErrors.address_raw ? "address_raw-error" : undefined}
               aria-invalid={!!fieldErrors.address_raw}
@@ -237,7 +214,7 @@ export function BuyerSubmissionForm({
             )}
           </div>
 
-          {order.ai_assistance_available !== true && <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0' }}>AI assistance is unavailable. Enter your address and payment details manually.</p>}
+          {order.ai_assistance_available !== true && <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0' }}>{t('buyer.form.manual')}</p>}
           {portalToken && order.ai_assistance_available === true && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
             onUse={value => updateField('address_raw', value)} disabled={isSubmitting || isLocked} />}
         </div>
@@ -247,8 +224,8 @@ export function BuyerSubmissionForm({
           <div className="buyer-form-section-header">
             <div className="buyer-form-section-badge">3</div>
             <div>
-              <h4 className="buyer-form-section-title">Advance Payment Claim / অগ্রিম পেমেন্টের তথ্য</h4>
-              <p className="buyer-form-section-subtitle">Record the advance you sent to the shop receiving account</p>
+              <h4 className="buyer-form-section-title">{t('buyer.form.payment')}</h4>
+              <p className="buyer-form-section-subtitle">{t('buyer.form.paymentHelp')}</p>
             </div>
           </div>
 
@@ -277,8 +254,8 @@ export function BuyerSubmissionForm({
           fontSize: '0.95rem',
         }}
       >
-        <Send size={18} />
-        <span>{isSubmitting ? 'Submitting / জমা হচ্ছে...' : isLocked ? 'Retry Same Submission / একই তথ্য দিয়ে আবার চেষ্টা করুন' : 'Submit Order Details / তথ্য জমা দিন'}</span>
+        <Send size={18} aria-hidden="true" />
+        <span>{t(isSubmitting ? 'buyer.form.submitting' : isLocked ? 'buyer.form.retry' : 'buyer.form.submit')}</span>
       </button>
     </form>
   );

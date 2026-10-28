@@ -1,4 +1,6 @@
+import { formatOrderAmount } from './orderNumbers';
 import { sellerFetch } from './sessionRequest';
+import { formatBangladeshDateTime } from '../locale/format';
 import type { ImportList, ImportResult } from './smsTypes';
 import type {
   AccountInput,
@@ -50,23 +52,7 @@ export function canonicalizeBdPhone(raw: string): string {
 }
 
 export function formatBangladeshTime(isoString: string): string {
-  try {
-    const d = new Date(isoString);
-    if (Number.isNaN(d.getTime())) return isoString;
-    return (
-      d.toLocaleString('en-GB', {
-        timeZone: 'Asia/Dhaka',
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-      }) + ' (BST / UTC+6)'
-    );
-  } catch {
-    return isoString;
-  }
+  return formatBangladeshDateTime(isoString, 'en');
 }
 
 export function parseBdtToMinor(bdtStr: string): number {
@@ -91,7 +77,7 @@ export function formatRemainingCod(order: {
     order.lifecycle === 'confirmed' && order.actual_cod_minor !== null
       ? order.actual_cod_minor
       : order.expected_cod_minor;
-  return `BDT ${(minor / 100).toLocaleString()}`;
+  return `BDT ${formatOrderAmount(minor)}`;
 }
 
 export class SellerApiError extends Error {

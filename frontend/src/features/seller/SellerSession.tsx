@@ -1,24 +1,44 @@
 import { useEffect, useLayoutEffect, useState } from 'react';
 import { useAuth, useClerk } from '@clerk/react';
-import App from '../../App';
+import { SellerSignIn } from './SellerSignIn';
+import { AppShell } from '../../App';
+import { LocaleProvider, LocaleSwitch, useLocale } from '../locale';
+import { sessionReason } from './sessionReason';
+import { sellerCopy } from '../locale/sellerCopy';
 import { bindSellerSession, renewSellerSessionToken, type AuthReason, type SessionFailure } from './sessionRequest';
 
 /** The SDK owns session persistence; application bearer tokens stay in memory. */
 export function SellerSession(): React.JSX.Element {
+  return <LocaleProvider><SellerSessionContent /></LocaleProvider>;
+}
+
+function SellerSessionContent(): React.JSX.Element {
+  const { locale, t } = useLocale();
+  const text = sellerCopy[locale];
   const { isLoaded, isSignedIn, sessionId, getToken } = useAuth();
-  const { openSignIn, signOut } = useClerk();
+  const { signOut } = useClerk();
+  const [signInOpen, setSignInOpen] = useState(false);
   const [credential, setCredential] = useState<{ sessionId: string; token: string; bearerToken: string }>();
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<'token' | 'signOut'>();
   const [signingOut, setSigningOut] = useState(false);
   const [signedOutSession, setSignedOutSession] = useState<string | null>();
   const [failure, setFailure] = useState<{ sessionId: string; kind: SessionFailure; reason?: AuthReason }>();
   const [retry, setRetry] = useState(0);
   const blocked = failure !== undefined && failure.sessionId === sessionId;
 
+  // Keep the seller tab title localized even while Clerk or the session is loading.
+  useEffect(() => {
+    document.title = t('document.title.seller');
+  }, [t]);
+
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !sessionId || signingOut || sessionId === signedOutSession || blocked) return;
     let active = true;
+    let recoveryTimer: number | undefined;
+    let refreshing = false;
     const refresh = async () => {
+      if (refreshing) return;
+      refreshing = true;
       try {
         const token = await getToken();
         if (!active) return;
@@ -26,15 +46,23 @@ export function SellerSession(): React.JSX.Element {
         setCredential(previous => ({ sessionId, bearerToken: token,
           token: previous?.sessionId === sessionId ? previous.token : token }));
         setError(undefined);
+        window.clearTimeout(recoveryTimer);
+        recoveryTimer = undefined;
       } catch {
         if (!active) return;
         setCredential(undefined);
-        setError('Unable to obtain your seller session. Please sign in again.');
+        setError('token');
+        if (recoveryTimer === undefined) recoveryTimer = window.setTimeout(() => {
+          recoveryTimer = undefined;
+          void refresh();
+        }, 5000);
+      } finally {
+        refreshing = false;
       }
     };
     void refresh();
     const interval = window.setInterval(() => void refresh(), 30000);
-    return () => { active = false; window.clearInterval(interval); };
+    return () => { active = false; window.clearInterval(interval); window.clearTimeout(recoveryTimer); };
   }, [isLoaded, isSignedIn, sessionId, getToken, signingOut, signedOutSession, blocked, retry]);
 
   const token = isLoaded && isSignedIn && !signingOut && !blocked && sessionId !== signedOutSession && credential?.sessionId === sessionId
@@ -44,12 +72,13 @@ export function SellerSession(): React.JSX.Element {
     return bindSellerSession(token, (kind, reason) => {
       setCredential(undefined);
       setFailure({ sessionId, kind, reason });
-    });
-  }, [token, sessionId]);
+    }, () => getToken({ skipCache: true }));
+  }, [token, sessionId, getToken]);
   useLayoutEffect(() => {
     if (token && credential) renewSellerSessionToken(token, credential.bearerToken);
   }, [token, credential]);
   const handleSignOut = async () => {
+    setSignInOpen(false);
     setSigningOut(true);
     setSignedOutSession(sessionId);
     setCredential(undefined);
@@ -57,7 +86,7 @@ export function SellerSession(): React.JSX.Element {
       await signOut();
     } catch {
       setSignedOutSession(undefined);
-      setError('Unable to sign out. Please retry.');
+      setError('signOut');
     } finally {
       setSigningOut(false);
     }
@@ -68,21 +97,22 @@ export function SellerSession(): React.JSX.Element {
     setRetry(value => value + 1);
   };
 
-  if (!isLoaded) return <p role="status">Loading seller sign-in…</p>;
+  if (!isLoaded) return <><LocaleSwitch /><p role="status">{text.sessionLoading}</p></>;
+  if (signInOpen && !isSignedIn) return <SellerSignIn />;
 
   return <>
-    {error && <p role="alert">{error}</p>}
+    {error && <p role="alert">{error === 'token' ? text.sessionToken : text.sessionSignOut}</p>}
     {blocked && <div role="alert">
       <p>{failure?.kind === 'unauthorized'
-        ? 'Your seller session has expired. Please sign in again.'
-        : 'Session verification is unavailable. Please retry.'}</p>
-      {failure?.reason && <p>Session diagnostic: {failure.reason}</p>}
-      <button onClick={retrySession}>Retry seller session</button>
+        ? failure?.reason && failure.reason !== 'expired' ? text.sessionRejected : text.sessionExpired
+        : text.sessionUnavailable}</p>
+      {failure?.reason && <p>{text.diagnostic}: {sessionReason(failure.reason, locale)}</p>}
+      <button onClick={retrySession}>{text.sessionRetry}</button>
     </div>}
-    <App token={token} sessionId={token ? sessionId ?? undefined : undefined}
+    <AppShell token={token} sessionId={token ? sessionId ?? undefined : undefined}
       onSignIn={() => {
         if (isSignedIn && sessionId !== signedOutSession) retrySession();
-        else void openSignIn();
+        else setSignInOpen(true);
       }}
       onSignOut={() => { void handleSignOut(); }} />
   </>;

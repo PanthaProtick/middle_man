@@ -2,8 +2,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { BuyerApiError, fetchPublicOrder } from './api';
 import type { PublicOrder } from './types';
 
-const RETRY_MESSAGE = 'Unable to refresh. Showing the last saved status. Please retry. / নতুন স্ট্যাটাস পাওয়া যায়নি। আবার চেষ্টা করুন।';
-const OFFLINE_MESSAGE = 'You are offline. Showing the last saved status. / ইন্টারনেট সংযোগ নেই।';
+/**
+ * Presentation-free failure kinds. The buyer portal maps these to the selected
+ * language so server-side wording never becomes the display contract.
+ */
+export type PublicOrderProblem = 'offline' | 'refresh_failed' | 'order_unavailable' | 'load_failed';
+
+const UNAVAILABLE_ORDER_CODES = new Set(['NOT_FOUND', 'BUYER_LINK_REVOKED']);
 
 interface Controller {
   refresh: () => Promise<void>;
@@ -14,9 +19,9 @@ export function usePublicOrder(portalToken: string) {
   const [order, setOrder] = useState<PublicOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [gateDisabledMessage, setGate] = useState<string | null>(null);
-  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [error, setError] = useState<PublicOrderProblem | null>(null);
+  const [gateDisabled, setGate] = useState<boolean>(false);
+  const [refreshError, setRefreshError] = useState<PublicOrderProblem | null>(null);
   const controller = useRef<Controller | null>(null);
 
   useEffect(() => {
@@ -52,7 +57,7 @@ export function usePublicOrder(portalToken: string) {
       stopped = fresh.lifecycle !== 'pending' && fresh.lifecycle !== 'awaiting_buyer';
       setOrder(fresh);
       setError(null);
-      setGate(null);
+      setGate(false);
       setRefreshError(null);
     };
     async function refresh() {
@@ -60,8 +65,8 @@ export function usePublicOrder(portalToken: string) {
       clearTimeout(timer);
       if (!navigator.onLine) {
         setLoading(false);
-        if (current) setRefreshError(OFFLINE_MESSAGE);
-        else setError(OFFLINE_MESSAGE);
+        if (current) setRefreshError('offline');
+        else setError('offline');
         return;
       }
       const version = ++generation;
@@ -84,18 +89,27 @@ export function usePublicOrder(portalToken: string) {
           stopped = true;
           current = null;
           setOrder(null);
-          setGate('Public buyer access is disabled until access/projection policy is settled');
+          setGate(true);
+        } else if (apiError && UNAVAILABLE_ORDER_CODES.has(apiError.code)) {
+          accessDenied = true;
+          stopped = true;
+          current = null;
+          setOrder(null);
+          setError('order_unavailable');
+        } else if (apiError?.code === 'DATABASE_UNAVAILABLE') {
+          if (current) setRefreshError('refresh_failed');
+          else setError('load_failed');
         } else if (apiError && apiError.statusCode >= 400 && apiError.statusCode < 500
           && apiError.statusCode !== 408 && apiError.statusCode !== 429) {
           accessDenied = true;
           stopped = true;
           current = null;
           setOrder(null);
-          setError('Order record unavailable. Please contact the seller. / অর্ডার পাওয়া যাচ্ছে না। বিক্রেতার সাথে যোগাযোগ করুন।');
+          setError('order_unavailable');
         } else if (current) {
-          setRefreshError(RETRY_MESSAGE);
+          setRefreshError('refresh_failed');
         } else {
-          setError('Unable to load order. Please retry.');
+          setError('load_failed');
         }
       } finally {
         if (active && version === generation) {
@@ -112,8 +126,8 @@ export function usePublicOrder(portalToken: string) {
       setRefreshing(false);
       if (!navigator.onLine) {
         setLoading(false);
-        if (current) setRefreshError(OFFLINE_MESSAGE);
-        else setError(OFFLINE_MESSAGE);
+        if (current) setRefreshError('offline');
+        else setError('offline');
       } else if (visible() && !stopped) void refresh();
     };
     controller.current = {
@@ -150,5 +164,5 @@ export function usePublicOrder(portalToken: string) {
 
   const refresh = useCallback(async () => { await controller.current?.refresh(); }, []);
   const save = useCallback((fresh: PublicOrder) => controller.current?.save(fresh), []);
-  return { order, loading, error, gateDisabledMessage, isRefreshing, refreshError, refresh, save };
+  return { order, loading, error, gateDisabled, isRefreshing, refreshError, refresh, save };
 }

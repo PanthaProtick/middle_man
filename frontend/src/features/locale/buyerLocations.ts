@@ -1,0 +1,46 @@
+export const enBuyerLocations = {
+  "buyer.location.label": "Pathao delivery location",
+  "buyer.location.help": "Choose the delivery location if available. Include house, street and delivery directions in the full address below.",
+  "buyer.location.simulated": "Simulated Pathao locations — offline demonstration only.",
+  "buyer.location.loading": "Loading Pathao locations…",
+  "buyer.location.city": "city",
+  "buyer.location.zone": "zone",
+  "buyer.location.area": "area",
+  "buyer.location.search": "Search Pathao {name}",
+  "buyer.location.choice": "Pathao {name}",
+  "buyer.location.choose": "Choose {name}",
+  "buyer.location.saved": "Saved choice (ID {id}); retry to load label",
+  "buyer.location.unsupportedOption": " — unsupported delivery",
+  "buyer.location.unsupported": "My destination is not supported / needs seller help",
+  "buyer.location.retry": "Retry location lookup",
+  "buyer.location.clear": "Clear choices and use written address",
+  "buyer.location.noMatches": "No matching locations.",
+  "buyer.location.emptyCities": "No cities are listed. Submit your written address for seller resolution.",
+  "buyer.location.emptyZones": "No zones are listed. Submit your written address for seller resolution.",
+  "buyer.location.emptyAreas": "No area choices are listed. Submit your written address; the seller must verify delivery coverage.",
+  "buyer.location.unavailable": "Pathao locations are unavailable. You can submit your written address and payment claim for seller resolution. Retry keeps your inputs."
+} as const;
+
+export const bnBuyerLocations = {
+  "buyer.location.label": "Pathao-এর ডেলিভারির এলাকা",
+  "buyer.location.help": "তালিকায় থাকলে ডেলিভারির এলাকা বেছে নিন। নিচের সম্পূর্ণ ঠিকানায় বাড়ি, রাস্তা ও পৌঁছানোর নির্দেশনা লিখুন।",
+  "buyer.location.simulated": "Pathao-এর নমুনা এলাকার তালিকা — শুধু অফলাইন প্রদর্শনীর জন্য।",
+  "buyer.location.loading": "Pathao-এর এলাকার তালিকা লোড হচ্ছে…",
+  "buyer.location.city": "শহর",
+  "buyer.location.zone": "জোন",
+  "buyer.location.area": "এলাকা",
+  "buyer.location.search": "Pathao-এর {name} খুঁজুন",
+  "buyer.location.choice": "Pathao-এর {name}",
+  "buyer.location.choose": "{name} বেছে নিন",
+  "buyer.location.saved": "সংরক্ষিত এলাকা (ID {id}); নাম দেখতে আবার চেষ্টা করুন",
+  "buyer.location.unsupportedOption": " — এখানে ডেলিভারি নেই",
+  "buyer.location.unsupported": "আমার গন্তব্যে ডেলিভারি নেই / বিক্রেতার সাহায্য দরকার",
+  "buyer.location.retry": "আবার এলাকার তালিকা খুঁজুন",
+  "buyer.location.clear": "এলাকা বাদ দিয়ে লেখা ঠিকানা ব্যবহার করুন",
+  "buyer.location.noMatches": "মিলে যাওয়া এলাকা নেই।",
+  "buyer.location.emptyCities": "শহরের তালিকা খালি। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা জমা দিন।",
+  "buyer.location.emptyZones": "জোনের তালিকা খালি। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা জমা দিন।",
+  "buyer.location.emptyAreas": "এলাকার তালিকা খালি। লেখা ঠিকানা জমা দিন; ডেলিভারি দেওয়া যাবে কি না বিক্রেতা যাচাই করবেন।",
+  "buyer.location.unavailable": "Pathao-এর এলাকার তালিকা পাওয়া যাচ্ছে না। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা ও পেমেন্টের তথ্য জমা দিতে পারেন। আবার চেষ্টা করলে আপনার তথ্য থাকবে।"
+} as const;
+

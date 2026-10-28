@@ -1,3 +1,5 @@
+import { useLocale } from '../locale/context';
+import { historyText } from '../locale/historyCopy';
 import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { EvidenceRetentionPanel } from './EvidenceRetentionPanel';
@@ -9,14 +11,16 @@ interface RetentionSectionProps {
 }
 
 export function RetentionSection({ token, onCleaned }: RetentionSectionProps): React.JSX.Element {
+  const { locale } = useLocale();
+  const tr = (text: string) => historyText(locale, text);
   return (
     <section aria-labelledby="section-retention-title">
       <div style={{ marginBottom: '14px' }}>
         <h4 id="section-retention-title" style={{ color: 'var(--primary-accent)', fontSize: '0.95rem', margin: 0, display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <ShieldCheck size={16} /> Data Retention &amp; Compliance Policy
+          <ShieldCheck size={16} /> {tr("Data retention policy")}
         </h4>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.8rem', margin: '2px 0 0' }}>
-          Inspect and execute statutory retention routines for raw evidence files and operational history.
+          {tr("Inspect and run cleanup for raw evidence and completed records.")}
         </p>
       </div>
 

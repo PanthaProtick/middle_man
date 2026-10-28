@@ -1,9 +1,14 @@
+import './BuyerCorrection.css';
+import { OrderOutcomeForms } from './OrderOutcomeForms';
 import React, { useState, useEffect, useRef } from 'react';
 import { Ban, XCircle, RefreshCw, AlertTriangle } from 'lucide-react';
 import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { PaymentAccount, SellerOrder } from './types';
 import { cancelOrder, rejectOrder, replaceOrder } from './paymentDecisions';
-import { fetchPaymentAccounts } from './api';
+import type { CancelDecision, RejectDecision, OrderReplacementInput } from './paymentDecisions';
+import { fetchPaymentAccounts, parseBdtToMinor, SellerApiError } from './api';
+import { useLocale } from '../locale/context';
+import { correctionOutcomeCopy, outcomeFieldError } from '../locale/correctionOutcomeCopy';
 
 interface OrderOutcomesProps {
   order: SellerOrder;
@@ -14,6 +19,8 @@ interface OrderOutcomesProps {
 }
 
 export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courierAttemptStatus }: OrderOutcomesProps): React.JSX.Element {
+  const { locale } = useLocale();
+  const text = correctionOutcomeCopy[locale];
   const [activeAction, setActiveAction] = useState<'none' | 'cancel' | 'reject' | 'replace'>('none');
   const [reason, setReason] = useState('');
   const [productName, setProductName] = useState(order.product_name);
@@ -22,7 +29,8 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
   const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
   const [selectedAccountId, setSelectedAccountId] = useState(order.payment_account_id);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<keyof typeof text | 'unknown' | null>(null);
+  const [pending, setPending] = useState<{ action: 'cancel' | 'reject' | 'replace'; key: string; payload: CancelDecision | RejectDecision | OrderReplacementInput } | null>(null);
 
   const idempotencyKeyRef = useRef<string>(crypto.randomUUID());
 
@@ -46,26 +54,30 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
 
   const handleCancel = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reason.trim()) {
-      setError('Please provide a cancellation reason.');
+    if (isSubmitting) return;
+    if (!pending && !reason.trim()) {
+      setError('needCancelReason');
       return;
     }
     setError(null);
     setIsSubmitting(true);
     try {
+      const attempt = pending ?? { action: 'cancel' as const, key: idempotencyKeyRef.current, payload: { action: 'cancel' as const, expected_version: order.version, reason: reason.trim() } };
+      setPending(attempt);
       const updated = await cancelOrder(
         order.id,
-        { action: 'cancel', expected_version: order.version, reason: reason.trim() },
-        idempotencyKeyRef.current,
+        attempt.payload as CancelDecision,
+        attempt.key,
         token
       );
       idempotencyKeyRef.current = crypto.randomUUID();
+      setPending(null);
       setActiveAction('none');
       setReason('');
       onUpdated(updated);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to cancel order';
-      setError(message);
+      if (err instanceof SellerApiError && err.status < 500) { setPending(null); idempotencyKeyRef.current = crypto.randomUUID(); }
+      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : outcomeFieldError(err.fields?.[0]?.field ?? '', 'cancel') ?? 'failed' : 'unknown');
     } finally {
       setIsSubmitting(false);
     }
@@ -73,26 +85,30 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
 
   const handleReject = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reason.trim()) {
-      setError('Please provide a rejection reason.');
+    if (isSubmitting) return;
+    if (!pending && !reason.trim()) {
+      setError('needRejectReason');
       return;
     }
     setError(null);
     setIsSubmitting(true);
     try {
+      const attempt = pending ?? { action: 'reject' as const, key: idempotencyKeyRef.current, payload: { action: 'reject' as const, expected_version: order.version, reason: reason.trim() } };
+      setPending(attempt);
       const updated = await rejectOrder(
         order.id,
-        { action: 'reject', expected_version: order.version, reason: reason.trim() },
-        idempotencyKeyRef.current,
+        attempt.payload as RejectDecision,
+        attempt.key,
         token
       );
       idempotencyKeyRef.current = crypto.randomUUID();
+      setPending(null);
       setActiveAction('none');
       setReason('');
       onUpdated(updated);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to reject order';
-      setError(message);
+      if (err instanceof SellerApiError && err.status < 500) { setPending(null); idempotencyKeyRef.current = crypto.randomUUID(); }
+      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : outcomeFieldError(err.fields?.[0]?.field ?? '', 'reject') ?? 'failed' : 'unknown');
     } finally {
       setIsSubmitting(false);
     }
@@ -100,43 +116,39 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
 
   const handleReplace = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!reason.trim()) {
-      setError('Please provide a replacement reason.');
+    if (isSubmitting) return;
+    if (!pending && !reason.trim()) {
+      setError('needReplaceReason');
       return;
     }
-    const totalNum = parseInt(totalBdt.trim(), 10) || 0;
-    const advanceNum = parseInt(advanceBdt.trim(), 10) || 0;
-    if (totalNum <= 0) {
-      setError('Total amount must be greater than 0.');
-      return;
-    }
-    if (advanceNum <= 0 || advanceNum > totalNum) {
-      setError('Advance must be positive and not exceed total.');
-      return;
-    }
-    if (!selectedAccountId) {
-      setError('Please select an active payment account.');
-      return;
+    let totalNum = 0;
+    let advanceNum = 0;
+    if (!pending) {
+      try { totalNum = parseBdtToMinor(totalBdt); }
+      catch { setError('invalidTotal'); return; }
+      try { advanceNum = parseBdtToMinor(advanceBdt); }
+      catch { setError('invalidAdvance'); return; }
+      if (advanceNum > totalNum) { setError('invalidAdvance'); return; }
+      if (!selectedAccountId) { setError('needAccount'); return; }
     }
     setError(null);
     setIsSubmitting(true);
     try {
+      const attempt = pending ?? { action: 'replace' as const, key: idempotencyKeyRef.current, payload: {
+        expected_version: order.version, reason: reason.trim(), order: {
+          product_name: productName.trim() || order.product_name, total_minor: totalNum,
+          required_advance_minor: advanceNum, payment_account_id: selectedAccountId,
+        },
+      } };
+      setPending(attempt);
       const newOrder = await replaceOrder(
         order.id,
-        {
-          expected_version: order.version,
-          reason: reason.trim(),
-          order: {
-            product_name: productName.trim() || order.product_name,
-            total_minor: totalNum * 100,
-            required_advance_minor: advanceNum * 100,
-            payment_account_id: selectedAccountId,
-          },
-        },
-        idempotencyKeyRef.current,
+        attempt.payload as OrderReplacementInput,
+        attempt.key,
         token
       );
       idempotencyKeyRef.current = crypto.randomUUID();
+      setPending(null);
       setActiveAction('none');
       setReason('');
       if (onReplaced) {
@@ -145,27 +157,27 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
         onUpdated(newOrder);
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Failed to replace order';
-      setError(message);
+      if (err instanceof SellerApiError && err.status < 500) { setPending(null); idempotencyKeyRef.current = crypto.randomUUID(); }
+      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : outcomeFieldError(err.fields?.[0]?.field ?? '', 'replace') ?? 'failed' : 'unknown');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div style={{ marginTop: '16px', background: 'var(--bg-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
+    <div className="order-outcomes" lang={locale === 'bn' ? 'bn-BD' : 'en'} style={{ marginTop: '16px', background: 'var(--bg-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>Order Outcomes</span>
+        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{text.outcomes}</span>
         {isReplaced && (
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            Replaced by <code style={{ color: 'var(--primary-accent)' }}>{order.replaced_by_order_id?.slice(0, 8)}</code>
+            {text.replacedBy} <code style={{ color: 'var(--primary-accent)' }}>{order.replaced_by_order_id}</code>
           </span>
         )}
       </div>
 
       {error && (
-        <div style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--rose-accent)', borderRadius: '6px', color: 'var(--rose-accent)', fontSize: '0.8rem' }}>
-          {error}
+        <div id="order-outcome-error" role="alert" style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--rose-accent)', borderRadius: '6px', color: 'var(--rose-accent)', fontSize: '0.8rem' }}>
+          {error === 'unknown' ? text.unknownError : text[error]}
         </div>
       )}
 
@@ -174,101 +186,39 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
             {!isTerminal && (
               <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--rose-accent)' }} onClick={() => { setError(null); setActiveAction('cancel'); }}>
-                <Ban size={14} style={{ marginRight: '4px' }} /> Cancel Order
+                <Ban size={14} style={{ marginRight: '4px' }} /> {text.cancel}
               </button>
             )}
 
             {order.lifecycle === 'pending' && !isAllocated && (
               <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--amber-accent)' }} onClick={() => { setError(null); setActiveAction('reject'); }}>
-                <XCircle size={14} style={{ marginRight: '4px' }} /> Reject Submission
+                <XCircle size={14} style={{ marginRight: '4px' }} /> {text.reject}
               </button>
             )}
 
-            {!isReplaced && !isAllocated && (
+            {!isReplaced && !isAllocated && ['awaiting_buyer', 'pending', 'expired'].includes(order.lifecycle) && (
               <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--primary-accent)' }} onClick={() => { setError(null); setActiveAction('replace'); }}>
-                <RefreshCw size={14} style={{ marginRight: '4px' }} /> Replace Order
+                <RefreshCw size={14} style={{ marginRight: '4px' }} /> {text.replace}
               </button>
             )}
           </div>
 
           {!isReplaced && isAllocated && (
             <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <AlertTriangle size={12} color="var(--amber-accent)" /> Allocated orders require payment resolution before replacement
+              <AlertTriangle size={12} color="var(--amber-accent)" /> {text.allocated}
             </div>
           )}
         </div>
       )}
 
-      {activeAction === 'cancel' && (
-        <form onSubmit={handleCancel} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--rose-accent)', fontWeight: 600 }}>Cancel Order #{order.id.slice(0, 8)}</div>
-          {isAllocated && (
-            <div style={{ fontSize: '0.75rem', color: 'var(--amber-accent)', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 8px', borderRadius: '4px' }}>
-              Confirmed payment allocation is preserved and will not be refunded.
-            </div>
-          )}
-          {['submitting', 'unknown', 'success'].includes(courierAttemptStatus ?? '') && (
-            <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--rose-accent)', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 8px', borderRadius: '4px' }}>
-              Local cancellation does not cancel the courier booking in Pathao. You must resolve or cancel the booking directly in Pathao.
-            </div>
-          )}
-          {isAllocated && courierAttemptStatus == null && <p role="alert">
-            Courier booking status is unavailable. Local cancellation does not cancel a Pathao booking. Check and resolve any booking directly in Pathao.
-          </p>}
-          {courierAttemptStatus === 'unsubmitted' && (
-            <div role="note" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'var(--bg-surface)', padding: '6px 8px', borderRadius: '4px' }}>
-              Cancellation prevents courier draft submission. No local courier attempt is recorded; check Pathao for bookings created elsewhere.
-            </div>
-          )}
-          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for cancellation (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting}>Dismiss</button>
-            <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#dc2626' }} disabled={isSubmitting}>{isSubmitting ? 'Cancelling...' : 'Confirm Cancellation'}</button>
-          </div>
-        </form>
-      )}
-
-      {activeAction === 'reject' && (
-        <form onSubmit={handleReject} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--amber-accent)', fontWeight: 600 }}>Reject Order #{order.id.slice(0, 8)}</div>
-          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Reason for rejection (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting}>Dismiss</button>
-            <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#ea580c' }} disabled={isSubmitting}>{isSubmitting ? 'Rejecting...' : 'Confirm Rejection'}</button>
-          </div>
-        </form>
-      )}
-
-      {activeAction === 'replace' && (
-        <form onSubmit={handleReplace} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--primary-accent)', fontWeight: 600 }}>Replace Order #{order.id.slice(0, 8)}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            Predecessor will be cancelled. A new order with fresh link and terms will be created.
-          </div>
-          {['submitting', 'unknown', 'success'].includes(courierAttemptStatus ?? '') && (
-            <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--rose-accent)', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 8px', borderRadius: '4px' }}>
-              Local cancellation does not cancel the courier booking in Pathao. You must resolve or cancel the booking directly in Pathao.
-            </div>
-          )}
-          <input type="text" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Product Name" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <input type="number" value={totalBdt} onChange={(e) => setTotalBdt(e.target.value)} placeholder="Total BDT" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
-            <input type="number" value={advanceBdt} onChange={(e) => setAdvanceBdt(e.target.value)} placeholder="Advance BDT" style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
-          </div>
-          {accounts.length > 0 && (
-            <select value={selectedAccountId} onChange={(e) => setSelectedAccountId(e.target.value)} style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }}>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>{a.label} ({a.provider.toUpperCase()} - {a.receiving_number})</option>
-              ))}
-            </select>
-          )}
-          <textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Replacement reason (required)..." rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} />
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting}>Dismiss</button>
-            <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px' }} disabled={isSubmitting}>{isSubmitting ? 'Creating...' : 'Create Replacement'}</button>
-          </div>
-        </form>
-      )}
+      <OrderOutcomeForms
+        activeAction={activeAction} order={order} isAllocated={isAllocated} courierAttemptStatus={courierAttemptStatus}
+        reason={reason} setReason={setReason} productName={productName} setProductName={setProductName}
+        totalBdt={totalBdt} setTotalBdt={setTotalBdt} advanceBdt={advanceBdt} setAdvanceBdt={setAdvanceBdt}
+        accounts={accounts} selectedAccountId={selectedAccountId} setSelectedAccountId={setSelectedAccountId}
+        isSubmitting={isSubmitting} pending={!!pending} error={error} text={text} setError={setError} setActiveAction={setActiveAction}
+        handleCancel={handleCancel} handleReject={handleReject} handleReplace={handleReplace}
+      />
     </div>
   );
 }

@@ -155,7 +155,7 @@ describe('EvidenceRetentionPanel', () => {
     });
 
     expect(cleanupMock).toHaveBeenCalledTimes(1);
-    expect(container.textContent).toContain('Storage service unavailable: failed to remove file');
+    expect(container.textContent).toContain('Failed to execute raw evidence cleanup');
     expect(cleanupBtn?.hasAttribute('disabled')).toBe(false);
 
     // Second attempt (retry) succeeds after recovery

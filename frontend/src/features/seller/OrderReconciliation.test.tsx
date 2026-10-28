@@ -173,7 +173,7 @@ describe('Order Reconciliation and Review UI', () => {
     expect(container.textContent).toContain('Actual Remaining COD');
     expect(container.textContent).toContain('BDT 4,000');
     expect(container.textContent).toContain('Confirmed Payment Allocation');
-    expect(container.textContent).toContain('automatic');
+    expect(container.textContent).toContain('Automatic match');
     expect(container.textContent).toContain('Accepted Advance:');
     expect(container.textContent).toContain('BDT 1,000');
     expect(container.textContent).toContain('Confirmed At:');

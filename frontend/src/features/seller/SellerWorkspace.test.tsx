@@ -29,7 +29,7 @@ describe('Seller API Client', () => {
 
   it('formats dates in Bangladesh time with explicit zone', () => {
     const formatted = formatBangladeshTime('2026-10-24T12:00:00Z');
-    expect(formatted).toContain('BST / UTC+6');
+    expect(formatted).toContain('Bangladesh time');
     expect(formatted).toContain('2026');
   });
 
@@ -277,7 +277,8 @@ describe('SellerWorkspace Component', () => {
     });
 
     expect(container.textContent).toContain('Workspace Error');
-    expect(container.textContent).toContain('Network offline');
+    expect(container.textContent).toContain('Unable to complete this request. Please retry.');
+    expect(container.textContent).not.toContain('Network offline');
     expect(container.textContent).toContain('Retry');
   });
 
