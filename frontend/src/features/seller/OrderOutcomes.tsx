@@ -1,4 +1,5 @@
 import './BuyerCorrection.css';
+import { OrderOutcomeForms } from './OrderOutcomeForms';
 import React, { useState, useEffect, useRef } from 'react';
 import { Ban, XCircle, RefreshCw, AlertTriangle } from 'lucide-react';
 import type { CourierAttemptStatus } from './courierReviewTypes';
@@ -122,21 +123,13 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
     }
     let totalNum = 0;
     let advanceNum = 0;
-    try { totalNum = parseBdtToMinor(totalBdt); }
-    catch { setError('invalidTotal'); return; }
-    try { advanceNum = parseBdtToMinor(advanceBdt); }
-    catch { setError('invalidAdvance'); return; }
-    if (totalNum <= 0) {
-      setError('invalidTotal');
-      return;
-    }
-    if (advanceNum <= 0 || advanceNum > totalNum) {
-      setError('invalidAdvance');
-      return;
-    }
-    if (!selectedAccountId) {
-      setError('needAccount');
-      return;
+    if (!pending) {
+      try { totalNum = parseBdtToMinor(totalBdt); }
+      catch { setError('invalidTotal'); return; }
+      try { advanceNum = parseBdtToMinor(advanceBdt); }
+      catch { setError('invalidAdvance'); return; }
+      if (advanceNum > totalNum) { setError('invalidAdvance'); return; }
+      if (!selectedAccountId) { setError('needAccount'); return; }
     }
     setError(null);
     setIsSubmitting(true);
@@ -183,7 +176,7 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
       </div>
 
       {error && (
-        <div role="alert" style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--rose-accent)', borderRadius: '6px', color: 'var(--rose-accent)', fontSize: '0.8rem' }}>
+        <div id="order-outcome-error" role="alert" style={{ marginBottom: '12px', padding: '8px 12px', background: 'rgba(239, 68, 68, 0.15)', border: '1px solid var(--rose-accent)', borderRadius: '6px', color: 'var(--rose-accent)', fontSize: '0.8rem' }}>
           {error === 'unknown' ? text.unknownError : text[error]}
         </div>
       )}
@@ -203,7 +196,7 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
               </button>
             )}
 
-            {!isReplaced && !isAllocated && (
+            {!isReplaced && !isAllocated && ['awaiting_buyer', 'pending', 'expired'].includes(order.lifecycle) && (
               <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--primary-accent)' }} onClick={() => { setError(null); setActiveAction('replace'); }}>
                 <RefreshCw size={14} style={{ marginRight: '4px' }} /> {text.replace}
               </button>
@@ -218,76 +211,14 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
         </div>
       )}
 
-      {activeAction === 'cancel' && (
-        <form onSubmit={handleCancel} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--rose-accent)', fontWeight: 600 }}>{text.cancelTitle} #{order.id}</div>
-          {isAllocated && (
-            <div style={{ fontSize: '0.75rem', color: 'var(--amber-accent)', background: 'rgba(245, 158, 11, 0.1)', padding: '6px 8px', borderRadius: '4px' }}>
-              {text.allocationWarning}
-            </div>
-          )}
-          {['submitting', 'unknown', 'success'].includes(courierAttemptStatus ?? '') && (
-            <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--rose-accent)', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 8px', borderRadius: '4px' }}>
-              {text.courierWarning}
-            </div>
-          )}
-          {isAllocated && courierAttemptStatus == null && <p role="alert">
-            {text.courierUnavailable}
-          </p>}
-          {courierAttemptStatus === 'unsubmitted' && (
-            <div role="note" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', background: 'var(--bg-surface)', padding: '6px 8px', borderRadius: '4px' }}>
-              {text.draftWarning}
-            </div>
-          )}
-          <label>{text.cancelReason}<textarea required disabled={!!pending} value={reason} onChange={(e) => setReason(e.target.value)} rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} /></label>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting || !!pending}>{text.dismiss}</button>
-            <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#dc2626' }} disabled={isSubmitting}>{isSubmitting ? text.cancelling : pending ? text.retry : text.confirmCancel}</button>
-          </div>
-        </form>
-      )}
-
-      {activeAction === 'reject' && (
-        <form onSubmit={handleReject} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--amber-accent)', fontWeight: 600 }}>{text.rejectTitle} #{order.id}</div>
-          <label>{text.rejectReason}<textarea required disabled={!!pending} value={reason} onChange={(e) => setReason(e.target.value)} rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} /></label>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting || !!pending}>{text.dismiss}</button>
-            <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px', background: '#ea580c' }} disabled={isSubmitting}>{isSubmitting ? text.rejecting : pending ? text.retry : text.confirmReject}</button>
-          </div>
-        </form>
-      )}
-
-      {activeAction === 'replace' && (
-        <form onSubmit={handleReplace} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--primary-accent)', fontWeight: 600 }}>{text.replaceTitle} #{order.id}</div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            {text.predecessor}
-          </div>
-          {['submitting', 'unknown', 'success'].includes(courierAttemptStatus ?? '') && (
-            <div role="alert" style={{ fontSize: '0.75rem', color: 'var(--rose-accent)', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '6px 8px', borderRadius: '4px' }}>
-              {text.courierWarning}
-            </div>
-          )}
-          <label>{text.product}<input type="text" disabled={!!pending} value={productName} onChange={(e) => setProductName(e.target.value)} style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} /></label>
-          <div className="order-outcomes-amounts" style={{ display: 'grid', gap: '8px' }}>
-            <label>{text.total}<input type="text" inputMode="decimal" disabled={!!pending} value={totalBdt} onChange={(e) => setTotalBdt(e.target.value)} style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} /></label>
-            <label>{text.requiredAdvance}<input type="text" inputMode="decimal" disabled={!!pending} value={advanceBdt} onChange={(e) => setAdvanceBdt(e.target.value)} style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} /></label>
-          </div>
-          {accounts.length > 0 && (
-            <select aria-label={text.account} disabled={!!pending} value={selectedAccountId} onChange={(e) => setSelectedAccountId(e.target.value)} style={{ padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }}>
-              {accounts.map((a) => (
-                <option key={a.id} value={a.id}>{a.label} ({a.provider.toUpperCase()} - {a.receiving_number})</option>
-              ))}
-            </select>
-          )}
-          <label>{text.replaceReason}<textarea required disabled={!!pending} value={reason} onChange={(e) => setReason(e.target.value)} rows={2} style={{ width: '100%', padding: '6px 8px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)', fontSize: '0.8rem' }} /></label>
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end' }}>
-            <button type="button" className="btn btn-secondary" style={{ fontSize: '0.75rem', padding: '4px 8px' }} onClick={() => { setActiveAction('none'); setError(null); }} disabled={isSubmitting || !!pending}>{text.dismiss}</button>
-            <button type="submit" className="btn btn-primary" style={{ fontSize: '0.75rem', padding: '4px 12px' }} disabled={isSubmitting}>{isSubmitting ? text.creating : pending ? text.retry : text.createReplacement}</button>
-          </div>
-        </form>
-      )}
+      <OrderOutcomeForms
+        activeAction={activeAction} order={order} isAllocated={isAllocated} courierAttemptStatus={courierAttemptStatus}
+        reason={reason} setReason={setReason} productName={productName} setProductName={setProductName}
+        totalBdt={totalBdt} setTotalBdt={setTotalBdt} advanceBdt={advanceBdt} setAdvanceBdt={setAdvanceBdt}
+        accounts={accounts} selectedAccountId={selectedAccountId} setSelectedAccountId={setSelectedAccountId}
+        isSubmitting={isSubmitting} pending={!!pending} error={error} text={text} setError={setError} setActiveAction={setActiveAction}
+        handleCancel={handleCancel} handleReject={handleReject} handleReplace={handleReplace}
+      />
     </div>
   );
 }

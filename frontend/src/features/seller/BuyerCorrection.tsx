@@ -30,6 +30,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
   const [stale, setStale] = useState(false);
   const [showDevStatus, setShowDevStatus] = useState(false);
   const [pending, setPending] = useState<{key: string; input: CorrectionInput} | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
   const alive = useRef(true);
 
   async function load(id: string, keepDraft = false) {
@@ -61,7 +62,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
     return () => {current = false; alive.current = false;};
     // Each editor is keyed by order/link and seller session at its call site.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [orderId, portalToken, token]);
+  }, [orderId, portalToken, token, loadAttempt]);
 
   async function submit() {
     if (!order || !draft || busy || stale) return;
@@ -107,6 +108,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
     <h3>{text.correctionTitle}</h3>
     {error && <p role="alert">{errorText}</p>}
     {!order && !error && <p role="status">{text.loading}</p>}
+    {!order && error && <button type="button" onClick={() => {setError(''); setLoadAttempt(value => value + 1);}}>{text.refresh}</button>}
     {order && (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
         <p role="status" style={{ margin: '4px 0' }}>

@@ -25,6 +25,7 @@ it('switches correction drafts and history without changing user text or sending
   await act(async () => render('en'));
   const reason = host.querySelector<HTMLTextAreaElement>('label:last-child textarea')!;
   await act(async () => { Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(reason, 'Exact reason'); reason.dispatchEvent(new Event('input', {bubbles: true})); });
+  reason.focus();
   await act(async () => render('bn'));
   expect(host.textContent).toContain('ক্রেতার তথ্যের পরিবর্তনের ইতিহাস');
   expect(host.textContent).toContain('পেমেন্ট পাঠানোর নাম্বার মিলছে না');
@@ -32,6 +33,7 @@ it('switches correction drafts and history without changing user text or sending
   expect(host.textContent).toContain('seller:opaque');
   expect(host.textContent).toContain('অক্টোবর');
   expect(reason.value).toBe('Exact reason');
+  expect(document.activeElement).toBe(reason);
   expect(fetcher).toHaveBeenCalledTimes(2);
   await act(async () => root.unmount());
 });
@@ -55,16 +57,70 @@ it('switches a selected outcome and retries the frozen request after an uncertai
   await act(async () => { Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(reason, 'Exact reason'); reason.dispatchEvent(new Event('input', {bubbles: true})); });
   await act(async () => render('bn'));
   expect(reason.value).toBe('Exact reason');
+  reason.focus();
+  expect(document.activeElement).toBe(reason);
   expect(host.textContent).toContain('বাতিল নিশ্চিত করুন');
   const submit = async () => act(async () => {host.querySelector('form')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));});
   await submit();
   expect(host.querySelector('[role="alert"]')?.textContent).toContain('ফল জানা যায়নি');
   await act(async () => render('en'));
   expect(host.textContent).toContain('Outcome unknown');
+  expect(host.querySelector('textarea')?.disabled).toBe(true);
   await submit();
   expect(requests).toHaveLength(2);
   expect(requests[0]?.body).toBe(requests[1]?.body);
   expect(requests[0]?.headers).toEqual(requests[1]?.headers);
   expect(updated).toHaveBeenCalledOnce();
+  await act(async () => root.unmount());
+});
+
+it('offers an actionable retry after correction load fails', async () => {
+  const revision = {id: 'revision', revision_number: 1, buyer_name: 'Buyer', contact_number: '01711111111',
+    address: {raw_text: 'Address'}, payment_claim: {provider: 'bkash', trx_id: 'TX', sender_number: '01822222222', amount_minor: 20000},
+    actor: 'buyer', reason: null, created_at: '2026-10-23T00:00:00Z', claim_accepted_at: '2026-10-23T00:00:00Z'};
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockRejectedValueOnce(new Error('offline'))
+    .mockResolvedValueOnce(new Response(JSON.stringify(order)))
+    .mockResolvedValueOnce(new Response(JSON.stringify({items: [revision], next_cursor: null})));
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<BuyerCorrection orderId={order.id} token="seller" />));
+  expect(host.querySelector('[role="alert"]')?.textContent).toContain('Correction unavailable');
+  await act(async () => host.querySelector('button')!.click());
+  expect(host.querySelector('form')).not.toBeNull();
+  expect(fetcher).toHaveBeenCalledTimes(3);
+  await act(async () => root.unmount());
+});
+
+it('hides replacement on rejected and cancelled orders', async () => {
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  for (const lifecycle of ['rejected', 'cancelled'] as const) {
+    await act(async () => root.render(<OrderOutcomes order={{...order, lifecycle}} onUpdated={vi.fn()} />));
+    expect(host.textContent).not.toContain('Replace Order');
+  }
+  await act(async () => root.unmount());
+});
+
+it('retries an unknown replacement with the frozen money and account payload', async () => {
+  const writes: RequestInit[] = [];
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (String(url).includes('payment-accounts')) return new Response(JSON.stringify([{id: 'account-1', is_active: true, provider: 'bkash', receiving_number: '01711111111', label: 'Primary'}]));
+    writes.push(init!);
+    if (writes.length === 1) throw new Error('offline');
+    return new Response(JSON.stringify({...order, id: 'new-order'}));
+  });
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  const replaced = vi.fn();
+  await act(async () => root.render(<OrderOutcomes order={order} token="seller" onUpdated={vi.fn()} onReplaced={replaced} />));
+  await act(async () => Array.from(host.querySelectorAll('button')).find(button => button.textContent?.includes('Replace Order'))!.click());
+  const reason = host.querySelector('textarea')!;
+  await act(async () => { Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(reason, 'Replace as requested'); reason.dispatchEvent(new Event('input', {bubbles: true})); });
+  const submit = async () => act(async () => {host.querySelector('form')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));});
+  await submit();
+  expect(host.textContent).toContain('Outcome unknown');
+  expect(host.querySelector<HTMLInputElement>('input')?.disabled).toBe(true);
+  await submit();
+  expect(writes).toHaveLength(2);
+  expect(writes[0]?.body).toBe(writes[1]?.body);
+  expect(writes[0]?.headers).toEqual(writes[1]?.headers);
+  expect(replaced).toHaveBeenCalledOnce();
   await act(async () => root.unmount());
 });
