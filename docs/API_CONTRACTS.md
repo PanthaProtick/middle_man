@@ -429,3 +429,15 @@ Migration 0026 removes screenshot metadata, AI payment extractions, upload repla
 records, and revision screenshot references. Stop old application processes and
 erase the verified private storage directory before applying it. SMS and address
 retention, payment matching, accepted allocations and courier COD are preserved.
+
+## Address assistance language metadata
+
+`POST /api/public/orders/{token}/address-extraction` accepts optional `language`
+(`en` or `bn`, default `en`) to guide a fresh provider clarification. The
+response includes nullable `explanation_language`; historical responses without
+metadata remain valid and have an unknown language. This hint is excluded from
+the existing idempotency fingerprint: a retry in another language replays the
+original extraction and language without another provider call. Address fields
+remain unchanged and require buyer review. Provider output language is requested,
+not independently verified. AI opt-in, limits, retention, and lifecycle gates remain
+unchanged.

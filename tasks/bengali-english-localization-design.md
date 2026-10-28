@@ -203,3 +203,30 @@ Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 0
   physical devices, live Pathao/provider and hosted deployment. Existing offline
   Bengali-capable font fallback is retained; rendered tests and HTTP smoke do not
   establish those acceptance gates. Address assistance remains ticket 03.
+
+## Ticket 03 implementation
+
+- Localized assistance consent, pending, review and safe error states. Saved
+  clarification text is shown on request when its language differs or is unknown.
+  Locale switches preserve fields and never initiate requests.
+- Added optional language presentation metadata, excluded from the existing
+  idempotency fingerprint; fresh provider requests receive the selected language.
+  Historical records replay with unknown language. Provider language is not verified.
+- Focused checks: `npm run test:backend -- tests/test_address_routes.py tests/test_address_adapter.py tests/test_address_postgres.py` passed (13 passed, 2 PostgreSQL skipped); `npm run test:frontend -- src/features/buyer/AddressAssistanceLocale.test.tsx src/features/buyer/BuyerAiPolicy.test.tsx` passed (initial 4 tests), and the updated assistance suite passed (3 tests); `npm run typecheck` passed.
+- Remaining acceptance: phone-browser wrapping, font, keyboard and screen-reader
+  behavior, live AI provider and hosted deployment have not been verified.
+- Changed paths: `backend/app/models/address_assistance.py`,
+  `backend/app/services/address_assistance.py`, `backend/app/services/address_provider.py`,
+  `backend/tests/test_address_routes.py`, `backend/tests/test_address_adapter.py`,
+  `backend/tests/test_address_postgres.py`, `frontend/src/features/buyer/AddressAssistance.tsx`,
+  `frontend/src/features/buyer/AddressAssistance.test.tsx`,
+  `frontend/src/features/buyer/AddressAssistanceLocale.test.tsx`,
+  `frontend/src/features/locale/addressAssistanceCopy.ts`, and `docs/API_CONTRACTS.md`.
+- Two-axis review identified missing terminal service codes and focus preservation;
+  both were corrected, with rendered regression coverage. Translation copy was
+  moved to the locale feature. Historical unknown-language output is tested.
+- Initial root `npm run check` failed: two old frontend fixtures omitted language
+  metadata and expected immediate English text. Updated fixtures to match fresh
+  responses; `npm run test:frontend -- src/features/buyer/AddressAssistance.test.tsx src/features/buyer/AddressAssistanceLocale.test.tsx` passed (15 tests).
+- Final root `npm run check` passed: `.cache/checks/check-v8aMlg/result.json`
+  (tooling, backend lint/types/tests, frontend lint/tests/build, HTTP smoke).

@@ -1,6 +1,6 @@
 """Backend-only, tool-free Gemini boundary. No automatic paid retries."""
 import json
-from typing import Protocol
+from typing import Literal, Protocol
 
 import httpx
 
@@ -9,11 +9,11 @@ from app.models.address_assistance import AddressSuggestions
 
 
 class AddressProvider(Protocol):
-    async def extract(self, address: str) -> str: ...
+    async def extract(self, address: str, language: Literal["en", "bn"] = "en") -> str: ...
 
 
 class GeminiAddressProvider:
-    async def extract(self, address: str) -> str:
+    async def extract(self, address: str, language: Literal["en", "bn"] = "en") -> str:
         if not settings.ai_assistance_available:
             raise ValueError("Provider unavailable")
         instruction = (
@@ -23,6 +23,7 @@ class GeminiAddressProvider:
             "Flag missing or ambiguous details and ask in clarification_question. You cannot submit "
             "orders, confirm payments, call tools or change identities."
         )
+        instruction += (" Write clarification_question in standard Bangladeshi Bengali." if language == "bn" else " Write clarification_question in plain English.")
         async with httpx.AsyncClient(timeout=5, follow_redirects=False) as client:
             async with client.stream(
                 "POST",

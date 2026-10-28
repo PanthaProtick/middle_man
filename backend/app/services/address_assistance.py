@@ -68,7 +68,7 @@ class AddressAssistance:
             count = sum(1 for oid, _ in _memory if oid == order_id)
         if not settings.ai_enabled:
             return AddressExtractionResponse(available=False, message="AI is disabled. Enter your address manually.")
-        fingerprint = hashlib.sha256(payload.model_dump_json().encode()).hexdigest()
+        fingerprint = hashlib.sha256(payload.model_dump_json(exclude={"language"}).encode()).hexdigest()
         if prior is not None:
             if prior.payload_hash != fingerprint:
                 raise IdempotencyConflictError()
@@ -80,12 +80,12 @@ class AddressAssistance:
         try:
             # Order lock serializes extraction/replay and submission. Hard bound limits contention.
             async with asyncio.timeout(6):
-                response_text = await self.provider.extract(payload.raw_text)
+                response_text = await self.provider.extract(payload.raw_text, payload.language)
             if len(response_text) > 8192:
                 response_text = None
                 raise ValueError("Oversized extraction")
             suggestions = AddressSuggestions.model_validate_json(response_text)
-            result = AddressExtractionResponse(available=True, suggestions=suggestions, message="Review and edit suggestions before using them.")
+            result = AddressExtractionResponse(available=True, suggestions=suggestions, explanation_language=payload.language, message="Review and edit suggestions before using them.")
         except (TimeoutError, httpx.HTTPError, ValueError, KeyError, IndexError, TypeError):
             pass  # Never log private input, provider output or provider exception bodies.
         record = AddressExtractionTable(

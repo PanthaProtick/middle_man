@@ -35,9 +35,9 @@ async def test_concurrent_same_key_has_one_committed_result(postgres_buyer):
     client, connection, _, order = postgres_buyer
 
     class SlowProvider(ProviderDouble):
-        async def extract(self, address):
+        async def extract(self, address, language="en"):
             await asyncio.sleep(0.05)
-            return await super().extract(address)
+            return await super().extract(address, language)
 
     provider = SlowProvider(SUGGESTIONS)
     app.dependency_overrides[get_address_provider] = lambda: provider

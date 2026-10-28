@@ -38,9 +38,11 @@ class ProviderDouble:
     def __init__(self, output):
         self.output = output
         self.calls = 0
+        self.languages = []
 
-    async def extract(self, address):
+    async def extract(self, address, language="en"):
         self.calls += 1
+        self.languages.append(language)
         if isinstance(self.output, Exception):
             raise self.output
         return json.dumps(self.output)
@@ -143,10 +145,10 @@ async def test_provider_finishing_at_expiry_cannot_return_suggestions(client):
     app.dependency_overrides[get_buyer_clock] = lambda: lambda: now
 
     class ExpiringProvider(ProviderDouble):
-        async def extract(self, address):
+        async def extract(self, address, language="en"):
             nonlocal now
             now = expires
-            return await super().extract(address)
+            return await super().extract(address, language)
 
     app.dependency_overrides[get_address_provider] = lambda: ExpiringProvider(SUGGESTIONS)
     response = await client.post(f"/api/public/orders/{order['portal_token']}/address-extraction", json={"raw_text": "Dhaka", "ai_opt_in": True}, headers={"Idempotency-Key": "late"})
@@ -159,3 +161,18 @@ async def test_opt_in_requires_boolean_true_not_numeric_truth(client):
     response = await client.post(f"/api/public/orders/{order['portal_token']}/address-extraction", json={"raw_text": "Dhaka", "ai_opt_in": 1}, headers={"Idempotency-Key": "numeric-consent"})
     assert response.status_code == 422
 
+
+@pytest.mark.asyncio
+async def test_language_is_presentation_metadata_and_replay_preserves_original(client):
+    order = await _create_test_order(client)
+    provider = ProviderDouble(SUGGESTIONS)
+    app.dependency_overrides[get_address_provider] = lambda: provider
+    url = f"/api/public/orders/{order['portal_token']}/address-extraction"
+    payload = {"raw_text": "Dhaka", "ai_opt_in": True, "language": "bn"}
+    first = await client.post(url, json=payload, headers={"Idempotency-Key": "language"})
+    assert first.status_code == 200
+    assert first.json()["explanation_language"] == "bn"
+    assert provider.languages == ["bn"]
+    replay = await client.post(url, json={**payload, "language": "en"}, headers={"Idempotency-Key": "language"})
+    assert replay.json() == first.json()
+    assert provider.calls == 1

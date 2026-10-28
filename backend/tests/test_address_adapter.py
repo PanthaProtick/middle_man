@@ -24,6 +24,7 @@ async def test_adapter_sends_untrusted_text_without_tools(client, monkeypatch):
         assert request.headers["x-goog-api-key"] == "synthetic-key"
         body = json.loads(request.content)
         assert "tools" not in body
+        assert "standard Bangladeshi Bengali" in body["systemInstruction"]["parts"][0]["text"]
         assert body["contents"][0]["parts"][0]["text"] == address
         assert address not in body["systemInstruction"]["parts"][0]["text"]
         return httpx.Response(200, json={"candidates": [{"finishReason": "STOP", "content": {"parts": [{"text": json.dumps(SUGGESTIONS)}]}}]})
@@ -32,7 +33,7 @@ async def test_adapter_sends_untrusted_text_without_tools(client, monkeypatch):
     monkeypatch.setattr(httpx, "AsyncClient", lambda **kwargs: original_client(transport=httpx.MockTransport(respond), **kwargs))
     app.dependency_overrides[get_address_provider] = lambda: GeminiAddressProvider()
     try:
-        response = await client.post(f"/api/public/orders/{order['portal_token']}/address-extraction", json={"raw_text": address, "ai_opt_in": True}, headers={"Idempotency-Key": "adapter"})
+        response = await client.post(f"/api/public/orders/{order['portal_token']}/address-extraction", json={"raw_text": address, "ai_opt_in": True, "language": "bn"}, headers={"Idempotency-Key": "adapter"})
         assert response.status_code == 200
         assert response.json()["suggestions"] == SUGGESTIONS
     finally:
