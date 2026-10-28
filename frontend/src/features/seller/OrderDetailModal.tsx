@@ -33,9 +33,25 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
   const [order, setOrder] = useState(initialOrder);
   const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(null);
   const [showReviewCodes, setShowReviewCodes] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
+  const tabs = [text.overviewTab, text.paymentTab, text.deliveryTab, text.buyerTab];
+  const tabKeys = ['overview', 'payment', 'delivery', 'buyer'];
+  const selectTab = (index: number) => {
+    setActiveTab(index);
+    dialogRef.current?.scrollTo?.({ top: 0 });
+  };
+  const onTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const next = event.key === 'ArrowRight' ? (index + 1) % tabs.length
+      : event.key === 'ArrowLeft' ? (index + tabs.length - 1) % tabs.length
+      : event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : null;
+    if (next === null) return;
+    event.preventDefault();
+    selectTab(next);
+    dialogRef.current?.querySelectorAll<HTMLButtonElement>('[role="tab"]')[next]?.focus();
+  };
   useEffect(() => {
     const opener = document.activeElement;
     const dialog = dialogRef.current!;
@@ -75,6 +91,21 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         </button>
       </div>
 
+      <div className="order-detail-context">
+        <strong>{order.product_name}</strong>
+        <span>{lifecycleLabel(order.lifecycle, text)}</span>
+      </div>
+      {hasReviewReasons && <button type="button" className="order-detail-alert" onClick={() => selectTab(1)}>{text.reviewPayment}</button>}
+      {(courierAttemptStatus === 'failed' || courierAttemptStatus === 'unknown') &&
+        <button type="button" className="order-detail-alert" onClick={() => selectTab(2)}>{text.reviewDelivery}</button>}
+      <div className="order-detail-tabs" role="tablist" aria-label={text.details}>
+        {tabs.map((label, index) => <button key={tabKeys[index]} type="button" role="tab"
+          id={`${titleId}-${tabKeys[index]}-tab`} aria-controls={`${titleId}-${tabKeys[index]}-panel`}
+          aria-selected={activeTab === index} tabIndex={activeTab === index ? 0 : -1}
+          onClick={() => selectTab(index)} onKeyDown={event => onTabKeyDown(event, index)}>{label}</button>)}
+      </div>
+
+      <section role="tabpanel" id={`${titleId}-overview-panel`} aria-labelledby={`${titleId}-overview-tab`} hidden={activeTab !== 0}>
       <div style={{ marginBottom: '16px' }}>
         {order.predecessor_order_id && (
           <div style={{ fontSize: '0.75rem', color: 'var(--primary-accent)', marginBottom: '4px' }}>
@@ -108,6 +139,40 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         </div>
       </div>
 
+      <div className="detail-section-card">
+        <div className="detail-section-header">
+          <div className="detail-section-title" style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)' }}>
+            <Clock size={14} /> {text.deadlines}
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '8px', fontSize: '0.8rem' }}>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.status}</span>
+            <span style={{ fontWeight: 600, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
+              {lifecycleLabel(order.lifecycle, text)}
+            </span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.version}</span>
+            <span style={{ color: 'var(--text-primary)' }}>v{order.version}</span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>{text.created}</span>
+            <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshDateTime(order.created_at, locale)}</span>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-secondary)' }}>{isExpired ? text.expiredShort : text.deadlineShort}</span>
+            <span style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)' }}>
+              {formatBangladeshDateTime(order.expires_at, locale)}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <DeveloperDetailsPanel order={order} />
+
+      </section>
+      <section role="tabpanel" id={`${titleId}-payment-panel`} aria-labelledby={`${titleId}-payment-tab`} hidden={activeTab !== 1}>
       {isConfirmed && (
         <div style={{ marginBottom: '16px', background: 'rgba(16, 185, 129, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--emerald-accent)', marginBottom: '6px' }}>
@@ -190,48 +255,20 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         </div>
       </div>
 
-      <div className="detail-section-card">
-        <div className="detail-section-header">
-          <div className="detail-section-title" style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)' }}>
-            <Clock size={14} /> {text.deadlines}
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '8px', fontSize: '0.8rem' }}>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{text.status}</span>
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-              {lifecycleLabel(order.lifecycle, text)}
-            </span>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{text.version}</span>
-            <span style={{ color: 'var(--text-primary)' }}>v{order.version}</span>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{text.created}</span>
-            <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshDateTime(order.created_at, locale)}</span>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{isExpired ? text.expiredShort : text.deadlineShort}</span>
-            <span style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)' }}>
-              {formatBangladeshDateTime(order.expires_at, locale)}
-            </span>
-          </div>
-        </div>
-      </div>
-
+      {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
+      {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
+        onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
+      </section>
+      <section role="tabpanel" id={`${titleId}-delivery-panel`} aria-labelledby={`${titleId}-delivery-tab`} hidden={activeTab !== 2}>
       <section className="detail-section-card" aria-label={text.parcel}>
         <h4>{text.parcel}</h4>
         <p>{text.weight}: {order.parcel_weight_grams == null ? text.notProvided : order.parcel_weight_grams / 1000}</p>
         <p>{text.quantity}: {order.parcel_quantity ?? text.notProvided}</p>
       </section>
-      <DeveloperDetailsPanel order={order} />
-
       {token && (isConfirmed || order.lifecycle === 'cancelled') && order.allocation_basis &&
         <CourierWorkspace key={`courier-${order.id}-${order.version}-${token}`} orderId={order.id} token={token} onAttemptStatusChanged={setCourierAttemptStatus} />}
-      {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
-      {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
-        onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
+      </section>
+      <section role="tabpanel" id={`${titleId}-buyer-panel`} aria-labelledby={`${titleId}-buyer-tab`} hidden={activeTab !== 3}>
       {token && order.buyer_revision && <BuyerCorrection key={`${order.id}-${order.version}`} orderId={order.id} token={token} courierAttemptStatus={courierAttemptStatus} onCorrected={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
       {token && (
         <OrderOutcomes
@@ -251,7 +288,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
       )}
       {token && <BuyerLinkAccess key={`access-${order.id}`} order={order} token={token}
         onUpdated={fresh => { setOrder(fresh); onCorrected?.(fresh); }} />}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px', marginTop: '20px', flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <BuyerLinkCopy key={order.portal_url} portalUrl={order.portal_url} detail />
           <a
@@ -264,6 +300,12 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
             <ExternalLink size={14} />
             <span>{buyerLinkCopy[locale].open}</span>
           </a>
+        </div>
+      </section>
+      <div className="order-detail-footer">
+        <div className="order-detail-navigation">
+          <button type="button" className="btn btn-secondary" disabled={activeTab === 0} onClick={() => selectTab(activeTab - 1)}>{text.backTab}</button>
+          <button type="button" className="btn btn-secondary" disabled={activeTab === tabs.length - 1} onClick={() => selectTab(activeTab + 1)}>{text.nextTab}</button>
         </div>
         <button className="btn btn-secondary" onClick={onClose}>
           {text.close}

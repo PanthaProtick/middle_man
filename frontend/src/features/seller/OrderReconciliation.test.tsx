@@ -189,4 +189,25 @@ describe('Order Reconciliation and Review UI', () => {
     expect(container.textContent).toContain('TIME_UNCLEAR');
     expect(container.textContent).toContain('Expected Remaining COD');
   });
+
+  it('navigates order sections with tabs, footer controls, and the payment alert', async () => {
+    await act(async () => root.render(<OrderDetailModal order={pendingReviewOrder} onClose={vi.fn()} />));
+    const dialog = container.querySelector('dialog')!;
+    const tabs = [...dialog.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+    const panels = [...dialog.querySelectorAll<HTMLElement>('[role="tabpanel"]')];
+    expect(tabs.map(tab => tab.textContent)).toEqual(['Overview', 'Payment', 'Delivery', 'Buyer & link']);
+    expect(panels.map(panel => panel.hidden)).toEqual([false, true, true, true]);
+    expect(dialog.textContent).toContain('Cotton Kurti');
+    expect(dialog.querySelector<HTMLButtonElement>('.order-detail-navigation button')?.disabled).toBe(true);
+
+    await act(async () => dialog.querySelector<HTMLButtonElement>('.order-detail-alert')!.click());
+    expect(panels.map(panel => panel.hidden)).toEqual([true, false, true, true]);
+    expect(tabs[1].getAttribute('aria-selected')).toBe('true');
+
+    await act(async () => tabs[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true })));
+    expect(panels.map(panel => panel.hidden)).toEqual([true, true, false, true]);
+    await act(async () => dialog.querySelectorAll<HTMLButtonElement>('.order-detail-navigation button')[1].click());
+    expect(panels.map(panel => panel.hidden)).toEqual([true, true, true, false]);
+    expect(dialog.querySelectorAll<HTMLButtonElement>('.order-detail-navigation button')[1].disabled).toBe(true);
+  });
 });
