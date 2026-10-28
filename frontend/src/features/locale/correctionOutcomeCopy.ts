@@ -28,7 +28,7 @@ const en = {
   needCancelReason: 'Please provide a cancellation reason.', needRejectReason: 'Please provide a rejection reason.', needReplaceReason: 'Please provide a replacement reason.',
   invalidTotal: 'Total amount must be greater than zero.', invalidAdvance: 'Advance must be positive and not exceed total.', needAccount: 'Select an active payment account.',
   unknownError: 'Outcome unknown. Retry the same request or refresh the order before changing it.',
-  failed: 'Request failed. Review the order and try again.', stale: 'The order changed. Refresh it before trying again.', phoneError: 'Enter a valid Bangladeshi phone number.', amountError: 'Enter a positive amount with up to two decimal places.',
+  failed: 'Request failed. Review the order and try again.', stale: 'The order changed. Refresh it before trying again.', invalidField: 'Check this value and try again.', phoneError: 'Enter a valid Bangladeshi phone number.', amountError: 'Enter a positive amount with up to two decimal places.',
 } as const;
 
 const bn: Record<keyof typeof en, string> = {
@@ -58,7 +58,7 @@ const bn: Record<keyof typeof en, string> = {
   needCancelReason: 'বাতিলের কারণ লিখুন।', needRejectReason: 'প্রত্যাখ্যানের কারণ লিখুন।', needReplaceReason: 'বদলানোর কারণ লিখুন।',
   invalidTotal: 'মোট টাকা শূন্যের বেশি হতে হবে।', invalidAdvance: 'অগ্রিম শূন্যের বেশি এবং মোট টাকার সমান বা কম হতে হবে।', needAccount: 'একটি সক্রিয় পেমেন্ট অ্যাকাউন্ট বাছুন।',
   unknownError: 'ফল জানা যায়নি। একই অনুরোধ আবার পাঠান অথবা পরিবর্তনের আগে অর্ডার রিফ্রেশ করুন।',
-  failed: 'অনুরোধ ব্যর্থ হয়েছে। অর্ডার পর্যালোচনা করে আবার চেষ্টা করুন।', stale: 'অর্ডারের তথ্য বদলেছে। আবার চেষ্টা করার আগে রিফ্রেশ করুন।', phoneError: 'বাংলাদেশের একটি বৈধ ফোন নাম্বার লিখুন।', amountError: 'শূন্যের বেশি টাকা লিখুন; দশমিকের পরে সর্বোচ্চ দুই ঘর।',
+  failed: 'অনুরোধ ব্যর্থ হয়েছে। অর্ডার পর্যালোচনা করে আবার চেষ্টা করুন।', stale: 'অর্ডারের তথ্য বদলেছে। আবার চেষ্টা করার আগে রিফ্রেশ করুন।', invalidField: 'এই তথ্য ঠিক করে আবার চেষ্টা করুন।', phoneError: 'বাংলাদেশের একটি বৈধ ফোন নাম্বার লিখুন।', amountError: 'শূন্যের বেশি টাকা লিখুন; দশমিকের পরে সর্বোচ্চ দুই ঘর।',
 };
 
 export const correctionOutcomeCopy = { en, bn };
@@ -77,4 +77,20 @@ const pathaoEnvironments = {
 };
 export function correctionLocationEnvironment(code: keyof typeof pathaoEnvironments.en, locale: Locale): string {
   return pathaoEnvironments[locale][code];
+}
+const correctionFields = {
+  buyer_name: 'buyerName', contact_number: 'contact', address: 'address', 'address.raw_text': 'address',
+  payment_claim: 'claim', 'payment_claim.provider': 'provider', 'payment_claim.trx_id': 'transaction',
+  'payment_claim.sender_number': 'sender', 'payment_claim.amount_minor': 'advance', reason: 'reason',
+} as const;
+export function correctionFieldLabel(field: string, locale: Locale): string | null {
+  const key = correctionFields[field as keyof typeof correctionFields];
+  return key ? correctionOutcomeCopy[locale][key] : null;
+}
+export function outcomeFieldError(field: string, action: 'cancel' | 'reject' | 'replace'): 'invalidTotal' | 'invalidAdvance' | 'needAccount' | 'needCancelReason' | 'needRejectReason' | 'needReplaceReason' | null {
+  if (field === 'order.total_minor' || field === 'total_minor') return 'invalidTotal';
+  if (field === 'order.required_advance_minor' || field === 'required_advance_minor') return 'invalidAdvance';
+  if (field === 'order.payment_account_id' || field === 'payment_account_id') return 'needAccount';
+  if (field === 'reason') return action === 'cancel' ? 'needCancelReason' : action === 'reject' ? 'needRejectReason' : 'needReplaceReason';
+  return null;
 }

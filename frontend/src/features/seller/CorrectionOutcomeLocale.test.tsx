@@ -124,3 +124,52 @@ it('retries an unknown replacement with the frozen money and account payload', a
   expect(replaced).toHaveBeenCalledOnce();
   await act(async () => root.unmount());
 });
+
+it('keeps a rejection in flight through a language switch without sending it again', async () => {
+  let finish!: (response: Response) => void;
+  const writes: RequestInit[] = [];
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+    if (String(url).includes('payment-accounts')) return new Response(JSON.stringify([]));
+    writes.push(init!);
+    return new Promise<Response>(resolve => { finish = resolve; });
+  });
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  const updated = vi.fn();
+  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate}}>
+    <OrderOutcomes order={order} token="seller" onUpdated={updated} />
+  </LocaleContext.Provider>);
+  await act(async () => render('en'));
+  await act(async () => Array.from(host.querySelectorAll('button')).find(button => button.textContent?.includes('Reject Submission'))!.click());
+  const reason = host.querySelector('textarea')!;
+  await act(async () => { Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(reason, 'Buyer text unchanged'); reason.dispatchEvent(new Event('input', {bubbles: true})); });
+  act(() => {host.querySelector('form')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));});
+  act(() => render('bn'));
+  expect(host.textContent).toContain('প্রত্যাখ্যান হচ্ছে');
+  expect(reason.value).toBe('Buyer text unchanged');
+  expect(writes).toHaveLength(1);
+  await act(async () => finish(new Response(JSON.stringify({...order, lifecycle: 'rejected', version: 2}))));
+  expect(updated).toHaveBeenCalledOnce();
+  expect(JSON.parse(String(writes[0]?.body)).reason).toBe('Buyer text unchanged');
+  await act(async () => root.unmount());
+});
+
+it('localizes a coded correction field error and associates it with the field', async () => {
+  const revision = {id: 'revision', revision_number: 1, buyer_name: 'Buyer', contact_number: '01711111111',
+    address: {raw_text: 'Address'}, payment_claim: {provider: 'bkash', trx_id: 'TX', sender_number: '01822222222', amount_minor: 20000},
+    actor: 'buyer', reason: null, created_at: '2026-10-23T00:00:00Z', claim_accepted_at: '2026-10-23T00:00:00Z'};
+  vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify(order)))
+    .mockResolvedValueOnce(new Response(JSON.stringify({items: [revision], next_cursor: null})))
+    .mockResolvedValueOnce(new Response(JSON.stringify({error: {code: 'VALIDATION_ERROR', message: 'unsafe backend prose',
+      fields: [{field: 'buyer_name', code: 'string_too_long', message: 'unsafe field prose'}]}}), {status: 422}));
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<LocaleContext.Provider value={{locale: 'bn', setLocale: vi.fn(), t: englishTranslate}}>
+    <BuyerCorrection orderId={order.id} token="seller" />
+  </LocaleContext.Provider>));
+  const reason = host.querySelector<HTMLTextAreaElement>('label:last-child textarea')!;
+  await act(async () => { Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(reason, 'Exact reason'); reason.dispatchEvent(new Event('input', {bubbles: true})); });
+  await act(async () => {host.querySelector('form')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));});
+  expect(host.textContent).toContain('ক্রেতার নাম: এই তথ্য ঠিক করে আবার চেষ্টা করুন।');
+  expect(host.textContent).not.toContain('unsafe backend prose');
+  expect(host.querySelector<HTMLInputElement>('input')?.getAttribute('aria-describedby')).toBe('correction-error-buyer_name');
+  await act(async () => root.unmount());
+});

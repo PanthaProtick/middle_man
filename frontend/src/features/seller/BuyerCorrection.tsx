@@ -6,7 +6,7 @@ import type { CorrectionInput, History, Revision } from './corrections';
 import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { SellerOrder } from './types';
 import { useLocale } from '../locale/context';
-import { correctionLocationCondition, correctionLocationEnvironment, correctionOutcomeCopy, correctionReview, correctionStatus } from '../locale/correctionOutcomeCopy';
+import { correctionFieldLabel, correctionLocationCondition, correctionLocationEnvironment, correctionOutcomeCopy, correctionReview, correctionStatus } from '../locale/correctionOutcomeCopy';
 import { formatBangladeshDateTime } from '../locale/format';
 
 interface Props {
@@ -26,6 +26,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
   const [reason, setReason] = useState('');
   const [amountBdt, setAmountBdt] = useState('');
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [stale, setStale] = useState(false);
   const [showDevStatus, setShowDevStatus] = useState(false);
@@ -66,7 +67,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
 
   async function submit() {
     if (!order || !draft || busy || stale) return;
-    setBusy(true); setError('');
+    setBusy(true); setError(''); setFieldErrors([]);
     try {
       canonicalizeBdPhone(draft.contact_number);
       canonicalizeBdPhone(draft.payment_claim.sender_number);
@@ -84,6 +85,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
     } catch (err) {
       if (!alive.current) return;
       setError(err instanceof SellerApiError && err.status === 401 ? 'unauthorized' : err instanceof SellerApiError ? err.code : err instanceof Error && err.message.startsWith('Invalid Bangladeshi phone') ? 'phone' : err instanceof Error && err.message.startsWith('Amount') ? 'amount' : 'unknown');
+      if (err instanceof SellerApiError) setFieldErrors((err.fields ?? []).map(field => field.field ?? '').filter(field => correctionFieldLabel(field, locale) !== null));
       if (err instanceof SellerApiError && !err.code.startsWith('HTTP_5')) {
         setPending(null);
         if (['STALE_VERSION', 'PAYMENT_FIELDS_LOCKED'].includes(err.code)) setStale(true);
@@ -107,6 +109,9 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
   return <section className="buyer-correction" lang={locale === 'bn' ? 'bn-BD' : 'en'} aria-label={text.correctionTitle}>
     <h3>{text.correctionTitle}</h3>
     {error && <p role="alert">{errorText}</p>}
+    {fieldErrors.map(field => <p id={`correction-error-${field.replaceAll('.', '-')}`} role="alert" key={field}>
+      {correctionFieldLabel(field, locale)}: {text.invalidField}
+    </p>)}
     {!order && !error && <p role="status">{text.loading}</p>}
     {!order && error && <button type="button" onClick={() => {setError(''); setLoadAttempt(value => value + 1);}}>{text.refresh}</button>}
     {order && (
@@ -147,21 +152,21 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
     }}>{text.refresh}</button>}
     {draft && order && ['pending', 'confirmed'].includes(order.lifecycle) && <form onSubmit={event => {event.preventDefault(); void submit();}}>
       <fieldset disabled={busy || !!pending || stale}>
-        <label>{text.buyerName}<input required maxLength={200} value={draft.buyer_name} onChange={e => setDraft({...draft, buyer_name: e.target.value})} /></label>
-        <label>{text.contact}<input required maxLength={32} value={draft.contact_number} onChange={e => setDraft({...draft, contact_number: e.target.value})} /></label>
-        <label>{text.address}<textarea required maxLength={2000} value={draft.address.raw_text} onChange={e => setDraft({...draft, address: {...draft.address, raw_text: e.target.value}})} /></label>
+        <label>{text.buyerName}<input required maxLength={200} aria-invalid={fieldErrors.includes('buyer_name')} aria-describedby={fieldErrors.includes('buyer_name') ? 'correction-error-buyer_name' : undefined} value={draft.buyer_name} onChange={e => setDraft({...draft, buyer_name: e.target.value})} /></label>
+        <label>{text.contact}<input required maxLength={32} aria-invalid={fieldErrors.includes('contact_number')} aria-describedby={fieldErrors.includes('contact_number') ? 'correction-error-contact_number' : undefined} value={draft.contact_number} onChange={e => setDraft({...draft, contact_number: e.target.value})} /></label>
+        <label>{text.address}<textarea required maxLength={2000} aria-invalid={fieldErrors.includes('address') || fieldErrors.includes('address.raw_text')} aria-describedby={fieldErrors.includes('address.raw_text') ? 'correction-error-address-raw_text' : fieldErrors.includes('address') ? 'correction-error-address' : undefined} value={draft.address.raw_text} onChange={e => setDraft({...draft, address: {...draft.address, raw_text: e.target.value}})} /></label>
         <fieldset disabled={isConfirmed}><legend>{text.claim}</legend>
           {isConfirmed && (
             <p className="payment-locked-note" style={{fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '4px 0 8px'}}>
               {text.locked}
             </p>
           )}
-          <label>{text.provider}<select value={draft.payment_claim.provider} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, provider: e.target.value === 'bkash' ? 'bkash' : 'nagad'}})}><option value="bkash">bKash</option><option value="nagad">Nagad</option></select></label>
-          <label>{text.transaction}<input required maxLength={128} value={draft.payment_claim.trx_id} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, trx_id: e.target.value}})} /></label>
-          <label>{text.sender}<input required maxLength={32} value={draft.payment_claim.sender_number} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, sender_number: e.target.value}})} /></label>
-          <label>{text.advance}<input required inputMode="decimal" value={amountBdt} onChange={e => setAmountBdt(e.target.value)} /></label>
+          <label>{text.provider}<select aria-invalid={fieldErrors.includes('payment_claim.provider')} aria-describedby={fieldErrors.includes('payment_claim.provider') ? 'correction-error-payment_claim-provider' : undefined} value={draft.payment_claim.provider} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, provider: e.target.value === 'bkash' ? 'bkash' : 'nagad'}})}><option value="bkash">bKash</option><option value="nagad">Nagad</option></select></label>
+          <label>{text.transaction}<input required maxLength={128} aria-invalid={fieldErrors.includes('payment_claim.trx_id')} aria-describedby={fieldErrors.includes('payment_claim.trx_id') ? 'correction-error-payment_claim-trx_id' : undefined} value={draft.payment_claim.trx_id} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, trx_id: e.target.value}})} /></label>
+          <label>{text.sender}<input required maxLength={32} aria-invalid={fieldErrors.includes('payment_claim.sender_number')} aria-describedby={fieldErrors.includes('payment_claim.sender_number') ? 'correction-error-payment_claim-sender_number' : undefined} value={draft.payment_claim.sender_number} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, sender_number: e.target.value}})} /></label>
+          <label>{text.advance}<input required inputMode="decimal" aria-invalid={fieldErrors.includes('payment_claim.amount_minor')} aria-describedby={fieldErrors.includes('payment_claim.amount_minor') ? 'correction-error-payment_claim-amount_minor' : undefined} value={amountBdt} onChange={e => setAmountBdt(e.target.value)} /></label>
         </fieldset>
-        <label>{text.reason}<textarea required maxLength={1000} value={reason} onChange={e => setReason(e.target.value)} /></label>
+        <label>{text.reason}<textarea required maxLength={1000} aria-invalid={fieldErrors.includes('reason')} aria-describedby={fieldErrors.includes('reason') ? 'correction-error-reason' : undefined} value={reason} onChange={e => setReason(e.target.value)} /></label>
       </fieldset>
       <button type="submit" disabled={busy || stale || (!pending && !reason.trim())}>
         {buttonLabel}

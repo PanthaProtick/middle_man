@@ -8,7 +8,7 @@ import { cancelOrder, rejectOrder, replaceOrder } from './paymentDecisions';
 import type { CancelDecision, RejectDecision, OrderReplacementInput } from './paymentDecisions';
 import { fetchPaymentAccounts, parseBdtToMinor, SellerApiError } from './api';
 import { useLocale } from '../locale/context';
-import { correctionOutcomeCopy } from '../locale/correctionOutcomeCopy';
+import { correctionOutcomeCopy, outcomeFieldError } from '../locale/correctionOutcomeCopy';
 
 interface OrderOutcomesProps {
   order: SellerOrder;
@@ -77,7 +77,7 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
       onUpdated(updated);
     } catch (err: unknown) {
       if (err instanceof SellerApiError && err.status < 500) { setPending(null); idempotencyKeyRef.current = crypto.randomUUID(); }
-      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : 'failed' : 'unknown');
+      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : outcomeFieldError(err.fields?.[0]?.field ?? '', 'cancel') ?? 'failed' : 'unknown');
     } finally {
       setIsSubmitting(false);
     }
@@ -108,7 +108,7 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
       onUpdated(updated);
     } catch (err: unknown) {
       if (err instanceof SellerApiError && err.status < 500) { setPending(null); idempotencyKeyRef.current = crypto.randomUUID(); }
-      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : 'failed' : 'unknown');
+      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : outcomeFieldError(err.fields?.[0]?.field ?? '', 'reject') ?? 'failed' : 'unknown');
     } finally {
       setIsSubmitting(false);
     }
@@ -158,7 +158,7 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
       }
     } catch (err: unknown) {
       if (err instanceof SellerApiError && err.status < 500) { setPending(null); idempotencyKeyRef.current = crypto.randomUUID(); }
-      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : 'failed' : 'unknown');
+      setError(err instanceof SellerApiError && err.status < 500 ? err.code === 'STALE_VERSION' ? 'stale' : outcomeFieldError(err.fields?.[0]?.field ?? '', 'replace') ?? 'failed' : 'unknown');
     } finally {
       setIsSubmitting(false);
     }
