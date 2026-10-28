@@ -1,6 +1,8 @@
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { LocaleProvider, useLocale } from '../locale';
+import { sellerCopy } from '../locale/sellerCopy';
 import { SellerSession } from './SellerSession';
 
 const clerk = vi.hoisted(() => ({
@@ -203,6 +205,30 @@ it('keeps the language switch available while sign-in loads without requesting a
   expect(container.querySelector('[role=status]:not(.sr-only)')?.textContent).toContain('সাইন ইন লোড হচ্ছে');
   expect(clerk.getToken).not.toHaveBeenCalled();
   localStorage.clear();
+});
+it('shares the enclosing locale selection without reacquiring the seller token', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  function OuterLocale(): React.JSX.Element {
+    const { locale } = useLocale();
+    return <span data-testid="outer-locale">{locale}</span>;
+  }
+  try {
+    await act(async () => root.render(
+      <LocaleProvider>
+        <OuterLocale />
+        <SellerSession />
+      </LocaleProvider>,
+    ));
+    expect(container.textContent).toContain('Shop Setup');
+    const tokens = clerk.getToken.mock.calls.length;
+
+    await act(async () => Array.from(container.querySelectorAll('button'))
+      .find(b => b.textContent === 'বাংলা')!.click());
+
+    expect(container.querySelector('[data-testid="outer-locale"]')?.textContent).toBe('bn');
+    expect(container.textContent).toContain(sellerCopy.bn.setup);
+    expect(clerk.getToken).toHaveBeenCalledTimes(tokens);
+  } finally { localStorage.clear(); }
 });
 it('translates a rejected session without repeating authentication or requests', async () => {
   localStorage.setItem('middleman.locale', 'en');

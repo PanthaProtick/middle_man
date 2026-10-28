@@ -3,7 +3,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from './App';
 import { awaitingOrder } from './features/buyer/buyerLocaleFixtures';
-import { LOCALE_STORAGE_KEY } from './features/locale';
+import { LOCALE_STORAGE_KEY, LocaleProvider, useLocale } from './features/locale';
 
 let container: HTMLDivElement;
 let root: Root;
@@ -23,6 +23,11 @@ afterEach(async () => {
   window.history.replaceState({}, '', '/');
   vi.restoreAllMocks();
 });
+
+function OuterLocale(): React.JSX.Element {
+  const { locale } = useLocale();
+  return <span data-testid="outer-locale">{locale}</span>;
+}
 
 function button(name: string): HTMLButtonElement {
   const match = Array.from(container.querySelectorAll('button'))
@@ -50,6 +55,29 @@ describe('Both application entry paths expose the language switch', () => {
     expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bn');
     expect(document.documentElement.lang).toBe('bn-BD');
     expect(container.textContent).toContain('আপনার দোকানে সাইন ইন করুন');
+  });
+
+  it('uses the enclosing provider instead of creating a second locale state', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({
+      status: 'healthy', project_name: 'Test', environment: 'test',
+      database_configured: false, gemini_configured: false,
+    })));
+
+    await act(async () => root.render(
+      <LocaleProvider>
+        <OuterLocale />
+        <App />
+      </LocaleProvider>,
+    ));
+
+    expect(container.querySelector('[data-testid="outer-locale"]')?.textContent).toBe('en');
+    expect(container.querySelectorAll('.locale-switch')).toHaveLength(1);
+
+    await act(async () => button('বাংলা').click());
+
+    expect(container.querySelector('[data-testid="outer-locale"]')?.textContent).toBe('bn');
+    expect(container.textContent).toContain('আপনার দোকানে সাইন ইন করুন');
+    expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bn');
   });
 
   it('uses the saved device preference for a shared buyer link without extra requests', async () => {
