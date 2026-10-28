@@ -22,6 +22,9 @@ it('keeps a filter, expanded review and open details while translating labels an
   await act(async () => root.render(<LocaleProvider><LocaleSwitch /><OrderList orders={[order]} statusFilter="pending"
     onFilterChange={filter} nextCursor="cursor-original" onLoadMore={loadMore} /></LocaleProvider>));
   const button = (text: string) => Array.from(host.querySelectorAll('button')).find(item => item.textContent?.trim() === text)!;
+  expect(host.textContent).toContain('Deadline:');
+  expect(host.textContent).not.toContain('BST');
+  expect(host.textContent).toContain('Bangladesh time');
   await act(async () => button('Show codes').click());
   await act(async () => button('Inspect').click());
   const dialog = host.querySelector('dialog')!;

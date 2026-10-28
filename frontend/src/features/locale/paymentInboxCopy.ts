@@ -1,4 +1,5 @@
 import { useLocale } from './context';
+import { keyedCopy } from './keyedCopy';
 const bengali: Record<string, string> = {
 "observation":"প্রাপ্ত তথ্য", "observations":"প্রাপ্ত তথ্য", "none":"বিরোধ নেই",
 "unmatched":"অমিল", "used":"ব্যবহৃত", "allocated":"বরাদ্দ হয়েছে", "conflicted":"বিরোধপূর্ণ", "incomplete":"অসম্পূর্ণ", "matched":"মিলেছে", "conflicting":"বিরোধপূর্ণ", "identical":"একই তথ্য", "consistent":"সামঞ্জস্যপূর্ণ", "initial":"প্রথম রেকর্ড", "manual":"হাতে লেখা", "sms":"SMS",
@@ -30,6 +31,8 @@ const bengali: Record<string, string> = {
   "Cancel editing": "সম্পাদনা বাতিল করুন",
   "Designated Receiving Accounts": "নির্ধারিত প্রাপক অ্যাকাউন্ট",
   "Manage the bKash, Nagad, and Rocket numbers given to buyers on their confirmation link.": "ক্রেতার নিশ্চিতকরণ লিংকে দেওয়া প্রাপক নম্বরগুলো পরিচালনা করুন।",
+  "Courier Logistics Integration": "কুরিয়ার লজিস্টিকস ইন্টিগ্রেশন",
+  "Connect your courier accounts to automate parcel dispatch and delivery tracking.": "পার্সেল পাঠানো ও ডেলিভারি ট্র্যাকিং স্বয়ংক্রিয় করতে আপনার কুরিয়ার অ্যাকাউন্ট সংযুক্ত করুন।",
   "account": "অ্যাকাউন্ট",
   "accounts": "অ্যাকাউন্ট",
   "Received Payments Inbox": "প্রাপ্ত পেমেন্টের ইনবক্স",
@@ -88,7 +91,13 @@ const bengali: Record<string, string> = {
 };
 /** Exposed for the centralized copy audit; runtime lookups go through the hook. */
 export const paymentInboxBengali = bengali;
+const paymentInboxCopy = {
+  en: {
+    'SMS import guidance': 'Paste seller incoming-payment SMS only. Buyer payment details are claims, not receipt evidence. Raw SMS is private with a deletion deadline 30 days after original collection. Unsupported formats need manual entry.',
+  },
+  bn: bengali,
+};
 export function usePaymentInboxCopy() {
   const { locale } = useLocale();
-  return (english: string): string => locale === 'bn' ? (bengali[english] ?? english) : english === 'SMS import guidance' ? 'Paste seller incoming-payment SMS only. Buyer payment details are claims, not receipt evidence. Raw SMS is private with a deletion deadline 30 days after original collection. Unsupported formats need manual entry.' : english;
+  return (english: string): string => keyedCopy(locale, paymentInboxCopy, english);
 }

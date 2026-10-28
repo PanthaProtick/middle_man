@@ -1,3 +1,4 @@
+import { keyedCopy } from './keyedCopy';
 import type { Locale } from './storage';
 
 const reasons: Record<string, [string, string]> = {
@@ -14,8 +15,12 @@ const reasons: Record<string, [string, string]> = {
 };
 /** Exposed for the centralized copy audit; runtime lookups go through paymentReason. */
 export const paymentExceptionReasons = reasons;
+const reasonText = {
+  en: Object.fromEntries(Object.entries(reasons).map(([code, [english]]) => [code, english])),
+  bn: Object.fromEntries(Object.entries(reasons).map(([code, [, bengali]]) => [code, bengali])),
+};
 export function paymentReason(code: string, locale: Locale): string {
-  return reasons[code]?.[locale === 'bn' ? 1 : 0] ?? (locale === 'bn'
+  return keyedCopy(locale, reasonText, code, locale === 'bn'
     ? 'অজানা কারণ; তথ্য যাচাই করে সহায়তা নিন' : 'Unknown reason; review the evidence and contact support');
 }
 export const paymentExceptionCopy = {

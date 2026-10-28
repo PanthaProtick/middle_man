@@ -49,11 +49,15 @@ describe('Both application entry paths expose the language switch', () => {
     expect(button('বাংলা')).toBeDefined();
     expect(button('English')).toBeDefined();
     expect(container.textContent).toContain('Sign in to your shop');
+    const statusGroup = () => container.querySelector('.status-badges');
+    expect(statusGroup()?.getAttribute('role')).toBe('group');
+    expect(statusGroup()?.getAttribute('aria-label')).toBe('System status');
 
     await act(async () => button('বাংলা').click());
 
     expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bn');
     expect(document.documentElement.lang).toBe('bn-BD');
+    expect(statusGroup()?.getAttribute('aria-label')).toBe('সিস্টেমের অবস্থা');
     expect(container.textContent).toContain('আপনার দোকানে সাইন ইন করুন');
   });
 

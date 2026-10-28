@@ -34,7 +34,7 @@ export default function Header({
         </div>
       </div>
 
-      <div className="status-badges">
+      <div className="status-badges" role="group" aria-label={text.status}>
         <LocaleSwitch />
         <div
           className={`badge ${isHealthy ? 'online' : 'offline'}`}

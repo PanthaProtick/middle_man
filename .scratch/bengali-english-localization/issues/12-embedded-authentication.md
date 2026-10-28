@@ -18,7 +18,7 @@
 
 - [ ] Perform real-session acceptance for reachable embedded sign-in, verification, error, and recovery paths in both locales using existing authorized development access. Record unavailable credentials/configuration as a precise gap; external identity-provider sites remain outside application control. **Partially run; failures and remaining cases recorded below.**
 
-- [ ] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details.
+- [ ] Keep approved standard Bangladeshi Bengali and plain English wording. Include Bengali-capable offline font fallback, phone wrapping and reachable controls, localized document/control language, associated errors, announcements, and preserved keyboard focus; test visible behavior rather than implementation details. Copy, offline font fallback, document language, and preserved focus are implemented and tested; phone wrapping/control reachability and announcements were not verified on a real phone or screen reader.
 
 - [x] Run focused repository tests for changed behavior, then root npm run check as the final pre-handoff gate. Record changed paths, exact results, and failed/blocked/unrun browser or provider acceptance in the existing task record. Mocks and HTTP smoke do not prove live acceptance.
 
@@ -114,3 +114,16 @@
   flow with equivalent methods, recovery, MFA, error and security coverage.
 - Ticket remains reopened; earlier unrun phone/screen-reader, expiry/error and full
   password-reset acceptance remain open. No password was changed or order modified.
+
+## Review-fix pass — 2026-10-28
+
+- Branch `review-fixes-localization` (`2c96682`, `63b183f`; base `4359cea`) changed
+  no Clerk contract or provider behavior and added no live coverage. It typed the
+  `Root.test.tsx` Clerk localization mock as
+  `Array<ClerkLocalizationResource | undefined>` instead of `as unknown[]`, so the
+  locale-prop assertions stay compiler-checked. Static resource parity still does
+  not prove the installed Clerk widgets render every reachable path in Bengali.
+- Ticket remains reopened: the hardcoded `Enter verification code` and `Loading`
+  accessibility labels are still untranslated, and the phone-browser,
+  screen-reader, expiry/error and full password-reset acceptance cases remain
+  unrun.

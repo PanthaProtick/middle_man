@@ -1,6 +1,8 @@
+import { formatIntegerMinor, normalizeBengaliDigits } from '../locale/format';
+
 /** Normalize only numeric input boundaries; opaque identifiers and free text stay intact. */
 export function asciiDigits(value: string): string {
-  return value.replace(/[০-৯]/g, digit => String(digit.charCodeAt(0) - 0x09e6));
+  return normalizeBengaliDigits(value);
 }
 
 export function orderAmountMinor(value: string): number | null {
@@ -12,8 +14,5 @@ export function orderAmountMinor(value: string): number | null {
 }
 /** Format safe integer minor units without a floating-point division losing cents. */
 export function formatOrderAmount(minor: number): string {
-  const value = BigInt(minor);
-  const sign = value < 0n ? '-' : '';
-  const absolute = value < 0n ? -value : value;
-  return `${sign}${(absolute / 100n).toLocaleString('en-US')}.${String(absolute % 100n).padStart(2, '0')}`;
+  return formatIntegerMinor(minor);
 }

@@ -1,4 +1,5 @@
 import { formatCount } from './format';
+import { keyedCopy } from './keyedCopy';
 import type { Locale } from './storage';
 import { SellerApiError } from '../seller/api';
 
@@ -40,7 +41,8 @@ const bn: Record<string, string> = {
 };
 /** Exposed for the centralized copy audit; runtime lookups go through historyText. */
 export const historyBengali = bn;
-export const historyText = (locale: Locale, text: string): string => locale === 'bn' ? bn[text] ?? text : text;
+const historyCopy = { en: {}, bn };
+export const historyText = (locale: Locale, text: string): string => keyedCopy(locale, historyCopy, text);
 
 /** Retain a stable presentation key, never server text that may contain private data. */
 export function historyError(error: unknown, fallback: string): string {

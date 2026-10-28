@@ -1,6 +1,6 @@
 import { formatOrderAmount } from './orderNumbers';
 import { sellerFetch } from './sessionRequest';
-import { formatBangladeshDateTime } from '../locale/format';
+import { formatBangladeshDateTime, normalizeBengaliDigits } from '../locale/format';
 import type { ImportList, ImportResult } from './smsTypes';
 import type {
   AccountInput,
@@ -16,26 +16,10 @@ import type {
   ShopStatus,
 } from './types';
 
-const BANGLA_DIGITS: Record<string, string> = {
-  '০': '0',
-  '১': '1',
-  '২': '2',
-  '৩': '3',
-  '৪': '4',
-  '৫': '5',
-  '৬': '6',
-  '৭': '7',
-  '৮': '8',
-  '৯': '9',
-};
-
 const BD_PHONE_REGEX = /^01[3-9]\d{8}$/;
 
 export function canonicalizeBdPhone(raw: string): string {
-  let cleaned = raw.trim();
-  for (const [bangla, ascii] of Object.entries(BANGLA_DIGITS)) {
-    cleaned = cleaned.replaceAll(bangla, ascii);
-  }
+  let cleaned = normalizeBengaliDigits(raw.trim());
   cleaned = cleaned.replace(/[\s\-()]/g, '');
   if (cleaned.startsWith('+880')) {
     cleaned = '0' + cleaned.slice(4);

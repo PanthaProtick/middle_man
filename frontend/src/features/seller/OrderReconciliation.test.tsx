@@ -122,7 +122,7 @@ describe('Order Reconciliation and Review UI', () => {
     expect(document.activeElement).toBe(inspect);
   });
 
-  it('renders confirmed order in OrderList with Confirmed badge and Actual COD', async () => {
+  it('renders confirmed order in OrderList with Confirmed badge and remaining COD balance', async () => {
     await act(async () => {
       root.render(
         <OrderList
@@ -137,7 +137,7 @@ describe('Order Reconciliation and Review UI', () => {
 
     expect(container.textContent).toContain('Silk Saree');
     expect(container.textContent).toContain('Confirmed');
-    expect(container.textContent).toContain('Actual COD:');
+    expect(container.textContent).toContain('Remaining COD balance:');
     expect(container.textContent).toContain('BDT 4,000');
     expect(container.textContent).toContain('Confirmed: 1');
   });
@@ -156,7 +156,7 @@ describe('Order Reconciliation and Review UI', () => {
     });
 
     expect(container.textContent).toContain('Cotton Kurti');
-    expect(container.textContent).toContain('Expected COD:');
+    expect(container.textContent).toContain('Expected remaining COD balance:');
     expect(container.textContent).toContain('BDT 2,500');
     expect(container.textContent).toContain('Review Exceptions: 1');
     expect(container.textContent).toContain('Review:');
@@ -170,7 +170,7 @@ describe('Order Reconciliation and Review UI', () => {
     });
 
     expect(container.textContent).toContain('Order & Link Details');
-    expect(container.textContent).toContain('Actual Remaining COD');
+    expect(container.textContent).toContain('Remaining COD balance');
     expect(container.textContent).toContain('BDT 4,000');
     expect(container.textContent).toContain('Confirmed Payment Allocation');
     expect(container.textContent).toContain('Automatic match');
@@ -187,7 +187,7 @@ describe('Order Reconciliation and Review UI', () => {
     expect(container.textContent).toContain('Review Required');
     expect(container.textContent).toContain('SENDER_MISMATCH');
     expect(container.textContent).toContain('TIME_UNCLEAR');
-    expect(container.textContent).toContain('Expected Remaining COD');
+    expect(container.textContent).toContain('Expected remaining COD balance');
   });
 
   it('navigates order sections with tabs, footer controls, and the payment alert', async () => {

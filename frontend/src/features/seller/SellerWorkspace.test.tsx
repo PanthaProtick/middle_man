@@ -247,7 +247,7 @@ describe('SellerWorkspace Component', () => {
     expect(container.textContent).toContain('Active Shop');
     expect(container.textContent).toContain('Personal bKash');
     expect(container.textContent).toContain('Wireless Earbuds');
-    expect(container.textContent).toContain('Expected COD:');
+    expect(container.textContent).toContain('Expected remaining COD balance:');
     expect(container.textContent).toContain('BDT 2,000');
     expect(container.textContent).toContain('Awaiting Buyer');
     expect(container.textContent).toContain('Create Order Link');

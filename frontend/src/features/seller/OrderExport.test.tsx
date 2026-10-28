@@ -84,8 +84,8 @@ it('copies an authenticated summary with every label in English without decorati
   expect(copied).toContain('Fixed total: BDT 100.00');
   expect(copied).toContain('Required advance: BDT 20.00');
   expect(copied).toContain('Accepted advance: BDT 30.00');
-  expect(copied).toContain('Expected COD: BDT 80.00');
-  expect(copied).toContain('Actual COD: BDT 70.00');
+  expect(copied).toContain('Expected remaining COD balance: BDT 80.00');
+  expect(copied).toContain('Remaining COD balance: BDT 70.00');
   expect(copied).toContain('Manual delivery aid only; no courier booking');
   expect(statusText(host)).toBe('Summary copied.');
   expect(statusText(host)).not.toContain('✓');

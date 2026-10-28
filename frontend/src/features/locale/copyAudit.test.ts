@@ -21,9 +21,11 @@ type Copy = Record<string, string>;
 type PairedCopy = { en: Copy; bn: Copy };
 
 /**
- * Every copy module, independent of the components that consume it. The paired
- * group carries both languages in one module; the keyed group is an
- * English-keyed Bengali dictionary used through a lookup function.
+ * Static parity audit over copy modules, independent of the components that
+ * consume them. It proves key/placeholder parity and lookup resolution, but it
+ * cannot see copy written directly in JSX; rendered locale tests cover those
+ * seams. The paired group carries both languages in one module; the keyed group
+ * is an English-keyed Bengali dictionary used through a lookup function.
  */
 const pairedCopies: Record<string, PairedCopy> = {
   catalogs,
@@ -130,5 +132,17 @@ describe('approved glossary vocabulary is used consistently', () => {
     expect(paymentExceptionCopy.bn.caption).toContain('ক্রেতার দেওয়া পেমেন্টের তথ্য');
     expect(paymentExceptionCopy.bn.cod).toContain('ডেলিভারির সময় বাকি পরিশোধ');
     expect(courierBengali['Courier proposal']).toBe('কুরিয়ার অনুরোধের খসড়া');
+    expect(orderCopy.en.actualCod).toContain('Remaining COD balance');
+    expect(orderCopy.en.expectedCod).toContain('Expected remaining COD balance');
+    expect(orderCopy.en.actualRemaining).toBe('Remaining COD balance');
+    expect(orderCopy.en.expectedRemaining).toBe('Expected remaining COD balance');
+    expect(orderCreationCopy.en.cod).toContain('Expected remaining COD balance');
+    expect(exportCopy.en.actualCod).toBe('Remaining COD balance');
+    expect(exportCopy.en.expectedCod).toBe('Expected remaining COD balance');
+  });
+
+  it('does not leave an ambiguous BST label next to the localized time zone', () => {
+    expect(orderCopy.en.deadline).toBe('Deadline:');
+    expect(orderCopy.en.deadline).not.toContain('BST');
   });
 });

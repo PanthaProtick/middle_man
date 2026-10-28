@@ -34,6 +34,50 @@ it('switches parcel labels without replacing edits, focus, draft evidence or mak
   await act(async () => root.unmount());
 });
 
+it('localizes the proposal retry control when the draft cannot be loaded', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('offline'));
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><CourierDraft orderId="order-1" token="seller" /></LocaleProvider>));
+  expect(host.textContent).toContain('Courier proposal unavailable. Retry or reopen the order.');
+  expect(Array.from(host.querySelectorAll('button')).some(b => b.textContent === 'Retry proposal')).toBe(true);
+  await act(async () => Array.from(host.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
+  expect(host.textContent).toContain('কুরিয়ার অনুরোধের খসড়া পাওয়া যাচ্ছে না। আবার চেষ্টা করুন বা অর্ডারটি খুলুন।');
+  expect(Array.from(host.querySelectorAll('button')).some(b => b.textContent === 'কুরিয়ার অনুরোধের খসড়া আবার লোড করুন')).toBe(true);
+  await act(async () => root.unmount());
+});
+
+it('localizes the stale-details reload control without discarding saved input', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+    if (init?.method === 'PATCH') {
+      return new Response(JSON.stringify({ error: { code: 'STALE_VERSION', message: 'Private detail' } }), { status: 409 });
+    }
+    return new Response(JSON.stringify({
+      order_id: 'order-1', status: 'local_proposal', version: 3,
+      recipient_name: 'Buyer', contact_number: '01711111111', address: 'Road 1, Dhaka',
+      remaining_cod_minor: 12345, parcel_weight_grams: 1500, parcel_quantity: 2,
+      missing_parcel_fields: [], blockers: ['COURIER_CONNECTION_REQUIRED'],
+    }));
+  });
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><CourierDraft orderId="order-1" token="seller" /></LocaleProvider>));
+  const weight = host.querySelector<HTMLInputElement>('#courier-weight')!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(weight, '2');
+    weight.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await act(async () => host.querySelector('form')!.requestSubmit());
+  expect(host.textContent).toContain('Courier details changed. Reload the current values before saving again.');
+  const reload = Array.from(host.querySelectorAll('button')).find(b => b.textContent === 'Reload current details');
+  expect(reload).toBeDefined();
+  await act(async () => Array.from(host.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
+  expect(host.textContent).toContain('বর্তমান তথ্য আবার লোড করুন');
+  expect(weight.value).toBe('2');
+  expect(host.textContent).not.toContain('Private detail');
+  await act(async () => root.unmount());
+});
+
 it('switches an in-flight submission and its accepted result without repeating the booking', async () => {
   localStorage.setItem('middleman.locale', 'en');
   let finish!: (response: Response) => void;

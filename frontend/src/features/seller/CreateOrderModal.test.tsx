@@ -88,7 +88,7 @@ describe('CreateOrderModal Component', () => {
     });
 
     expect(container.textContent).toContain('Create Order & Buyer Link');
-    expect(container.textContent).toContain('Expected Remaining COD:');
+    expect(container.textContent).toContain('Expected remaining COD balance:');
     const select = container.querySelector('select[name="paymentAccountId"]') as HTMLSelectElement;
     expect(select).not.toBeNull();
     expect(select.options.length).toBe(1);

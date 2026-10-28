@@ -163,6 +163,7 @@ remain unrun and unclaimed.
 | Root `npm run check` | PASS | `.cache/checks/check-iZEZ0B/result.json` (tooling, lint, types, backend/frontend tests, build, HTTP smoke) |
 | Ticket 01 browser acceptance | NOT RUN | No phone-browser typography/focus/document-language check performed |
 | Real embedded Clerk sign-in/recovery | NOT RUN | Requires live authentication configuration; mocked paths do not establish it |
+| Review-fix post-fix root `npm run check` | PASS | `.cache/checks/check-FWfCQo/result.json` (465 backend passed/170 skipped; 71 frontend files/400 tests; tooling, lint, types, build, HTTP smoke) |
 
 ## Ticket 02 implementation and verification
 
@@ -398,11 +399,62 @@ remain unrun and unclaimed.
   passed (9 files, 95 tests). `npm run typecheck` passed (111 source files);
   `npm run lint:frontend` passed.
 - Root `npm run check` PASS: `.cache/checks/check-ysJlOM/result.json`
+- Post-review-fix root `npm run check` PASS: `.cache/checks/check-FWfCQo/result.json`
   (tooling, backend lint/types, 465 backend passed/170 skipped, frontend lint,
   69 frontend files/389 tests, build, HTTP smoke).
+- Copy-audit limit: `copyAudit.test.ts` compares dictionary keys, values,
+  placeholders, and lookup resolution. It cannot detect copy written directly in
+  JSX, so the hardcoded-copy gaps from review were fixed and are covered by
+  rendered locale tests instead.
 - Unrun gates: phone-browser font/wrapping/control/focus/reduced-motion/
   announcement checks and screen-reader behavior were NOT RUN. Real embedded
   Clerk sign-in/recovery was NOT RUN (ticket 12 evidence is mocked/local only).
   Hosted deployment and live Pathao/payment/AI provider behavior were NOT RUN. No
   headless-browser smoke was run and no browser dependency was added, so rendered
   tests and HTTP smoke do not establish those gates.
+
+### Review-fix pass — two-axis findings (2026-10-28)
+
+- Baseline `4359cea` on branch `review-fixes-localization`. Ticket 13's
+  owner-approved vocabulary, resolved status, and checkboxes from main remain
+  authoritative; ticket 12 remains **reopened - live authentication acceptance
+  failures**. This pass added no live Clerk coverage.
+- Fixed remaining hardcoded copy in `AccountsSection` (courier integration
+  heading/guidance) and `CourierDraft` (proposal retry and reload controls), with
+  rendered Bengali coverage. Replaced the simultaneous bilingual buyer contact
+  placeholder with selected-language copy using 0-9 digits (`017XXXXXXXX` /
+  `যেমন: 017XXXXXXXX`). Removed the stale `BST` label while the formatter appends
+  the localized zone; English seller/export COD labels now use the glossary's
+  “remaining COD balance” wording.
+- Extracted `formatIntegerMinor` in `features/locale/format.ts`; `formatBdt` and
+  `formatOrderAmount` both use it, preserving exact cents, signs, grouping, and
+  two decimals at `Number.MAX_SAFE_INTEGER`. Extracted
+  `normalizeBengaliDigits` and reused it in `canonicalizeBdPhone` and
+  `asciiDigits` without changing phone/free-text behavior. Added focused tests.
+- Header's `.status-badges` group regained a localized accessible name
+  (`sellerCopy.status`). Reverted `.metric-chip:nth-child(5)` to the pre-existing
+  `.metric-chip:last-child`; no layout test proved the newer selector necessary.
+  Removed the `localizations: [] as unknown[]` cast in `Root.test.tsx` by typing
+  the mock as `Array<ClerkLocalizationResource | undefined>`.
+- Added `features/locale/keyedCopy.ts` as the single English-keyed lookup with
+  explicit fallback; history, receipt, payment-exception, courier, and
+  payment-inbox copy now use it with unchanged behavior. Removed the tracked
+  `.scratch/tmp/uv-47c1bc0f64a35c35.lock`; no other scratch work was touched.
+- Ticket 13's recorded integrated root gate is
+  `.cache/checks/check-ysJlOM/result.json` (465 backend passed/170 skipped;
+  69 frontend files/389 tests); the earlier stale `check-FvRozu` reference was
+  already superseded before this merge. Post-fix root gate PASS:
+  `.cache/checks/check-FWfCQo/result.json` (465 backend passed/170 skipped;
+  71 frontend files/400 tests; tooling, lint, types, build, HTTP smoke all
+  passed). An intermediate run `.cache/checks/check-6pA1Pd/result.json` failed
+  10 frontend tests because the new integer formatter threw on `NaN`/undefined
+  fixture amounts; it now retains the previous `NaN` placeholder output and the
+  rerun passed. Merge resolution against `main` (`cd32581`) re-ran the root gate:
+  PASS, `.cache/checks/check-hrO0mm/result.json` (465 backend passed/170 skipped;
+  72 frontend files/404 tests; tooling, lint, types, build, HTTP smoke).
+- Intentional domain-correctness change retained: `OrderOutcomes` offers
+  replacement only for `awaiting_buyer`, `pending`, and `expired` orders (the
+  ticket 10 review fix). This was not reverted and still needs owner confirmation.
+- Unrun acceptance is unchanged: phone-browser typography/wrapping/controls/
+  announcements, screen-reader behavior, real Clerk sign-in/recovery, hosted
+  deployment, and live provider behavior.

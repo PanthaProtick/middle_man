@@ -118,7 +118,7 @@ it.each(['en', 'bn'] as const)('shows unaccepted advance and COD without inventi
   const copied = writeText.mock.calls[0][0] as string;
   const notAccepted = locale === 'bn' ? 'গ্রহণ করা হয়নি' : 'Not accepted';
   expect(copied).toContain(`${locale === 'bn' ? 'গৃহীত ডেলিভারির আগে অগ্রিম' : 'Accepted advance'}: ${notAccepted}`);
-  expect(copied).toContain(`${locale === 'bn' ? 'ডেলিভারির সময় বাকি পরিশোধ' : 'Actual COD'}: ${notAccepted}`);
+  expect(copied).toContain(`${locale === 'bn' ? 'ডেলিভারির সময় বাকি পরিশোধ' : 'Remaining COD balance'}: ${notAccepted}`);
   expect(copied).not.toContain('BDT undefined');
   await act(async () => root.unmount());
 });

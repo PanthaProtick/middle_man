@@ -29,10 +29,30 @@ const partsFormatter = new Intl.DateTimeFormat('en-GB', {
   hour12: true,
 });
 
+/**
+ * Formats integer minor units (for example paisa) without floating-point
+ * division, so cents stay exact at the supported safe-integer boundary.
+ */
+export function formatIntegerMinor(minor: number): string {
+  if (!Number.isSafeInteger(minor)) {
+    // Retain the historic placeholder for malformed or non-integer values
+    // instead of throwing while rendering a partial record.
+    return (minor / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+  const value = BigInt(minor);
+  const sign = value < 0n ? '-' : '';
+  const absolute = value < 0n ? -value : value;
+  return `${sign}${(absolute / 100n).toLocaleString('en-US')}.${String(absolute % 100n).padStart(2, '0')}`;
+}
+
 /** Money always uses 0-9 digits and two decimal places in both languages. */
 export function formatBdt(minor: number): string {
-  const bdt = minor / 100;
-  return `৳${bdt.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `৳${formatIntegerMinor(minor)}`;
+}
+
+/** Normalizes Bengali digits ০–৯ to 0–9; other characters stay untouched. */
+export function normalizeBengaliDigits(value: string): string {
+  return value.replace(/[০-৯]/g, digit => String(digit.charCodeAt(0) - 0x09e6));
 }
 
 /**
