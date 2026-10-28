@@ -24,13 +24,15 @@ export function useDateSelection(onApply: (range: OrderDateRange | null) => void
   const changeDateMode = useCallback((mode: OrderDateMode) => {
     setDateMode(mode);
     setDateError(null);
-    if (mode === 'any' && appliedDateRange !== null) {
-      clearActiveDateRange();
+    if (mode === 'today') {
+      const range = lastDaysRange(1);
+      onApply(range);
+      setAppliedDateRange(range);
     } else if (appliedDateRange !== null) {
       // A pending custom/relative selection must not stay active in another mode.
       clearActiveDateRange();
     }
-  }, [appliedDateRange, clearActiveDateRange]);
+  }, [appliedDateRange, clearActiveDateRange, onApply]);
 
   const changeDateFrom = useCallback((value: string) => {
     setDateFrom(value);

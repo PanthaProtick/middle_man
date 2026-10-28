@@ -1,6 +1,6 @@
 import { normalizeBengaliDigits } from '../locale/format';
 
-export type OrderDateMode = 'any' | 'custom' | 'relative';
+export type OrderDateMode = 'any' | 'today' | 'custom' | 'relative';
 export type OrderDateError =
   | 'range_required'
   | 'range_invalid'

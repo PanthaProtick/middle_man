@@ -67,6 +67,7 @@ export function OrderDateControls({
           style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', width: 'auto' }}
         >
           <option value="any">{text.dateAnyTime}</option>
+          <option value="today">{text.dateToday}</option>
           <option value="custom">{text.dateCustom}</option>
           <option value="relative">{text.dateRelative}</option>
         </select>
