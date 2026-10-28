@@ -155,7 +155,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
         <label>{text.buyerName}<input required maxLength={200} aria-invalid={fieldErrors.includes('buyer_name')} aria-describedby={fieldErrors.includes('buyer_name') ? 'correction-error-buyer_name' : undefined} value={draft.buyer_name} onChange={e => setDraft({...draft, buyer_name: e.target.value})} /></label>
         <label>{text.contact}<input required maxLength={32} aria-invalid={fieldErrors.includes('contact_number')} aria-describedby={fieldErrors.includes('contact_number') ? 'correction-error-contact_number' : undefined} value={draft.contact_number} onChange={e => setDraft({...draft, contact_number: e.target.value})} /></label>
         <label>{text.address}<textarea required maxLength={2000} aria-invalid={fieldErrors.includes('address') || fieldErrors.includes('address.raw_text')} aria-describedby={fieldErrors.includes('address.raw_text') ? 'correction-error-address-raw_text' : fieldErrors.includes('address') ? 'correction-error-address' : undefined} value={draft.address.raw_text} onChange={e => setDraft({...draft, address: {...draft.address, raw_text: e.target.value}})} /></label>
-        <fieldset disabled={isConfirmed}><legend>{text.claim}</legend>
+        <fieldset disabled={isConfirmed} aria-describedby={fieldErrors.includes('payment_claim') ? 'correction-error-payment_claim' : undefined}><legend>{text.claim}</legend>
           {isConfirmed && (
             <p className="payment-locked-note" style={{fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '4px 0 8px'}}>
               {text.locked}
