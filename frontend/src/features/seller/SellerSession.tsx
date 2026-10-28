@@ -34,7 +34,11 @@ function SellerSessionContent(): React.JSX.Element {
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !sessionId || signingOut || sessionId === signedOutSession || blocked) return;
     let active = true;
+    let recoveryTimer: number | undefined;
+    let refreshing = false;
     const refresh = async () => {
+      if (refreshing) return;
+      refreshing = true;
       try {
         const token = await getToken();
         if (!active) return;
@@ -42,15 +46,23 @@ function SellerSessionContent(): React.JSX.Element {
         setCredential(previous => ({ sessionId, bearerToken: token,
           token: previous?.sessionId === sessionId ? previous.token : token }));
         setError(undefined);
+        window.clearTimeout(recoveryTimer);
+        recoveryTimer = undefined;
       } catch {
         if (!active) return;
         setCredential(undefined);
         setError('token');
+        if (recoveryTimer === undefined) recoveryTimer = window.setTimeout(() => {
+          recoveryTimer = undefined;
+          void refresh();
+        }, 5000);
+      } finally {
+        refreshing = false;
       }
     };
     void refresh();
     const interval = window.setInterval(() => void refresh(), 30000);
-    return () => { active = false; window.clearInterval(interval); };
+    return () => { active = false; window.clearInterval(interval); window.clearTimeout(recoveryTimer); };
   }, [isLoaded, isSignedIn, sessionId, getToken, signingOut, signedOutSession, blocked, retry]);
 
   const token = isLoaded && isSignedIn && !signingOut && !blocked && sessionId !== signedOutSession && credential?.sessionId === sessionId
@@ -60,8 +72,8 @@ function SellerSessionContent(): React.JSX.Element {
     return bindSellerSession(token, (kind, reason) => {
       setCredential(undefined);
       setFailure({ sessionId, kind, reason });
-    });
-  }, [token, sessionId]);
+    }, () => getToken({ skipCache: true }));
+  }, [token, sessionId, getToken]);
   useLayoutEffect(() => {
     if (token && credential) renewSellerSessionToken(token, credential.bearerToken);
   }, [token, credential]);

@@ -28,6 +28,36 @@ it('renews authorization without invalidating a same-session response already in
   }));
 });
 
+it('refreshes an expired bearer and retries a read without clearing the seller session', async () => {
+  const failed = vi.fn();
+  const refresh = vi.fn().mockResolvedValue('fresh-alpha');
+  const fetcher = vi.fn()
+    .mockResolvedValueOnce(new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'expired' } }))
+    .mockResolvedValueOnce(Response.json({ display_name: 'Alpha' }));
+  vi.stubGlobal('fetch', fetcher);
+  dispose = bindSellerSession('alpha', failed, refresh);
+  await expect(requestJson('/api/seller/shop', {}, 'alpha')).resolves.toEqual({ display_name: 'Alpha' });
+  expect(refresh).toHaveBeenCalledOnce();
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(fetcher).toHaveBeenLastCalledWith('/api/seller/shop', expect.objectContaining({
+    headers: expect.objectContaining({ Authorization: 'Bearer fresh-alpha' }),
+  }));
+  expect(failed).not.toHaveBeenCalled();
+});
+
+it('refreshes an expired bearer without replaying a write', async () => {
+  const failed = vi.fn();
+  const fetcher = vi.fn().mockResolvedValue(new Response('{}', {
+    status: 401, headers: { 'X-Seller-Auth-Reason': 'expired' },
+  }));
+  vi.stubGlobal('fetch', fetcher);
+  dispose = bindSellerSession('alpha', failed, vi.fn().mockResolvedValue('fresh-alpha'));
+  const response = await sellerFetch('/api/seller/orders', { method: 'POST' }, 'alpha');
+  expect(response.status).toBe(401);
+  expect(fetcher).toHaveBeenCalledTimes(1);
+  expect(failed).not.toHaveBeenCalled();
+});
+
 it('rejects a body delivered after the request session is invalidated', async () => {
   let deliver!: (value: Uint8Array) => void;
   let finish!: () => void;

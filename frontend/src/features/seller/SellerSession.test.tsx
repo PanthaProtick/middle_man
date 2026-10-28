@@ -135,7 +135,7 @@ it.each(['sign-out', 'identity-change', 'expiry'])('discards a late private resp
   expect(container.textContent).toContain(change === 'identity-change' ? 'Shop Setup' : 'Sign in to your shop');
 });
 
-it('clears private content when periodic token acquisition fails', async () => {
+it('recovers automatically after a transient periodic token acquisition failure', async () => {
   vi.useFakeTimers();
   try {
     await act(async () => root.render(<SellerSession />));
@@ -144,6 +144,10 @@ it('clears private content when periodic token acquisition fails', async () => {
     await act(async () => vi.advanceTimersByTimeAsync(30000));
     expect(container.textContent).not.toContain('Shop Setup');
     expect(container.textContent).toContain('Unable to obtain your seller session');
+    clerk.getToken.mockResolvedValue('renewed-session-token');
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(container.textContent).toContain('Shop Setup');
+    expect(container.textContent).not.toContain('Unable to obtain your seller session');
   } finally { vi.useRealTimers(); }
 });
 
