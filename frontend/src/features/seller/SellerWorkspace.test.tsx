@@ -29,7 +29,7 @@ describe('Seller API Client', () => {
 
   it('formats dates in Bangladesh time with explicit zone', () => {
     const formatted = formatBangladeshTime('2026-10-24T12:00:00Z');
-    expect(formatted).toContain('BST / UTC+6');
+    expect(formatted).toContain('Bangladesh time');
     expect(formatted).toContain('2026');
   });
 

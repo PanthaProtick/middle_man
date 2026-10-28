@@ -55,7 +55,7 @@ const bn: Record<keyof typeof en, string> = {
   address: 'ঠিকানা',
   fixedTotal: 'সম্মত মোট মূল্য',
   requiredAdvance: 'ডেলিভারির আগে প্রয়োজনীয় অগ্রিম',
-  acceptedAdvance: 'গৃহীত অগ্রিম',
+  acceptedAdvance: 'গৃহীত ডেলিভারির আগে অগ্রিম',
   expectedCod: 'ডেলিভারির সময় সম্ভাব্য বাকি পরিশোধ',
   actualCod: 'ডেলিভারির সময় বাকি পরিশোধ',
   notAccepted: 'গ্রহণ করা হয়নি',

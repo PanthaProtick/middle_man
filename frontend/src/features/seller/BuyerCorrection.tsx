@@ -104,7 +104,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
 
   const errorText = error === 'unknown' ? text.unknownError : error === 'unavailable' ? text.unavailable
     : error === 'refreshed' ? text.refreshed : error === 'phone' ? text.phoneError
-      : error === 'amount' ? text.amountError : error === 'STALE_VERSION' ? text.stale : error === 'unauthorized' ? (locale === 'bn' ? 'বিক্রেতা হিসেবে সাইন ইন করুন।' : 'Seller sign-in required.') : text.failed;
+      : error === 'amount' ? text.amountError : error === 'STALE_VERSION' ? text.stale : error === 'unauthorized' ? text.unauthorized : text.failed;
 
   return <section className="buyer-correction" lang={locale === 'bn' ? 'bn-BD' : 'en'} aria-label={text.correctionTitle}>
     <h3>{text.correctionTitle}</h3>

@@ -59,8 +59,11 @@ const bn: Record<string, string> = {
   "Receiving Account *": "প্রাপক অ্যাকাউন্ট *",
   "No active receiving accounts available": "কোনো সক্রিয় প্রাপক অ্যাকাউন্ট নেই",
   "Transaction ID (TrxID) *": "লেনদেনের আইডি (TrxID) *",
+  "e.g. 9K72LKQW1": "যেমন: 9K72LKQW1",
   "Actual Received Amount (BDT) *": "প্রকৃত প্রাপ্ত টাকা (BDT) *",
+  "e.g. 150": "যেমন: 150",
   "Sender Number ": "প্রেরকের নম্বর ",
+  "e.g. 01700000000": "যেমন: 01700000000",
   "(Optional - incomplete if omitted)": "(ঐচ্ছিক — না দিলে তথ্য অসম্পূর্ণ থাকবে)",
   "Payment Occurrence Time ": "পেমেন্টের সময় ",
   "Cancel": "বাতিল করুন",
@@ -80,6 +83,8 @@ const bn: Record<string, string> = {
   "Outcome unknown; retry the same correction": "ফলাফল নিশ্চিত নয়; একই সংশোধন আবার পাঠান",
   "Failed to record transaction": "পেমেন্ট রেকর্ড করা যায়নি। তথ্য যাচাই করে আবার চেষ্টা করুন।"
 };
+/** Exposed for the centralized copy audit; runtime lookups go through receiptText. */
+export const receiptBengali = bn;
 export const receiptText = (locale: Locale, value: string): string => locale === 'bn' ? bn[value] ?? value : value;
 
 export function receiptError(error: unknown, fallback: string): string {

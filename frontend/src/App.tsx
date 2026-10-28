@@ -35,6 +35,11 @@ export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): R
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
   const isOrderPortal = pathname.startsWith('/orders/');
   const portalToken = isOrderPortal ? pathname.replace('/orders/', '').trim() : '';
+  const showingPortal = isOrderPortal && Boolean(portalToken);
+
+  useEffect(() => {
+    document.title = t(showingPortal ? 'document.title.buyer' : 'document.title.seller');
+  }, [showingPortal, t]);
 
   useEffect(() => {
     if (isOrderPortal) return;
@@ -45,7 +50,7 @@ export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): R
     return () => clearInterval(interval);
   }, [isOrderPortal]);
 
-  if (isOrderPortal && portalToken) {
+  if (showingPortal) {
     return (
       <div className="portal-shell">
         <header className="portal-header">

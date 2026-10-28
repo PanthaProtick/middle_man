@@ -81,11 +81,13 @@ const bengali: Record<string, string> = {
   "Status:": "অবস্থা:",
   "Recorded Observations": "প্রাপ্ত তথ্যের রেকর্ড",
   "Observation #": "প্রাপ্ত তথ্য #",
-  "Confirmed orders:": "নিশ্চিত অর্ডার:",
+  "Confirmed orders:": "নিশ্চিত করা অর্ডার:",
   "Import": "আমদানি",
   "Message": "বার্তা",
   "No previous SMS imports.": "আগের কোনো SMS আমদানি নেই।"
 };
+/** Exposed for the centralized copy audit; runtime lookups go through the hook. */
+export const paymentInboxBengali = bengali;
 export function usePaymentInboxCopy() {
   const { locale } = useLocale();
   return (english: string): string => locale === 'bn' ? (bengali[english] ?? english) : english === 'SMS import guidance' ? 'Paste seller incoming-payment SMS only. Buyer payment details are claims, not receipt evidence. Raw SMS is private with a deletion deadline 30 days after original collection. Unsupported formats need manual entry.' : english;

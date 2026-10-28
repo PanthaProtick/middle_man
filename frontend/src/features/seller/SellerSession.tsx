@@ -12,7 +12,7 @@ export function SellerSession(): React.JSX.Element {
 }
 
 function SellerSessionContent(): React.JSX.Element {
-  const { locale } = useLocale();
+  const { locale, t } = useLocale();
   const text = sellerCopy[locale];
   const { isLoaded, isSignedIn, sessionId, getToken } = useAuth();
   const { openSignIn, signOut } = useClerk();
@@ -23,6 +23,11 @@ function SellerSessionContent(): React.JSX.Element {
   const [failure, setFailure] = useState<{ sessionId: string; kind: SessionFailure; reason?: AuthReason }>();
   const [retry, setRetry] = useState(0);
   const blocked = failure !== undefined && failure.sessionId === sessionId;
+
+  // Keep the seller tab title localized even while Clerk or the session is loading.
+  useEffect(() => {
+    document.title = t('document.title.seller');
+  }, [t]);
 
   useEffect(() => {
     if (!isLoaded || !isSignedIn || !sessionId || signingOut || sessionId === signedOutSession || blocked) return;

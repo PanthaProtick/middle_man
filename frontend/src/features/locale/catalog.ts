@@ -12,6 +12,8 @@ const englishCatalog = {
   'locale.english': 'English',
   'locale.announcement': 'Language: {language}',
 
+  'document.title.buyer': 'Order confirmation · middleman',
+  'document.title.seller': 'Seller workspace · middleman',
   'portal.brand': 'Order confirmation',
   'portal.backHome': 'Back to Home',
   'portal.footerNotice': 'Never share your PIN or OTP. Your seller reviews the order and payment details.',
@@ -79,6 +81,8 @@ const bengaliCatalog: Record<MessageKey, string> = {
   'locale.english': 'English',
   'locale.announcement': 'ভাষা: {language}',
 
+  'document.title.buyer': 'অর্ডার নিশ্চিতকরণ · middleman',
+  'document.title.seller': 'বিক্রেতার কর্মক্ষেত্র · middleman',
   'portal.brand': 'অর্ডার নিশ্চিতকরণ',
   'portal.backHome': 'হোমে ফিরুন',
   'portal.footerNotice':
