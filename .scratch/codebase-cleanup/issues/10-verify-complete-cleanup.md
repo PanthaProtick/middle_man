@@ -16,3 +16,23 @@
 - [ ] Report browser, physical-device, screen-reader, hosted, PostgreSQL, and live-provider acceptance separately; automated tests and HTTP smoke establish none of the unrun gates.
 - [ ] Deliver a concise final summary of changes, deletion evidence, remaining exceptions, and actual verification. Do not deploy or run operational data cleanup.
 
+## Work record
+
+**Inventory bounds (2026-10-28):** Full map in
+[disposition-record.md](../disposition-record.md).
+
+- Compare final scratch content against the 143-file baseline: 101 Markdown work
+  records retained (minus 2 relocated verification reports, plus records of this
+  effort), 42 non-Markdown artifacts resolved (17 relocated, 25 removed).
+- Compare test discovery against 101 backend modules, 78 frontend test files, and
+  3 tooling suites; explain every intentional addition/removal and verify the
+  split/exception list from tickets 05-08.
+- Confirm 2 source files over 300 were split, 10 review-trigger source files were
+  either decomposed or justified, and 15 over-300 tests were split or have narrow
+  documented exceptions.
+- Verify active links across `docs/`, `AGENTS.md`, `README.md`, `tasks/`, and
+  `.scratch/`; confirm producers write only to ignored cache storage.
+- Run a fresh root `npm run check` after final fixes and record the result artifact,
+  failures, skips, and unrun browser/device/screen-reader/hosted/PostgreSQL/live
+  gates. Do not claim unrun gates passed.
+

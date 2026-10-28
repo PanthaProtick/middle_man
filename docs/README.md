@@ -1,6 +1,8 @@
 # Project Documentation (Tier 2 Context)
 
-This directory houses **deep, on-demand reference documentation**. 
+This directory houses **deep, on-demand reference documentation**. Review a
+documentation file at 250 physical lines and split it by topic when navigation
+suffers; historical task records and completed work notes remain unchanged.
 
 [Codex ticket tool-call analysis](codex-ticket-tool-call-analysis.md) ranks tool output, command duration, failures and review costs across all six locally discoverable Codex ticket chats and twelve reviewers, with audit data and environment benchmark priorities.
 

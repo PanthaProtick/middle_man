@@ -37,7 +37,7 @@ flowchart LR
 
 ### Feature-Slice Colocation
 * **Frontend:** Avoid horizontal slicing (e.g., placing all hooks in one folder, all components in another). Instead, colocate components, custom hooks, types, and domain-specific tests under `src/features/<feature-name>/`.
-* **Modularity (< 250 Lines):** Deconstruct components exceeding 250 lines into sub-components or custom hooks.
+* **Size Review (250 / 300 Lines):** Review any source file at 250 physical lines and decompose it before 300. Tests follow the same rule, with narrow documented exceptions for cohesive scenarios or fixtures. Split by responsibility, not by line count alone.
 
 ### Graceful Standby / Mock-First Pattern
 * In development or evaluation, live cloud credentials (`GEMINI_API_KEY`, `DATABASE_URL`) may be omitted.

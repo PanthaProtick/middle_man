@@ -21,7 +21,9 @@
 - Backend: FastAPI, typed Python, Pydantic v2 request/response contracts; tests in
   `backend/tests/`. Frontend: strict TypeScript, explicit payload/prop types, no
   `any`; feature-specific UI, hooks, types, and tests in `frontend/src/features/`.
-- Keep sources below 250–300 lines; decompose growing files by responsibility.
+- Source files: review at 250 physical lines, 300 maximum. Tests follow the same
+  rule; only narrow documented cohesive-scenario or fixture exceptions may exceed
+  300. Decompose by responsibility, not by compressed formatting.
 - Development and unit tests support offline standby behavior without live
   credentials. Current item routes use process memory; Clerk settings alone do
   not implement authentication. Configuration flags do not establish readiness.

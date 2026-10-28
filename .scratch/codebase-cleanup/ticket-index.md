@@ -2,7 +2,10 @@
 
 Breakdown approved on 2026-10-28. Parent: [cleanup specification](spec.md).
 Each ticket is `ready-for-agent`; blocking edges still govern eligibility.
-No implementation has started as part of ticket publication.
+Ticket 01 records the inventory baseline in
+[disposition-record.md](disposition-record.md) and a resumable
+[implementation handoff](implementation-handoff.md). Implementation cleanup has
+not started.
 
 | Ticket | Blocked by | Spec acceptance focus |
 | --- | --- | --- |

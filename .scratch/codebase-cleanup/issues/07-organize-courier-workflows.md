@@ -15,3 +15,28 @@
 - [ ] Verify each bounded responsibility before proceeding; no live bookings or provider mutations are authorized as cleanup verification.
 - [ ] Run final root `npm run check` and record dispositions, exceptions, actual integration results, and unrun hosted/device/live-provider gates.
 
+## Work record
+
+**Inventory bounds (2026-10-28):** Full map in
+[disposition-record.md](../disposition-record.md).
+
+- Backend: `courier_review.py` 234, `courier_reconciliation.py`,
+  `courier_attempts.py`, `courier_drafts.py`, `courier_reservation.py`,
+  `pathao_*` services, `api/courier.py`, `api/pathao.py`, courier models.
+- Frontend: `CourierDraft.tsx` 241, `CourierReview.tsx`, `CourierWorkspace`,
+  reconciliation/outcome components, `PathaoSettings.tsx`, courier locale copy
+  (coordinate with 08), and their rendered tests.
+- Tests: `test_courier_post_submission_changes.py` 495 and
+  `test_courier_submission_postgres.py` 402 need split/exception;
+  `test_pathao_sandbox_booking.py` 367, `test_courier_submission_failures.py` 301,
+  `test_courier_drafts.py` 278, `test_courier_reconciliation_postgres.py` 255;
+  `CourierReview.test.tsx` 255 and `CourierPostSubmissionChanges.test.tsx` 235.
+- Preserve one local draft per confirmation, seller review, parcel/location
+  validation, server-derived COD, stale-revision protection, replay, uncertain
+  outcomes, reconciliation, privacy, and duplicate-booking prevention.
+- No live booking, provider mutation, or sandbox request is cleanup verification.
+
+**Required checks:** focused courier tests per responsibility, component/API
+collection checks, then `npm run check`. Report sandbox/live gates as NOT RUN
+unless separately authorized and executed.
+
