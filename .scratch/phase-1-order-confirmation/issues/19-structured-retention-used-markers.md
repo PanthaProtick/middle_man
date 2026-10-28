@@ -64,8 +64,9 @@ Implement only this approved slice and its required seams; blockers must complet
 - Browser PASS with synthetic identity/public gate and isolated PostgreSQL schema:
   seller removed 1 completed record and retained the unresolved order/receipt;
   old buyer link shows neutral unavailable record, pending buyer link stays pending.
-  Local launcher: `.scratch/phase-1-order-confirmation/structured_retention_browser.py`;
-  screenshots `.cache/retention-seller-browser.png`, `.cache/retention-buyer-browser.png`.
+  The disposable local launcher was removed during repository cleanup; current
+  coverage is the maintained retention backend and React suites.
+  Screenshots `.cache/retention-seller-browser.png`, `.cache/retention-buyer-browser.png`.
 - NOT RUN: hosted migrations/scheduler, live Clerk/providers, real-data deletion,
   external storage versions/log copies and backup purge. No deployment authorized.
 - Next action: independent standards/spec reviews, fix actionable findings, final

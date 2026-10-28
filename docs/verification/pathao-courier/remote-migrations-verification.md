@@ -17,8 +17,12 @@ User explicitly requested applying the pending remote schema migration with chec
 - Fresh connection after commit: schema verified and SQLAlchemy projections for
   both affected models compiled/executed successfully with zero-row reads.
 - Final independent read-only preflight: **no pending 0022/0023 migrations**.
-- Result: **PASS**. SQL source hashes and checks recorded in
-  `remote-migrations-result.json`. Credentials and private row contents were not
+- Result: **PASS**. The disposable execution report was removed from the
+  repository; it recorded the SQL source hashes and safe checks. Migration
+  SHA-256 values were `4757169e451ced5f0cdb7e7c035bc088a009d60ae5f6ff50cef6d6e6f30442a4`
+  for `0022_pathao_locations.sql` and
+  `f72f360bd02907a1251194245a881403cbb4298c800fa5c1c8c766e78d0f90d5` for
+  `0023_courier_review.sql`. Credentials and private row contents were not
   retrieved into output. Temporary execution scripts removed after verification.
 - This records actual remote schema acceptance. It does not establish browser,
   Clerk, provider, sandbox booking, or production acceptance. No courier request,

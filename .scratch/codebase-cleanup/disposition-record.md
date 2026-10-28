@@ -11,6 +11,13 @@ This record classifies candidates; it does not claim cleanup is complete. Ticket
 candidates, tickets 04-08 organize by feature, ticket 09 prevents recurrence, and
 ticket 10 verifies the integrated result.
 
+**Execution update (2026-10-28):** ticket 02 moved the retained evidence to
+`docs/verification/`, removed the temporary artifacts, and redirected the cleanup
+runner. One localization screenshot showed a live account identifier and was
+retained only in ignored `.evidence/`, not tracked. Paths below describe the audit
+state at ticket 01; current locations and evidence are recorded in
+[issue 02](issues/02-clean-scratch-and-artifact-producers.md).
+
 ## Evidence and counts
 
 - Repository: 829 tracked files. Source areas: `backend/app` (115), `frontend/src`
@@ -136,11 +143,13 @@ mass-archive it.
 
 Destination: `docs/verification/` (create), grouped by feature. Track it as
 historical development evidence with a README explaining synthetic-data scope and
-that these are not current readiness claims. All inspected images contain
-synthetic shop/order data; spot-check the rest before tracking.
+that these are not current readiness claims. Most inspected images contain
+synthetic shop/order data; spot-check before tracking. The embedded-switch
+screenshot was withheld from tracking because it showed a live account identifier
+(see issue 02).
 
-- 9 PNG: `.scratch/bengali-english-localization/verification/ticket12-embedded-switch.png`,
-  `ticket12-live-session.png`; `.scratch/pathao-courier/ticket07-cancelled-recovery.png`,
+- 9 PNG: `.scratch/bengali-english-localization/verification/ticket12-embedded-switch.png`
+  (withheld as sensitive), `ticket12-live-session.png`; `.scratch/pathao-courier/ticket07-cancelled-recovery.png`,
   `ticket07-noncreation.png`, `ticket12-buyer-pending.png`, `ticket12-desktop-modal-fixed.png`,
   `ticket12-phone-buyer.png`, `ticket12-phone-modal-fixed.png`, `ticket12-phone-seller-modal.png`.
 - 2 Markdown reports: `.scratch/pathao-courier/ticket07-browser-verification.md`,
@@ -186,11 +195,11 @@ focused component/API test where practical.
 
 ### Producers that recreate scratch clutter (ticket 02)
 
-- `scripts/cleanup-phase1-orders.py` writes its dry-run snapshot to
+- `scripts/cleanup-phase1-orders.py` wrote its dry-run snapshot to
   `.scratch/pathao-courier/ticket11-scoped-dry-run.json` and its apply result next
-  to it. Redirect both to `.cache/cleanup-phase1-orders/` (create the directory),
-  update the issue-11 instructions, and verify with `py_compile`/Ruff. Do not run
-  the script: it targets a live development database.
+  to it. Ticket 02 redirected both to `.cache/cleanup-phase1-orders/` (created
+  before writing) and updated the issue-11 instructions; `py_compile`/Ruff pass.
+  Do not run the script: it targets a live development database.
 - `.scratch/purge-payment-screenshots.py` and `.scratch/screenshot-removal-browser.cjs`
   also wrote results into scratch; deleting them removes those producers.
 - Existing maintained producers already use ignored storage: `scripts/checks.mjs`

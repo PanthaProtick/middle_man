@@ -29,3 +29,10 @@ Avoid unsupported secure/official-account implications. Page-derived metrics now
 ## Limits and next action
 
 Desk research supports audience hypotheses, not measured UX improvements. No live-provider, hosted database, authentication or deployment acceptance claimed. Backend tests skipped their environment-dependent cases. Existing offline/manual paths retained. Light is the supported theme; full seller localization and real-device pilot usability remain future research. Next action: review the running UI and test tasks with pilot sellers/buyers before measuring completion or conversion gains.
+
+## Post-cleanup note (2026-10-28)
+
+Cleanup ticket 02 removed the disposable browser probe and its TSX previews. The
+command above is historical and is no longer runnable. No maintained Playwright
+suite exists, so the visual/layout coverage is historical only; the written
+results and local `.cache/ui-revamp/` evidence remain the record.

@@ -1,5 +1,10 @@
 # Implementation handoff - after ticket 01
 
+**Executed in part: ticket 02 completed the scratch/artifact slice on 2026-10-28.**
+See [ticket 02](issues/02-clean-scratch-and-artifact-producers.md) for final
+dispositions, moved/deleted paths, and check results. The instructions below are
+retained as the planning record; do not re-run the moves or deletions.
+
 **Disposable planning aid.** Ticket 01 is complete; implementation cleanup starts
 at ticket 02. Read this file plus
 [ticket 02](issues/02-clean-scratch-and-artifact-producers.md) and
@@ -47,15 +52,18 @@ if the whole slice cannot be verified in one fresh context.
      `ticket12-phone-modal-fixed.png`, `ticket12-phone-seller-modal.png`, and
      `ticket12-check1.log` through `ticket12-check6.log`
      (`check5-backend.log`/`check5-frontend.log` are part of that range).
-   - Localization: `.scratch/bengali-english-localization/verification/ticket12-embedded-switch.png`,
-     `ticket12-live-session.png`.
+   - Localization: `.scratch/bengali-english-localization/verification/ticket12-live-session.png`
+     to `docs/verification/localization/`; the companion
+     `ticket12-embedded-switch.png` showed a live account identifier and was
+     moved to ignored `.evidence/verification/localization/` instead of tracked.
    - Payment screenshot removal:
      `.scratch/screenshot-removal-browser-result.json`.
 4. Spot-check every moved image for real names/numbers before tracking. The
-   inspected images are synthetic; if any contains real data, do not track it.
+   courier images were synthetic; the embedded-switch localization image exposed
+   an account identifier and was withheld from tracking as noted above.
 5. Update links (depths matter):
    - `.scratch/bengali-english-localization/issues/12-*.md` →
-     `../../docs/verification/localization/<file>` from the issue directory.
+     `../../../docs/verification/localization/<file>` from the issue directory.
    - `.scratch/pathao-courier/issues/12-*.md` → three levels up to the repo root,
      then `docs/verification/pathao-courier/<file>`.
    - `.scratch/pathao-courier/ticket12-compaction-handoff.md` → two levels up.

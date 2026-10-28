@@ -43,10 +43,11 @@ This resolution supersedes the remaining failure recorded in the recheck below.
   is persisted verbatim and exposed in GET courier-review. Keyword absence
   does not establish that provider text is safe. Use controlled error codes
   and allowlisted seller-facing messages rather than raw exception text.
-- Expanded reproducer retained at
-  `.scratch/pathao-courier/test_ticket06_definitive_privacy_probe.py`;
-  temporarily copy into `backend/tests/` to execute using the root wrapper.
-  Result: 1 passed / 1 failed (definitive-error privacy).
+- Expanded reproducer was retained during this investigation at
+  `.scratch/pathao-courier/test_ticket06_definitive_privacy_probe.py` and
+  temporarily copied into `backend/tests/` to execute. Result: 1 passed / 1 failed
+  (definitive-error privacy). The disposable probe was removed during repository
+  cleanup; its coverage now lives in `backend/tests/test_courier_submission_failures.py`.
 - Current focused submission tests plus original probes: 17 passed, 10
   PostgreSQL tests skipped because this shell has no test database URL.
   Independently inspected prior `check-hYNexB` result and backend log:
@@ -79,7 +80,8 @@ All three verification findings from independent review have been addressed and 
   - Reproducer probe converted into permanent test cases in `backend/tests/test_courier_submission_failures.py`:
     - `test_submission_malformed_success_classified_as_unknown` (parameterized for empty consignment, wrong order, inconsistent simulation flag)
     - `test_submission_error_privacy_sanitizes_raw_exceptions`
-    - Probe `.scratch/pathao-courier/test_ticket06_verification_probe.py` passes 2/2.
+    - Disposable probe `test_ticket06_verification_probe.py` passed 2/2 before it
+      was removed during repository cleanup.
   - Deterministic real PostgreSQL tests in `backend/tests/test_courier_submission_postgres.py` (10 passed, 0 skipped against disposable loopback PostgreSQL cluster on port 5432):
     - `test_postgres_simultaneous_submission_concurrency`: Concurrent submissions serialize; one succeeds (200), one conflicts (409).
     - `test_postgres_correction_during_reservation`: Interleaved draft correction invalidates stale review (409 `STALE_VERSION`), creating 0 attempt rows.

@@ -1,6 +1,7 @@
 """One-time Ticket 11 runner. Default is read-only; --apply requires its snapshot.
 
-Run from the repository root with backend/.venv/Scripts/python.exe.
+Run from the repository root with backend/.venv/Scripts/python.exe. Reports are
+written to ignored `.cache/cleanup-phase1-orders/`, never into `.scratch/`.
 Only the five owner-selected Phase 1 orders on the recorded development endpoint
 are eligible. No connection settings, tokens or private record values are printed.
 """
@@ -37,7 +38,7 @@ TARGETS = {
     '4d466a34-8a80-4860-b03e-a4f3bc200b8a': 'bd3042b7-a963-40c6-9bb7-aea4af65abd3',
     'c22effff-10a9-42ff-b87e-2ffc258f53d0': 'beb74169-97ae-4ef9-8421-9f62e36fc26b',
 }
-REPORT = ROOT / '.scratch/pathao-courier/ticket11-scoped-dry-run.json'
+REPORT = ROOT / '.cache/cleanup-phase1-orders/report.json'
 
 
 def digest(value):
@@ -139,6 +140,7 @@ async def main():
                 'counts': {t: len(r) for t, r in before.items()},
                 'selected_rows': {t: len(keys) for t, keys in allowed.items()},
                 'receipt_ids': sorted(receipt_ids)}
+            REPORT.parent.mkdir(parents=True, exist_ok=True)
             if not apply:
                 REPORT.write_text(json.dumps(report, indent=2) + '\n', encoding='utf-8')
                 await db.rollback()

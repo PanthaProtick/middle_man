@@ -74,3 +74,12 @@ stopped; the user's development API remains running with the updated code.
 
 Implementation and approved development purge are complete. No production
 deployment or live courier/AI-provider run was made.
+
+## Post-cleanup note (2026-10-28)
+
+Cleanup ticket 02 removed the one-time purge script and its
+`screenshot-purge-result.json` execution report because the report contained
+target metadata. The safe counts and preservation outcome remain written above;
+no hostname or internal identifier is retained. The mocked-API browser result is
+now tracked at
+[`../docs/verification/payment-screenshot-removal/screenshot-removal-browser-result.json`](../docs/verification/payment-screenshot-removal/screenshot-removal-browser-result.json).

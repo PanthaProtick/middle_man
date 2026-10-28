@@ -40,9 +40,12 @@ User currently prefers a MANUAL step-by-step walkthrough, with automated groups
 first and permission between groups. Do not surprise them by booking anything.
 
 Artifacts:
-- .scratch/pathao-courier/ticket12-migrations-result.json
-- .scratch/pathao-courier/ticket12-schema-preflight.json
-- .scratch/pathao-courier/ticket12-buyer-pending.png
+- The disposable `ticket12-migrations-result.json` and
+  `ticket12-schema-preflight.json` execution reports were removed during
+  repository cleanup; safe outcomes are summarized in
+  [`../../docs/verification/pathao-courier/remote-migrations-verification.md`](../../docs/verification/pathao-courier/remote-migrations-verification.md)
+  and in issue 12.
+- [`ticket12-buyer-pending.png`](../../docs/verification/pathao-courier/ticket12-buyer-pending.png)
 - Existing ticket contains earlier session/auth fixes and sandbox HTTP 522 probe.
 No memory update requested; this file is task scratch, not memory.
 
@@ -54,7 +57,10 @@ No memory update requested; this file is task scratch, not memory.
   applied transactionally to the recorded Neon neondb/public target, with target
   verification, advisory lock, bounded timeouts and SHARE locks on existing tables.
   Existing row counts and row hashes preserved. New tables empty; fresh SQLAlchemy
-  reads passed. Do NOT apply again blindly. See migration result artifact.
+  reads passed. Do NOT apply again blindly. See the migration record in
+  [issue 12](issues/12-verify-browser-and-sandbox-journey.md). The separate
+  [0022/0023 verification record](../../docs/verification/pathao-courier/remote-migrations-verification.md)
+  covers an earlier migration pair.
 - No verified SANDBOX account-owned credentials/store. Owner emailed Pathao devs.
   Earlier shared sandbox authentication probe got HTTP 522. Do not claim current
   provider status from that old probe. Actual sandbox booking journey is BLOCKED.
@@ -208,7 +214,8 @@ or generate credentials; user already emailed them. Do not send external message
 ## Automated Check 1 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group explicitly after compaction. Result: PASS, 6 passed,
-  0 skipped, 1.72 seconds pytest runtime. Log: ../ticket12-check1.log.
+  0 skipped, 1.72 seconds pytest runtime. Log:
+  `../../docs/verification/pathao-courier/ticket12-check1.log`.
 - Exact targets: test_courier_drafts.py::test_offline_automatic_draft_both_arrival_orders
   (both parameters), test_courier_drafts_postgres.py::test_automatic_draft_both_arrival_orders_replay_restart
   (both parameters), test_courier_submission.py::test_zero_cod_collection_for_prepaid_order,
@@ -231,7 +238,8 @@ or generate credentials; user already emailed them. Do not send external message
 ## Automated Check 2 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group after Check 1. PASS: 6 passed, 0 skipped,
-  2.59 seconds pytest runtime. Log: ../ticket12-check2.log.
+  2.59 seconds pytest runtime. Log:
+  `../../docs/verification/pathao-courier/ticket12-check2.log`.
 - Targets: test_courier_drafts.py::test_draft_edit_completes_fields_idempotently_without_changing_terms;
   test_courier_drafts_postgres.py::test_concurrent_confirmation_creates_one_draft (same/different keys);
   test_courier_submission.py::test_successful_simulated_submission_and_replay;
@@ -252,7 +260,7 @@ or generate credentials; user already emailed them. Do not send external message
 
 - Owner authorized this group after Check 2. PASS: 9 passed, 0 skipped,
   1.01 seconds pytest runtime. Exact command/node IDs and output:
-  ../ticket12-check3.log.
+  `../../docs/verification/pathao-courier/ticket12-check3.log`.
 - Cross-shop access denied for draft reads/edits, review reads/confirmation,
   booking submission, reconciliation and booked-order correction/cancellation.
   PostgreSQL stale/foreign parcel edits do not overwrite saved values.
@@ -271,7 +279,8 @@ or generate credentials; user already emailed them. Do not send external message
 ## Automated Check 4 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group after Check 3. PASS: 11 passed, 0 skipped,
-  2.15 seconds pytest runtime. Exact targets/output: ../ticket12-check4.log.
+  2.15 seconds pytest runtime. Exact targets/output:
+  `../../docs/verification/pathao-courier/ticket12-check4.log`.
 - Parcel edits, buyer corrections and account-setting changes invalidate old
   review tokens. Cancellation and incomplete/invalid delivery choices prevent
   approval. Unreviewed and stale booking submissions return conflicts.
@@ -291,7 +300,8 @@ or generate credentials; user already emailed them. Do not send external message
 
 - Owner authorized simulations after Check 4. PASS: backend 27 passed, 0 skipped
   (5.01 seconds); frontend 7 passed in one actual test file. Logs:
-  ../ticket12-check5-backend.log and ../ticket12-check5-frontend.log.
+  `../../docs/verification/pathao-courier/ticket12-check5-backend.log` and
+  `../../docs/verification/pathao-courier/ticket12-check5-frontend.log`.
 - Backend targets: complete test_courier_submission_failures.py and
   test_courier_post_submission_changes.py; PostgreSQL cases for unknown timeout,
   persistence failure, interrupted-attempt recovery, correction/cancellation after
@@ -315,7 +325,8 @@ or generate credentials; user already emailed them. Do not send external message
 ## Automated Check 6 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group after Check 5. PASS: 31 passed, 0 skipped,
-  16.73 seconds pytest runtime. Exact command/output: ../ticket12-check6.log.
+  16.73 seconds pytest runtime. Exact command/output:
+  `../../docs/verification/pathao-courier/ticket12-check6.log`.
 - Complete files: test_courier_retention.py, test_courier_reconciliation_replay.py,
   test_courier_reconciliation_replay_postgres.py, test_courier_changed_replay.py.
 - Retention tests verify deadline boundaries, redaction of courier snapshots and
@@ -376,8 +387,9 @@ or generate credentials; user already emailed them. Do not send external message
   an unnamed icon button in accessibility snapshot. Do not mark keyboard gate PASS.
 - Buyer keyboard Tab from Back to Home reaches Copy control. This is limited
   confirmed-state coverage, not submission-form validation/loading/location tests.
-- Screenshots: ../ticket12-phone-buyer.png and
-  ../ticket12-phone-seller-modal.png. Viewport override reset; tabs retained for
+- Screenshots: `../../docs/verification/pathao-courier/ticket12-phone-buyer.png` and
+  `../../docs/verification/pathao-courier/ticket12-phone-seller-modal.png`.
+  Viewport override reset; tabs retained for
   continuation. No tokens copied into artifacts, no live booking or data mutation.
 - Next: seek permission for modal accessibility remediation (regression tests,
   initial focus, containment, Escape and accessible close name), then retest phone
@@ -404,8 +416,9 @@ or generate credentials; user already emailed them. Do not send external message
   then browser-chrome boundary yielded BODY. No custom cyclic focus trap claimed.
   Phone bounds x16..366.4,y42.2..801.8; desktop x356..916,y45..855. No horizontal
   page overflow. Icon click also dismissed. Component tests cover footer close.
-- Screenshots: ../ticket12-phone-modal-fixed.png and
-  ../ticket12-desktop-modal-fixed.png. No orders or merchant settings changed;
+- Screenshots: `../../docs/verification/pathao-courier/ticket12-phone-modal-fixed.png`
+  and `../../docs/verification/pathao-courier/ticket12-desktop-modal-fixed.png`.
+  No orders or merchant settings changed;
   viewport override reset. Standards review0 findings, Spec review0 findings.
   This closes the observed Inspect keyboard defects, not all Ticket12 browser
   scenarios; older-order courier unavailability and real sandbox remain separate.

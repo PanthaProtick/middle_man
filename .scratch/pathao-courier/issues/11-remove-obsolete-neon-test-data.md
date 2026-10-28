@@ -29,9 +29,11 @@ October 26 orders. Ticket 20/21 provenance and the October 26 courier spec date
 corroborate the phase boundary. No age-based automatic selection is used.
 
 - Read-only scoped dry run succeeded on the same Phase 1 endpoint fingerprint
-  `ecd013abe3562868`, database `neondb`, with five exact order/shop pairs.
-  `../ticket11-scoped-dry-run.json` records safe counts, selected receipt IDs and
-  a whole-dataset digest. Selected dependencies: 5 buyer revisions, 5 receipts,
+  `ecd013abe3562868`, database `neondb`, with five exact order/shop pairs. The
+  disposable report recorded safe counts, selected receipt IDs and a whole-dataset
+  digest. It was removed during repository cleanup; the runner now writes
+  `.cache/cleanup-phase1-orders/report.json`, which is ignored. Selected
+  dependencies: 5 buyer revisions, 5 receipts,
   5 observations, 4 allocations, 1 image, 3 raw SMS rows, 3 import results,
   14 replay rows, 13 link measurements, 4 audit rows and 1 review reason.
 - Internal maintenance seam: `backend/app/services/obsolete_cleanup.py`.
@@ -42,7 +44,9 @@ corroborate the phase boundary. No age-based automatic selection is used.
   retention scheduling is unchanged. File deletion cannot roll back with SQL;
   it is idempotent and happens after structured cleanup validation/flush.
 - Runner defaults to read-only, rejects other endpoint/database/environment
-  identities and requires an unchanged dry-run snapshot for `--apply`. It checks
+  identities and requires an unchanged dry-run snapshot for `--apply`. It writes
+  its dry-run report to `.cache/cleanup-phase1-orders/report.json` and the apply
+  result beside it. It checks
   protected rows, old links, consumed identities and repeat execution separately.
 - TDD initial red: missing maintenance module. Disposable PostgreSQL initially
   unavailable; started the existing repository-local cluster on loopback 55447.
@@ -58,13 +62,16 @@ corroborate the phase boundary. No age-based automatic selection is used.
 ### 2026-10-27: Read-only inventory; destructive portion awaiting classification
 
 - Base revision: `2c71c88c700618ed30c0f90229747776504026ae` on `main`.
-- Re-executed the existing, initially untracked inventory probe using
-  `backend/.venv/Scripts/python.exe .scratch/pathao-courier/ticket11_inventory_probe.py`.
-  It completed a repeatable-read, read-only transaction and rolled back. Its
-  configured endpoint/database matched `remote-migrations-result.json`;
-  database `neondb`, schema `public`, recovery false. This verifies the recorded
-  endpoint, not an independent Neon control-plane project/branch lookup.
-- Snapshot: `../ticket11-inventory.json` (local untracked artifact). There are
+- Re-executed the never-tracked inventory probe, which has since been removed
+  with the other disposable probes. At the time it completed a repeatable-read,
+  read-only transaction, rolled back, and checked the recorded development target
+  identity (database `neondb`, schema `public`, recovery false). Both the probe and
+  the report that held the host-derived fingerprint were later removed, so this is
+  historical recorded evidence, not a reproducible or independent Neon
+  control-plane lookup.
+- Snapshot: the disposable `ticket11-inventory.json` was removed during repository
+  cleanup; its safe counts are retained below without the hostname or internal
+  identifiers. There are
   11 orders in 2 shops: 7 confirmed, 3 pending, 1 cancelled; 10 buyer revisions,
   10 receipts, 7 allocations, 7 consumed-payment markers, 38 idempotency records,
   1 order evidence row, 3 SMS evidence rows, 3 SMS imports, 10 observations,

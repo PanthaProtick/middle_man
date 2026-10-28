@@ -134,8 +134,10 @@
   did not enforce this startup inventory. Buyer access was not successfully enabled.
 - Read-only preflight confirmed the recorded Neon development endpoint matches,
   database neondb, schema public, writable primary; exactly those two expected
-  tables are missing. Twelve orders currently exist. Safe result artifact:
-  ticket12-schema-preflight.json. No database mutation was attempted.
+  tables are missing. Twelve orders currently exist. The safe result was recorded
+  in a disposable `ticket12-schema-preflight.json`, removed during repository
+  cleanup; no hostname or record identifiers are retained here. No database
+  mutation was attempted.
 - Existing migrations 0024_courier_submissions.sql and
   0025_courier_reconciliation.sql supply the missing schema. Requested approval
   to apply these exact migrations transactionally and verify preservation because
@@ -157,7 +159,14 @@
   Used a migration advisory lock, 5s lock timeout, 30s statement timeout and SHARE
   locks over existing tables. Existing table counts and deterministic row hashes
   matched before/after. Both new tables were empty. Fresh-connection SQLAlchemy
-  model reads passed. Source hashes and safe counts: ticket12-migrations-result.json.
+  model reads passed. The disposable execution report (`ticket12-migrations-result.json`)
+  was removed during repository cleanup after its safe outcomes were summarized.
+  It recorded these source hashes and safe counts: `0024_courier_submissions.sql`
+  `acab2648b6e08a160781695ec7a2b05f39728eaf400be60a12ab625ce414e11d`,
+  `0025_courier_reconciliation.sql`
+  `1970409f60d6ae5878f403a720b47d544160bf4ff252191f11eef70f5c0bb09c`;
+  12 orders, 10 buyer revisions, 0 courier drafts, 7 allocations, 10 receipts,
+  3 SMS evidence/import rows. No hostname or record identifiers are retained here.
 - Restarted through npm run dev:backend with session-only SELF_TEST_MODE=true,
   PUBLIC_BUYER_ACCESS_POLICY=self_test_link_possession and DEBUG=false. No saved
   environment file changed. The first browser reload still reached an old worker:
@@ -199,8 +208,10 @@
 - In-app seller session loaded as Synthetic Shop B, showing only its three orders;
   the notebook order from Shop A was absent. Requested owner switch to Shop A.
   This demonstrates separated lists, not direct cross-shop request denial.
-- Saved buyer proof screenshot: ticket12-buyer-pending.png. Temporary browser
-  viewport overrides were reset; buyer and seller tabs retained for continuation.
+- Saved buyer proof screenshot:
+  [`ticket12-buyer-pending.png`](../../../docs/verification/pathao-courier/ticket12-buyer-pending.png).
+  Temporary browser viewport overrides were reset; buyer and seller tabs retained
+  for continuation.
 - Final root npm run check PASS: .cache/checks/check-nMDgHW/result.json,
   all eight stages; backend 700 passed, 0 skipped; frontend 210 passed.
   PostgreSQL cases used isolated disposable loopback schemas, not the Neon
@@ -240,7 +251,7 @@
 ## Automated Check 1 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group explicitly after compaction. Result: PASS, 6 passed,
-  0 skipped, 1.72 seconds pytest runtime. Log: ../ticket12-check1.log.
+  0 skipped, 1.72 seconds pytest runtime. Log: ../../../docs/verification/pathao-courier/ticket12-check1.log.
 - Exact targets: test_courier_drafts.py::test_offline_automatic_draft_both_arrival_orders
   (both parameters), test_courier_drafts_postgres.py::test_automatic_draft_both_arrival_orders_replay_restart
   (both parameters), test_courier_submission.py::test_zero_cod_collection_for_prepaid_order,
@@ -263,7 +274,7 @@
 ## Automated Check 2 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group after Check 1. PASS: 6 passed, 0 skipped,
-  2.59 seconds pytest runtime. Log: ../ticket12-check2.log.
+  2.59 seconds pytest runtime. Log: ../../../docs/verification/pathao-courier/ticket12-check2.log.
 - Targets: test_courier_drafts.py::test_draft_edit_completes_fields_idempotently_without_changing_terms;
   test_courier_drafts_postgres.py::test_concurrent_confirmation_creates_one_draft (same/different keys);
   test_courier_submission.py::test_successful_simulated_submission_and_replay;
@@ -284,7 +295,7 @@
 
 - Owner authorized this group after Check 2. PASS: 9 passed, 0 skipped,
   1.01 seconds pytest runtime. Exact command/node IDs and output:
-  ../ticket12-check3.log.
+  ../../../docs/verification/pathao-courier/ticket12-check3.log.
 - Cross-shop access denied for draft reads/edits, review reads/confirmation,
   booking submission, reconciliation and booked-order correction/cancellation.
   PostgreSQL stale/foreign parcel edits do not overwrite saved values.
@@ -303,7 +314,7 @@
 ## Automated Check 4 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group after Check 3. PASS: 11 passed, 0 skipped,
-  2.15 seconds pytest runtime. Exact targets/output: ../ticket12-check4.log.
+  2.15 seconds pytest runtime. Exact targets/output: ../../../docs/verification/pathao-courier/ticket12-check4.log.
 - Parcel edits, buyer corrections and account-setting changes invalidate old
   review tokens. Cancellation and incomplete/invalid delivery choices prevent
   approval. Unreviewed and stale booking submissions return conflicts.
@@ -323,7 +334,7 @@
 
 - Owner authorized simulations after Check 4. PASS: backend 27 passed, 0 skipped
   (5.01 seconds); frontend 7 passed in one actual test file. Logs:
-  ../ticket12-check5-backend.log and ../ticket12-check5-frontend.log.
+  ../../../docs/verification/pathao-courier/ticket12-check5-backend.log and ../../../docs/verification/pathao-courier/ticket12-check5-frontend.log.
 - Backend targets: complete test_courier_submission_failures.py and
   test_courier_post_submission_changes.py; PostgreSQL cases for unknown timeout,
   persistence failure, interrupted-attempt recovery, correction/cancellation after
@@ -347,7 +358,7 @@
 ## Automated Check 6 — 2026-10-27 (fresh execution)
 
 - Owner authorized this group after Check 5. PASS: 31 passed, 0 skipped,
-  16.73 seconds pytest runtime. Exact command/output: ../ticket12-check6.log.
+  16.73 seconds pytest runtime. Exact command/output: ../../../docs/verification/pathao-courier/ticket12-check6.log.
 - Complete files: test_courier_retention.py, test_courier_reconciliation_replay.py,
   test_courier_reconciliation_replay_postgres.py, test_courier_changed_replay.py.
 - Retention tests verify deadline boundaries, redaction of courier snapshots and
@@ -408,8 +419,11 @@
   an unnamed icon button in accessibility snapshot. Do not mark keyboard gate PASS.
 - Buyer keyboard Tab from Back to Home reaches Copy control. This is limited
   confirmed-state coverage, not submission-form validation/loading/location tests.
-- Screenshots: ../ticket12-phone-buyer.png and
-  ../ticket12-phone-seller-modal.png. Viewport override reset; tabs retained for
+- Screenshots:
+  [`ticket12-phone-buyer.png`](../../../docs/verification/pathao-courier/ticket12-phone-buyer.png)
+  and
+  [`ticket12-phone-seller-modal.png`](../../../docs/verification/pathao-courier/ticket12-phone-seller-modal.png).
+  Viewport override reset; tabs retained for
   continuation. No tokens copied into artifacts, no live booking or data mutation.
 - Next: seek permission for modal accessibility remediation (regression tests,
   initial focus, containment, Escape and accessible close name), then retest phone
@@ -436,8 +450,11 @@
   then browser-chrome boundary yielded BODY. No custom cyclic focus trap claimed.
   Phone bounds x16..366.4,y42.2..801.8; desktop x356..916,y45..855. No horizontal
   page overflow. Icon click also dismissed. Component tests cover footer close.
-- Screenshots: ../ticket12-phone-modal-fixed.png and
-  ../ticket12-desktop-modal-fixed.png. No orders or merchant settings changed;
+- Screenshots:
+  [`ticket12-phone-modal-fixed.png`](../../../docs/verification/pathao-courier/ticket12-phone-modal-fixed.png)
+  and
+  [`ticket12-desktop-modal-fixed.png`](../../../docs/verification/pathao-courier/ticket12-desktop-modal-fixed.png).
+  No orders or merchant settings changed;
   viewport override reset. Standards review0 findings, Spec review0 findings.
   This closes the observed Inspect keyboard defects, not all Ticket12 browser
   scenarios; older-order courier unavailability and real sandbox remain separate.

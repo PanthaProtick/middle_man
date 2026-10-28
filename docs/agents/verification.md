@@ -50,6 +50,22 @@ a browser. For authorized provider/deployment work, verify those integrations
 separately. Report PASS, FAIL, BLOCKED, or NOT RUN with concise evidence and log
 paths. An interrupted or timed-out stage has not passed.
 
+## Optional offline browser demo
+
+`backend/tests/buyer_browser_demo.py` is a retained, offline-capable synthetic
+browser harness. From the repository root, set `BUYER_TEST_POSTGRES_URL` to a
+disposable loopback PostgreSQL database, build the frontend, then run:
+
+```powershell
+backend/.venv/Scripts/python.exe backend/tests/buyer_browser_demo.py
+```
+
+Add `--resume` to reuse the prior schema recorded in `.cache/buyer-browser.json`.
+The harness serves the production build on `127.0.0.1:8013` and injects public
+buyer permission only for that synthetic launcher. It is not part of
+`npm run check` and does not establish live authentication or provider behavior.
+Ticket 09 decides whether it remains a maintained browser seam.
+
 ## Comparing agent quality
 
 Use [the comparison template](../../tasks/agent-evaluation-template.md) only when

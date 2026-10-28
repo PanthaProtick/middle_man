@@ -59,12 +59,15 @@ API scope/filter/balance/formula-safe serialization tests; frontend error/copy/d
   `.cache/order-export-pg` before migrations. Tests use fresh random schemas and
   cover buyer CSV/balances, cross-shop denial, injected database outage, durable
   budget across sessions and 11 concurrent requests admitting exactly 10.
-- Browser partial PASS: `.scratch/phase-1-order-confirmation/order_export_browser.py`
-  serves isolated synthetic PostgreSQL records on loopback port 8017. Confirmed
+- Browser partial PASS: a disposable synthetic probe (since removed during
+  repository cleanup) served isolated synthetic PostgreSQL records on loopback
+  port 8017. Confirmed
   filter downloaded `order-summaries.csv`; inspected its real contents for quoted
   multiline/formula-safe buyer fields and 12000/2000/1500/10000/10500 BDT balances.
   Empty pending filter displayed explicit empty feedback. Order detail showed
   accepted advance 1500 and actual COD 10500 consistently; copy displayed success.
+  This remains historical evidence; current coverage is the maintained API and
+  `OrderExport.test.tsx` suites.
 - Browser BLOCKED: the automation bridge's virtual clipboard returned empty after
   the real Clipboard API reported success, so pasted contents are unverified.
   Spreadsheet-application import/readability is NOT RUN. These are acceptance

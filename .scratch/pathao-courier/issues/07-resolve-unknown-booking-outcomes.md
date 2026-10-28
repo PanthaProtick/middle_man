@@ -13,9 +13,10 @@
   Verified initial protections, rejected evidence, response interruption and
   retained retry key, disabled loading controls, recovered success,
   cancelled-order external-action warning, and acknowledged noncreation.
-- Evidence and reproduction fixture:
-  [browser verification record](../ticket07-browser-verification.md), including
-  screenshots of cancelled-order recovered success and confirmed noncreation.
+- Evidence:
+  [browser verification record](../../../docs/verification/pathao-courier/ticket07-browser-verification.md),
+  including screenshots of cancelled-order recovered success and confirmed
+  noncreation. The disposable reproduction fixture was removed after the run.
 - This closes the changed-component browser interaction check. It does not
   establish an authenticated whole-app or live-provider journey. Physical-device,
   sandbox/live Pathao/Clerk, and hosted migration acceptance remain NOT RUN.

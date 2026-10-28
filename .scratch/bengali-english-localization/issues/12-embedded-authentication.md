@@ -76,7 +76,7 @@
 - NOT RUN: wrong/expired-code errors, resend completion, full password reset,
   English verification completion, session expiry, phone viewport and screen-reader
   acceptance. A password change requires user completion; no password was changed.
-- Evidence: `.scratch/bengali-english-localization/verification/ticket12-live-session.png`.
+- Evidence: [`ticket12-live-session.png`](../../../docs/verification/localization/ticket12-live-session.png).
   No credentials or verification codes are recorded here.
 - Earlier local verification on this checkout: focused Root/resource/SellerSession
   tests passed 22 tests. Full `npm run check` passed with repository-local TEMP/TMP:
@@ -98,9 +98,12 @@
   switched both ways on email verification with three partial digits still visibly
   present and the resend countdown continuing. Document title and form copy follow
   the selected locale. Final recovery screen also checked after the last source edit.
-- Evidence: `verification/ticket12-embedded-switch.png` relative to the localization
-  scratch directory. Browser value reads redact input, so visible digits and screen
-  continuity are the live evidence rather than comparisons against redacted values.
+- Evidence: the companion switch screenshot showed a live account identifier in
+  the Clerk recovery surface, so it was removed from tracking and is retained only
+  in ignored private evidence storage (`.evidence/verification/localization/`).
+  It is not linked here; earlier Git history still contains the prior commit.
+  Browser value reads redact input, so visible digits and screen continuity
+  are the live evidence rather than comparisons against redacted values.
 - Regression tests cover reachable switching, unchanged input node/value and focus,
   stable provider mount, and no repeated token request or modal invocation. Focused
   Root/SellerSession suite passed 21 tests.

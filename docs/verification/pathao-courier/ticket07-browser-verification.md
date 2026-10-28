@@ -31,12 +31,11 @@ Screenshots inspected and saved:
 - [Cancelled-order recovered booking](ticket07-cancelled-recovery.png)
 - [Confirmed noncreation](ticket07-noncreation.png)
 
-For reproduction, copy `ticket07-browser.html` and `ticket07-browser.tsx` from this
-directory into `frontend/.scratch/`, run
-`npm exec -- vite --host 127.0.0.1 --port 5178 --strictPort` from `frontend/`, and
-open `http://127.0.0.1:5178/.scratch/ticket07-browser.html`. The fixture imports
-actual seller components; its toolbar controls only the synthetic responses.
-The temporary frontend copies and owned Vite process were removed/stopped after
+For reproduction, the disposable `ticket07-browser.html` / `ticket07-browser.tsx`
+fixture was removed from the repository after verification. This record is
+historical and was not rerun after relocation. The fixture imported actual seller
+components; its toolbar controls only controlled the synthetic responses. The
+temporary frontend copies and owned Vite process were removed/stopped after
 verification. No production source changes were made in this verification pass.
 
 The previous full automated gate remains PASS at
