@@ -1,34 +1,41 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestJson, SellerApiError } from './api';
+import { useCourierText } from '../locale/courierCopy';
 import type { PathaoConnectInput, PathaoConnection, PathaoDefaultsInput, PathaoDeliveryType, PathaoEnvironment, PathaoStores } from './pathaoTypes';
 
 export function PathaoSettings({ token }: { token: string }): React.JSX.Element {
+  const t = useCourierText();
   const [environment, setEnvironment] = useState<PathaoEnvironment>('offline');
-  return <section aria-label="Pathao courier settings" className="pathao-settings-panel">
+  return <section aria-label={t('Pathao courier settings')} className="pathao-settings-panel">
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-      <h4 style={{ margin: 0, color: 'var(--primary-accent)', fontSize: '0.95rem' }}>Pathao courier account</h4>
-      <span className="badge info">{environment.toUpperCase()}</span>
+      <h4 style={{ margin: 0, color: 'var(--primary-accent)', fontSize: '0.95rem' }}>{t('Pathao courier account')}</h4>
+      <span className="badge info">{t(environment)}</span>
     </div>
-    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 0 4px' }}>Optional: keep creating buyer links and collecting orders without a courier connection.</p>
-    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 12px' }}>Production booking is disabled. These settings do not create a booking.</p>
-    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '12px' }}>Courier environment
+    <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 0 4px' }}>{t('Optional: keep creating buyer links and collecting orders without a courier connection.')}</p>
+    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 12px' }}>{t('Production booking is disabled. These settings do not create a booking.')}</p>
+    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '12px' }}>{t('Courier environment')}
       <select className="form-control" style={{ marginTop: '4px', maxWidth: '320px' }} value={environment} onChange={event => setEnvironment(event.target.value as PathaoEnvironment)}>
-        <option value="offline">Offline — simulated</option>
-        <option value="sandbox">Pathao sandbox</option>
-        <option value="production">Pathao production — setup only</option>
+        <option value="offline">{t('Offline — simulated')}</option>
+        <option value="sandbox">{t('Pathao sandbox')}</option>
+        <option value="production">{t('Pathao production — setup only')}</option>
       </select>
     </label>
     <ConnectionForm key={`${token}:${environment}`} token={token} environment={environment} />
   </section>;
 }
 
+type SettingsError = 'Session lost. Sign in again to manage Pathao.'
+  | 'Pathao settings changed. Reload settings before saving again.'
+  | 'Pathao settings could not be loaded or saved. Check credentials and connection, then reload settings.';
+
 function ConnectionForm({ token, environment }: { token: string; environment: PathaoEnvironment }): React.JSX.Element {
+  const t = useCourierText();
   const [connection, setConnection] = useState<PathaoConnection>();
   const [stores, setStores] = useState<PathaoStores>();
   const [pickup, setPickup] = useState('');
   const [service, setService] = useState<PathaoDeliveryType>(48);
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string>();
+  const [error, setError] = useState<SettingsError>();
   const [denied, setDenied] = useState(false);
   const alive = useRef(true);
   const credentials = useRef<HTMLFormElement>(null);
@@ -112,37 +119,37 @@ function ConnectionForm({ token, environment }: { token: string; environment: Pa
     finally { if (alive.current) setBusy(false); }
   }
 
-  if (denied) return <p role="alert">{error}</p>;
+  if (denied) return <p role="alert">{error && t(error)}</p>;
   return <div aria-busy={busy}>
-    <p role="status">{connection ? `${connection.status} · Revision ${connection.version} · ${connection.merchant_hint ?? 'No merchant'}` : error ? 'Settings unavailable' : 'Loading settings…'}</p>
-    {environment === 'offline' && <p>Simulated setup and pickup stores. No credentials or Pathao requests.</p>}
-    {error && <p role="alert">{error}</p>}
-    <button type="button" className="btn btn-secondary btn-sm" style={{ marginBottom: '12px' }} onClick={() => void reload()} disabled={busy}>Reload settings</button>
+    <p role="status">{connection ? `${t(connection.status)} · ${t('Revision')} ${connection.version} · ${connection.merchant_hint ?? t('No merchant')}` : error ? t('Settings unavailable') : t('Loading settings…')}</p>
+    {environment === 'offline' && <p>{t('Simulated setup and pickup stores. No credentials or Pathao requests.')}</p>}
+    {error && <p role="alert">{t(error)}</p>}
+    <button type="button" className="btn btn-secondary btn-sm" style={{ marginBottom: '12px' }} onClick={() => void reload()} disabled={busy}>{t('Reload settings')}</button>
     <form ref={credentials} onSubmit={connect} autoComplete="off">
       <fieldset disabled={busy || !connection}>
-        <legend>{connection?.status === 'connected' ? 'Replace merchant connection' : 'Connect merchant'}</legend>
+        <legend>{connection?.status === 'connected' ? t('Replace merchant connection') : t('Connect merchant')}</legend>
         {environment !== 'offline' && <>
-          <p>Credentials are write-only. Replacing the connection clears pickup and service defaults.</p>
-          <label>Client ID<input name="client_id" className="form-control" type="password" required maxLength={256} autoComplete="off" /></label>
-          <label>Client secret<input name="client_secret" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
-          <label>Merchant email<input name="username" className="form-control" type="email" required maxLength={256} autoComplete="off" /></label>
-          <label>Merchant password<input name="password" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
+          <p>{t('Credentials are write-only. Replacing the connection clears pickup and service defaults.')}</p>
+          <label>{t('Client ID')}<input name="client_id" className="form-control" type="password" required maxLength={256} autoComplete="off" /></label>
+          <label>{t('Client secret')}<input name="client_secret" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
+          <label>{t('Merchant email')}<input name="username" className="form-control" type="email" required maxLength={256} autoComplete="off" /></label>
+          <label>{t('Merchant password')}<input name="password" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
         </>}
-        <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '8px' }}>{environment === 'offline' ? 'Connect simulated account' : 'Verify and save connection'}</button>
+        <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '8px' }}>{environment === 'offline' ? t('Connect simulated account') : t('Verify and save connection')}</button>
       </fieldset>
     </form>
     {connection?.status === 'connected' && <form data-defaults onSubmit={saveDefaults} style={{ marginTop: '12px' }}>
       <fieldset disabled={busy || !stores}>
-        <legend>Courier defaults</legend>
-        {stores?.stores.length === 0 && <p>No active pickup stores. Add one in Pathao, then reload settings.</p>}
-        <label>Pickup store<select name="pickup" className="form-control" value={pickup} required onChange={event => setPickup(event.target.value)}>
-          <option value="">Choose a pickup store</option>
+        <legend>{t('Courier defaults')}</legend>
+        {stores?.stores.length === 0 && <p>{t('No active pickup stores. Add one in Pathao, then reload settings.')}</p>}
+        <label>{t('Pickup store')}<select name="pickup" className="form-control" value={pickup} required onChange={event => setPickup(event.target.value)}>
+          <option value="">{t('Choose a pickup store')}</option>
           {stores?.stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
         </select></label>
-        <label>Delivery service<select className="form-control" value={service} onChange={event => setService(event.target.value === '12' ? 12 : 48)}>
-          <option value="48">Normal delivery (48)</option><option value="12">On-demand delivery (12)</option>
+        <label>{t('Delivery service')}<select className="form-control" value={service} onChange={event => setService(event.target.value === '12' ? 12 : 48)}>
+          <option value="48">{t('Normal delivery (48)')}</option><option value="12">{t('On-demand delivery (12)')}</option>
         </select></label>
-        <button className="btn btn-primary btn-sm" type="submit" disabled={!pickup || !stores?.stores.length} style={{ marginTop: '8px' }}>Save courier defaults</button>
+        <button className="btn btn-primary btn-sm" type="submit" disabled={!pickup || !stores?.stores.length} style={{ marginTop: '8px' }}>{t('Save courier defaults')}</button>
       </fieldset>
     </form>}
   </div>;
