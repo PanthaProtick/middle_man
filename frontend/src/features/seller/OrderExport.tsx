@@ -1,106 +1,123 @@
 import { sellerFetch } from './sessionRequest';
-import { useEffect, useRef, useState } from 'react';
-import { requestJson } from './api';
-import type { OrderLifecycle } from './types';
-
-interface OrderSummary {
-  order_id: string;
-  product: string;
-  lifecycle: OrderLifecycle;
-  buyer_name: string;
-  contact_number: string;
-  address: string;
-  total_bdt: string;
-  required_advance_bdt: string;
-  accepted_advance_bdt: string;
-  expected_cod_bdt: string;
-  actual_cod_bdt: string;
-  purpose: string;
-}
-
-function readable(summary: OrderSummary): string {
-  return [
-    `Order: ${summary.order_id}`, `Product: ${summary.product}`, `Lifecycle: ${summary.lifecycle}`,
-    `Buyer: ${summary.buyer_name}`, `Contact: ${summary.contact_number}`, `Address: ${summary.address}`,
-    `Fixed total: BDT ${summary.total_bdt}`, `Required advance: BDT ${summary.required_advance_bdt}`,
-    `Accepted advance: ${summary.accepted_advance_bdt ? `BDT ${summary.accepted_advance_bdt}` : 'Not accepted'}`,
-    `Expected COD: BDT ${summary.expected_cod_bdt}`,
-    `Actual COD: ${summary.actual_cod_bdt ? `BDT ${summary.actual_cod_bdt}` : 'Not accepted'}`,
-    summary.purpose,
-  ].join('\n');
-}
+import { useId, useEffect, useRef, useState } from 'react';
+import { requestJson, SellerApiError } from './api';
+import { useLocale } from '../locale/context';
+import {
+  exportCopy, failureCode, feedbackMessage, summaryText,
+  type ExportFeedback, type ExportOrderSummary,
+} from '../locale/exportCopy';
 
 export function OrderExport({ orderId, status, token }: {
   orderId?: string; status?: string; token?: string;
 }): React.JSX.Element {
+  const { locale } = useLocale();
+  const text = exportCopy[locale];
   const [busy, setBusy] = useState(false);
-  const [message, setMessage] = useState('');
-  const [failed, setFailed] = useState(false);
+  const [feedback, setFeedback] = useState<ExportFeedback | null>(null);
   const active = useRef(true);
+  // Completion copy follows the language selected when the operation settles.
+  const localeRef = useRef(locale);
+  const feedbackId = useId();
+  useEffect(() => {
+    localeRef.current = locale;
+  }, [locale]);
   useEffect(() => {
     active.current = true;
     return () => { active.current = false; };
   }, []);
 
-  async function run() {
-    setBusy(true); setMessage(''); setFailed(false);
+  async function copySummary(id: string) {
+    const summary = await requestJson<ExportOrderSummary>(
+      `/api/seller/orders/${encodeURIComponent(id)}/summary`, {}, token,
+    );
+    if (!active.current) return;
     try {
-      if (orderId) {
-        const summary = await requestJson<OrderSummary>(
-          `/api/seller/orders/${encodeURIComponent(orderId)}/summary`, {}, token,
-        );
-        if (!active.current) return;
-        await navigator.clipboard.writeText(readable(summary));
-        setMessage('Summary copied.');
-      } else {
-        const query = status ? `?${new URLSearchParams({ status })}` : '';
-        const response = await sellerFetch(`/api/seller/orders/export${query}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        }, token);
-        if (!response.ok) {
-          const body: { error?: { message?: string } } = await response.json();
-          throw new Error(body.error?.message ?? `Export failed (${response.status}).`);
-        }
-        if (response.headers.get('X-Export-Count') === '0') {
-          setMessage('No orders match this filter.');
-          return;
-        }
-        const blob = await response.blob();
-        if (!active.current) return;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url; link.download = 'order-summaries.csv';
-        document.body.append(link); link.click(); link.remove();
-        // Let the browser consume the URL before releasing the download resource.
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        setMessage('CSV download started.');
-      }
-    } catch (error) {
-      setFailed(true);
-      setMessage(error instanceof Error ? error.message : 'Copy/export unavailable. Please retry.');
-    } finally { setBusy(false); }
+      await navigator.clipboard.writeText(summaryText(summary, localeRef.current));
+    } catch {
+      if (active.current) setFeedback({ kind: 'error', code: 'clipboard' });
+      return;
+    }
+    if (active.current) setFeedback({ kind: 'copied' });
   }
 
+  async function downloadCsv() {
+    const query = status ? `?${new URLSearchParams({ status })}` : '';
+    const response = await sellerFetch(`/api/seller/orders/export${query}`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }, token);
+    if (!active.current) return;
+    if (!response.ok) {
+      setFeedback({ kind: 'error', code: failureCode(response.status) });
+      return;
+    }
+    if (response.headers.get('X-Export-Count') === '0') {
+      setFeedback({ kind: 'empty' });
+      return;
+    }
+    const blob = await response.blob();
+    if (!active.current) return;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url; link.download = 'order-summaries.csv';
+    document.body.append(link); link.click(); link.remove();
+    // Let the browser consume the URL before releasing the download resource.
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setFeedback({ kind: 'started' });
+  }
+
+  async function run() {
+    setBusy(true); setFeedback(null);
+    try {
+      if (orderId) await copySummary(orderId);
+      else await downloadCsv();
+    } catch (error) {
+      if (!active.current) return;
+      setFeedback({
+        kind: 'error',
+        code: error instanceof SellerApiError ? failureCode(error.status) : 'unknown',
+      });
+    } finally {
+      if (active.current) setBusy(false);
+    }
+  }
+
+  const message = feedback ? feedbackMessage(feedback, locale) : null;
+  const label = busy ? text.preparing
+    : orderId ? text.copyDeliverySummary
+      : status ? text.downloadFilteredEnglishCsv
+        : text.downloadEnglishCsv;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+    <div lang={locale === 'bn' ? 'bn-BD' : 'en'} style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void run()}>
-          {busy ? 'Preparing…' : orderId ? 'Copy delivery summary' : 'Download filtered CSV'}
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          disabled={busy}
+          aria-busy={busy}
+          aria-describedby={message ? feedbackId : undefined}
+          style={{ minHeight: '36px', wordBreak: 'break-word' }}
+          onClick={() => void run()}
+        >
+          {label}
         </button>
       </div>
       <small style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: 1.4 }}>
-        Manual delivery aid only; no courier booking, update or delivery-price calculation.
+        {text.purpose}
       </small>
       {message && (
         <p
-          role={failed ? 'alert' : 'status'}
+          id={feedbackId}
+          role={message.failed ? 'alert' : 'status'}
+          aria-live={message.failed ? 'assertive' : 'polite'}
           style={{
             margin: '2px 0 0',
             fontSize: '0.8rem',
-            color: failed ? 'var(--rose-accent)' : 'var(--emerald-accent)',
+            color: message.failed ? 'var(--rose-accent)' : 'var(--emerald-accent)',
           }}
         >
-          {message}
+          <span aria-hidden="true">{message.failed ? '⚠ ' : '✓ '}</span>
+          {message.message}
         </p>
       )}
     </div>
