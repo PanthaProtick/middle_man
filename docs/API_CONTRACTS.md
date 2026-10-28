@@ -1,5 +1,18 @@
 # API Contracts & Data Flow Guide
 
+## Seller order search and export
+
+`GET /api/seller/orders` and `GET /api/seller/orders/export` accept one optional
+`search` term (maximum 200 characters, trimmed). Within the seller's shop it
+matches an exact case-insensitive order ID, partial case-insensitive product or
+current buyer name, or a complete Bangladesh buyer contact number normalized
+across `017…`, `88017…`, and `+88017…` formats. Short numeric fragments never
+match phone fields. Search combines with the lifecycle filter using AND, excludes
+retained orders, and is applied before list pagination and the CSV's 500-order
+limit. The CSV preserves English columns, escaping, private/no-store headers,
+rate limiting, and returns `EXPORT_TOO_LARGE` instead of truncating above 500
+matches. Search text is request-only and is not logged or persisted in URLs.
+
 ## Pathao merchant settings
 
 Buyer destination collection and the controlled public catalog are documented in

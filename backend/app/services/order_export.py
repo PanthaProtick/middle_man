@@ -12,6 +12,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.tokens import get_utc_now
 from app.models.entities import AllocationTable, AuditEventTable, BuyerRevisionTable, OrderTable, ShopTable
 from app.models.order_export import ExportFilters, OrderStatus, OrderSummary
+from app.services.order_search import (
+    matches_order_search,
+    memory_buyer_revision,
+    order_search_clause,
+)
 from app.services.seller_service import NotFoundError, SellerDomainException
 
 _memory_attempts: dict[str, list[float]] = {}
@@ -52,12 +57,21 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                         OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None))
         if filters.status:
             query = query.where(lifecycle == filters.status)
+        search_clause = order_search_clause(
+            filters.search,
+            order_id=OrderTable.id,
+            product_name=OrderTable.product_name,
+            buyer_name=BuyerRevisionTable.buyer_name,
+            contact_number=BuyerRevisionTable.contact_number_canonical,
+        )
+        if search_clause is not None:
+            query = query.where(search_clause)
         if order_id:
             query = query.where(OrderTable.id == order_id)
         rows = (await db.execute(query.order_by(OrderTable.created_at.desc(), OrderTable.id.desc())
                                  .limit(filters.limit + 1))).all()
         if len(rows) > filters.limit:
-            raise SellerDomainException(422, 'EXPORT_TOO_LARGE', 'Too many orders. Narrow the status filter.')
+            raise SellerDomainException(422, 'EXPORT_TOO_LARGE', 'Too many orders. Narrow the search or status filter.')
         result = []
         for order, buyer, allocation in rows:
             state = 'expired' if order.lifecycle == 'awaiting_buyer' and order.expires_at <= now else order.lifecycle
@@ -67,7 +81,6 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                                   buyer.buyer_name if buyer else '', buyer.contact_number_canonical if buyer else '',
                                   buyer.address_raw if buyer else ''))
     else:
-        from app.services.buyer_service import _memory_buyer_revisions
         from app.services.order_service import _check_and_apply_expiry, _memory_orders
         from app.services.reconciliation import get_order_allocation
 
@@ -80,14 +93,26 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
             if raw['shop_id'] != shop_id or raw.get('retained_at'):
                 continue
             _check_and_apply_expiry(raw, now)
-            if (not filters.status or raw['lifecycle'] == filters.status) and (not order_id or raw['id'] == order_id):
+            memory_buyer = memory_buyer_revision(str(raw['id']), raw.get('buyer_revision'))
+            if (
+                (not filters.status or raw['lifecycle'] == filters.status)
+                and (not order_id or raw['id'] == order_id)
+                and matches_order_search(
+                    filters.search,
+                    order_id=str(raw['id']),
+                    product_name=str(raw.get('product_name', '')),
+                    buyer_name=str(memory_buyer.get('buyer_name', '')),
+                    contact_number_canonical=memory_buyer.get('contact_number_canonical'),
+                )
+            ):
                 selected.append(raw)
                 if len(selected) > filters.limit:
-                    raise SellerDomainException(422, 'EXPORT_TOO_LARGE', 'Too many orders. Narrow the status filter.')
+                    raise SellerDomainException(
+                        422, 'EXPORT_TOO_LARGE', 'Too many orders. Narrow the search or status filter.'
+                    )
         result = []
         for raw in sorted(selected, key=lambda r: (r['created_at'], r['id']), reverse=True):
-            memory_buyer = next((b for b in _memory_buyer_revisions.get(raw['id'], [])
-                          if b['revision_number'] == raw.get('buyer_revision')), {})
+            memory_buyer = memory_buyer_revision(str(raw['id']), raw.get('buyer_revision'))
             memory_allocation = await get_order_allocation(None, raw['id'])
             accepted = memory_allocation.accepted_amount_minor if memory_allocation and raw['lifecycle'] in ('confirmed', 'cancelled') else None
             result.append(project(raw['id'], raw['product_name'], raw['lifecycle'], raw['total_minor'],

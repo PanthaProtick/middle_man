@@ -12,8 +12,8 @@ import {
 } from './orderExportSupport';
 import { sellerFetch } from './sessionRequest';
 
-export function OrderExport({ orderId, status, token }: {
-  orderId?: string; status?: string; token?: string;
+export function OrderExport({ orderId, status, search, token }: {
+  orderId?: string; status?: string; search?: string; token?: string;
 }): React.JSX.Element {
   const { locale } = useLocale();
   const text = exportCopy[locale];
@@ -34,6 +34,14 @@ export function OrderExport({ orderId, status, token }: {
     active.current = true;
     return () => { active.current = false; };
   }, []);
+
+  const criteria = `${status ?? ''}\u0000${search ?? ''}`;
+  const criteriaRef = useRef(criteria);
+  useEffect(() => {
+    if (criteriaRef.current === criteria) return;
+    criteriaRef.current = criteria;
+    setFeedback(null);
+  }, [criteria]);
 
   useEffect(() => {
     if (prevBusyRef.current && !busy && wasFocusedRef.current) {
@@ -64,8 +72,12 @@ export function OrderExport({ orderId, status, token }: {
   }
 
   async function downloadCsv() {
-    const query = status ? `?${new URLSearchParams({ status })}` : '';
-    const response = await sellerFetch(`/api/seller/orders/export${query}`, {
+    const params = new URLSearchParams();
+    if (status) params.set('status', status);
+    const trimmedSearch = search?.trim();
+    if (trimmedSearch) params.set('search', trimmedSearch);
+    const query = params.toString();
+    const response = await sellerFetch(`/api/seller/orders/export${query ? `?${query}` : ''}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     }, token);
     if (!active.current) return;
@@ -120,7 +132,7 @@ export function OrderExport({ orderId, status, token }: {
   const message = feedback ? exportFeedbackMessage(feedback, locale) : null;
   const label = busy ? text.preparing
     : orderId ? text.copyDeliverySummary
-      : status ? text.downloadFilteredEnglishCsv
+      : status || search?.trim() ? text.downloadFilteredEnglishCsv
         : text.downloadEnglishCsv;
 
   return (

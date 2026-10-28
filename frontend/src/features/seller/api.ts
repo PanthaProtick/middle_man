@@ -179,13 +179,15 @@ export async function updatePaymentAccount(
 }
 
 export async function fetchOrders(
-  params: { cursor?: string; limit?: number; status?: string } = {},
+  params: { cursor?: string; limit?: number; status?: string; search?: string } = {},
   token?: string,
 ): Promise<SellerOrderListResponse> {
   const query = new URLSearchParams();
   if (params.cursor) query.set('cursor', params.cursor);
   if (params.limit) query.set('limit', String(params.limit));
   if (params.status) query.set('status', params.status);
+  const search = params.search?.trim();
+  if (search) query.set('search', search);
   const qStr = query.toString();
   const url = `/api/seller/orders${qStr ? `?${qStr}` : ''}`;
   return requestJson<SellerOrderListResponse>(url, { method: 'GET' }, token);

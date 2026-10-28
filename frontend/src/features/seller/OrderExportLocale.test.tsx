@@ -226,7 +226,10 @@ it('clears stale empty-export feedback when the order lifecycle filter changes',
   const render = (status: string) => root.render(<OrderList orders={[]} statusFilter={status}
     onFilterChange={() => {}} nextCursor={null} onLoadMore={() => {}} />);
   await act(async () => render('pending'));
-  await act(async () => host.querySelector('button')!.click());
+  const exportButton = Array.from(host.querySelectorAll('button')).find(
+    (button) => button.textContent === 'Download filtered English CSV',
+  )!;
+  await act(async () => exportButton.click());
   expect(host.textContent).toContain('No orders match this filter');
   await act(async () => render('confirmed'));
   expect(host.textContent).not.toContain('No orders match this filter');

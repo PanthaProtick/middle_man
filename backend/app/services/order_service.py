@@ -23,6 +23,12 @@ from app.services.order_mapping import (
     to_seller_order,
     to_seller_order_from_dict,
 )
+from app.services.order_search import (
+    matches_order_search,
+    memory_buyer_revision,
+    order_after_cursor,
+    order_list_query,
+)
 from app.services.reconciliation import get_order_allocation, get_order_review_reasons
 from app.services.seller_service import (
     NotFoundError,
@@ -188,34 +194,32 @@ class OrderService:
         limit: int = 25,
         status_filter: Optional[str] = None,
         review_filter: Optional[str] = None,
+        search: Optional[str] = None,
     ) -> Tuple[List[SellerOrder], Optional[str]]:
         now = get_utc_now()
         limit = max(1, min(limit, 100))
 
         if self.db is not None:
-            query = select(OrderTable).where(OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None))
-            if status_filter:
-                query = query.where(OrderTable.lifecycle == status_filter)
-            query = query.order_by(desc(OrderTable.created_at), desc(OrderTable.id))
+            query = order_list_query(
+                shop_id=shop_id, search=search, status_filter=status_filter, now=now
+            )
+            if cursor:
+                cursor_order = (await self.db.scalars(
+                    query.where(OrderTable.id == cursor)
+                )).first()
+                if cursor_order is not None:
+                    query = order_after_cursor(query, cursor_order)
+            query = query.order_by(
+                desc(OrderTable.created_at), desc(OrderTable.id)
+            ).limit(limit + 1)
 
             orders = (await self.db.scalars(query)).all()
             for o in orders:
                 if _check_and_apply_expiry(o, now):
                     await self.db.commit()
 
-            filtered = [
-                o for o in orders if (status_filter is None or o.lifecycle == status_filter)
-            ]
-
-            start_idx = 0
-            if cursor:
-                for idx, item in enumerate(filtered):
-                    if item.id == cursor:
-                        start_idx = idx + 1
-                        break
-
-            page = filtered[start_idx : start_idx + limit]
-            next_cursor = page[-1].id if (start_idx + limit < len(filtered) and len(page) > 0) else None
+            page = orders[:limit]
+            next_cursor = page[-1].id if len(orders) > limit and page else None
             res_orders: List[SellerOrder] = []
             for o in page:
                 alloc = await get_order_allocation(self.db, o.id) if o.lifecycle in ("confirmed", "cancelled") else None
@@ -227,7 +231,19 @@ class OrderService:
         for raw in all_raw:
             _check_and_apply_expiry(raw, now)
 
-        filtered_raw = [o for o in all_raw if (status_filter is None or o["lifecycle"] == status_filter)]
+        def matches(raw: dict[str, Any]) -> bool:
+            if status_filter is not None and raw["lifecycle"] != status_filter:
+                return False
+            buyer = memory_buyer_revision(str(raw["id"]), raw.get("buyer_revision"))
+            return matches_order_search(
+                search,
+                order_id=str(raw["id"]),
+                product_name=str(raw.get("product_name", "")),
+                buyer_name=str(buyer.get("buyer_name", "")),
+                contact_number_canonical=buyer.get("contact_number_canonical"),
+            )
+
+        filtered_raw = [o for o in all_raw if matches(o)]
         filtered_raw.sort(key=lambda x: (x["created_at"], x["id"]), reverse=True)
 
         start_idx = 0

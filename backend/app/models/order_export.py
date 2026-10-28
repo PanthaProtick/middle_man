@@ -8,6 +8,7 @@ OrderStatus = Literal['awaiting_buyer', 'pending', 'confirmed', 'rejected', 'can
 class ExportFilters(BaseModel):
     model_config = ConfigDict(extra='forbid')
     status: OrderStatus | None = None
+    search: str | None = Field(None, max_length=200)
     limit: int = Field(500, ge=1, le=500)
 
 

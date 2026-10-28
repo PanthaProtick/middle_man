@@ -1,8 +1,8 @@
 import { useLocale } from '../locale';
 import { sellerCopy } from '../locale/sellerCopy';
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import type { PaymentAccount, ReceiptView, SellerOrder, Shop } from './types';
-import { fetchShop, createShop, fetchPaymentAccounts, fetchOrders, fetchTransactions, SellerApiError } from './api';
+import type { PaymentAccount, ReceiptView, Shop } from './types';
+import { fetchShop, createShop, fetchPaymentAccounts, fetchTransactions, SellerApiError } from './api';
 import { OrderList } from './OrderList';
 import { CreateOrderModal } from './CreateOrderModal';
 import { ManualTransactionModal } from './ManualTransactionModal';
@@ -18,6 +18,7 @@ import { WorkspaceAccountsSummary } from './WorkspaceAccountsSummary';
 import { PaymentsSection } from './PaymentsSection';
 import { AccountsSection } from './AccountsSection';
 import { RetentionSection } from './RetentionSection';
+import { useSellerOrders } from './useSellerOrders';
 
 export type WorkspaceSection = 'orders' | 'payments' | 'accounts' | 'retention';
 
@@ -46,9 +47,6 @@ export function SellerWorkspace({
   const [shop, setShop] = useState<Shop | null>(null);
   const [setupNeeded, setSetupNeeded] = useState<boolean>(false);
   const [accounts, setAccounts] = useState<PaymentAccount[]>([]);
-  const [orders, setOrders] = useState<SellerOrder[]>([]);
-  const [ordersFilter, setOrdersFilter] = useState<string>('');
-  const [ordersNextCursor, setOrdersNextCursor] = useState<string | null>(null);
   const [transactions, setTransactions] = useState<ReceiptView[]>([]);
   const [transactionsFilter, setTransactionsFilter] = useState<string>('');
   const [transactionsNextCursor, setTransactionsNextCursor] = useState<string | null>(null);
@@ -60,22 +58,21 @@ export function SellerWorkspace({
   const workspaceError = typeof error === 'object' && error ? error.code : null;
   const errorText = workspaceErrorText(error, locale);
   const captureWorkspaceError = useCallback((err: unknown) => setError({ code: err instanceof SellerApiError ? err.code : 'UNKNOWN' }), []);
+  const {
+    orders,
+    statusFilter: ordersFilter,
+    search: ordersSearch,
+    nextCursor: ordersNextCursor,
+    loading: ordersLoading,
+    reload: reloadOrders,
+    changeStatus: handleFilterChange,
+    changeSearch: handleSearchChange,
+    loadMore: loadMoreOrders,
+    addOrder,
+  } = useSellerOrders(token, captureWorkspaceError);
   const [shopName, setShopName] = useState<string>('');
   const [setupSubmitting, setSetupSubmitting] = useState<boolean>(false);
   const shopIdempotencyKeyRef = useRef<string>(crypto.randomUUID());
-  const loadOrders = useCallback(
-    async (status?: string, cursor?: string) => {
-      if (!token) return;
-      try {
-        const res = await fetchOrders({ status: status || undefined, cursor }, token);
-        setOrders((prev) => (cursor ? [...prev, ...res.items] : res.items));
-        setOrdersNextCursor(res.next_cursor);
-      } catch (err) {
-        captureWorkspaceError(err);
-      }
-    },
-    [token, captureWorkspaceError],
-  );
   const loadTransactions = useCallback(
     async (filterKey?: string, cursor?: string) => {
       if (!token) return;
@@ -105,22 +102,18 @@ export function SellerWorkspace({
         if (status.shop) {
           const accs = await fetchPaymentAccounts(token);
           setAccounts(accs);
-          await loadOrders(ordersFilter);
+          await reloadOrders();
           await loadTransactions(transactionsFilter);
         }
       })
       .catch((err: unknown) => captureWorkspaceError(err))
       .finally(() => setLoading(false));
-  }, [token, ordersFilter, transactionsFilter, loadOrders, loadTransactions, captureWorkspaceError]);
+  }, [token, transactionsFilter, reloadOrders, loadTransactions, captureWorkspaceError]);
 
   useEffect(() => {
     if (!token) return;
     loadData();
   }, [token, loadData]);
-  const handleFilterChange = (status: string) => {
-    setOrdersFilter(status);
-    loadOrders(status);
-  };
   const handleCreateShop = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!token) return setError({ code: 'UNKNOWN' });
@@ -205,18 +198,21 @@ export function SellerWorkspace({
                 <BuyerCorrection
                   portalToken={new URLSearchParams(window.location.search).get('order-link')!}
                   token={token}
-                  onCorrected={() => { void loadOrders(ordersFilter); }}
+                  onCorrected={() => { void reloadOrders(); }}
                 />
               )}
 
               <OrderList
                 token={token}
-                onCorrected={() => { void loadOrders(ordersFilter); }}
+                onCorrected={() => { void reloadOrders(); }}
                 orders={orders}
                 statusFilter={ordersFilter}
                 onFilterChange={handleFilterChange}
+                search={ordersSearch}
+                onSearchChange={handleSearchChange}
+                loading={ordersLoading}
                 nextCursor={ordersNextCursor}
-                onLoadMore={() => ordersNextCursor && loadOrders(ordersFilter, ordersNextCursor)}
+                onLoadMore={loadMoreOrders}
               />
             </section>
           )}
@@ -236,7 +232,7 @@ export function SellerWorkspace({
               onRefreshTransactions={loadTransactions}
               onTransactionsChanged={() => {
                 void loadTransactions(transactionsFilter);
-                void loadOrders(ordersFilter);
+                void reloadOrders();
               }}
               onFilterChange={(f) => {
                 setTransactionsFilter(f);
@@ -261,7 +257,7 @@ export function SellerWorkspace({
             <RetentionSection
               token={token}
               onCleaned={() => {
-                void loadOrders(ordersFilter);
+                void reloadOrders();
                 void loadTransactions(transactionsFilter);
               }}
             />
@@ -274,7 +270,10 @@ export function SellerWorkspace({
           accounts={accounts}
           token={token}
           onClose={() => setIsCreateModalOpen(false)}
-          onOrderCreated={(newOrder) => setOrders((prev) => [newOrder, ...prev])}
+          onOrderCreated={(newOrder) => {
+            if (ordersSearch.trim() || ordersFilter) void reloadOrders();
+            else addOrder(newOrder);
+          }}
           onError={setError}
         />
       )}

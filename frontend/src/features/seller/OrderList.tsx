@@ -18,6 +18,9 @@ interface OrderListProps {
   onFilterChange: (status: string) => void;
   nextCursor: string | null;
   onLoadMore: () => void;
+  search?: string;
+  onSearchChange?: (search: string) => void;
+  loading?: boolean;
 }
 
 const LIFECYCLE_BADGES: Record<OrderLifecycle, { bg: string; color: string }> = {
@@ -36,6 +39,9 @@ export function OrderList({
   onFilterChange,
   nextCursor,
   onLoadMore,
+  search = '',
+  onSearchChange = () => undefined,
+  loading = false,
 }: OrderListProps): React.JSX.Element {
   const { locale } = useLocale();
   const text = orderCopy[locale];
@@ -63,6 +69,45 @@ export function OrderList({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <form
+            role="search"
+            aria-label={text.searchLabel}
+            onSubmit={(event) => event.preventDefault()}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}
+          >
+            <label htmlFor="order-search" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              {text.searchLabel}
+            </label>
+            <input
+              id="order-search"
+              type="search"
+              value={search}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder={text.searchPlaceholder}
+              autoComplete="off"
+              className="form-control"
+              style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', minWidth: '220px' }}
+            />
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => onSearchChange(search)}
+              style={{ minHeight: '36px' }}
+            >
+              {text.searchAction}
+            </button>
+            {search && (
+              <button
+                type="button"
+                className="btn btn-secondary btn-sm"
+                aria-label={text.clearSearch}
+                onClick={() => onSearchChange('')}
+                style={{ minHeight: '36px' }}
+              >
+                {text.clearSearch}
+              </button>
+            )}
+          </form>
           <label htmlFor="order-status-filter" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{text.status}</label>
           <select
             id="order-status-filter"
@@ -87,11 +132,17 @@ export function OrderList({
         </div>
       </div>
 
-      <OrderExport key={statusFilter} status={statusFilter} token={token} />
-      {orders.length === 0 ? (
+      <OrderExport key={statusFilter} status={statusFilter} search={search} token={token} />
+      {loading ? (
+        <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
+          <p role="status" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+            {text.loading}
+          </p>
+        </div>
+      ) : orders.length === 0 ? (
         <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            {text.empty}
+            {search.trim() ? text.noMatches : text.empty}
           </p>
         </div>
       ) : (

@@ -23,6 +23,10 @@ const en = {
   CONFLICTING_RECEIPTS: 'Received-payment records conflict', COMPETING_CLAIMS: 'Multiple orders claim this payment',
   PAYMENT_USED: 'Payment is already used', unknownReview: 'Unknown review reason. Review the payment evidence before continuing.',
   parcel: 'Parcel details', weight: 'Weight (kg)', quantity: 'Quantity', notProvided: 'Not provided',
+  searchLabel: 'Search orders', searchAction: 'Search',
+  searchPlaceholder: 'Order ID, product, buyer or mobile number', clearSearch: 'Clear search',
+  loading: 'Loading orders…',
+  noMatches: 'No orders match this search and filter.',
 } as const;
 const bn: Record<keyof typeof en, string> = {
   list: 'অর্ডার ও সক্রিয় ক্রেতার লিংক', confirmed: 'নিশ্চিত করা', exceptions: 'পর্যালোচনার অসঙ্গতি:', status: 'অবস্থা:',
@@ -49,6 +53,10 @@ const bn: Record<keyof typeof en, string> = {
   CONFLICTING_RECEIPTS: 'পাওয়া পেমেন্টের তথ্যে অসঙ্গতি আছে', COMPETING_CLAIMS: 'একই পেমেন্ট একাধিক অর্ডারে দাবি করা হয়েছে',
   PAYMENT_USED: 'পেমেন্ট ইতিমধ্যে ব্যবহার হয়েছে', unknownReview: 'অজানা পর্যালোচনার কারণ। এগোনোর আগে পেমেন্টের তথ্য পর্যালোচনা করুন।',
   parcel: 'পার্সেলের তথ্য', weight: 'ওজন (কেজি)', quantity: 'পরিমাণ', notProvided: 'দেওয়া হয়নি',
+  searchLabel: 'অর্ডার খুঁজুন', searchAction: 'খুঁজুন',
+  searchPlaceholder: 'অর্ডার আইডি, পণ্য, ক্রেতা বা মোবাইল নম্বর', clearSearch: 'অনুসন্ধান মুছুন',
+  loading: 'অর্ডার লোড হচ্ছে…',
+  noMatches: 'এই অনুসন্ধান ও ফিল্টারে কোনো অর্ডার মেলেনি।',
 };
 export const orderCopy = { en, bn };
 export type OrderCopy = typeof en | typeof bn;

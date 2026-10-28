@@ -1,6 +1,6 @@
 # Task: Orders and received-payments search and date filters
 
-Status: In-Progress (design agreed; implementation not started)
+Status: In-Progress (ticket 01 complete; date and payment tickets remain)
 
 - Goal: Add server-backed search and date filters to the seller Orders list and Received Payments Inbox, alongside their existing filters. Search and date filters also constrain the Orders CSV export.
 - Scope exclusions: Do not filter accepted payment history inside an individual order, search raw SMS or private notes, add advanced query syntax, put search text in the browser address bar, or change the CSV's English columns.
@@ -26,17 +26,19 @@ Status: In-Progress (design agreed; implementation not started)
 
 ## Current state
 
-- Completed: Interviewed and confirmed all product decisions, including the 500-order export cap. Traced current list, export, state, and timestamp contracts. This file records the implementation target.
-- Published the ready-for-agent issue-tracker spec at `.scratch/order-payment-search-date-filters/spec.md` with the agreed behavior and existing test seams.
-- Published four approved, independently startable tracer-bullet tickets in `.scratch/order-payment-search-date-filters/issues/` for Orders search, Orders date, received-payments search, and received-payments date.
-- Next step: Implement the validated backend filter contract and focused route/service tests first; then add frontend controls in bounded Orders and Payments clusters. Run focused tests after each cluster and root `npm run check` before handoff.
-- Resume: Inspect current diff and re-read the relevant route/service contracts, then implement one backend list predicate and its tests.
+- Completed: Ticket 01 (Orders search and matching CSV export). Added one shared `search` predicate used by the list and export, trim/exact-ID/partial-name/full-phone normalization, shop and retained scoping, expiry-aware lifecycle filtering, database keyset pagination with an equivalent offline path, the 500-order export boundary, and Orders UI state with stale-response rejection. Search stays in workspace memory; loaded orders reload rather than bypass active filters.
+- Completed earlier: Interviewed and confirmed all product decisions, including the 500-order export cap. Published the issue-tracker spec and four tracer-bullet tickets.
+- Changed paths: `backend/app/services/order_search.py`, `order_service.py`, `order_export.py`, the order/export route/models, `frontend/src/features/seller/useSellerOrders.ts`, `SellerWorkspace.tsx`, `OrderList.tsx`, `OrderExport.tsx`, `api.ts`, locale copy, and focused backend/frontend tests.
+- Next step: Pick up ticket 02 (Orders creation-date filter), reusing the shared predicate/query seam and extending list, export, and workspace tests.
+- Resume: Inspect the current diff and ticket 02, then add the date contract and query predicates before UI controls.
 
 ## Verification
 
 | Command or acceptance case | PASS / FAIL / BLOCKED / NOT RUN | Result or log path |
 | --- | --- | --- |
 | Design confirmed by user | PASS | Interview in this chat, 2026-10-28 |
-| Focused backend and frontend tests | NOT RUN | Implementation not started |
-| Root `npm run check` | NOT RUN | Documentation-only change |
-| Browser and live-provider acceptance | NOT RUN | Implementation not started |
+| Focused backend tests (search, routes, export, shop isolation) | PASS | 25 tests; `tests/test_order_search.py`, `test_order_routes.py`, `test_order_export.py`, `test_shop_isolation.py` |
+| PostgreSQL search path test | NOT RUN | `test_order_search_postgres.py` skips without `BUYER_TEST_POSTGRES_URL` |
+| Focused frontend tests (search, export, locale, workspace) | PASS | 39 tests across `OrderSearch`, `OrderExport`, `OrderExportLocale`, `OrderLocale`, `SellerWorkspace` |
+| Root `npm run check` | PASS | `.cache/checks/check-O7x0lC/result.json` (tooling, lint, types, backend/frontend tests, build, HTTP smoke) |
+| Browser and live-provider acceptance | NOT RUN | Requires a real browser; local mocks and HTTP tests do not establish it |

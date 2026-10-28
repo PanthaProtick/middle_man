@@ -43,4 +43,4 @@ async def export_orders(filters: Annotated[ExportFilters, Query()],
 @router.get('/{order_id}/summary', response_model=OrderSummary)
 async def order_summary(order_id: str, seller: SellerIdentity = Depends(get_seller_identity),
                         db: AsyncSession | None = Depends(get_db)) -> OrderSummary:
-    return (await read_summaries(db, seller, ExportFilters(limit=500), order_id))[0]
+    return (await read_summaries(db, seller, ExportFilters(limit=500, search=None), order_id))[0]

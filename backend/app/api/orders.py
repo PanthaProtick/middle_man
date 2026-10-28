@@ -71,6 +71,7 @@ async def list_orders(
     limit: int = Query(25, ge=1, le=100),
     status: Optional[str] = Query(None),
     review: Optional[str] = Query(None),
+    search: Optional[str] = Query(None, max_length=200),
     seller: SellerIdentity = Depends(get_seller_identity),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> SellerOrderListResponse:
@@ -82,7 +83,8 @@ async def list_orders(
 
     order_svc = OrderService(db)
     items, next_cursor = await order_svc.list_orders(
-        shop_id=shop.id, cursor=cursor, limit=limit, status_filter=status, review_filter=review
+        shop_id=shop.id, cursor=cursor, limit=limit, status_filter=status,
+        review_filter=review, search=search,
     )
     return SellerOrderListResponse(items=items, next_cursor=next_cursor)
 
