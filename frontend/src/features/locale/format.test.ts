@@ -8,18 +8,20 @@ describe('locale formatting', () => {
     expect(formatBdt(50050)).not.toMatch(/[০-৯]/);
   });
 
-  it('formats Bangladesh time with an English Gregorian month name', () => {
+  it('formats Bangladesh time with a localized label and English Gregorian month name', () => {
     const formatted = formatBangladeshDateTime('2026-10-24T12:00:00Z', 'en');
     expect(formatted).toContain('24 Oct 2026');
     expect(formatted).toContain('06:00');
-    expect(formatted).toContain('BST / UTC+6');
+    expect(formatted).toContain('Bangladesh time');
+    expect(formatted).not.toContain('BST');
     expect(formatted).not.toMatch(/[০-৯]/);
   });
 
-  it('localizes Gregorian month names while keeping 0-9 digits', () => {
+  it('localizes the Bangladesh time label and Gregorian month names while keeping 0-9 digits', () => {
     const formatted = formatBangladeshDateTime('2026-10-24T12:00:00Z', 'bn');
     expect(formatted).toContain('24 অক্টোবর 2026');
-    expect(formatted).toContain('BST / UTC+6');
+    expect(formatted).toContain('বাংলাদেশ সময়');
+    expect(formatted).not.toContain('BST');
     expect(formatted).not.toMatch(/[০-৯]/);
   });
 

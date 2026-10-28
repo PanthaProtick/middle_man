@@ -198,7 +198,7 @@ export function ManualTransactionModal({
             <label htmlFor="manual-trxId" style={labelStyle}>{tr("Transaction ID (TrxID) *")}</label>
             <input
               type="text"
-              placeholder="e.g. 9K72LKQW1"
+              placeholder={tr("e.g. 9K72LKQW1")}
               id="manual-trxId" aria-invalid={Boolean(fieldErrors.trxId)} aria-describedby={fieldErrors.trxId ? "manual-trxId-error" : undefined} value={trxId}
               onChange={(e) => setTrxId(e.target.value)}
               disabled={submitting}
@@ -221,7 +221,7 @@ export function ManualTransactionModal({
               type="text" inputMode="decimal"
               step="any"
               min="0.01"
-              placeholder="e.g. 150"
+              placeholder={tr("e.g. 150")}
               id="manual-amount" aria-invalid={Boolean(fieldErrors.amount)} aria-describedby={fieldErrors.amount ? "manual-amount-error" : undefined} value={amountBdt}
               onChange={(e) => setAmountBdt(e.target.value)}
               disabled={submitting}
@@ -243,7 +243,7 @@ export function ManualTransactionModal({
             </label>
             <input
               type="text"
-              placeholder="e.g. 01700000000"
+              placeholder={tr("e.g. 01700000000")}
               id="manual-sender" value={senderNumber}
               onChange={(e) => setSenderNumber(e.target.value)}
               disabled={submitting}

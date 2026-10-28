@@ -29,6 +29,7 @@ const en = {
   invalidTotal: 'Total amount must be greater than zero.', invalidAdvance: 'Advance must be positive and not exceed total.', needAccount: 'Select an active payment account.',
   unknownError: 'Outcome unknown. Retry the same request or refresh the order before changing it.',
   failed: 'Request failed. Review the order and try again.', stale: 'The order changed. Refresh it before trying again.', invalidField: 'Check this value and try again.', phoneError: 'Enter a valid Bangladeshi phone number.', amountError: 'Enter a positive amount with up to two decimal places.',
+  unauthorized: 'Seller sign-in required.',
 } as const;
 
 const bn: Record<keyof typeof en, string> = {
@@ -43,22 +44,23 @@ const bn: Record<keyof typeof en, string> = {
   booked: 'পাঠাও-এ কুরিয়ার বুকিং নিশ্চিত হয়েছে। এখানে সংশোধন করলে বুকিং বদলায় না। পাঠাও-এ আলাদাভাবে আপডেট করুন।',
   submitting: 'কুরিয়ারে পাঠানো হচ্ছে। এখানে সংশোধন করলে বুকিং বদলায় না। বুকিং হয়ে থাকলে পাঠাও-এ দেখুন।',
   unknownBooking: 'কুরিয়ারে পাঠানোর ফল জানা যায়নি। চেষ্টা মিলিয়ে দেখুন এবং পাঠাও-এ বুকিং থাকলে সমাধান করুন।',
-  unsubmitted: 'কুরিয়ারের খসড়া জমা হয়নি। জমার আগে সংশোধনে খসড়া আপডেট হবে। অন্য কোথাও বুকিং হয়েছে কি না দেখুন।',
+  unsubmitted: 'কুরিয়ার অনুরোধের খসড়া জমা হয়নি। জমার আগে সংশোধনে খসড়া আপডেট হবে। অন্য কোথাও বুকিং হয়েছে কি না দেখুন।',
   courier: 'এখানে সংশোধন করলে কুরিয়ার বুকিং বদলায় না। বিদ্যমান বুকিং আলাদাভাবে আপডেট করুন।',
   outcomes: 'অর্ডারের সিদ্ধান্ত', replacedBy: 'বদলে তৈরি অর্ডার', cancel: 'অর্ডার বাতিল করুন', reject: 'জমা প্রত্যাখ্যান করুন', replace: 'বদলে নতুন অর্ডার করুন',
   allocated: 'পেমেন্ট বরাদ্দ করা অর্ডার বদলানোর আগে পেমেন্টের বিষয়টি সমাধান করুন।', cancelTitle: 'অর্ডার বাতিল', rejectTitle: 'অর্ডার প্রত্যাখ্যান', replaceTitle: 'অর্ডার বদল',
   allocationWarning: 'নিশ্চিত করা পেমেন্টের বরাদ্দ অক্ষত থাকবে; স্বয়ংক্রিয়ভাবে টাকা ফেরত যাবে না।',
   courierWarning: 'এখানে বাতিল করলে পাঠাও-এর কুরিয়ার বুকিং বাতিল হয় না। পাঠাও-এ সরাসরি সমাধান বা বাতিল করুন।',
   courierUnavailable: 'কুরিয়ার বুকিংয়ের অবস্থা জানা যায়নি। পাঠাও-এ বুকিং থাকলে সরাসরি যাচাই ও সমাধান করুন।',
-  draftWarning: 'বাতিল করলে কুরিয়ারের খসড়া জমা হবে না। অন্য কোথাও বুকিং হয়েছে কি না পাঠাও-এ দেখুন।',
+  draftWarning: 'বাতিল করলে কুরিয়ার অনুরোধের খসড়া জমা হবে না। অন্য কোথাও বুকিং হয়েছে কি না পাঠাও-এ দেখুন।',
   cancelReason: 'বাতিলের কারণ (আবশ্যক)', rejectReason: 'প্রত্যাখ্যানের কারণ (আবশ্যক)', replaceReason: 'বদলানোর কারণ (আবশ্যক)',
   dismiss: 'বন্ধ করুন', cancelling: 'বাতিল হচ্ছে…', confirmCancel: 'বাতিল নিশ্চিত করুন', rejecting: 'প্রত্যাখ্যান হচ্ছে…', confirmReject: 'প্রত্যাখ্যান নিশ্চিত করুন', creating: 'তৈরি হচ্ছে…', createReplacement: 'বদলে নতুন অর্ডার তৈরি করুন',
   predecessor: 'আগের অর্ডার বাতিল হবে। নতুন লিংক ও শর্তসহ নতুন অর্ডার তৈরি হবে।',
-  product: 'পণ্যের নাম', total: 'মোট টাকা', requiredAdvance: 'অগ্রিম টাকা', account: 'সক্রিয় পেমেন্ট অ্যাকাউন্ট',
+  product: 'পণ্যের নাম', total: 'মোট টাকা', requiredAdvance: 'ডেলিভারির আগে অগ্রিম (BDT)', account: 'সক্রিয় পেমেন্ট অ্যাকাউন্ট',
   needCancelReason: 'বাতিলের কারণ লিখুন।', needRejectReason: 'প্রত্যাখ্যানের কারণ লিখুন।', needReplaceReason: 'বদলানোর কারণ লিখুন।',
   invalidTotal: 'মোট টাকা শূন্যের বেশি হতে হবে।', invalidAdvance: 'অগ্রিম শূন্যের বেশি এবং মোট টাকার সমান বা কম হতে হবে।', needAccount: 'একটি সক্রিয় পেমেন্ট অ্যাকাউন্ট বাছুন।',
   unknownError: 'ফল জানা যায়নি। একই অনুরোধ আবার পাঠান অথবা পরিবর্তনের আগে অর্ডার রিফ্রেশ করুন।',
   failed: 'অনুরোধ ব্যর্থ হয়েছে। অর্ডার পর্যালোচনা করে আবার চেষ্টা করুন।', stale: 'অর্ডারের তথ্য বদলেছে। আবার চেষ্টা করার আগে রিফ্রেশ করুন।', invalidField: 'এই তথ্য ঠিক করে আবার চেষ্টা করুন।', phoneError: 'বাংলাদেশের একটি বৈধ ফোন নাম্বার লিখুন।', amountError: 'শূন্যের বেশি টাকা লিখুন; দশমিকের পরে সর্বোচ্চ দুই ঘর।',
+  unauthorized: 'বিক্রেতা হিসেবে সাইন ইন করুন।',
 };
 
 export const correctionOutcomeCopy = { en, bn };

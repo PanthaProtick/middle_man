@@ -1,6 +1,8 @@
 # Task: Consistent Bengali and English experience
 
-Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 03–13 pending)
+Status: Implemented and locally verified through ticket 13. Phone-browser,
+screen-reader, real embedded authentication, hosted, and live-provider acceptance
+remain unrun and unclaimed.
 
 ## Goal and settled scope
 
@@ -343,3 +345,64 @@ Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 0
 - Language changes render from saved state; courier requests remain keyed to order/session/revision, and switch does not run review, submission, reconciliation, or location requests. Known blocker/error codes receive selected-language guidance. Unknown provider text is behind an original-evidence disclosure on authenticated seller screens. Pathao names/IDs, contact/address evidence, parcel values, and recorded attempts are preserved. Draft numeric boundaries accept Bengali digits.
 - Focused frontend courier runs passed (latest 4 files / 20 tests). Focused backend submission/failure/replay passed (26 tests); root `npm run typecheck` passed. First root gate failed frontend lint on an exported helper; moved it into its own module. Final root `npm run check` passed every stage with repository-local pytest basetemp: `.cache/checks/check-LcGcaV/result.json`.
 - Manual browser, phone wrapping/font, screen-reader, real Clerk, sandbox Pathao, and live-provider acceptance: NOT RUN. Rendered tests and HTTP smoke do not establish these gates.
+
+### Ticket 13 — cross-workflow acceptance and vocabulary audit (2026-10-28)
+
+- Baseline `2c4be4d` on `ticket-13-acceptance-vocabulary` (integration tip
+  `feat/bengali-english-localization`; tickets 11–12 merged).
+- Fixed the four confirmed audit gaps: `BuyerCorrection` now renders the
+  session-required error from `correctionOutcomeCopy`; `ManualTransactionModal`
+  placeholders resolve through `receiptCopy`; `format.ts` labels Bangladesh time
+  as `Bangladesh time`/`বাংলাদেশ সময়` while keeping Asia/Dhaka and 0-9 digits;
+  and `AppShell` sets a localized per-route `document.title` for the buyer portal
+  and seller workspace without changing routing or remounting state; the seller
+  session also sets it while Clerk/session state is still loading.
+- Added centralized `frontend/src/features/locale/copyAudit.test.ts`: key parity,
+  non-empty values, placeholder parity, and lookup resolution across paired
+  catalogs (`catalogs`, buyer link/order/creation/diagnostic, correction/outcome,
+  export, seller, address assistance, buyer messages/locations/errors, payment
+  exception) and English-keyed Bengali dictionaries (`courierBengali`,
+  `historyBengali`, `paymentInboxBengali`, `receiptBengali`). Identical values are
+  deliberately limited to documented terms (বাংলা, SMS, TrxID, Pathao,
+  Facebook/Messenger, BDT, Gemini, Google, English). `historyBengali`,
+  `paymentInboxBengali`, `receiptBengali`, and `paymentExceptionReasons` are
+  exported only for this audit; runtime lookups still use their existing helpers.
+- Added `frontend/src/features/locale/integration.test.tsx`: browser preference
+  `bn`/non-`bn`, explicit override persisted across remount, one locale shared by
+  buyer `/orders/...` and seller entry paths, shared-link recipient independence
+  (supplied order locale ignored; public path stays Clerk-free), populated buyer
+  form with the same DOM node, values, and request count after switching, and
+  localized buyer/seller tab titles.
+- Vocabulary aligned with GLOSSARY.md: confirmed order wording in `sellerCopy`
+  and `paymentInboxCopy`; remaining COD wording in `paymentExceptionCopy`;
+  delivery-advance labels in `orderCopy`, `exportCopy`, `historyCopy`,
+  `buyerMessages`, and `paymentExceptionCopy`; courier-draft wording in
+  `courierCopy` and `correctionOutcomeCopy`. The seller name-limit copy now uses
+  0-9 digits. No provider or booking certainty was added.
+- Owner-review vocabulary retained rather than silently rewritten: seller UI
+  uses English “payment claim”/Bengali “পেমেন্টের দাবি” for the claim concept,
+  while GLOSSARY.md’s approved noun is “buyer payment proof”/“ক্রেতার দেওয়া
+  পেমেন্টের তথ্য” (used in the comparison caption). Compact labels such as
+  “গৃহীত অগ্রিম” remain inside courier sentences. English/CSV also retain “COD”;
+  Bengali uses the approved remaining-balance phrase.
+- Changed paths: `frontend/src/App.tsx`,
+  `frontend/src/features/locale/{catalog,correctionOutcomeCopy,courierCopy,exportCopy,historyCopy,paymentExceptionCopy,paymentInboxCopy,receiptCopy,sellerCopy,orderCopy,buyerMessages,format}.ts`,
+  `frontend/src/features/seller/{BuyerCorrection,ManualTransactionModal,SellerSession}.tsx`,
+  `frontend/src/features/locale/{copyAudit.test.ts,integration.test.tsx,format.test.ts}`,
+  `frontend/src/features/seller/{CorrectionOutcomeLocale,ManualTransactionLocale,SellerWorkspace,OrderExport,SellerSession}.test.tsx`,
+  `docs/adr/0006-bengali-english-presentation-boundary.md`,
+  `docs/ui-audience-and-design.md`, this record, and ticket 13.
+- Focused checks: `npm run test:frontend -- src/features/locale src/App.locale.test.tsx src/features/seller/CorrectionOutcomeLocale.test.tsx src/features/seller/ManualTransactionLocale.test.tsx src/features/seller/SellerWorkspace.test.tsx src/features/seller/OrderExport.test.tsx src/features/seller/PaymentException.test.tsx`
+  passed (13 files, 123 tests); a follow-up seller-session/locale run
+  `npm run test:frontend -- src/features/seller/SellerSession.test.tsx src/features/locale src/App.locale.test.tsx`
+  passed (9 files, 95 tests). `npm run typecheck` passed (111 source files);
+  `npm run lint:frontend` passed.
+- Root `npm run check` PASS: `.cache/checks/check-FvRozu/result.json`
+  (tooling, backend lint/types, 465 backend passed/170 skipped, frontend lint,
+  69 frontend files/389 tests, build, HTTP smoke).
+- Unrun gates: phone-browser font/wrapping/control/focus/reduced-motion/
+  announcement checks and screen-reader behavior were NOT RUN. Real embedded
+  Clerk sign-in/recovery was NOT RUN (ticket 12 evidence is mocked/local only).
+  Hosted deployment and live Pathao/payment/AI provider behavior were NOT RUN. No
+  headless-browser smoke was run and no browser dependency was added, so rendered
+  tests and HTTP smoke do not establish those gates.

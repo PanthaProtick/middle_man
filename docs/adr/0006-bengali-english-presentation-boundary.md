@@ -1,7 +1,9 @@
 # Bengali and English presentation with preserved business data
 
-Status: accepted design, published in the local tracker as ready-for-agent.
-No implemented localization is claimed.
+Status: accepted and implemented. Automated rendered and catalog tests establish
+the presentation contract. Phone-browser, screen-reader, real embedded
+authentication, hosted, and live-provider acceptance remain unverified; rendered
+tests and HTTP smoke do not establish those gates.
 
 Use a selected-language Bengali or English experience across buyer and seller
 surfaces, replacing simultaneous bilingual labels. Preserve user-written data,
@@ -28,6 +30,10 @@ websites retain their own language, with localized guidance before leaving the
 application. Completeness of embedded authentication requires live verification.
 
 This decision replaces the paired-buyer-label design direction in
-[Audience and UI design decisions](../ui-audience-and-design.md), once finalized
-and implemented. See the [implementation brief](../../tasks/bengali-english-localization-design.md)
-for wording, number/date rules, acceptance cases, and rollout gates.
+[Audience and UI design decisions](../ui-audience-and-design.md). Localized
+document titles, browser-preference initialization, explicit-choice persistence,
+and shared buyer/seller device preference are covered by automated tests; other
+parts of this record remain acceptance requirements rather than demonstrated
+browser or live-provider behavior. See the
+[implementation brief](../../tasks/bengali-english-localization-design.md) for
+wording, number/date rules, acceptance cases, exact evidence, and unrun gates.

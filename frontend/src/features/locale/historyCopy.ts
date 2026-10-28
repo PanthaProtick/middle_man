@@ -6,7 +6,7 @@ const bn: Record<string, string> = {
   'Accepted payment history':'গৃহীত পেমেন্টের ইতিহাস',
   'Loading decision history…':'সিদ্ধান্তের ইতিহাস আনা হচ্ছে…',
   'Payment history unavailable':'পেমেন্টের ইতিহাস পাওয়া যাচ্ছে না। আবার চেষ্টা করুন।',
-  'Retry history':'ইতিহাস আবার আনুন', 'Accepted advance':'গৃহীত অগ্রিম',
+  'Retry history':'ইতিহাস আবার আনুন', 'Accepted advance':'গৃহীত ডেলিভারির আগে অগ্রিম',
   'Remaining COD':'ডেলিভারির সময় বাকি পরিশোধ', 'Accepted exceptions':'গৃহীত ব্যতিক্রম',
   'None':'নেই', 'Reason':'কারণ', 'Seller':'বিক্রেতা', 'Shop totals':'দোকানের মোট হিসাব',
   'confirmed':'নিশ্চিত', 'manual acceptances':'হাতে গ্রহণ', 'accepted exception orders':'ব্যতিক্রম গ্রহণ করা অর্ডার',
@@ -38,6 +38,8 @@ const bn: Record<string, string> = {
   'Data retention policy':'তথ্য সংরক্ষণের নীতি',
   'Inspect and run cleanup for raw evidence and completed records.':'মূল তথ্য ও সম্পন্ন রেকর্ড সংরক্ষণের অবস্থা দেখুন এবং মুছে ফেলুন।',
 };
+/** Exposed for the centralized copy audit; runtime lookups go through historyText. */
+export const historyBengali = bn;
 export const historyText = (locale: Locale, text: string): string => locale === 'bn' ? bn[text] ?? text : text;
 
 /** Retain a stable presentation key, never server text that may contain private data. */

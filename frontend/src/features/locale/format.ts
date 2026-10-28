@@ -17,6 +17,8 @@ const BENGALI_MONTHS = [
 
 const ENGLISH_MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
+const BANGLADESH_TIME_LABEL = { en: 'Bangladesh time', bn: 'বাংলাদেশ সময়' } as const;
+
 const partsFormatter = new Intl.DateTimeFormat('en-GB', {
   timeZone: 'Asia/Dhaka',
   year: 'numeric',
@@ -54,7 +56,7 @@ export function formatBangladeshDateTime(isoString: string, locale: Locale): str
   const month = locale === 'bn' ? BENGALI_MONTHS[monthIndex] : ENGLISH_MONTHS[monthIndex];
 
   if (!day || !year || !month || !hour || !minute) return isoString;
-  return `${day} ${month} ${year}, ${hour}:${minute} ${period} (BST / UTC+6)`;
+  return `${day} ${month} ${year}, ${hour}:${minute} ${period} (${BANGLADESH_TIME_LABEL[locale]})`;
 }
 
 /** Operational counts use 0-9 digits in either language. */

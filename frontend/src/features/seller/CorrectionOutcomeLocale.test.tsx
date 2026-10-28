@@ -74,6 +74,23 @@ it('switches a selected outcome and retries the frozen request after an uncertai
   await act(async () => root.unmount());
 });
 
+it('renders the session-required correction error from the shared catalog in both languages', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(
+    JSON.stringify({ error: { code: 'UNAUTHORIZED', message: 'Raw sign-in detail' } }),
+    { status: 401 },
+  ));
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  const render = (locale: 'en' | 'bn') => root.render(<LocaleContext.Provider value={{locale, setLocale: vi.fn(), t: englishTranslate, provided: true}}>
+    <BuyerCorrection orderId={order.id} token="seller" />
+  </LocaleContext.Provider>);
+  await act(async () => render('bn'));
+  expect(host.querySelector('[role="alert"]')?.textContent).toBe('বিক্রেতা হিসেবে সাইন ইন করুন।');
+  await act(async () => render('en'));
+  expect(host.querySelector('[role="alert"]')?.textContent).toBe('Seller sign-in required.');
+  expect(host.textContent).not.toContain('Raw sign-in detail');
+  await act(async () => root.unmount());
+});
+
 it('offers an actionable retry after correction load fails', async () => {
   const revision = {id: 'revision', revision_number: 1, buyer_name: 'Buyer', contact_number: '01711111111',
     address: {raw_text: 'Address'}, payment_claim: {provider: 'bkash', trx_id: 'TX', sender_number: '01822222222', amount_minor: 20000},

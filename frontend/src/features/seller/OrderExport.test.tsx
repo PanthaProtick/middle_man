@@ -123,7 +123,7 @@ it('renders a Bengali summary with verbatim Unicode data, localized lifecycle an
   expect(copied).toContain('ঠিকানা: ঢাকা, মিরপুর ১০');
   expect(copied).toContain('সম্মত মোট মূল্য: BDT 100.00');
   expect(copied).toContain('ডেলিভারির আগে প্রয়োজনীয় অগ্রিম: BDT 20.00');
-  expect(copied).toContain('গৃহীত অগ্রিম: গ্রহণ করা হয়নি');
+  expect(copied).toContain('গৃহীত ডেলিভারির আগে অগ্রিম: গ্রহণ করা হয়নি');
   expect(copied).toContain('ডেলিভারির সময় সম্ভাব্য বাকি পরিশোধ: BDT 80.00');
   expect(copied).toContain('ডেলিভারির সময় বাকি পরিশোধ: গ্রহণ করা হয়নি');
   expect(copied).toContain('ম্যানুয়াল ডেলিভারির সহায়তার জন্য');
@@ -144,7 +144,7 @@ it.each(['en', 'bn'] as const)('shows unaccepted advance and COD without inventi
   await click(host, locale === 'bn' ? 'ডেলিভারির সারসংক্ষেপ কপি করুন' : 'Copy delivery summary');
   const copied = writeText.mock.calls[0][0] as string;
   const notAccepted = locale === 'bn' ? 'গ্রহণ করা হয়নি' : 'Not accepted';
-  expect(copied).toContain(`${locale === 'bn' ? 'গৃহীত অগ্রিম' : 'Accepted advance'}: ${notAccepted}`);
+  expect(copied).toContain(`${locale === 'bn' ? 'গৃহীত ডেলিভারির আগে অগ্রিম' : 'Accepted advance'}: ${notAccepted}`);
   expect(copied).toContain(`${locale === 'bn' ? 'ডেলিভারির সময় বাকি পরিশোধ' : 'Actual COD'}: ${notAccepted}`);
   expect(copied).not.toContain('BDT undefined');
   await act(async () => root.unmount());
