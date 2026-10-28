@@ -4,8 +4,11 @@ import { RefreshCw, Search, SlidersHorizontal, ReceiptText } from 'lucide-react'
 import type { PaymentAccount, ReceiptView } from './types';
 import { EvidenceResolution } from './EvidenceResolution';
 import { TransactionCard } from './TransactionCard';
+import { OrderDateControls } from './OrderDateControls';
+import type { useDateSelection } from './useDateSelection';
 
 interface TransactionInboxProps {
+  dates?: ReturnType<typeof useDateSelection>;
   transactions: ReceiptView[];
   accounts?: PaymentAccount[];
   token?: string;
@@ -21,6 +24,7 @@ interface TransactionInboxProps {
 }
 
 export function TransactionInbox({
+  dates,
   transactions,
   accounts,
   token,
@@ -41,7 +45,9 @@ export function TransactionInbox({
     setExpandedId((prev) => (prev === id ? null : id));
   };
 
-  const emptyMessage = search.trim()
+  const emptyMessage = dates?.appliedDateRange
+    ? c("No received payments match this search, date and filter.")
+    : search.trim()
     ? c("No received payments match this search and filter.")
     : filter
       ? c("No received transactions match the selected filter.")
@@ -107,6 +113,17 @@ export function TransactionInbox({
           </button>
         )}
       </form>
+
+      {dates && <OrderDateControls
+        idPrefix="transaction"
+        label={c("Recorded date:")}
+        mode={dates.dateMode} from={dates.dateFrom} to={dates.dateTo}
+        lastDays={dates.lastDays} appliedRange={dates.appliedDateRange} error={dates.dateError}
+        onModeChange={dates.changeDateMode} onFromChange={dates.changeDateFrom}
+        onToChange={dates.changeDateTo} onLastDaysChange={dates.changeLastDays}
+        onApplyDates={dates.applyCustomDates} onApplyPreset={dates.applyRelativePreset}
+        onApplyLastDays={dates.applyLastDays}
+      />}
 
       <div
         style={{

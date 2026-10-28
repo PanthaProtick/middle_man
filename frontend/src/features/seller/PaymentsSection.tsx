@@ -4,8 +4,10 @@ import { Smartphone, Plus } from 'lucide-react';
 import { SmsImportPanel } from './SmsImportPanel';
 import { TransactionInbox } from './TransactionInbox';
 import type { PaymentAccount, ReceiptView } from './types';
+import type { useDateSelection } from './useDateSelection';
 
 interface PaymentsSectionProps {
+  dates?: ReturnType<typeof useDateSelection>;
   accounts: PaymentAccount[];
   token: string;
   transactions: ReceiptView[];
@@ -22,6 +24,7 @@ interface PaymentsSectionProps {
 }
 
 export function PaymentsSection({
+  dates,
   accounts,
   token,
   transactions,
@@ -61,6 +64,7 @@ export function PaymentsSection({
       />
 
       <TransactionInbox
+        dates={dates}
         accounts={accounts}
         token={token}
         onResolved={onTransactionsChanged}

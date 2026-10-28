@@ -1,5 +1,42 @@
+import datetime
+
 import pytest
 from test_transaction_search import _ids, _record
+
+
+@pytest.mark.asyncio
+async def test_postgres_recorded_dates_filter_before_keyset_paging(postgres_buyer) -> None:
+    client, connection, _, order = postgres_buyer
+    ids = []
+    for index, timestamp in enumerate([
+        '2026-10-26T17:59:59+00:00', '2026-10-26T18:00:00+00:00',
+        '2026-10-27T17:59:59+00:00', '2026-10-27T18:00:00+00:00',
+    ]):
+        receipt = await _record(client, order['payment_account_id'], f'PG-DATE-{index}', occurred=None)
+        ids.append(receipt['id'])
+        await connection.execute('UPDATE received_transactions SET created_at = $1 WHERE id = $2',
+                                 datetime.datetime.fromisoformat(timestamp), receipt['id'])
+    params = {'from_date': '2026-10-27', 'to_date': '2026-10-27',
+              'search': 'merchant', 'parse': 'incomplete', 'used': 'unmatched', 'limit': 1}
+    page = (await client.get('/api/seller/transactions', params=params)).json()
+    assert [row['id'] for row in page['items']] == [ids[2]]
+    # Cursor ordering survives the anchor leaving the active reconciliation filter.
+    await connection.execute("UPDATE received_transactions SET reconciliation_state = 'used' WHERE id = $1", ids[2])
+    page = (await client.get('/api/seller/transactions', params={
+        **params, 'cursor': page['next_cursor'],
+    })).json()
+    assert [row['id'] for row in page['items']] == [ids[1]]
+    assert page['next_cursor'] is None
+    # Retention also cannot turn a valid ordering anchor into a first-page restart.
+    params.pop('used')
+    page = (await client.get('/api/seller/transactions', params=params)).json()
+    assert [row['id'] for row in page['items']] == [ids[2]]
+    await connection.execute('UPDATE received_transactions SET retained_at = now() WHERE id = $1', ids[2])
+    page = (await client.get('/api/seller/transactions', params={
+        **params, 'cursor': page['next_cursor'],
+    })).json()
+    assert [row['id'] for row in page['items']] == [ids[1]]
+    assert page['next_cursor'] is None
 
 
 @pytest.mark.asyncio

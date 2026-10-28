@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, Query, Response
@@ -14,6 +15,7 @@ from app.models.transaction import (
     ReceiptView,
 )
 from app.services.evidence_resolution import resolve_evidence
+from app.services.order_dates import order_created_bounds
 from app.services.receipt_comparison import compare_receipt
 from app.services.receipt_correction import correct_receipt
 from app.services.seller_service import NotFoundError, SellerDomainException, SellerService
@@ -81,10 +83,13 @@ async def list_transactions(
     used: Optional[str] = Query(None),
     parse: Optional[str] = Query(None),
     search: Optional[str] = Query(None, max_length=200),
+    from_date: Optional[datetime.date] = Query(None),
+    to_date: Optional[datetime.date] = Query(None),
     seller: SellerIdentity = Depends(get_seller_identity),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> ReceiptListResponse:
     _set_security_headers(response)
+    order_created_bounds(from_date, to_date)
     seller_svc = SellerService(db)
     shop = await seller_svc.get_shop_by_owner(seller.owner_id)
     if not shop:
@@ -99,6 +104,8 @@ async def list_transactions(
         used_filter=used,
         parse_filter=parse,
         search=search,
+        from_date=from_date,
+        to_date=to_date,
     )
     return ReceiptListResponse(items=items, next_cursor=next_cursor)
 

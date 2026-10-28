@@ -16,6 +16,8 @@ function orderDateErrorText(error: OrderDateError | null, text: OrderCopy): stri
 }
 
 export interface OrderDateControlsProps {
+  idPrefix?: string;
+  label?: string;
   mode: OrderDateMode;
   from: string;
   to: string;
@@ -32,6 +34,7 @@ export interface OrderDateControlsProps {
 }
 
 export function OrderDateControls({
+  idPrefix = 'order', label,
   mode, from, to, lastDays, appliedRange, error,
   onModeChange, onFromChange, onToChange, onLastDaysChange,
   onApplyDates, onApplyPreset, onApplyLastDays,
@@ -53,11 +56,11 @@ export function OrderDateControls({
       style={{ display: 'flex', flexDirection: 'column', gap: '6px', margin: '10px 0' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        <label htmlFor="order-date-mode" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-          {text.dateFilter}
+        <label htmlFor={`${idPrefix}-date-mode`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+          {label ?? text.dateFilter}
         </label>
         <select
-          id="order-date-mode"
+          id={`${idPrefix}-date-mode`}
           value={mode}
           onChange={(event) => onModeChange(event.target.value as OrderDateMode)}
           className="form-control"
@@ -75,11 +78,11 @@ export function OrderDateControls({
             onSubmit={(event) => { event.preventDefault(); onApplyDates(); }}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}
           >
-            <label htmlFor="order-date-from" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <label htmlFor={`${idPrefix}-date-from`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               {text.dateFrom}
             </label>
             <input
-              id="order-date-from"
+              id={`${idPrefix}-date-from`}
               type="date"
               value={from}
               onChange={(event) => onFromChange(event.target.value)}
@@ -88,11 +91,11 @@ export function OrderDateControls({
               className="form-control"
               style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', width: 'auto' }}
             />
-            <label htmlFor="order-date-to" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <label htmlFor={`${idPrefix}-date-to`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
               {text.dateTo}
             </label>
             <input
-              id="order-date-to"
+              id={`${idPrefix}-date-to`}
               type="date"
               value={to}
               onChange={(event) => onToChange(event.target.value)}
@@ -126,11 +129,11 @@ export function OrderDateControls({
               onSubmit={(event) => { event.preventDefault(); onApplyLastDays(); }}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}
             >
-              <label htmlFor="order-date-days" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <label htmlFor={`${idPrefix}-date-days`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                 {text.dateLastDaysLabel}
               </label>
               <input
-                id="order-date-days"
+                id={`${idPrefix}-date-days`}
                 type="number"
                 min={1}
                 max={3650}

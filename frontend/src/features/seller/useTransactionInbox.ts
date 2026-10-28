@@ -1,10 +1,13 @@
 import { useCallback, useRef, useState } from 'react';
 import { fetchTransactions } from './api';
 import type { ReceiptView } from './types';
+import type { OrderDateRange } from './orderDateFilter';
+import { useDateSelection } from './useDateSelection';
 
 interface InboxQuery {
   filter: string;
   search: string;
+  dateRange: OrderDateRange | null;
 }
 
 function reconciliationParams(filter: string): {
@@ -29,7 +32,7 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   const [search, setSearch] = useState('');
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const queryRef = useRef<InboxQuery>({ filter: '', search: '' });
+  const queryRef = useRef<InboxQuery>({ filter: '', search: '', dateRange: null });
   const requestRef = useRef(0);
 
   const load = useCallback(
@@ -47,6 +50,8 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
         const res = await fetchTransactions({
           ...reconciliationParams(query.filter),
           search: query.search,
+          fromDate: query.dateRange?.from,
+          toDate: query.dateRange?.to,
           cursor,
         }, token);
         if (requestId !== requestRef.current) return;
@@ -63,6 +68,11 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   );
 
   const reload = useCallback(() => load(), [load]);
+  const applyDates = useCallback((dateRange: OrderDateRange | null) => {
+    queryRef.current = { ...queryRef.current, dateRange };
+    void load();
+  }, [load]);
+  const dates = useDateSelection(applyDates);
   const changeFilter = useCallback((value: string) => {
     queryRef.current = { ...queryRef.current, filter: value };
     setFilter(value);
@@ -78,7 +88,7 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   }, [load, nextCursor]);
   const upsert = useCallback((receipt: ReceiptView) => {
     // A filtered inbox must re-query, otherwise the new row could violate the filter.
-    if (queryRef.current.search.trim() || queryRef.current.filter) {
+    if (queryRef.current.search.trim() || queryRef.current.filter || queryRef.current.dateRange) {
       void load();
       return;
     }
@@ -90,6 +100,7 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   }, [load]);
 
   return {
+    dates,
     transactions,
     filter,
     search,

@@ -244,6 +244,8 @@ export async function fetchTransactions(
     used?: string;
     parse?: string;
     search?: string;
+    fromDate?: string;
+    toDate?: string;
   } = {},
   token?: string,
 ): Promise<ReceiptListResponse> {
@@ -255,6 +257,8 @@ export async function fetchTransactions(
   if (params.parse) query.set('parse', params.parse);
   const search = params.search?.trim();
   if (search) query.set('search', search);
+  if (params.fromDate) query.set('from_date', params.fromDate);
+  if (params.toDate) query.set('to_date', params.toDate);
   const qStr = query.toString();
   const url = `/api/seller/transactions${qStr ? `?${qStr}` : ''}`;
   return requestJson<ReceiptListResponse>(url, { method: 'GET' }, token);

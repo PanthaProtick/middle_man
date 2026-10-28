@@ -53,6 +53,7 @@ export function SellerWorkspace({
   const captureWorkspaceError = useCallback((err: unknown) => setError({ code: err instanceof SellerApiError ? err.code : 'UNKNOWN' }), []);
   const {
     transactions,
+    dates: transactionDates,
     filter: transactionsFilter,
     search: transactionsSearch,
     nextCursor: transactionsNextCursor,
@@ -213,6 +214,7 @@ export function SellerWorkspace({
               }}
               onFilterChange={handleTransactionsFilterChange}
               onSearchChange={handleTransactionsSearchChange}
+              dates={transactionDates}
               onLoadMore={loadMoreTransactions}
             />
           )}

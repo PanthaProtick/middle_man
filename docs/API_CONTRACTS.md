@@ -41,6 +41,15 @@ excludes retained records, and is applied before pagination in both database and
 offline paths. Search terms are request-only and are not logged or persisted in
 URLs.
 
+The same transaction list accepts optional `from_date` and `to_date` inclusive
+Bangladesh calendar dates (`YYYY-MM-DD`), applied to record `created_at`, including
+records without `occurred_at`. The end boundary is the following Dhaka midnight.
+Malformed or reversed ranges return 422; future end dates and individual bounds
+are supported. Date, search, and reconciliation predicates apply before keyset
+pagination on both database and offline paths. The inbox captures Last X days
+(1–3650, including today) as explicit dates and reuses them while paging.
+Accepted payment history within an order is unaffected.
+
 ## Pathao merchant settings
 
 Buyer destination collection and the controlled public catalog are documented in

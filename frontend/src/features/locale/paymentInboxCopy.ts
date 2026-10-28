@@ -49,6 +49,8 @@ const bengali: Record<string, string> = {
   "Clear search": "অনুসন্ধান মুছুন",
   "Loading received payments…": "প্রাপ্ত পেমেন্ট লোড হচ্ছে…",
   "No received payments match this search and filter.": "এই অনুসন্ধান ও ফিল্টারে কোনো প্রাপ্ত পেমেন্ট মেলেনি।",
+  "No received payments match this search, date and filter.": "এই অনুসন্ধান, তারিখ ও ফিল্টারে কোনো প্রাপ্ত পেমেন্ট মেলেনি।",
+  "Recorded date:": "রেকর্ড করার তারিখ:",
   "All Transactions": "সব লেনদেন",
   "Conflicted Only": "শুধু বিরোধপূর্ণ",
   "Incomplete Only": "শুধু অসম্পূর্ণ",
