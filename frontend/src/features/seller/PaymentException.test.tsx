@@ -2,6 +2,8 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, it, vi } from 'vitest';
 import { PaymentException } from './PaymentException';
+import { LocaleProvider } from '../locale/LocaleProvider';
+import { LocaleSwitch } from '../locale/LocaleSwitch';
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -24,7 +26,7 @@ it('shows actual COD and retries an unknown approval with the identical payload 
   await act(async () => root.render(<PaymentException orderId="order" token="seller" onAccepted={done} />));
   await act(async () => {const select = container.querySelector('select')!; select.value='receipt';select.dispatchEvent(new Event('change',{bubbles:true}));});
   expect(container.textContent).toContain('Remaining COD after acceptance: BDT 10,500.00');
-  expect(container.textContent).toContain('AMOUNT_MISMATCH');
+  expect(container.textContent).toContain('Amount does not match');
   await act(async () => {const field=container.querySelector('textarea')!;
     Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value')!.set!.call(field,'Accept actual receipt');
     field.dispatchEvent(new Event('input',{bubbles:true}));});
@@ -41,7 +43,7 @@ it('shows actual COD and retries an unknown approval with the identical payload 
 });
 
 it.each([
-  {blockers:['PAYMENT_EXCEEDS_TOTAL'],message:'Cannot accept: PAYMENT_EXCEEDS_TOTAL',status:200},
+  {blockers:['PAYMENT_EXCEEDS_TOTAL'],message:'Cannot accept: Payment exceeds the order total',status:200},
   {blockers:[],message:'Seller sign-in required',status:401},
 ])('blocks unsafe or unauthorized previews: $message', async ({blockers,message,status}) => {
   const receipt={id:'receipt',provider:'bkash',trx_id:'PAY',amount_minor:1200001,payment_account_id:'account',version:1};
@@ -61,3 +63,26 @@ it.each([
   expect(spy.mock.calls).toHaveLength(2);
   await act(async()=>root.unmount());container.remove();
 });
+
+it('translates a loaded blocked preview on language change without fetching again', async () => {
+  localStorage.setItem('middleman.locale', 'en');
+  const receipt = {id:'receipt', provider:'bkash', trx_id:'PAY১২', amount_minor:15000, payment_account_id:'account', version:1};
+  const preview = {receipt, order_id:'order', expected_version:2, expected_transaction_version:1,
+    claim_provider:'bkash', claim_trx_id:'PAY১২', claim_sender:'01822222222', claim_amount_minor:15000,
+    claim_submitted_at:'2026-10-24T01:00:00Z', order_created_at:'2026-10-24T00:00:00Z',
+    account_provider:'bkash', payment_account_id:'account', total_minor:10000, required_advance_minor:10000,
+    accepted_amount_minor:15000, actual_cod_minor:null, exceptions:['AMOUNT_MISMATCH'], blockers:['PAYMENT_EXCEEDS_TOTAL']};
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify({items:[receipt]})))
+    .mockResolvedValueOnce(new Response(JSON.stringify(preview)));
+  const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><PaymentException orderId="order" token="seller" onAccepted={vi.fn()} /></LocaleProvider>));
+  await act(async () => { const select = host.querySelector('select')!; select.value = 'receipt'; select.dispatchEvent(new Event('change', {bubbles:true})); });
+  expect(host.textContent).toContain('Payment exceeds the order total');
+  await act(async () => Array.from(host.querySelectorAll('button')).find(button => button.textContent === 'বাংলা')!.click());
+  expect(host.textContent).toContain('পেমেন্ট অর্ডারের মোট টাকার বেশি');
+  expect(host.textContent).toContain('PAY১২');
+  expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
+  expect(fetcher).toHaveBeenCalledTimes(2);
+  await act(async () => root.unmount()); host.remove(); localStorage.clear();
+});
+

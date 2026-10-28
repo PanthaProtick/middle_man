@@ -58,7 +58,7 @@ it('keeps the retry key after failure, disables controls while pending, and rota
   expect(textarea.disabled).toBe(true);
   expect(container.textContent).toContain('Processing request');
   await act(async () => resolveRequest(new Response(JSON.stringify({error: {code: 'UNAVAILABLE', message: 'Retry this batch'}}), {status: 503})));
-  expect(container.querySelector('[role="alert"]')?.textContent).toContain('Retry this batch');
+  expect(container.querySelector('[role="alert"]')?.textContent).toContain('Retry the same batch');
   expect(textarea.value).toBe('unknown SMS');
   fetchSpy.mockRejectedValue(new Error('Offline'));
   await submit();

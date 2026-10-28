@@ -1,3 +1,4 @@
+import { usePaymentInboxCopy } from '../locale/paymentInboxCopy';
 import React from 'react';
 import { Smartphone, Plus } from 'lucide-react';
 import { SmsImportPanel } from './SmsImportPanel';
@@ -31,19 +32,20 @@ export function PaymentsSection({
   onFilterChange,
   onLoadMore,
 }: PaymentsSectionProps): React.JSX.Element {
+  const c = usePaymentInboxCopy();
   return (
     <section aria-labelledby="section-payments-title">
       <div className="isolated-section-header" style={{ marginBottom: '16px' }}>
         <div>
           <h4 id="section-payments-title" className="isolated-section-title">
-            <Smartphone size={18} /> Received Payments Inbox
+            <Smartphone size={18} /> {c("Received Payments Inbox")}
           </h4>
           <p className="isolated-section-desc">
-            Paste bKash, Nagad, or Rocket SMS to automatically extract transactions and resolve pending buyer orders.
+            {c("Paste bKash, Nagad, or Rocket SMS to automatically extract transactions and resolve pending buyer orders.")}
           </p>
         </div>
         <button className="btn btn-primary btn-sm" onClick={() => onOpenRecordModal()}>
-          <Plus size={14} /> Record Payment
+          <Plus size={14} /> {c("Record Payment")}
         </button>
       </div>
 

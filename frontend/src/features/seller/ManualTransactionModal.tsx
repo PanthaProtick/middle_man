@@ -1,7 +1,12 @@
+import { inputStyle, labelStyle } from './manualPaymentStyles';
+import { LocaleSwitch } from '../locale/LocaleSwitch';
+import { orderAmountMinor } from './orderNumbers';
+import { useLocale } from '../locale/context';
+import { receiptText, receiptError } from '../locale/receiptCopy';
 import React, { useState, useRef } from 'react';
 import { X, AlertCircle, RefreshCw, Smartphone } from 'lucide-react';
 import type { PaymentAccount, ReceiptView } from './types';
-import { recordManualTransaction, parseBdtToMinor, SellerApiError } from './api';
+import { recordManualTransaction, SellerApiError } from './api';
 
 interface ManualTransactionModalProps {
   accounts: PaymentAccount[];
@@ -12,30 +17,15 @@ interface ManualTransactionModalProps {
   onError?: (msg: string) => void;
 }
 
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '8px 12px',
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border-subtle)',
-  borderRadius: '6px',
-  color: 'var(--text-primary)',
-};
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: '0.85rem',
-  color: 'var(--text-secondary)',
-  marginBottom: '4px',
-};
-
 export function ManualTransactionModal({
   accounts,
   token,
   initialAccountId,
   onClose,
   onTransactionRecorded,
-  onError,
 }: ManualTransactionModalProps): React.JSX.Element {
+  const { locale } = useLocale();
+  const tr = (value: string) => receiptText(locale, value);
   const activeAccounts = accounts.filter((a) => a.is_active);
   const [selectedAccountId, setSelectedAccountId] = useState<string>(
     initialAccountId || activeAccounts[0]?.id || ''
@@ -55,6 +45,7 @@ export function ManualTransactionModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
     setLocalError(null);
     setFieldErrors({});
 
@@ -66,14 +57,17 @@ export function ManualTransactionModal({
       errors.amount = 'Actual received amount must be greater than 0';
     } else {
       try {
-        amountMinor = parseBdtToMinor(amountBdt);
-      } catch (amountErr) {
-        errors.amount = amountErr instanceof Error ? amountErr.message : 'Invalid amount';
+        amountMinor = orderAmountMinor(amountBdt) ?? 0;
+        if (!amountMinor || amountMinor > 100_000_000_000) throw new Error('Invalid amount');
+      } catch {
+        errors.amount = 'Invalid amount';
       }
     }
 
     if (Object.keys(errors).length > 0) {
       setFieldErrors(errors);
+      const first = Object.keys(errors)[0];
+      document.getElementById(`manual-${first}`)?.focus();
       return;
     }
 
@@ -82,6 +76,7 @@ export function ManualTransactionModal({
       return;
     }
 
+    if (occurredAt && Number.isNaN(Date.parse(occurredAt))) { setLocalError('Check corrected fields'); return; }
     const occurredAtIso = occurredAt ? new Date(occurredAt).toISOString() : null;
 
     setSubmitting(true);
@@ -104,13 +99,13 @@ export function ManualTransactionModal({
       if (err instanceof SellerApiError && err.fields) {
         const mapped: Record<string, string> = {};
         for (const f of err.fields) {
-          if (f.field) mapped[f.field] = f.message;
+          if (f.field) mapped[({payment_account_id:'accountId',trx_id:'trxId',amount_minor:'amount'} as Record<string,string>)[f.field] ?? f.field] = 'Check corrected fields';
         }
         setFieldErrors(mapped);
       }
-      const msg = err instanceof Error ? err.message : 'Failed to record transaction';
+      const msg = receiptError(err, 'Failed to record transaction');
       setLocalError(msg);
-      onError?.(msg);
+
     } finally {
       setSubmitting(false);
     }
@@ -130,7 +125,7 @@ export function ManualTransactionModal({
       }}
     >
       <div
-        className="card"
+        role="dialog" aria-modal="true" aria-label={tr("Record Received Payment")} lang={locale} className="card"
         style={{
           maxWidth: '540px',
           width: '100%',
@@ -141,19 +136,19 @@ export function ManualTransactionModal({
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
           <h3 style={{ margin: 0, color: 'var(--primary-accent)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Smartphone size={20} /> Record Received Payment
+            <Smartphone size={20} /> {tr("Record Received Payment")}
           </h3>
           <button
             onClick={onClose}
             style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
-            aria-label="Close"
+            aria-label={tr("Close")}
           >
             <X size={20} />
           </button>
         </div>
 
         {localError && (
-          <div
+          <div role="alert"
             style={{
               padding: '10px 14px',
               background: 'rgba(239, 68, 68, 0.1)',
@@ -168,21 +163,22 @@ export function ManualTransactionModal({
             }}
           >
             <AlertCircle size={16} />
-            <span>{localError}</span>
+            <span>{tr(localError)}</span>
           </div>
         )}
 
+        <LocaleSwitch />
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Receiving Account *</label>
+            <label htmlFor="manual-accountId" style={labelStyle}>{tr("Receiving Account *")}</label>
             <select
-              value={selectedAccountId}
+              id="manual-accountId" aria-invalid={Boolean(fieldErrors.accountId)} aria-describedby={fieldErrors.accountId ? "manual-accountId-error" : undefined} value={selectedAccountId}
               onChange={(e) => setSelectedAccountId(e.target.value)}
               disabled={submitting || activeAccounts.length === 0}
               style={{ ...inputStyle, border: fieldErrors.accountId ? '1px solid var(--rose-accent)' : inputStyle.border }}
             >
               {activeAccounts.length === 0 ? (
-                <option value="">No active receiving accounts available</option>
+                <option value="">{tr("No active receiving accounts available")}</option>
               ) : (
                 activeAccounts.map((a) => (
                   <option key={a.id} value={a.id}>
@@ -193,17 +189,17 @@ export function ManualTransactionModal({
             </select>
             {fieldErrors.accountId && (
               <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
-                {fieldErrors.accountId}
+                <span id="manual-accountId-error">{tr(fieldErrors.accountId)}</span>
               </span>
             )}
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Transaction ID (TrxID) *</label>
+            <label htmlFor="manual-trxId" style={labelStyle}>{tr("Transaction ID (TrxID) *")}</label>
             <input
               type="text"
               placeholder="e.g. 9K72LKQW1"
-              value={trxId}
+              id="manual-trxId" aria-invalid={Boolean(fieldErrors.trxId)} aria-describedby={fieldErrors.trxId ? "manual-trxId-error" : undefined} value={trxId}
               onChange={(e) => setTrxId(e.target.value)}
               disabled={submitting}
               style={{
@@ -214,19 +210,19 @@ export function ManualTransactionModal({
             />
             {fieldErrors.trxId && (
               <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
-                {fieldErrors.trxId}
+                <span id="manual-trxId-error">{tr(fieldErrors.trxId)}</span>
               </span>
             )}
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>Actual Received Amount (BDT) *</label>
+            <label htmlFor="manual-amount" style={labelStyle}>{tr("Actual Received Amount (BDT) *")}</label>
             <input
-              type="number"
+              type="text" inputMode="decimal"
               step="any"
               min="0.01"
               placeholder="e.g. 150"
-              value={amountBdt}
+              id="manual-amount" aria-invalid={Boolean(fieldErrors.amount)} aria-describedby={fieldErrors.amount ? "manual-amount-error" : undefined} value={amountBdt}
               onChange={(e) => setAmountBdt(e.target.value)}
               disabled={submitting}
               style={{
@@ -236,19 +232,19 @@ export function ManualTransactionModal({
             />
             {fieldErrors.amount && (
               <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
-                {fieldErrors.amount}
+                <span id="manual-amount-error">{tr(fieldErrors.amount)}</span>
               </span>
             )}
           </div>
 
           <div style={{ marginBottom: '14px' }}>
-            <label style={labelStyle}>
-              Sender Number <span style={{ color: 'var(--text-muted)' }}>(Optional - incomplete if omitted)</span>
+            <label htmlFor="manual-sender" style={labelStyle}>
+              {tr("Sender Number ")}<span style={{ color: 'var(--text-muted)' }}>{tr("(Optional - incomplete if omitted)")}</span>
             </label>
             <input
               type="text"
               placeholder="e.g. 01700000000"
-              value={senderNumber}
+              id="manual-sender" value={senderNumber}
               onChange={(e) => setSenderNumber(e.target.value)}
               disabled={submitting}
               style={{
@@ -258,18 +254,18 @@ export function ManualTransactionModal({
             />
             {fieldErrors.sender_number && (
               <span style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '2px', display: 'block' }}>
-                {fieldErrors.sender_number}
+                {tr(fieldErrors.sender_number)}
               </span>
             )}
           </div>
 
           <div style={{ marginBottom: '20px' }}>
-            <label style={labelStyle}>
-              Payment Occurrence Time <span style={{ color: 'var(--text-muted)' }}>(Optional - incomplete if omitted)</span>
+            <label htmlFor="manual-time" style={labelStyle}>
+              {tr("Payment Occurrence Time ")}<span style={{ color: 'var(--text-muted)' }}>{tr("(Optional - incomplete if omitted)")}</span>
             </label>
             <input
               type="datetime-local"
-              value={occurredAt}
+              id="manual-time" value={occurredAt}
               onChange={(e) => setOccurredAt(e.target.value)}
               disabled={submitting}
               style={inputStyle}
@@ -283,7 +279,7 @@ export function ManualTransactionModal({
               onClick={onClose}
               disabled={submitting}
             >
-              Cancel
+              {tr("Cancel")}
             </button>
             <button
               type="submit"
@@ -292,10 +288,10 @@ export function ManualTransactionModal({
             >
               {submitting ? (
                 <>
-                  <RefreshCw size={14} className="spin" /> Recording...
+                  <RefreshCw size={14} className="spin" /> {tr("Recording...")}
                 </>
               ) : (
-                'Record Payment'
+                tr("Record Payment")
               )}
             </button>
           </div>

@@ -1,3 +1,4 @@
+import { usePaymentInboxCopy } from '../locale/paymentInboxCopy';
 import React, { useState } from 'react';
 import { RefreshCw, Search, SlidersHorizontal, ReceiptText } from 'lucide-react';
 import type { PaymentAccount, ReceiptView } from './types';
@@ -29,6 +30,7 @@ export function TransactionInbox({
   onLoadMore,
   onRefresh,
 }: TransactionInboxProps): React.JSX.Element {
+  const c = usePaymentInboxCopy();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const toggleExpand = (id: string) => {
@@ -36,18 +38,18 @@ export function TransactionInbox({
   };
 
   return (
-    <div className="isolated-section">
+    <div className="isolated-section" aria-busy={loading}>
       <div className="isolated-section-header">
         <div>
           <h4 className="isolated-section-title">
-            <ReceiptText size={18} /> Transaction Ledger &amp; Observations
+            <ReceiptText size={18} /> {c("Transaction Ledger & Observations")}
           </h4>
           <p className="isolated-section-desc">
-            Received payment SMS extractions, manual payment records, and reconciliation history.
+            {c("Received payment SMS extractions, manual payment records, and reconciliation history.")}
           </p>
         </div>
         <span className="section-tab-count" style={{ alignSelf: 'center', fontSize: '0.78rem', padding: '3px 8px' }}>
-          {transactions.length} {transactions.length === 1 ? 'transaction' : 'transactions'}
+          {transactions.length} {transactions.length === 1 ? c("transaction") : c("transactions")}
         </span>
       </div>
 
@@ -63,8 +65,9 @@ export function TransactionInbox({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <SlidersHorizontal size={16} color="var(--text-secondary)" />
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>Filter:</span>
+          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{c("Filter:")}</span>
           <select
+            aria-label={c("Filter:")}
             value={filter}
             onChange={(e) => onFilterChange(e.target.value)}
             className="form-control"
@@ -75,11 +78,11 @@ export function TransactionInbox({
               width: 'auto',
             }}
           >
-            <option value="">All Transactions</option>
-            <option value="conflicted">Conflicted Only</option>
-            <option value="incomplete">Incomplete Only</option>
-            <option value="unmatched">Unmatched Only</option>
-            <option value="used">Used Only</option>
+            <option value="">{c("All Transactions")}</option>
+            <option value="conflicted">{c("Conflicted Only")}</option>
+            <option value="incomplete">{c("Incomplete Only")}</option>
+            <option value="unmatched">{c("Unmatched Only")}</option>
+            <option value="used">{c("Used Only")}</option>
           </select>
         </div>
 
@@ -89,7 +92,7 @@ export function TransactionInbox({
             onClick={onRefresh}
             disabled={loading}
           >
-            <RefreshCw size={14} className={loading ? 'spin' : ''} /> Refresh Inbox
+            <RefreshCw size={14} className={loading ? 'spin' : ''} /> {c("Refresh Inbox")}
           </button>
         )}
       </div>
@@ -107,8 +110,8 @@ export function TransactionInbox({
           <Search size={24} style={{ color: 'var(--text-muted)', margin: '0 auto 8px' }} />
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
             {filter
-              ? 'No received transactions match the selected filter.'
-              : 'No received payments recorded yet. Click "Record Received Payment" above to add manual payment observations.'}
+              ? c("No received transactions match the selected filter.")
+              : c("No received payments recorded yet. Click \"Record Received Payment\" above to add manual payment observations.")}
           </p>
         </div>
       ) : (
@@ -133,7 +136,7 @@ export function TransactionInbox({
                 onClick={onLoadMore}
                 disabled={loading}
               >
-                Load More Received Payments
+                {c("Load More Received Payments")}
               </button>
             </div>
           )}

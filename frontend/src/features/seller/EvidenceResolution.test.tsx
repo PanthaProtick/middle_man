@@ -1,3 +1,5 @@
+import { LocaleProvider } from '../locale/LocaleProvider';
+import { LocaleSwitch } from '../locale/LocaleSwitch';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 import { afterEach, expect, it, vi } from 'vitest';
@@ -14,12 +16,12 @@ const comparison = {
   allocated_order_id: null, history: [],
 };
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
 async function mount() {
   const container = document.createElement('div');
   document.body.append(container);
   const root = createRoot(container);
-  await act(async () => root.render(<EvidenceResolution receiptId="receipt" token="seller" onResolved={() => {}} />));
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><EvidenceResolution receiptId="receipt" token="seller" onResolved={() => {}} /></LocaleProvider>));
   async function change(label: string, value: string) {
     await act(async () => {
       const node = container.querySelector<HTMLSelectElement | HTMLTextAreaElement>(`[aria-label="${label}"]`)!;
@@ -44,14 +46,18 @@ it('compares claims and retains the identical decision after an unknown outcome'
     })); });
   const ui = await mount();
   expect(ui.container.textContent).toContain('Buyer A');
-  expect(ui.container.textContent).toContain('SENDER_MISMATCH');
+  expect(ui.container.textContent).toContain('Sender does not match or is missing');
   await ui.change('Received observation', 'obs');
   await ui.change('Claim decision', 'order-a');
   expect(ui.container.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);
   await ui.change('Decision reason', 'Checked both buyers');
   await ui.submit();
-  expect(ui.container.querySelector('[role="alert"]')?.textContent).toContain('Connection lost');
+  expect(ui.container.querySelector('[role="alert"]')?.textContent).toContain('Outcome unknown; retry the same decision');
   expect(ui.container.textContent).toContain('Retry same decision');
+  await act(async () => Array.from(ui.container.querySelectorAll('button')).find(button => button.textContent === 'বাংলা')!.click());
+  expect(ui.container.textContent).toContain('একই সিদ্ধান্ত আবার পাঠান');
+  expect(ui.container.querySelector<HTMLTextAreaElement>('[aria-label="সিদ্ধান্তের কারণ"]')!.value).toBe('Checked both buyers');
+  await act(async () => Array.from(ui.container.querySelectorAll('button')).find(button => button.textContent === 'English')!.click());
   await ui.submit();
   expect(ui.container.textContent).toContain('Accepted allocation: order-a');
   expect(requests[0]?.body).toBe(requests[1]?.body);

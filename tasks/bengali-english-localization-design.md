@@ -303,3 +303,36 @@ Status: In-Progress (tickets 01–02 implemented and locally verified; tickets 0
 - Ticket 05 implementation is complete and locally verified. Manual browser,
   phone/font/wrapping, screen-reader, real Clerk and live-provider acceptance
   remain unrun. These are not established by rendered tests or HTTP smoke.
+
+### Ticket 06 — partial implementation (2026-10-28)
+
+- Baseline `b9f5c3750907480a91a8bf0bdde991be31c68259`. Localized the manual payment exception preview and stable reason codes in `frontend/src/features/seller/PaymentException.tsx` and `frontend/src/features/locale/paymentExceptionCopy.ts`; updated `PaymentException.test.tsx` with a rendered blocked-preview language-switch case. Unknown reason and request errors use safe guidance. Existing acceptance and retry logic remains in place.
+- Focused `npm run test:frontend -- src/features/seller/PaymentException.test.tsx` passed (4 tests); `npm run typecheck` passed. Initial focused red test failed as expected before implementation.
+- Incomplete: receiving accounts, SMS import, manual receipt entry, inbox/cards, evidence resolution and correction, full request and locale-switch journeys, accessibility and phone wrapping remain. Complete those before marking the ticket resolved, then perform the required two-axis review and final check. Browser, screen-reader, physical-device and live-provider acceptance have not been run.
+- Partial-work root `npm run check` passed all configured stages with repository-local pytest basetemp; result `.cache/checks/check-EjZI6C/result.json`. This does not establish full ticket completion.
+
+### Ticket 06 — completion (2026-10-28)
+
+- Completed receiving-account setup/edit/status, payment inbox/filter/empty states,
+  SMS import/results, manual receipt entry, evidence comparison/correction and
+  exception acceptance presentation in Bengali and English. Catalogs:
+  `paymentInboxCopy.ts`, `receiptCopy.ts`, `paymentExceptionCopy.ts`.
+- Locale changes retain account/receipt/SMS drafts, filters, loaded evidence and
+  pending decisions. Numeric amount boundaries accept Bengali digits; opaque
+  account labels, TrxIDs, SMS and decision reasons retain their original text.
+  Exceptions describe seller acceptance without implying independent verification.
+  Unknown request errors receive safe guidance, and matching blockers remain enforced.
+- Added rendered account, inbox and manual-entry locale journeys; extended evidence
+  retry tests to switch language while retaining identical payload/key. Focused
+  integration: 8 files / 22 tests passed; final account locale run: 3 tests passed.
+  `npm run typecheck` passed. Existing request and matching tests run in the full gate.
+- Two-axis review: Standards identified encoding, pending-account guards, associated
+  errors/focus and modal length; all corrected and rechecked. Spec identified two
+  remaining evidence strings and parent error echo; corrected. No remaining
+  actionable findings within the reviewed change. English-keyed catalogs retain
+  a maintenance trade-off: new copy must include its Bengali translation.
+- Final `npm run check` passed all configured stages with
+  `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.scratch/pytest-ticket06-final`:
+  `.cache/checks/check-kVjAi8/result.json`.
+- Browser/physical-phone wrapping, screen-reader, real-session and live-provider
+  acceptance remain unrun; rendered tests and HTTP smoke do not establish them.
