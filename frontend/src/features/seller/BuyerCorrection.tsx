@@ -5,6 +5,9 @@ import { correctBuyer, fetchCorrectionOrder, fetchHistory, resolveCorrectionLink
 import type { CorrectionInput, History, Revision } from './corrections';
 import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { SellerOrder } from './types';
+import { useLocale } from '../locale/context';
+import { correctionLocationCondition, correctionLocationEnvironment, correctionOutcomeCopy, correctionReview, correctionStatus } from '../locale/correctionOutcomeCopy';
+import { formatBangladeshDateTime } from '../locale/format';
 
 interface Props {
   orderId?: string;
@@ -15,6 +18,8 @@ interface Props {
 }
 
 export function BuyerCorrection({orderId, portalToken, token, onCorrected, courierAttemptStatus}: Props) {
+  const {locale} = useLocale();
+  const text = correctionOutcomeCopy[locale];
   const [order, setOrder] = useState<SellerOrder>();
   const [history, setHistory] = useState<History>();
   const [draft, setDraft] = useState<Revision>();
@@ -50,7 +55,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
       try {
         const id = orderId ?? (await resolveCorrectionLink(portalToken ?? '', token)).order_id;
         if (current) await load(id);
-      } catch (err) { if (current) setError(err instanceof Error ? err.message : 'Correction unavailable'); }
+      } catch (err) { if (current) setError(err instanceof SellerApiError && err.status === 401 ? 'unauthorized' : 'unavailable'); }
     }
     void initial();
     return () => {current = false; alive.current = false;};
@@ -74,10 +79,10 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
       const result = await correctBuyer(order.id, mutation.input, mutation.key, token);
       if (!alive.current) return;
       setPending(null); setReason(''); setOrder(result); onCorrected?.(result);
-      await load(order.id);
+      try { await load(order.id); } catch { setError('unavailable'); }
     } catch (err) {
       if (!alive.current) return;
-      setError(err instanceof Error ? err.message : 'Correction unavailable');
+      setError(err instanceof SellerApiError && err.status === 401 ? 'unauthorized' : err instanceof SellerApiError ? err.code : err instanceof Error && err.message.startsWith('Invalid Bangladeshi phone') ? 'phone' : err instanceof Error && err.message.startsWith('Amount') ? 'amount' : 'unknown');
       if (err instanceof SellerApiError && !err.code.startsWith('HTTP_5')) {
         setPending(null);
         if (['STALE_VERSION', 'PAYMENT_FIELDS_LOCKED'].includes(err.code)) setStale(true);
@@ -87,23 +92,27 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
 
   const isConfirmed = order?.lifecycle === 'confirmed';
   const buttonLabel = busy
-    ? (isConfirmed ? 'Saving delivery correction…' : 'Saving…')
+    ? (isConfirmed ? text.savingDelivery : text.saving)
     : pending
-      ? 'Retry same correction'
+      ? text.retry
       : isConfirmed
-        ? 'Save delivery correction'
-        : 'Save correction and check again';
+        ? text.saveDelivery
+        : text.save;
 
-  return <section className="buyer-correction" aria-label="Seller buyer corrections">
-    <h3>Correct buyer information / ক্রেতার তথ্য সংশোধন</h3>
-    {error && <p role="alert">{error}</p>}
-    {!order && !error && <p role="status">Loading buyer information…</p>}
+  const errorText = error === 'unknown' ? text.unknownError : error === 'unavailable' ? text.unavailable
+    : error === 'refreshed' ? text.refreshed : error === 'phone' ? text.phoneError
+      : error === 'amount' ? text.amountError : error === 'STALE_VERSION' ? text.stale : error === 'unauthorized' ? (locale === 'bn' ? 'বিক্রেতা হিসেবে সাইন ইন করুন।' : 'Seller sign-in required.') : text.failed;
+
+  return <section className="buyer-correction" lang={locale === 'bn' ? 'bn-BD' : 'en'} aria-label={text.correctionTitle}>
+    <h3>{text.correctionTitle}</h3>
+    {error && <p role="alert">{errorText}</p>}
+    {!order && !error && <p role="status">{text.loading}</p>}
     {order && (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px' }}>
         <p role="status" style={{ margin: '4px 0' }}>
-          Status: <strong>{order.lifecycle}</strong>
+          {text.status} <strong>{correctionStatus(order.lifecycle, locale)}</strong>
           <span style={{ display: showDevStatus ? 'inline' : 'none' }}>
-            {' '}— {order.review_reasons.join(', ') || 'No private review reasons'}
+            {' '}— {order.review_reasons.map(code => correctionReview(code, locale)).join(', ') || text.noReasons}
           </span>
         </p>
         <button
@@ -112,61 +121,61 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
           style={{ background: 'none', border: 'none', color: 'var(--primary-accent)', cursor: 'pointer', fontSize: '0.725rem', textDecoration: 'underline', padding: 0 }}
           aria-expanded={showDevStatus}
         >
-          {showDevStatus ? 'Hide dev details' : 'Show dev details'}
+          {showDevStatus ? text.hideDetails : text.showDetails}
         </button>
       </div>
     )}
     {isConfirmed && (
       <div className="courier-notice" role="note" style={{marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.825rem', color: 'var(--amber-accent)'}}>
         {courierAttemptStatus === 'success'
-          ? 'Courier booking is already confirmed in Pathao. Portal corrections do not update courier bookings. Update courier parcels separately in Pathao. / কুরিয়ার বুকিং ইতিপূর্বে পাঠাও-এ কনফার্ম করা হয়েছে। পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। পাঠাও-এ সরাসরি বুকিং আপডেট করুন।'
+          ? text.booked
           : courierAttemptStatus === 'submitting'
-            ? 'Courier submission is in flight. Portal corrections do not update courier bookings. Resolve in Pathao if booked. / কুরিয়ার সাবমিশন প্রক্রিয়াধীন। পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না।'
+            ? text.submitting
             : courierAttemptStatus === 'unknown'
-              ? 'Courier submission outcome is unknown. Portal corrections do not update courier bookings. Reconcile the attempt and resolve in Pathao. / কুরিয়ার সাবমিশন ফলাফল অনিশ্চিত। পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না।'
+              ? text.unknownBooking
               : courierAttemptStatus === 'unsubmitted'
-                ? 'Unsubmitted courier draft. Corrections refresh the delivery draft before booking submission. Portal corrections do not update courier bookings if already booked elsewhere.'
-                : 'Portal corrections do not update courier bookings. Update courier parcels separately if already booked. / পোর্টালের তথ্য পরিবর্তনে কুরিয়ার বুকিং আপডেট হয় না। কুরিয়ারে বুকিং করা থাকলে আলাদাভাবে আপডেট করুন।'}
+                ? text.unsubmitted
+                : text.courier}
       </div>
     )}
     {stale && <button onClick={async () => {
       if (!order) return;
-      try {await load(order.id, true); setStale(false); setPending(null); setError('Review your retained inputs against the refreshed order before saving.');}
-      catch (err) {setError(err instanceof Error ? err.message : 'Refresh unavailable');}
-    }}>Refresh order and retain inputs</button>}
+      try {await load(order.id, true); setStale(false); setPending(null); setError('refreshed');}
+      catch {setError('unavailable');}
+    }}>{text.refresh}</button>}
     {draft && order && ['pending', 'confirmed'].includes(order.lifecycle) && <form onSubmit={event => {event.preventDefault(); void submit();}}>
       <fieldset disabled={busy || !!pending || stale}>
-        <label>Buyer name<input required maxLength={200} value={draft.buyer_name} onChange={e => setDraft({...draft, buyer_name: e.target.value})} /></label>
-        <label>Contact number<input required maxLength={32} value={draft.contact_number} onChange={e => setDraft({...draft, contact_number: e.target.value})} /></label>
-        <label>Delivery address<textarea required maxLength={2000} value={draft.address.raw_text} onChange={e => setDraft({...draft, address: {...draft.address, raw_text: e.target.value}})} /></label>
-        <fieldset disabled={isConfirmed}><legend>Payment claim</legend>
+        <label>{text.buyerName}<input required maxLength={200} value={draft.buyer_name} onChange={e => setDraft({...draft, buyer_name: e.target.value})} /></label>
+        <label>{text.contact}<input required maxLength={32} value={draft.contact_number} onChange={e => setDraft({...draft, contact_number: e.target.value})} /></label>
+        <label>{text.address}<textarea required maxLength={2000} value={draft.address.raw_text} onChange={e => setDraft({...draft, address: {...draft.address, raw_text: e.target.value}})} /></label>
+        <fieldset disabled={isConfirmed}><legend>{text.claim}</legend>
           {isConfirmed && (
             <p className="payment-locked-note" style={{fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '4px 0 8px'}}>
-              Payment terms and accepted advance are locked on confirmed orders. / কনফার্মড অর্ডারে পেমেন্ট ও অগ্রিমের তথ্য অপরিবর্তনশীল।
+              {text.locked}
             </p>
           )}
-          <label>Provider<select value={draft.payment_claim.provider} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, provider: e.target.value === 'bkash' ? 'bkash' : 'nagad'}})}><option value="bkash">bKash</option><option value="nagad">Nagad</option></select></label>
-          <label>Transaction ID<input required maxLength={128} value={draft.payment_claim.trx_id} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, trx_id: e.target.value}})} /></label>
-          <label>Payment sender<input required maxLength={32} value={draft.payment_claim.sender_number} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, sender_number: e.target.value}})} /></label>
-          <label>Claimed advance (BDT)<input required inputMode="decimal" value={amountBdt} onChange={e => setAmountBdt(e.target.value)} /></label>
+          <label>{text.provider}<select value={draft.payment_claim.provider} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, provider: e.target.value === 'bkash' ? 'bkash' : 'nagad'}})}><option value="bkash">bKash</option><option value="nagad">Nagad</option></select></label>
+          <label>{text.transaction}<input required maxLength={128} value={draft.payment_claim.trx_id} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, trx_id: e.target.value}})} /></label>
+          <label>{text.sender}<input required maxLength={32} value={draft.payment_claim.sender_number} onChange={e => setDraft({...draft, payment_claim: {...draft.payment_claim, sender_number: e.target.value}})} /></label>
+          <label>{text.advance}<input required inputMode="decimal" value={amountBdt} onChange={e => setAmountBdt(e.target.value)} /></label>
         </fieldset>
-        <label>Correction reason<textarea required maxLength={1000} value={reason} onChange={e => setReason(e.target.value)} /></label>
+        <label>{text.reason}<textarea required maxLength={1000} value={reason} onChange={e => setReason(e.target.value)} /></label>
       </fieldset>
       <button type="submit" disabled={busy || stale || (!pending && !reason.trim())}>
         {buttonLabel}
       </button>
     </form>}
-    {history && <details><summary>Buyer revision history ({history.items.length})</summary>
+    {history && <details><summary>{text.history} ({history.items.length})</summary>
       {history.items.map(item => <article key={item.id}>
-        <p>Revision {item.revision_number}: {item.buyer_name}, {item.contact_number}, {item.address.raw_text}</p>
-        {item.address.pathao && <p>Pathao: {item.address.pathao.condition} · {item.address.pathao.environment} ·
-          {item.address.pathao.city_name ?? 'City unresolved'} ({item.address.pathao.city_id ?? '—'}) /{' '}
-          {item.address.pathao.zone_name ?? 'Zone unresolved'} ({item.address.pathao.zone_id ?? '—'}) /{' '}
-          {item.address.pathao.area_name ?? 'Area unresolved'} ({item.address.pathao.area_id ?? '—'}).
-          {item.address.pathao.booking_blocked && ' Booking blocked; seller resolution/review required.'}</p>}
+        <p>{text.revision} {item.revision_number}: {item.buyer_name}, {item.contact_number}, {item.address.raw_text}</p>
+        {item.address.pathao && <p>Pathao: {correctionLocationCondition(item.address.pathao.condition, locale)} · {correctionLocationEnvironment(item.address.pathao.environment, locale)} ·
+          {item.address.pathao.city_name ?? text.city} ({item.address.pathao.city_id ?? '—'}) /{' '}
+          {item.address.pathao.zone_name ?? text.zone} ({item.address.pathao.zone_id ?? '—'}) /{' '}
+          {item.address.pathao.area_name ?? text.area} ({item.address.pathao.area_id ?? '—'}).
+          {item.address.pathao.booking_blocked && text.bookingBlocked}</p>}
         <p>{item.payment_claim.provider} · {item.payment_claim.trx_id} · {item.payment_claim.sender_number} · BDT {(item.payment_claim.amount_minor / 100).toFixed(2)}</p>
-        <p>{item.actor} · {item.reason ?? 'Initial submission'} · {item.created_at}</p>
-        <p>Payment claim accepted: {item.claim_accepted_at}</p>
+        <p>{item.actor} · {item.reason ?? text.initial} · {formatBangladeshDateTime(item.created_at, locale)}</p>
+        <p>{text.accepted} {formatBangladeshDateTime(item.claim_accepted_at, locale)}</p>
       </article>)}
     </details>}
   </section>;

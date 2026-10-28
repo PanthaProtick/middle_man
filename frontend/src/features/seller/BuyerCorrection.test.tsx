@@ -43,13 +43,13 @@ it('retains edits and retries an unknown correction with identical payload and k
   });
   const submit = async () => act(async () => {container.querySelector('form')!.dispatchEvent(new Event('submit', {bubbles: true, cancelable: true}));});
   await submit();
-  expect(container.textContent).toContain('Connection lost');
+  expect(container.textContent).toContain('Outcome unknown. Retry the same request');
   expect(reason.value).toBe('Fix name');
   expect(container.textContent).toContain('Retry same correction');
   await submit();
   expect(requests[0]?.body).toBe(requests[1]?.body);
   expect(requests[0]?.headers).toEqual(requests[1]?.headers);
-  expect(container.textContent).toContain('confirmed');
+  expect(container.textContent).toContain('Confirmed');
   expect(container.textContent).toContain('Buyer revision history (2)');
   await act(async () => root.unmount()); container.remove();
 });

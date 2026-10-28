@@ -26,3 +26,9 @@
 .buyer-correction summary { padding: 12px 0; cursor: pointer; }
 .buyer-correction article { border-top: 1px solid var(--border-subtle); overflow-wrap: anywhere; font-size: 0.85rem; }
 .buyer-correction [role=alert] { color: #fca5a5; }
+.order-outcomes { overflow-wrap: anywhere; }
+.order-outcomes form, .order-outcomes label { min-width: 0; }
+.order-outcomes label { display: grid; gap: 4px; }
+.order-outcomes input, .order-outcomes textarea, .order-outcomes select { box-sizing: border-box; max-width: 100%; }
+.order-outcomes-amounts { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
+.order-outcomes button { white-space: normal; min-height: 40px; }
