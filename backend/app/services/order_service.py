@@ -18,6 +18,7 @@ from app.core.tokens import (
 )
 from app.models.entities import OrderTable, PaymentAccountTable
 from app.models.order import OrderInput, SellerOrder
+from app.services.order_dates import order_created_bounds, within_order_dates
 from app.services.order_mapping import (
     check_and_apply_expiry,
     to_seller_order,
@@ -195,13 +196,21 @@ class OrderService:
         status_filter: Optional[str] = None,
         review_filter: Optional[str] = None,
         search: Optional[str] = None,
+        from_date: Optional[datetime.date] = None,
+        to_date: Optional[datetime.date] = None,
     ) -> Tuple[List[SellerOrder], Optional[str]]:
         now = get_utc_now()
         limit = max(1, min(limit, 100))
+        created_from, created_to = order_created_bounds(from_date, to_date)
 
         if self.db is not None:
             query = order_list_query(
-                shop_id=shop_id, search=search, status_filter=status_filter, now=now
+                shop_id=shop_id,
+                search=search,
+                status_filter=status_filter,
+                now=now,
+                created_from=created_from,
+                created_to=created_to,
             )
             if cursor:
                 cursor_order = (await self.db.scalars(
@@ -233,6 +242,8 @@ class OrderService:
 
         def matches(raw: dict[str, Any]) -> bool:
             if status_filter is not None and raw["lifecycle"] != status_filter:
+                return False
+            if not within_order_dates(raw["created_at"], created_from, created_to):
                 return False
             buyer = memory_buyer_revision(str(raw["id"]), raw.get("buyer_revision"))
             return matches_order_search(

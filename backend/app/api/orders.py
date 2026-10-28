@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from fastapi import APIRouter, Depends, Header, Query, Response
@@ -72,6 +73,8 @@ async def list_orders(
     status: Optional[str] = Query(None),
     review: Optional[str] = Query(None),
     search: Optional[str] = Query(None, max_length=200),
+    from_date: Optional[datetime.date] = Query(None),
+    to_date: Optional[datetime.date] = Query(None),
     seller: SellerIdentity = Depends(get_seller_identity),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> SellerOrderListResponse:
@@ -84,7 +87,7 @@ async def list_orders(
     order_svc = OrderService(db)
     items, next_cursor = await order_svc.list_orders(
         shop_id=shop.id, cursor=cursor, limit=limit, status_filter=status,
-        review_filter=review, search=search,
+        review_filter=review, search=search, from_date=from_date, to_date=to_date,
     )
     return SellerOrderListResponse(items=items, next_cursor=next_cursor)
 

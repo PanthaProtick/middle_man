@@ -1,3 +1,4 @@
+import datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -9,6 +10,8 @@ class ExportFilters(BaseModel):
     model_config = ConfigDict(extra='forbid')
     status: OrderStatus | None = None
     search: str | None = Field(None, max_length=200)
+    from_date: datetime.date | None = None
+    to_date: datetime.date | None = None
     limit: int = Field(500, ge=1, le=500)
 
 

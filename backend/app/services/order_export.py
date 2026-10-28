@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.tokens import get_utc_now
 from app.models.entities import AllocationTable, AuditEventTable, BuyerRevisionTable, OrderTable, ShopTable
 from app.models.order_export import ExportFilters, OrderStatus, OrderSummary
+from app.services.order_dates import order_created_bounds, within_order_dates
 from app.services.order_search import (
     matches_order_search,
     memory_buyer_revision,
@@ -32,6 +33,7 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
         from app.services.order_service import OrderService
         await OrderService(db).get_order(shop_id, order_id)
     now = get_utc_now()
+    created_from, created_to = order_created_bounds(filters.from_date, filters.to_date)
     if db is not None:
         await db.execute(text("SET LOCAL statement_timeout = '5s'"))
         await db.execute(text("SET LOCAL lock_timeout = '2s'"))
@@ -57,6 +59,10 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                         OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None))
         if filters.status:
             query = query.where(lifecycle == filters.status)
+        if created_from is not None:
+            query = query.where(OrderTable.created_at >= created_from)
+        if created_to is not None:
+            query = query.where(OrderTable.created_at < created_to)
         search_clause = order_search_clause(
             filters.search,
             order_id=OrderTable.id,
@@ -97,6 +103,7 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
             if (
                 (not filters.status or raw['lifecycle'] == filters.status)
                 and (not order_id or raw['id'] == order_id)
+                and within_order_dates(raw['created_at'], created_from, created_to)
                 and matches_order_search(
                     filters.search,
                     order_id=str(raw['id']),

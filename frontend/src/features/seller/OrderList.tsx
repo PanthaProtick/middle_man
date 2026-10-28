@@ -1,14 +1,13 @@
-import { formatOrderAmount } from './orderNumbers';
 import React, { useState } from 'react';
-import { Clock, AlertTriangle, Eye, ShoppingBag } from 'lucide-react';
-import type { OrderLifecycle, SellerOrder } from './types';
-import { formatRemainingCod } from './api';
-import { formatBangladeshDateTime } from '../locale/format';
+import { ShoppingBag } from 'lucide-react';
+import type { SellerOrder } from './types';
 import { useLocale } from '../locale/context';
-import { orderCopy, lifecycleLabel, reviewLabel } from '../locale/orderCopy';
+import { orderCopy, lifecycleLabel } from '../locale/orderCopy';
 import { OrderDetailModal } from './OrderDetailModal';
 import { OrderExport } from './OrderExport';
-import { BuyerLinkCopy } from './BuyerLinkCopy';
+import { OrderDateControls } from './OrderDateControls';
+import { OrderCard } from './OrderCard';
+import type { OrderDateError, OrderDateMode, OrderDateRange } from './orderDateFilter';
 
 interface OrderListProps {
   token?: string;
@@ -21,16 +20,20 @@ interface OrderListProps {
   search?: string;
   onSearchChange?: (search: string) => void;
   loading?: boolean;
+  dateMode?: OrderDateMode;
+  dateFrom?: string;
+  dateTo?: string;
+  lastDays?: string;
+  appliedDateRange?: OrderDateRange | null;
+  dateError?: OrderDateError | null;
+  onDateModeChange?: (mode: OrderDateMode) => void;
+  onDateFromChange?: (value: string) => void;
+  onDateToChange?: (value: string) => void;
+  onLastDaysChange?: (value: string) => void;
+  onApplyDates?: () => void;
+  onApplyPreset?: (days: number) => void;
+  onApplyLastDays?: () => void;
 }
-
-const LIFECYCLE_BADGES: Record<OrderLifecycle, { bg: string; color: string }> = {
-  awaiting_buyer: { bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--amber-accent)' },
-  pending: { bg: 'rgba(59, 130, 246, 0.15)', color: 'var(--primary-accent)' },
-  confirmed: { bg: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-accent)' },
-  rejected: { bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
-  cancelled: { bg: 'rgba(107, 114, 128, 0.2)', color: 'var(--text-secondary)' },
-  expired: { bg: 'rgba(239, 68, 68, 0.15)', color: 'var(--rose-accent)' },
-};
 
 export function OrderList({
   token, onCorrected,
@@ -42,6 +45,19 @@ export function OrderList({
   search = '',
   onSearchChange = () => undefined,
   loading = false,
+  dateMode = 'any',
+  dateFrom = '',
+  dateTo = '',
+  lastDays = '',
+  appliedDateRange = null,
+  dateError = null,
+  onDateModeChange = () => undefined,
+  onDateFromChange = () => undefined,
+  onDateToChange = () => undefined,
+  onLastDaysChange = () => undefined,
+  onApplyDates = () => undefined,
+  onApplyPreset = () => undefined,
+  onApplyLastDays = () => undefined,
 }: OrderListProps): React.JSX.Element {
   const { locale } = useLocale();
   const text = orderCopy[locale];
@@ -132,7 +148,29 @@ export function OrderList({
         </div>
       </div>
 
-      <OrderExport key={statusFilter} status={statusFilter} search={search} token={token} />
+      <OrderDateControls
+        mode={dateMode}
+        from={dateFrom}
+        to={dateTo}
+        lastDays={lastDays}
+        appliedRange={appliedDateRange}
+        error={dateError}
+        onModeChange={onDateModeChange}
+        onFromChange={onDateFromChange}
+        onToChange={onDateToChange}
+        onLastDaysChange={onLastDaysChange}
+        onApplyDates={onApplyDates}
+        onApplyPreset={onApplyPreset}
+        onApplyLastDays={onApplyLastDays}
+      />
+      <OrderExport
+        key={`${statusFilter}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`}
+        status={statusFilter}
+        search={search}
+        fromDate={appliedDateRange?.from}
+        toDate={appliedDateRange?.to}
+        token={token}
+      />
       {loading ? (
         <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
           <p role="status" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
@@ -142,136 +180,22 @@ export function OrderList({
       ) : orders.length === 0 ? (
         <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            {search.trim() ? text.noMatches : text.empty}
+            {search.trim() ? text.noMatches : appliedDateRange ? text.noDateMatches : text.empty}
           </p>
         </div>
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {orders.map((ord) => {
-            const badge = Object.hasOwn(LIFECYCLE_BADGES, ord.lifecycle) ? LIFECYCLE_BADGES[ord.lifecycle] : { bg: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)' };
-            const isAwaiting = ord.lifecycle === 'awaiting_buyer';
-            const isExpired = ord.lifecycle === 'expired';
-
-            return (
-              <div key={ord.id} className="isolated-subcard">
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-                  <div style={{ minWidth: 0, maxWidth: '100%' }}>
-                    <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem', marginRight: '8px', wordBreak: 'break-word' }}>
-                      {ord.product_name}
-                    </span>
-                    <span
-                      style={{
-                        padding: '2px 8px',
-                        borderRadius: '9999px',
-                        fontSize: '0.725rem',
-                        fontWeight: 600,
-                        background: badge.bg,
-                        color: badge.color,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '4px',
-                      }}
-                    >
-                      {isExpired && <AlertTriangle size={11} />}
-                      {lifecycleLabel(ord.lifecycle, text)}
-                    </span>
-                  </div>
-
-                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      onClick={() => setSelectedOrder(ord)}
-                      title={text.inspectTitle}
-                    >
-                      <Eye size={13} />
-                      <span>{text.inspect}</span>
-                    </button>
-                    <BuyerLinkCopy key={ord.portal_url} portalUrl={ord.portal_url} />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '8px', marginBottom: '10px', fontSize: '0.825rem' }}>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>{text.total}</span>
-                    <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>BDT {formatOrderAmount(ord.total_minor)}</span>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>{text.advance}</span>
-                    <span style={{ color: 'var(--cyan-accent)', fontWeight: 500 }}>BDT {formatOrderAmount(ord.required_advance_minor)}</span>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>
-                      {ord.lifecycle === 'confirmed' ? text.actualCod : text.expectedCod}
-                    </span>
-                    <span style={{ color: ord.lifecycle === 'confirmed' ? 'var(--emerald-accent)' : 'var(--primary-accent)', fontWeight: 600 }}>
-                      {formatRemainingCod(ord)}
-                    </span>
-                  </div>
-                  <div>
-                    <span style={{ color: 'var(--text-secondary)' }}>{text.account}</span>
-                    <span style={{ color: 'var(--text-primary)' }}>
-                      {ord.account_provider.toUpperCase()} ({ord.account_receiving_number})
-                    </span>
-                  </div>
-                </div>
-
-                {ord.lifecycle === 'pending' && ord.review_reasons && ord.review_reasons.length > 0 && (
-                  <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <span style={{ fontSize: '0.725rem', color: 'var(--rose-accent)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                      <AlertTriangle size={11} /> {text.review}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => toggleReviewCodes(ord.id)}
-                      style={{
-                        background: 'none',
-                        border: 'none',
-                        color: 'var(--primary-accent)',
-                        cursor: 'pointer',
-                        fontSize: '0.7rem',
-                        textDecoration: 'underline',
-                        padding: '0 2px',
-                      }}
-                      aria-expanded={Boolean(expandedReviewIds[ord.id])}
-                      title={text.toggleCodes}
-                    >
-                      {expandedReviewIds[ord.id] ? text.hideCodes : text.showCodes}
-                    </button>
-                    <span>{ord.review_reasons.map(reason => reviewLabel(reason, text)).join(" · ")}</span>
-                    <div style={{ display: expandedReviewIds[ord.id] ? 'inline-flex' : 'none', gap: '4px', flexWrap: 'wrap' }}>
-                      {ord.review_reasons.map((r) => (
-                        <span
-                          key={r}
-                          style={{
-                            fontSize: '0.7rem',
-                            padding: '1px 6px',
-                            background: 'rgba(239, 68, 68, 0.2)',
-                            border: '1px solid rgba(239, 68, 68, 0.3)',
-                            color: 'var(--rose-accent)',
-                            borderRadius: '4px',
-                            fontFamily: 'monospace',
-                          }}
-                        >
-                          {r}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)', paddingTop: '6px' }}>
-                  <div>{text.created} {formatBangladeshDateTime(ord.created_at, locale)}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isExpired ? 'var(--rose-accent)' : isAwaiting ? 'var(--amber-accent)' : 'var(--text-secondary)' }}>
-                    <Clock size={12} />
-                    <span>
-                      {isExpired ? text.expiredAt : text.deadline}
-                      {formatBangladeshDateTime(ord.expires_at, locale)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            );
-          })}
+          {orders.map((ord) => (
+            <OrderCard
+              key={ord.id}
+              order={ord}
+              text={text}
+              locale={locale}
+              expanded={Boolean(expandedReviewIds[ord.id])}
+              onInspect={setSelectedOrder}
+              onToggleReview={toggleReviewCodes}
+            />
+          ))}
 
           {nextCursor && (
             <div style={{ textAlign: 'center', marginTop: '12px' }}>

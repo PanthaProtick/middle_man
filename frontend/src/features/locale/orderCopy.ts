@@ -27,6 +27,16 @@ const en = {
   searchPlaceholder: 'Order ID, product, buyer or mobile number', clearSearch: 'Clear search',
   loading: 'Loading orders…',
   noMatches: 'No orders match this search and filter.',
+  noDateMatches: 'No orders match this date range.',
+  dateFilter: 'Created date:', dateAnyTime: 'Any time', dateCustom: 'Custom dates',
+  dateRelative: 'Last X days', dateFrom: 'From', dateTo: 'To', dateApply: 'Apply dates',
+  dateLastDaysPreset: 'Last {days} days', dateLastDaysLabel: 'Last days',
+  dateApplyLastDays: 'Apply last days',
+  dateActiveRange: 'Showing {from} to {to} (Bangladesh dates).',
+  dateRangeRequired: 'Choose both a start date and an end date.',
+  dateRangeInvalid: 'Enter a valid start date and end date.',
+  dateRangeReversed: 'The start date must be on or before the end date.',
+  dateDaysInvalid: 'Enter a whole number of days from 1 to 3650.',
 } as const;
 const bn: Record<keyof typeof en, string> = {
   list: 'অর্ডার ও সক্রিয় ক্রেতার লিংক', confirmed: 'নিশ্চিত করা', exceptions: 'পর্যালোচনার অসঙ্গতি:', status: 'অবস্থা:',
@@ -57,6 +67,16 @@ const bn: Record<keyof typeof en, string> = {
   searchPlaceholder: 'অর্ডার আইডি, পণ্য, ক্রেতা বা মোবাইল নম্বর', clearSearch: 'অনুসন্ধান মুছুন',
   loading: 'অর্ডার লোড হচ্ছে…',
   noMatches: 'এই অনুসন্ধান ও ফিল্টারে কোনো অর্ডার মেলেনি।',
+  noDateMatches: 'এই তারিখের সীমায় কোনো অর্ডার মেলেনি।',
+  dateFilter: 'তৈরির তারিখ:', dateAnyTime: 'যেকোনো সময়', dateCustom: 'নির্দিষ্ট তারিখ',
+  dateRelative: 'শেষ কয়েক দিন', dateFrom: 'শুরু', dateTo: 'শেষ', dateApply: 'তারিখ প্রয়োগ করুন',
+  dateLastDaysPreset: 'শেষ {days} দিন', dateLastDaysLabel: 'দিন সংখ্যা',
+  dateApplyLastDays: 'দিন প্রয়োগ করুন',
+  dateActiveRange: '{from} থেকে {to} পর্যন্ত (বাংলাদেশের তারিখ)।',
+  dateRangeRequired: 'শুরুর তারিখ ও শেষের তারিখ দুটোই নির্বাচন করুন।',
+  dateRangeInvalid: 'সঠিক শুরুর তারিখ ও শেষের তারিখ দিন।',
+  dateRangeReversed: 'শুরুর তারিখ শেষের তারিখের আগে বা সমান হতে হবে।',
+  dateDaysInvalid: '১ থেকে ৩৬৫০ এর মধ্যে পূর্ণ সংখ্যা দিন।',
 };
 export const orderCopy = { en, bn };
 export type OrderCopy = typeof en | typeof bn;

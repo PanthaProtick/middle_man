@@ -179,7 +179,14 @@ export async function updatePaymentAccount(
 }
 
 export async function fetchOrders(
-  params: { cursor?: string; limit?: number; status?: string; search?: string } = {},
+  params: {
+    cursor?: string;
+    limit?: number;
+    status?: string;
+    search?: string;
+    fromDate?: string;
+    toDate?: string;
+  } = {},
   token?: string,
 ): Promise<SellerOrderListResponse> {
   const query = new URLSearchParams();
@@ -188,6 +195,8 @@ export async function fetchOrders(
   if (params.status) query.set('status', params.status);
   const search = params.search?.trim();
   if (search) query.set('search', search);
+  if (params.fromDate) query.set('from_date', params.fromDate);
+  if (params.toDate) query.set('to_date', params.toDate);
   const qStr = query.toString();
   const url = `/api/seller/orders${qStr ? `?${qStr}` : ''}`;
   return requestJson<SellerOrderListResponse>(url, { method: 'GET' }, token);

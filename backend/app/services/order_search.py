@@ -56,6 +56,8 @@ def order_list_query(
     search: Optional[str],
     status_filter: Optional[str],
     now: datetime.datetime,
+    created_from: Optional[datetime.datetime] = None,
+    created_to: Optional[datetime.datetime] = None,
 ) -> Any:
     """Shop-scoped list query with search, current buyer join and expiry-aware status."""
     search_clause = order_search_clause(
@@ -68,6 +70,10 @@ def order_list_query(
     query = select(OrderTable).where(
         OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None)
     )
+    if created_from is not None:
+        query = query.where(OrderTable.created_at >= created_from)
+    if created_to is not None:
+        query = query.where(OrderTable.created_at < created_to)
     if search_clause is not None:
         query = query.outerjoin(
             BuyerRevisionTable,

@@ -12,8 +12,9 @@ import {
 } from './orderExportSupport';
 import { sellerFetch } from './sessionRequest';
 
-export function OrderExport({ orderId, status, search, token }: {
-  orderId?: string; status?: string; search?: string; token?: string;
+export function OrderExport({ orderId, status, search, fromDate, toDate, token }: {
+  orderId?: string; status?: string; search?: string;
+  fromDate?: string; toDate?: string; token?: string;
 }): React.JSX.Element {
   const { locale } = useLocale();
   const text = exportCopy[locale];
@@ -35,7 +36,7 @@ export function OrderExport({ orderId, status, search, token }: {
     return () => { active.current = false; };
   }, []);
 
-  const criteria = `${status ?? ''}\u0000${search ?? ''}`;
+  const criteria = `${status ?? ''}\u0000${search ?? ''}\u0000${fromDate ?? ''}\u0000${toDate ?? ''}`;
   const criteriaRef = useRef(criteria);
   useEffect(() => {
     if (criteriaRef.current === criteria) return;
@@ -76,11 +77,14 @@ export function OrderExport({ orderId, status, search, token }: {
     if (status) params.set('status', status);
     const trimmedSearch = search?.trim();
     if (trimmedSearch) params.set('search', trimmedSearch);
+    if (fromDate) params.set('from_date', fromDate);
+    if (toDate) params.set('to_date', toDate);
     const query = params.toString();
+    const runCriteria = criteriaRef.current;
     const response = await sellerFetch(`/api/seller/orders/export${query ? `?${query}` : ''}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     }, token);
-    if (!active.current) return;
+    if (!active.current || criteriaRef.current !== runCriteria) return;
     if (!response.ok) {
       let detail: string | undefined;
       try {
@@ -93,6 +97,7 @@ export function OrderExport({ orderId, status, search, token }: {
       } catch {
         // Non-JSON error body
       }
+      if (criteriaRef.current !== runCriteria) return;
       const failure = resolveExportFailure(null, response.status, detail);
       setFeedback({ kind: 'error', code: failure.code, detail: failure.detail });
       return;
@@ -102,7 +107,7 @@ export function OrderExport({ orderId, status, search, token }: {
       return;
     }
     const blob = await response.blob();
-    if (!active.current) return;
+    if (!active.current || criteriaRef.current !== runCriteria) return;
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url; link.download = 'order-summaries.csv';
@@ -132,7 +137,7 @@ export function OrderExport({ orderId, status, search, token }: {
   const message = feedback ? exportFeedbackMessage(feedback, locale) : null;
   const label = busy ? text.preparing
     : orderId ? text.copyDeliverySummary
-      : status || search?.trim() ? text.downloadFilteredEnglishCsv
+      : status || search?.trim() || fromDate || toDate ? text.downloadFilteredEnglishCsv
         : text.downloadEnglishCsv;
 
   return (

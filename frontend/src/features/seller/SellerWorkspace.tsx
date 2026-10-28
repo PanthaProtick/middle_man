@@ -62,11 +62,24 @@ export function SellerWorkspace({
     orders,
     statusFilter: ordersFilter,
     search: ordersSearch,
+    dateMode: ordersDateMode,
+    dateFrom: ordersDateFrom,
+    dateTo: ordersDateTo,
+    lastDays: ordersLastDays,
+    appliedDateRange: ordersDateRange,
+    dateError: ordersDateError,
     nextCursor: ordersNextCursor,
     loading: ordersLoading,
     reload: reloadOrders,
     changeStatus: handleFilterChange,
     changeSearch: handleSearchChange,
+    changeDateMode: handleDateModeChange,
+    changeDateFrom: handleDateFromChange,
+    changeDateTo: handleDateToChange,
+    changeLastDays: handleLastDaysChange,
+    applyCustomDates: handleApplyDates,
+    applyRelativePreset: handleApplyPreset,
+    applyLastDays: handleApplyLastDays,
     loadMore: loadMoreOrders,
     addOrder,
   } = useSellerOrders(token, captureWorkspaceError);
@@ -210,6 +223,19 @@ export function SellerWorkspace({
                 onFilterChange={handleFilterChange}
                 search={ordersSearch}
                 onSearchChange={handleSearchChange}
+                dateMode={ordersDateMode}
+                dateFrom={ordersDateFrom}
+                dateTo={ordersDateTo}
+                lastDays={ordersLastDays}
+                appliedDateRange={ordersDateRange}
+                dateError={ordersDateError}
+                onDateModeChange={handleDateModeChange}
+                onDateFromChange={handleDateFromChange}
+                onDateToChange={handleDateToChange}
+                onLastDaysChange={handleLastDaysChange}
+                onApplyDates={handleApplyDates}
+                onApplyPreset={handleApplyPreset}
+                onApplyLastDays={handleApplyLastDays}
                 loading={ordersLoading}
                 nextCursor={ordersNextCursor}
                 onLoadMore={loadMoreOrders}
@@ -271,7 +297,7 @@ export function SellerWorkspace({
           token={token}
           onClose={() => setIsCreateModalOpen(false)}
           onOrderCreated={(newOrder) => {
-            if (ordersSearch.trim() || ordersFilter) void reloadOrders();
+            if (ordersSearch.trim() || ordersFilter || ordersDateRange) void reloadOrders();
             else addOrder(newOrder);
           }}
           onError={setError}
