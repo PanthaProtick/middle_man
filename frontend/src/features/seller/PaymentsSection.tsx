@@ -11,11 +11,13 @@ interface PaymentsSectionProps {
   transactions: ReceiptView[];
   transactionsLoading: boolean;
   transactionsFilter: string;
+  transactionsSearch: string;
   transactionsNextCursor: string | null;
   onOpenRecordModal: (accountId?: string) => void;
-  onRefreshTransactions: (filter: string) => void;
+  onRefreshTransactions: () => void;
   onTransactionsChanged: () => void;
   onFilterChange: (filter: string) => void;
+  onSearchChange: (search: string) => void;
   onLoadMore: () => void;
 }
 
@@ -25,11 +27,13 @@ export function PaymentsSection({
   transactions,
   transactionsLoading,
   transactionsFilter,
+  transactionsSearch,
   transactionsNextCursor,
   onOpenRecordModal,
   onRefreshTransactions,
   onTransactionsChanged,
   onFilterChange,
+  onSearchChange,
   onLoadMore,
 }: PaymentsSectionProps): React.JSX.Element {
   const c = usePaymentInboxCopy();
@@ -64,9 +68,11 @@ export function PaymentsSection({
         loading={transactionsLoading}
         filter={transactionsFilter}
         onFilterChange={onFilterChange}
+        search={transactionsSearch}
+        onSearchChange={onSearchChange}
         nextCursor={transactionsNextCursor}
         onLoadMore={onLoadMore}
-        onRefresh={() => onRefreshTransactions(transactionsFilter)}
+        onRefresh={onRefreshTransactions}
       />
     </section>
   );

@@ -13,6 +13,8 @@ interface TransactionInboxProps {
   loading?: boolean;
   filter: string;
   onFilterChange: (filter: string) => void;
+  search: string;
+  onSearchChange: (search: string) => void;
   nextCursor?: string | null;
   onLoadMore?: () => void;
   onRefresh?: () => void;
@@ -26,6 +28,8 @@ export function TransactionInbox({
   loading = false,
   filter,
   onFilterChange,
+  search,
+  onSearchChange,
   nextCursor,
   onLoadMore,
   onRefresh,
@@ -36,6 +40,12 @@ export function TransactionInbox({
   const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
   };
+
+  const emptyMessage = search.trim()
+    ? c("No received payments match this search and filter.")
+    : filter
+      ? c("No received transactions match the selected filter.")
+      : c('No received payments recorded yet. Click "Record Received Payment" above to add manual payment observations.');
 
   return (
     <div className="isolated-section" aria-busy={loading}>
@@ -53,6 +63,51 @@ export function TransactionInbox({
         </span>
       </div>
 
+      <form
+        role="search"
+        aria-label={c("Search received payments")}
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSearchChange(search);
+        }}
+        style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}
+      >
+        <label htmlFor="transaction-search" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          {c("Search received payments")}
+        </label>
+        <input
+          id="transaction-search"
+          type="search"
+          value={search}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={c("TrxID, receipt ID, sender or receiving account")}
+          autoComplete="off"
+          className="form-control"
+          style={{ padding: '6px 10px', fontSize: '0.85rem', minHeight: '38px', minWidth: '260px' }}
+        />
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => onSearchChange(search)}
+          disabled={loading}
+          style={{ minHeight: '38px' }}
+        >
+          {c("Search")}
+        </button>
+        {search && (
+          <button
+            type="button"
+            className="btn btn-secondary btn-sm"
+            aria-label={c("Clear search")}
+            onClick={() => onSearchChange('')}
+            disabled={loading}
+            style={{ minHeight: '38px' }}
+          >
+            {c("Clear search")}
+          </button>
+        )}
+      </form>
+
       <div
         style={{
           display: 'flex',
@@ -65,9 +120,11 @@ export function TransactionInbox({
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
           <SlidersHorizontal size={16} color="var(--text-secondary)" />
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>{c("Filter:")}</span>
+          <label htmlFor="transaction-filter" style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+            {c("Filter:")}
+          </label>
           <select
-            aria-label={c("Filter:")}
+            id="transaction-filter"
             value={filter}
             onChange={(e) => onFilterChange(e.target.value)}
             className="form-control"
@@ -97,7 +154,22 @@ export function TransactionInbox({
         )}
       </div>
 
-      {transactions.length === 0 ? (
+      {loading && transactions.length === 0 ? (
+        <div
+          role="status"
+          style={{
+            padding: '32px 16px',
+            textAlign: 'center',
+            background: 'var(--bg-surface)',
+            borderRadius: '8px',
+            border: '1px dashed var(--border-subtle)',
+          }}
+        >
+          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+            {c("Loading received payments…")}
+          </p>
+        </div>
+      ) : transactions.length === 0 ? (
         <div
           style={{
             padding: '32px 16px',
@@ -109,9 +181,7 @@ export function TransactionInbox({
         >
           <Search size={24} style={{ color: 'var(--text-muted)', margin: '0 auto 8px' }} />
           <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            {filter
-              ? c("No received transactions match the selected filter.")
-              : c("No received payments recorded yet. Click \"Record Received Payment\" above to add manual payment observations.")}
+            {emptyMessage}
           </p>
         </div>
       ) : (

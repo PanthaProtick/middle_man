@@ -17,6 +17,7 @@ from app.services.evidence_resolution import resolve_evidence
 from app.services.receipt_comparison import compare_receipt
 from app.services.receipt_correction import correct_receipt
 from app.services.seller_service import NotFoundError, SellerDomainException, SellerService
+from app.services.transaction_listing import list_shop_transactions
 from app.services.transaction_service import TransactionService
 
 router = APIRouter(prefix="/seller/transactions", tags=["seller-transactions"])
@@ -79,6 +80,7 @@ async def list_transactions(
     review: Optional[str] = Query(None),
     used: Optional[str] = Query(None),
     parse: Optional[str] = Query(None),
+    search: Optional[str] = Query(None, max_length=200),
     seller: SellerIdentity = Depends(get_seller_identity),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> ReceiptListResponse:
@@ -88,14 +90,15 @@ async def list_transactions(
     if not shop:
         return ReceiptListResponse(items=[], next_cursor=None)
 
-    tx_svc = TransactionService(db)
-    items, next_cursor = await tx_svc.list_transactions(
+    items, next_cursor = await list_shop_transactions(
+        db,
         shop_id=shop.id,
         cursor=cursor,
         limit=limit,
         review_filter=review,
         used_filter=used,
         parse_filter=parse,
+        search=search,
     )
     return ReceiptListResponse(items=items, next_cursor=next_cursor)
 

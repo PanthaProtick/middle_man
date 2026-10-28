@@ -27,6 +27,20 @@ rate limiting, and returns `EXPORT_TOO_LARGE` instead of truncating above 500
 matches. Search text and date values are request-only and are not logged or
 persisted in URLs.
 
+## Seller received-payment search
+
+`GET /api/seller/transactions` accepts one optional `search` term (maximum 200
+characters, trimmed). Within the seller's shop it matches an exact case-insensitive
+provider TrxID, an exact case-insensitive internal receipt ID, a partial
+case-insensitive receiving-account label, a complete Bangladesh payment sender
+number, or a complete Bangladesh receiving-account number normalized across
+`017…`, `88017…`, and `+88017…` formats and Bengali digits. Short numeric
+fragments never match phone fields. Raw SMS text and buyer payment claims are not searched. Search
+combines with the `review`, `used`, and `parse` reconciliation filters using AND,
+excludes retained records, and is applied before pagination in both database and
+offline paths. Search terms are request-only and are not logged or persisted in
+URLs.
+
 ## Pathao merchant settings
 
 Buyer destination collection and the controlled public catalog are documented in

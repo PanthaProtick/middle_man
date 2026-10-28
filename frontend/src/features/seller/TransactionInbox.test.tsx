@@ -182,6 +182,8 @@ describe('Transaction API & Inbox UI', () => {
           transactions: mockTransactions,
           filter: '',
           onFilterChange: vi.fn(),
+          search: '',
+          onSearchChange: vi.fn(),
         })
       );
     });

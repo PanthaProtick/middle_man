@@ -1,8 +1,8 @@
 import uuid
-from typing import List, Literal, Optional, Tuple
+from typing import Literal, Optional, Tuple
 
 from fastapi import status
-from sqlalchemy import desc, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.idempotency import (
@@ -33,7 +33,6 @@ from app.services.transaction_store import (
     _memory_observations,
     _memory_transactions,
     is_observation_identical,
-    matches_transaction_filters,
     to_receipt_view,
 )
 
@@ -239,62 +238,3 @@ class TransactionService:
             )
         return receipt_view, status_code
 
-    async def list_transactions(
-        self,
-        shop_id: str,
-        cursor: Optional[str] = None,
-        limit: int = 25,
-        review_filter: Optional[str] = None,
-        used_filter: Optional[str] = None,
-        parse_filter: Optional[str] = None,
-    ) -> Tuple[List[ReceiptView], Optional[str]]:
-        if self.db is not None:
-            query = select(ReceivedTransactionTable).where(
-                ReceivedTransactionTable.shop_id == shop_id, ReceivedTransactionTable.retained_at.is_(None)
-            ).order_by(desc(ReceivedTransactionTable.created_at), desc(ReceivedTransactionTable.id))
-
-            res = await self.db.execute(query)
-            filtered = [
-                r for r in res.scalars().all()
-                if matches_transaction_filters(
-                    bool(r.has_conflict), r.sender_number_canonical, r.occurred_at,
-                    r.reconciliation_state, review_filter, used_filter, parse_filter
-                )
-            ]
-            start_idx = 0
-            if cursor:
-                for idx, r in enumerate(filtered):
-                    if r.id == cursor:
-                        start_idx = idx + 1
-                        break
-            page = filtered[start_idx : start_idx + limit]
-            next_cursor = page[-1].id if (start_idx + limit < len(filtered) and len(page) > 0) else None
-
-            views: List[ReceiptView] = []
-            for item in page:
-                stmt_obs = select(TransactionObservationTable).where(
-                    TransactionObservationTable.transaction_id == item.id
-                ).order_by(TransactionObservationTable.created_at.asc())
-                obs_res = await self.db.execute(stmt_obs)
-                views.append(to_receipt_view(item, list(obs_res.scalars().all())))
-            return views, next_cursor
-
-        # In-memory listing
-        all_raw = [t for t in _memory_transactions.values() if t["shop_id"] == shop_id and not t.get('retained_at')]
-        all_raw.sort(key=lambda x: (x["created_at"], x["id"]), reverse=True)
-        filtered_raw = [
-            t for t in all_raw
-            if matches_transaction_filters(
-                bool(t["has_conflict"]), t["sender_number_canonical"], t["occurred_at"],
-                t["reconciliation_state"], review_filter, used_filter, parse_filter
-            )
-        ]
-        start_idx = 0
-        if cursor:
-            for idx, raw_entry in enumerate(filtered_raw):
-                if raw_entry["id"] == cursor:
-                    start_idx = idx + 1
-                    break
-        page_raw = filtered_raw[start_idx : start_idx + limit]
-        next_cursor = page_raw[-1]["id"] if (start_idx + limit < len(filtered_raw) and len(page_raw) > 0) else None
-        return [to_receipt_view(raw, _memory_observations.get(raw["id"], [])) for raw in page_raw], next_cursor

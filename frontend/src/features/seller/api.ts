@@ -237,7 +237,14 @@ export async function resolveOrderLink(
 }
 
 export async function fetchTransactions(
-  params: { cursor?: string; limit?: number; review?: string; used?: string; parse?: string } = {},
+  params: {
+    cursor?: string;
+    limit?: number;
+    review?: string;
+    used?: string;
+    parse?: string;
+    search?: string;
+  } = {},
   token?: string,
 ): Promise<ReceiptListResponse> {
   const query = new URLSearchParams();
@@ -246,6 +253,8 @@ export async function fetchTransactions(
   if (params.review) query.set('review', params.review);
   if (params.used) query.set('used', params.used);
   if (params.parse) query.set('parse', params.parse);
+  const search = params.search?.trim();
+  if (search) query.set('search', search);
   const qStr = query.toString();
   const url = `/api/seller/transactions${qStr ? `?${qStr}` : ''}`;
   return requestJson<ReceiptListResponse>(url, { method: 'GET' }, token);

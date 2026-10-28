@@ -22,7 +22,7 @@ it('retains an inbox filter and translates its empty guidance without requests',
   localStorage.setItem('middleman.locale', 'bn');
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   const changed = vi.fn(); const fetcher = vi.spyOn(globalThis, 'fetch');
-  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><TransactionInbox transactions={[]} filter="unmatched" onFilterChange={changed} /></LocaleProvider>));
+  await act(async () => root.render(<LocaleProvider><LocaleSwitch /><TransactionInbox transactions={[]} filter="unmatched" onFilterChange={changed} search="" onSearchChange={() => undefined} /></LocaleProvider>));
   expect(host.textContent).toContain('এই ফিল্টারে কোনো লেনদেন নেই।');
   await act(async () => Array.from(host.querySelectorAll('button')).find(b => b.textContent === 'English')!.click());
   expect(host.textContent).toContain('No received transactions match the selected filter.');
