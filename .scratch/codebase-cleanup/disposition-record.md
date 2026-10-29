@@ -319,6 +319,18 @@ focused component/API test where practical.
 
 ## Uncertainties and next action
 
+### Ticket 07 execution update (2026-10-29)
+
+Courier production modules already separate draft, review, reservation, attempts,
+reconciliation/replay/resolution, retention, provider transport and settings;
+retained with existing frontend feature ownership and unchanged contracts.
+Four oversized/mixed test suites are split by completed/in-flight/unknown changes,
+PostgreSQL changes, validation/privacy and mocked transport, with explicit shared
+fixture imports. All original function/decorator ASTs and selected test counts are
+preserved. No tests or runtime code deleted; no size exceptions introduced.
+See [issue 07](issues/07-organize-courier-workflows.md) for paths, cohesion reviews,
+focused results, final-check status and unrun integration/provider gates.
+
 - Exact minimal assertion set that makes each removable probe redundant is not yet
   proven; ticket 02 must map it before deleting, and may add a focused maintained
   test. If a probe's browser-only behavior has no high-level seam, retain the
