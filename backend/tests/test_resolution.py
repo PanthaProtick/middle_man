@@ -2,7 +2,7 @@ import datetime
 
 import pytest
 from test_public_order_routes import _create_test_order, clean_memory_stores, seller_identity  # noqa: F401
-from test_transaction_routes import clean_stores  # noqa: F401
+from transaction_route_support import clean_stores  # noqa: F401
 
 
 async def conflict_case(client, competing=False):

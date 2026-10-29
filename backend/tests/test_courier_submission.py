@@ -5,7 +5,7 @@ from test_courier_review import ready_review
 from test_payment_exceptions import exception_case
 from test_payment_exceptions_postgres import decision
 from test_public_order_routes import clean_memory_stores, seller_identity  # noqa: F401
-from test_transaction_routes import clean_stores  # noqa: F401
+from transaction_route_support import clean_stores  # noqa: F401
 
 
 @pytest.fixture(autouse=True)

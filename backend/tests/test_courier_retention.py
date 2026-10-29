@@ -4,7 +4,7 @@ import datetime as dt
 import pytest
 from courier_reconciliation_support import offline_settings, reconcile, unknown_attempt  # noqa: F401
 from test_public_order_routes import clean_memory_stores, seller_identity  # noqa: F401
-from test_transaction_routes import clean_stores  # noqa: F401
+from transaction_route_support import clean_stores  # noqa: F401
 
 from app.services.courier_attempts import get_attempts
 from app.services.structured_retention import calendar_deadline, purge_completed_orders

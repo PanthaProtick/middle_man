@@ -5,7 +5,7 @@ from test_courier_drafts import confirm_automatically, parcel_order
 from test_courier_reconciliation_replay import resolution_payload
 from test_courier_review import ready_review
 from test_public_order_routes import clean_memory_stores, seller_identity  # noqa: F401
-from test_transaction_routes import clean_stores  # noqa: F401
+from transaction_route_support import clean_stores  # noqa: F401
 
 
 async def verify_changed_replay(client, monkeypatch, operation, change, connection=None):

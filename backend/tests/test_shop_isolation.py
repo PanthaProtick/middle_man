@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 import pytest
 from test_public_order_routes import _create_test_order, clean_memory_stores  # noqa: F401
 from test_seller_auth_integration import _generate_rsa_key_pair, _make_token
-from test_transaction_routes import clean_stores  # noqa: F401
+from transaction_route_support import clean_stores  # noqa: F401
 
 import app.core.auth as auth_module
 from app.core.auth import ClerkTokenVerifier

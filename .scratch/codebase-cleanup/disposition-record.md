@@ -18,6 +18,32 @@ retained only in ignored `.evidence/`, not tracked. Paths below describe the aud
 state at ticket 01; current locations and evidence are recorded in
 [issue 02](issues/02-clean-scratch-and-artifact-producers.md).
 
+## Ticket 06 payment workflow organization (2026-10-29)
+
+Base `f5db9ac`; no backend production behavior changed. Detailed checks and paths:
+[ticket 06](issues/06-organize-payments-and-reconciliation.md#implementation-2026-10-29).
+
+| Candidate / responsibility | Disposition and evidence |
+| --- | --- |
+| Manual payment modal (302 lines) | Move draft/validation/submission into colocated `useManualTransaction.ts`; retain JSX and localization in the modal (223 / 110 lines). Existing UI tests protect minor-unit precision, opaque IDs, language-switch state, validation, and one mutation. |
+| Reconciliation tests (809) | Split arrival/localized identity, competing claims, boundaries, and recovery into four collected modules; share existing fixtures in `reconciliation_support.py`. Nine original tests unchanged. |
+| Transaction route tests (462) | Split entry, observation/replay, and listing/privacy. Move clients/reset/setup into `transaction_route_support.py`; migrate all existing fixture consumers. Eleven original tests unchanged. |
+| Order outcome tests (666) | Split terminal behavior, decision guards, replacements, and replacement guards. Eighteen original tests unchanged. |
+| Marker protection tests (407) | Split configuration/digest, binding compatibility, and readiness. Sixteen original tests unchanged. |
+| PostgreSQL correction tests (671) | Separate allocation race from confirmed delivery correction. Restore conventional whitespace in the latter, retaining cohesive before/after durable assertions and stale-write checks. Both tests and database gating unchanged. |
+| Transaction search UI tests (301) | Split control/API and workspace request lifecycle; share synthetic helpers. All five original cases retained. |
+| `transaction_service.py` (240), `reconciliation.py` (252), `reconciliation_db.py` (258) | Keep: ingestion orchestration, memory reconciliation, and SQL reconciliation already have separate owners. SQL retry/savepoint/shop-lock order is one cohesive safety boundary. Further facade/adapter changes offer no demonstrated benefit for this cleanup. |
+| `TransactionCard.tsx` (257) | Keep: one receipt's status, sender/time, and expandable observation history; no I/O or independent business transitions. Small observation rendering already has its own component. |
+| TransactionDates (262), TransactionInbox (257) tests | Keep: bounded date/filter and inbox/API cases, respectively, under the hard maximum. Preserve existing assertions and fixture lifecycles. |
+| Payment recovery PostgreSQL journey (297) | Keep: one end-to-end recovery sequence using the existing gated fixture. Splitting would hide the state transitions the journey protects; under 300. |
+| Payment accounts, SMS import, evidence resolution/history, receipt/buyer correction, allocation, outcomes, retention/privacy | Keep existing feature/service ownership. SellerWorkspace opens entry/import; transactions/SMS/orders routers preserve typed seller-only seams. Services already separate ingestion, pure matching, listing/search, allocation, corrections and retention. Contracts document immutable observations, shop locks, replay, and used markers. No source move or semantics change justified. |
+| Historical screenshot evidence and retired screenshot product | Keep history in the ticket-02 evidence locations; no screenshot code, routes, migrations, or UI restored. |
+
+All split-owned files are below 250 lines; no new size exception is required.
+Courier tests receiving only the fixture import relocation remain ticket-07 size
+review candidates; their scenarios were not modified here. Test AST comparisons
+preserved all 56 moved backend tests, including decorators and assertions.
+
 ## Evidence and counts
 
 - Repository: 829 tracked files. Source areas: `backend/app` (115), `frontend/src`

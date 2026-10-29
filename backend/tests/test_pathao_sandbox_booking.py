@@ -5,7 +5,7 @@ import httpx
 import pytest
 from test_courier_drafts import confirm_automatically, parcel_order
 from test_public_order_routes import clean_memory_stores, seller_identity  # noqa: F401
-from test_transaction_routes import clean_stores  # noqa: F401
+from transaction_route_support import clean_stores  # noqa: F401
 
 CREDENTIALS = {'client_id': 'sandbox-client', 'client_secret': 'sandbox-secret',
                'username': 'sandbox@example.test', 'password': 'sandbox-password'}

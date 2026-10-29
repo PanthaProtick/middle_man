@@ -1,7 +1,7 @@
 import pytest
 from test_public_order_routes import clean_memory_stores, seller_identity  # noqa: F401
 from test_resolution import conflict_case
-from test_transaction_routes import clean_stores  # noqa: F401
+from transaction_route_support import clean_stores  # noqa: F401
 
 
 @pytest.mark.asyncio

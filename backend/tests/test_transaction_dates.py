@@ -3,9 +3,9 @@ import datetime
 
 import pytest
 from httpx import AsyncClient
-from test_transaction_routes import _setup_shop_and_account
-from test_transaction_routes import clean_stores as clean_stores
-from test_transaction_routes import seller_client as seller_client
+from transaction_route_support import _setup_shop_and_account
+from transaction_route_support import clean_stores as clean_stores
+from transaction_route_support import seller_client as seller_client
 
 from app.services.transaction_store import _memory_transactions
 
