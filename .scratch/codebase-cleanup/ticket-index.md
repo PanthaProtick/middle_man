@@ -1,8 +1,8 @@
 # Codebase cleanup ticket index
 
 Breakdown approved on 2026-10-28. Parent: [cleanup specification](spec.md).
-Tickets 01-09 have implementation records; ticket 10 remains the integrated
-verification. Blocking edges still govern eligibility. Ticket 01 records the
+Tickets 01–10 are complete with local verification evidence. Ticket 10 records
+the integrated A1–A8 audit, fresh final gate and unrun external limits. Ticket 01 records the
 inventory baseline in [disposition-record.md](disposition-record.md) and a resumable
 [implementation handoff](implementation-handoff.md).
 

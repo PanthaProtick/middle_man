@@ -1,6 +1,6 @@
 # Codebase cleanup and organization
 
-Status: ready-for-agent
+Status: implemented — integrated local acceptance verified; external gates remain unrun
 
 ## Problem Statement
 
@@ -192,6 +192,12 @@ the owner to classify files. Reachable feature retirement is a separate decision
 - Claiming production, browser, or live-provider readiness from local checks.
 
 ## Further Notes
+
+- Completion update (2026-10-29): tickets 01–10 are implemented and audited.
+  [Ticket 10](issues/10-verify-complete-cleanup.md) records A1–A8 evidence,
+  exact disposition reconciliation, preserved test bodies, final root-check PASS
+  and separate unrun external acceptance. Earlier planning notes below remain
+  historical; they do not describe the current implementation status.
 
 - The owner confirmed the final shared design on 2026-10-28 and delegated
   individual deletion choices to the agent. This spec publishes that agreement;

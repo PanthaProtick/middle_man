@@ -1,5 +1,11 @@
 # Cleanup disposition record
 
+Completion update (2026-10-29): [ticket 10](issues/10-verify-complete-cleanup.md)
+supersedes the initial next-action/uncertainty notes below with the integrated
+A1–A8 audit. All 42 non-Markdown candidates are reconciled: 16 tracked evidence
+moves, one private evidence move, 25 disposals. Test bodies are preserved; the
+fresh root gate passes. Historical planning and per-ticket evidence remain below.
+
 Ticket: [01: Inventory and convention baseline](issues/01-inventory-and-convention-baseline.md)
 Evidence date: 2026-10-28. Base revision: `7df3fa0` on `main`; checkout clean
 (no tracked modifications, no non-ignored untracked files). No credential files
