@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** closed
 
-- [ ] The orders list renders inside a dedicated `.ledger-scroll-viewport` container with responsive boundary constraints (`clamp(380px, 60vh, 680px)`) and `overflow-y: auto`.
-- [ ] `overscroll-behavior-y: contain` prevents mouse-wheel and touch momentum from scroll-chaining to the outer window.
-- [ ] Section headers, count indicators, search form, date controls, lifecycle filter, and export bar stay pinned above the scrolling container.
-- [ ] The "Load More" / "আরও দেখুন" button renders inside the scroll container at the bottom of the order cards.
-- [ ] Empty search/filter states and loading indicators maintain container height stability (`min-height: 360px`) with centered status messages.
-- [ ] Component integration tests verify pinned controls remain outside and order cards/states render inside the scroll viewport.
+- [x] The orders list renders inside a dedicated `.ledger-scroll-viewport` container with responsive boundary constraints (`clamp(380px, 60vh, 680px)`) and `overflow-y: auto`.
+- [x] `overscroll-behavior-y: contain` prevents mouse-wheel and touch momentum from scroll-chaining to the outer window.
+- [x] Section headers, count indicators, search form, date controls, lifecycle filter, and export bar stay pinned above the scrolling container.
+- [x] The "Load More" / "আরও দেখুন" button renders inside the scroll container at the bottom of the order cards.
+- [x] Empty search/filter states and loading indicators maintain container height stability (`min-height: 360px`) with centered status messages.
+- [x] Component integration tests verify pinned controls remain outside and order cards/states render inside the scroll viewport.

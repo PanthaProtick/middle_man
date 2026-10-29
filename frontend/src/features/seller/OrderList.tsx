@@ -171,41 +171,43 @@ export function OrderList({
         toDate={appliedDateRange?.to}
         token={token}
       />
-      {loading ? (
-        <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
-          <p role="status" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            {text.loading}
-          </p>
-        </div>
-      ) : orders.length === 0 ? (
-        <div style={{ padding: '24px', textAlign: 'center', background: 'var(--bg-surface)', borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
-          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            {search.trim() ? text.noMatches : appliedDateRange ? text.noDateMatches : text.empty}
-          </p>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {orders.map((ord) => (
-            <OrderCard
-              key={ord.id}
-              order={ord}
-              text={text}
-              locale={locale}
-              expanded={Boolean(expandedReviewIds[ord.id])}
-              onInspect={setSelectedOrder}
-              onToggleReview={toggleReviewCodes}
-            />
-          ))}
+      <div className="ledger-scroll-viewport" data-testid="order-scroll-viewport">
+        {loading ? (
+          <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
+            <p role="status" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+              {text.loading}
+            </p>
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+              {search.trim() ? text.noMatches : appliedDateRange ? text.noDateMatches : text.empty}
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {orders.map((ord) => (
+              <OrderCard
+                key={ord.id}
+                order={ord}
+                text={text}
+                locale={locale}
+                expanded={Boolean(expandedReviewIds[ord.id])}
+                onInspect={setSelectedOrder}
+                onToggleReview={toggleReviewCodes}
+              />
+            ))}
 
-          {nextCursor && (
-            <div style={{ textAlign: 'center', marginTop: '12px' }}>
-              <button className="btn btn-secondary btn-sm" onClick={onLoadMore}>
-                {text.more}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+            {nextCursor && (
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <button className="btn btn-secondary btn-sm" onClick={onLoadMore}>
+                  {text.more}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       {selectedOrder && (
         <OrderDetailModal

@@ -227,3 +227,29 @@
   color: var(--primary-accent);
   padding: 0 6px;
 }
+
+.ledger-scroll-viewport {
+  max-height: clamp(380px, 60vh, 680px);
+  min-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  background: var(--bg-surface);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-subtle) transparent;
+}
+.ledger-scroll-viewport::-webkit-scrollbar { width: 6px; }
+.ledger-scroll-viewport::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: var(--radius-xs);
+}
+.ledger-scroll-empty-state {
+  min-height: 336px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+}
