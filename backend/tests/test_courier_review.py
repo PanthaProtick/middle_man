@@ -97,7 +97,8 @@ async def test_correction_settings_and_cancellation_invalidate_review(client):
 @pytest.mark.parametrize('changes,blocker', [
     ({'store_id': 999999999}, 'PICKUP_STORE_REQUIRED'),
     ({'location': {'city_id': 1, 'zone_id': 10, 'area_id': 101}}, 'LOCATION_METADATA_REQUIRED'),
-    ({'location': {'city_id': 2, 'zone_id': 10, 'area_id': 100}}, 'LOCATION_METADATA_REQUIRED'),
+    ({'location': {'unsupported': True}}, 'LOCATION_METADATA_REQUIRED'),
+    ({'location': {'city_id': 1, 'zone_id': 999, 'area_id': 100}}, 'LOCATION_METADATA_REQUIRED'),
     ({'environment': 'sandbox'}, 'COURIER_CONNECTION_REQUIRED'),
 ])
 async def test_unready_choices_cannot_be_approved(client, changes, blocker):
@@ -108,7 +109,7 @@ async def test_unready_choices_cannot_be_approved(client, changes, blocker):
     assert response.status_code == 200, response.text
     blocked = response.json()
     assert blocker in blocked['blockers']
-    if changes.get('location', {}).get('city_id') == 2:
+    if changes.get('location', {}).get('zone_id') == 999:
         assert 'LOCATION_CHOICES_INVALID' in blocked['blockers']
         assert 'METADATA_UNAVAILABLE' not in blocked['blockers']
     assert (await client.post(path, json={'expected_token': blocked['token']})).status_code == 409

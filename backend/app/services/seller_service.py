@@ -19,8 +19,12 @@ from app.models.seller import AccountInput, AccountUpdateInput, PaymentAccountRe
 
 
 class SellerDomainException(HTTPException):
-    def __init__(self, status_code: int, code: str, message: str) -> None:
-        super().__init__(status_code=status_code, detail={"code": code, "message": message})
+    def __init__(self, status_code: int, code: str, message: str,
+                 fields: list[dict[str, object]] | None = None) -> None:
+        detail: dict[str, object] = {"code": code, "message": message}
+        if fields:
+            detail["fields"] = fields
+        super().__init__(status_code=status_code, detail=detail)
 
 
 class IdempotencyConflictError(SellerDomainException):

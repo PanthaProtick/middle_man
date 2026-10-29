@@ -33,7 +33,7 @@ async def pathao_locations(
     from app.services.pathao_locations import catalog, link_shop
     await link_shop(db, portal_token, clock)
     if zone_id is not None and city_id is None:
-        raise invalid()
+        raise invalid('city')
     result = await catalog(db, portal_token, city_id, zone_id)
     await link_shop(db, portal_token, clock)
     return result

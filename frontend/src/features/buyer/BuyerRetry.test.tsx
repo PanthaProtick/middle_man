@@ -164,6 +164,7 @@ it.each([413, 429])('preserves uncertain attempt after admission rejection %s', 
   let reads = 0;
   let posts = 0;
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+    if (String(_url).includes('/pathao-locations')) return new Response(JSON.stringify({condition: 'resolved', choices: [], simulated: true}));
     if (init?.method === 'POST') {
       posts++;
       if (posts === 2) return new Response(JSON.stringify({ error: { code: status === 429 ? 'PUBLIC_RATE_LIMITED' : 'PUBLIC_BODY_TOO_LARGE', message: 'Raw technical detail' } }), { status, headers: {'Retry-After': '10'} });

@@ -1,6 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Send, AlertCircle, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
+import type { LocationAvailability } from './pathaoTypes';
 import { BuyerContactFields } from './BuyerContactFields';
 import { PaymentClaimFields } from './PaymentClaimFields';
 import { PathaoLocations } from './PathaoLocations';
@@ -41,6 +42,19 @@ export function BuyerSubmissionForm({
   const { t, locale } = useLocale();
   const form = useRef<HTMLFormElement>(null);
   const [validation, setValidation] = useState<{fields: Record<string, MessageKey | ''>; serverFields: ApiError['fields']}>({fields: {}, serverFields});
+  const [availability, setAvailability] = useState<LocationAvailability>(() => portalToken
+    ? {state: 'loading', city: false, zone: false, area: false}
+    : {state: 'unavailable', city: false, zone: false, area: false});
+  const clearLocationErrors = useCallback(() => {
+    setValidation(current => {
+      const fields = Object.entries(current.fields).filter(([field]) => !field.startsWith('pathao_'));
+      return fields.length === Object.keys(current.fields).length ? current : {...current, fields: Object.fromEntries(fields)};
+    });
+  }, []);
+  const handleAvailabilityChange = useCallback((next: LocationAvailability) => {
+    setAvailability(next);
+    clearLocationErrors();
+  }, [clearLocationErrors]);
   const localErrors = validation.serverFields === serverFields ? validation.fields : {};
   const fieldErrors = {
     ...Object.fromEntries((serverFields ?? []).map(field => [formFieldName(field.field), fieldMessage(t, field)])),
@@ -52,7 +66,7 @@ export function BuyerSubmissionForm({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const errors = validateBuyerDraft(draft);
+    const errors = validateBuyerDraft(draft, portalToken ? availability : undefined);
     setValidation({fields: errors, serverFields});
     if (Object.keys(errors).length) {
       focusFirstError(form.current, errors);
@@ -130,8 +144,9 @@ export function BuyerSubmissionForm({
             </div>
           </div>
 
-          {portalToken && <PathaoLocations portalToken={portalToken} value={draft.pathao ?? {}}
-            disabled={isSubmitting || isLocked} onChange={pathao => onDraftChange({...draft, pathao})} />}
+          {portalToken && <PathaoLocations portalToken={portalToken} value={draft.pathao ?? {}} fieldErrors={fieldErrors}
+            disabled={isSubmitting || isLocked} onChange={pathao => { clearLocationErrors(); onDraftChange({...draft, pathao}); }}
+            onAvailabilityChange={handleAvailabilityChange} />}
 
           <div className="form-group" style={{ marginBottom: '10px' }}>
             <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>

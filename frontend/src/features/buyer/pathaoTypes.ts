@@ -16,6 +16,12 @@ export interface PathaoResolution extends Omit<PathaoSelection, 'city_id' | 'zon
   booking_blocked: boolean;
 }
 export interface LocationChoice { id: number; name: string; home_delivery_available?: boolean | null }
+export interface LocationAvailability {
+  state: 'loading' | 'ready' | 'unavailable';
+  city: boolean;
+  zone: boolean;
+  area: boolean;
+}
 export interface LocationCatalog {
   condition: PathaoResolution['condition'];
   environment: PathaoResolution['environment'];

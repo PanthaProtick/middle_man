@@ -72,8 +72,11 @@ Migration `0027_retire_address_ai.sql` erases historical extraction raw requests
 provider responses, generated suggestions and extraction replay results by dropping
 `address_extractions`, and removes the obsolete `ai_assistance_available` key from
 cached submission responses. Buyer revisions, payment claims, receipts, allocations,
-lifecycle and duplicate-payment protection are preserved. This slice does not make
-Pathao selections mandatory.
+lifecycle and duplicate-payment protection are preserved. Address AI retirement did
+not itself make Pathao selections mandatory; ticket 02 now requires selections
+when the shop catalog offers choices, while disconnected, unavailable or empty
+catalogs and unsupported/no-area destinations preserve the submission for seller
+resolution (see [the location contract](../pathao-location-contract.md)).
 
 ## Seller buyer corrections
 

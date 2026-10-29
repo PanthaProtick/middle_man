@@ -61,7 +61,7 @@ async def test_dependent_membership_labels_coverage_and_no_area(client):
     assert location['booking_blocked'] is True  # Offline data never authorizes booking.
 
 
-@pytest.mark.parametrize('zone,area,condition', [(10, 101, 'unsupported'), (11, None, 'no_area_unverified'), (10, None, 'missing_choices')])
+@pytest.mark.parametrize('zone,area,condition', [(10, 101, 'unsupported'), (11, None, 'no_area_unverified')])
 @pytest.mark.usefixtures('seller_identity')
 async def test_unresolved_destinations_preserve_payment(client, zone, area, condition):
     order = await _create_test_order(client)

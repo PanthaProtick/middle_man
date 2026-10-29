@@ -24,12 +24,23 @@ def clear_cache() -> None:
 
 
 class InvalidLocation(SellerDomainException):
-    def __init__(self) -> None:
-        super().__init__(422, 'PATHAO_LOCATION_INVALID', 'Choose locations from the selected parent, or clear selections and submit the written address.')
+    def __init__(self, code: str = 'PATHAO_LOCATION_INVALID',
+                 message: str = 'Choose locations from the selected parent, or mark the destination as unsupported.',
+                 field: str | None = None) -> None:
+        fields: list[dict[str, object]] | None = [{'field': field, 'code': code.lower(), 'message': message}] if field else None
+        super().__init__(422, code, message, fields=fields)
 
 
-def invalid() -> InvalidLocation:
-    return InvalidLocation()
+def invalid(level: Level) -> InvalidLocation:
+    return InvalidLocation(field=f'address.pathao.{level}_id')
+
+
+def required(level: Level) -> InvalidLocation:
+    return InvalidLocation(
+        'PATHAO_LOCATION_REQUIRED',
+        f'Choose an available Pathao {level}, or mark the destination as unsupported.',
+        field=f'address.pathao.{level}_id',
+    )
 
 
 def simulated(level: Level, parent: int | None) -> list[LocationChoice]:
@@ -96,10 +107,10 @@ async def choices(shop: str, env: Environment, revision: Revision, level: Level,
     return result
 
 
-def member(options: list[LocationChoice], selected: int) -> LocationChoice:
+def member(options: list[LocationChoice], selected: int, level: Level) -> LocationChoice:
     found = next((item for item in options if item.id == selected), None)
     if found is None:
-        raise invalid()
+        raise invalid(level)
     return found
 
 
@@ -107,15 +118,15 @@ async def hierarchy(shop: str, env: Environment, revision: Revision,
                     city: int | None = None, zone: int | None = None) -> list[LocationChoice]:
     """Return one level only after validating its complete parent chain."""
     if zone is not None and city is None:
-        raise invalid()
+        raise invalid('city')
     try:
         async with asyncio.timeout(10):
             options = await choices(shop, env, revision, 'city')
             if city is not None:
-                member(options, city)
+                member(options, city, 'city')
                 options = await choices(shop, env, revision, 'zone', city)
             if zone is not None:
-                member(options, zone)
+                member(options, zone, 'zone')
                 options = await choices(shop, env, revision, 'area', zone)
             return options
     except TimeoutError:

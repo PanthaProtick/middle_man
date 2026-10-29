@@ -33,18 +33,34 @@ are derived again, never trusted from the request. Existing district/thana/area
 text stays separate. Membership validation uses one connection revision; a changed
 revision invalidates the result. The original submitted payload determines retry
 identity. Saved retries bypass new catalog validation and still recheck current link
-authority under the existing order lock.
+authority under the existing order lock; an accepted replay performs no catalog work
+and returns the prior result even if provider availability has changed.
+Validation errors also recheck the connection revision before rejecting a submission;
+a changed revision yields unavailable fallback instead of a stale required/invalid
+choice error. Required and invalid choice errors identify the affected form field.
+
+Where the catalog offers choices, city, zone and area selections are mandatory.
+A missing choice returns 422 `PATHAO_LOCATION_REQUIRED`; a known forged ID or
+parent mismatch returns 422 `PATHAO_LOCATION_INVALID`, regardless of client-supplied
+labels, conditions or resolved flags. The buyer may mark the destination as
+explicitly unsupported to submit without IDs. Empty city or zone lists are treated
+as established unavailability rather than permission to skip verification: the
+written address and payment claim are preserved as `missing_choices`, and any
+unverified saved IDs are discarded instead of being rejected or fabricated.
 
 `resolved` means selected IDs/labels were found in this catalog and the selected
 area advertises home delivery; it does not prove booking readiness. `missing_choices`,
 `disconnected`, `unavailable`, `unsupported`, and `no_area_unverified` all require seller
 resolution. During outage/disconnection, unverified IDs and labels are discarded while
-the written address and payment claim are retained. A known forged ID is rejected;
-the buyer may explicitly clear choices to submit a written address. Unsupported
-coverage never triggers ID substitution. Empty area lists do not require a nonexistent
-choice, but remain `no_area_unverified`. All resolutions currently carry
+the written address and payment claim are retained. Unsupported coverage never
+triggers ID substitution; supplied IDs are still validated, and an explicit
+unsupported flag keeps the result `unsupported`. Empty area lists do not require a
+nonexistent choice, but remain `no_area_unverified`. All resolutions currently carry
 `booking_blocked: true`; existing draft blockers and absence of a submission endpoint
 remain in effect. Later review/booking work must establish current readiness.
+The explicit unsupported flag is retained in saved metadata and courier review;
+supported IDs alone cannot clear a buyer's stated coverage problem. The seller must
+explicitly resolve the destination in review before approval becomes available.
 
 The revision's nullable `address_pathao` JSON text is added by migration 0022 and
 projected only through private seller revision history, alongside the detailed
