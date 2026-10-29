@@ -360,3 +360,22 @@ Ticket 04's split order-route suites remain authoritative. See
 Retained review-trigger shell/service/client/model files have cohesion evidence
 there; tickets 06/08 coordinate shared account/client/entity ownership. No test
 size exceptions remain among ticket 05 targets.
+
+## Ticket 08 authentication/shared infrastructure (2026-10-29)
+
+Base `26a3e70`. Full ownership rationale and checks are in
+[ticket 08](issues/08-organize-authentication-and-shared-infrastructure.md#implementation-2026-10-29).
+
+| Candidate | Disposition |
+| --- | --- |
+| Link encryption tests (332) | Split primitives/config (147), readiness/compatibility (88), order recovery (107). All original function/decorator ASTs retained. |
+| Durable mode tests (296) | Separate storage lifecycle/config/schema (148) from seller mutation/outage/replay (153). Fixtures and authentication overrides unchanged. |
+| Clerk localization (299) | Separate typed sign-in resource (176) from composed provider-wide resource (130). Public export and exact copy remain. |
+| Core auth/config/database/tokens/idempotency/public admission | Keep bounded owners; no contract or authorization change. |
+| Seller session/request, Root/App, scaffold API and locale preference | Keep explicit seller/public and state/presentation boundaries. No generic shared module. |
+| Seller API (294), entities (284), order service (293) | Retain stable endpoint facade, metadata graph and order orchestration; existing session/mapping/search helpers already separate responsibilities. |
+| Clerk auth (253), SellerSession tests (259) | Keep cohesive verifier and rendered-session suites, below hard maximum. No new exception. |
+| Conftest E402 comments | Keep credential clearing before imports; suppression protects offline fixture initialization. |
+
+Ticket 09 still owns convention enforcement/documentation; ticket 10 owns final
+integrated acceptance. External gates remain separate and unrun in ticket 08.
