@@ -1,11 +1,18 @@
 # Phase 1 local synthetic self-test
 
-Status: consolidated plan confirmed; specification authorized; implementation pending.
+Status: historical plan; implementation continued in later tickets.
+
+> [!NOTE]
+> Buyer payment screenshots were retired by
+> [ADR-0005](adr/0005-remove-payment-screenshots.md). This checklist records the
+> original plan; unchecked items are not current readiness claims. Current contracts
+> start at [API contracts](API_CONTRACTS.md).
+
 Owner/operator: project owner. No execution evidence has been collected under this checklist.
 Specification: [ready-for-agent implementation delta](../.scratch/phase-1-self-test/spec.md).
 
 This is the immediate milestone under the [readiness plan](phase-1-readiness-plan.md).
-Use synthetic orders, transaction records, SMS and generated screenshots. Real
+Use synthetic orders, transaction records, and SMS. Real
 Clerk test sessions and a dedicated Neon development database are required;
 Gemini features are disabled. Local execution does not establish hosted readiness
 or seller benefit. Do not copy production data into this environment.
@@ -27,10 +34,11 @@ or seller benefit. Do not copy production data into this environment.
 5. Implement the agreed buyer-link policy, revocation and reissue. Preserve default
    denial when access policy is not enabled; a test dependency override is insufficient.
    Keep seller actions private. Do not expose replacement links through old links.
-6. Wire durable screenshot storage into an ignored local folder. Verify Git ignores
-   files before creating them, private reads, upload validation, failure cleanup,
-   restart persistence and deletion retries. Bound request bodies before full
-   buffering and define configurable request limits and clear retry responses.
+6. Historical screenshot step: durable screenshot storage was later retired. Confirm
+   the remaining raw SMS/address and structured-retention boundaries, private reads,
+   input validation, failure cleanup, restart persistence and deletion retries.
+   Bound request bodies before full buffering and define configurable request limits
+   and clear retry responses.
 7. Execute the acceptance matrix below, including actual PostgreSQL contention,
    local browser journeys and controlled-time cleanup/expiry cases. Fix failures
    using focused checks, then run root `npm run check` on the final candidate.

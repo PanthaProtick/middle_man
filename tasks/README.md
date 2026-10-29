@@ -19,6 +19,6 @@ flowchart LR
 ```
 
 ### Golden Rules for Task Context
-1. **Never pollute root rules:** Keep scratchpads, temporary checklists, and experiment logs inside `tasks/` or `.agent-scratch/`, not in `AGENTS.md` or `README.md`.
+1. **Never pollute root rules:** Keep resumable plans and checklists inside `tasks/`, not in `AGENTS.md` or `README.md`. Write execution logs, JSON results, and other run output to ignored `.cache/`; link to evidence instead of copying successful output.
 2. **Deterministic Completion:** A task is only marked `[x]` once verified with automated tests.
-3. **Prune/Archive:** When a major milestone is complete and merged, archive or delete temporary scratch files to prevent stale historical clutter.
+3. **Prune/Archive:** When a major milestone is complete and merged, archive or delete temporary plans to prevent stale historical clutter. Keep completed specifications, issues, and indexes in `.scratch/`.

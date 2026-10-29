@@ -263,7 +263,7 @@ flowchart TD
      ```powershell
      git status --short; git diff --stat
      ```
-  2. Avoid inline PowerShell `-c "..."` commands that fail on quotation escaping. Use scratch Python files in `scratch/` instead.
+  2. Avoid inline PowerShell `-c "..."` commands that fail on quotation escaping. Use a temporary script under ignored `.cache/` instead.
 
 ### Priority 3: Verification Tiering Discipline (Saves ~10 Minutes per Ticket)
 * **Problem**: 45 runs of `npm run check` resulted in 14 gate failures (31.1%) and 169s of wait time because the full check was run during active feature development.

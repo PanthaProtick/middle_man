@@ -3,6 +3,8 @@
 This directory houses **deep, on-demand reference documentation**. Review a
 documentation file at 250 physical lines and split it by topic when navigation
 suffers; historical task records and completed work notes remain unchanged.
+Source/test size, ownership, and work-storage rules are in
+[`CONVENTIONS.md`](CONVENTIONS.md).
 
 [Codex ticket tool-call analysis](codex-ticket-tool-call-analysis.md) ranks tool output, command duration, failures and review costs across all six locally discoverable Codex ticket chats and twelve reviewers, with audit data and environment benchmark priorities.
 
@@ -14,7 +16,8 @@ suffers; historical task records and completed work notes remain unchanged.
 * Do **NOT** load every document in this directory into your initial context prompt.
 * Read specific files only when working on a relevant domain:
   * [`ARCHITECTURE.md`](ARCHITECTURE.md): System topology, data flow, feature colocation.
-  * [`API_CONTRACTS.md`](API_CONTRACTS.md): REST guidelines, Pydantic schemas, and frontend API syncing.
+  * [`CONVENTIONS.md`](CONVENTIONS.md): Source/test size, ownership, work-record storage, and enforcement.
+  * [`API_CONTRACTS.md`](API_CONTRACTS.md): Contract index, with domain annexes under [`contracts/`](contracts/application-conventions.md).
   * [`agents/environment.md`](agents/environment.md): Setup, dependency/cache failures, and Antigravity discovery problems.
   * [`agents/verification.md`](agents/verification.md): Failed checks, stage logs, and browser/live acceptance boundaries.
   * [`verification/README.md`](verification/README.md): Historical browser, migration, and command evidence moved from scratch; not current readiness claims.

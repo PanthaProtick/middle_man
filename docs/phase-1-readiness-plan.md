@@ -1,6 +1,15 @@
 # Phase 1 readiness and next-phase exit plan
 
-Prepared: 2026-10-24. Status: consolidated plan confirmed; specification authorized; implementation and verification pending.
+Prepared: 2026-10-24. Status: historical plan; implementation and verification
+continued in later tickets.
+
+> [!NOTE]
+> This plan predates later decisions and is retained as a planning record. Buyer
+> payment screenshots were retired by [ADR-0005](adr/0005-remove-payment-screenshots.md),
+> and the referenced evidence/file-store path no longer exists. Unchecked gates are
+> not current readiness claims. Current contracts start at
+> [API contracts](API_CONTRACTS.md); historical verification evidence is in
+> [verification](verification/README.md).
 
 ## Goal and scope
 
@@ -18,21 +27,24 @@ readiness.
 - Run the first self-test locally, before a separate hosted-deployment stage.
 - Use real Clerk sessions and a dedicated Neon development database with synthetic
   order data. Mock identities and memory storage do not satisfy this milestone.
-- Include optional screenshot uploads using generated payment images; verify
-  restart persistence and rejection of unauthorized reads.
+- Historical requirement: optional screenshot uploads using generated payment
+  images. Screenshot collection and private viewing were later retired by
+  [ADR-0005](adr/0005-remove-payment-screenshots.md); preserve the replacement SMS
+  and structured-retention boundaries instead.
 - Require repeatable happy-path and failure evidence, including uncertain retries,
   competing payment claims, cross-shop access attempts, restart and database failure.
 - Treat durable-database startup/configuration failure as part of outage acceptance;
   it must not silently produce successful memory-only writes.
 - Buyer-link possession grants order terms/status viewing and initial submission,
   without buyer sign-in or OTP. Public responses exclude buyer personal details,
-  screenshots and seller transaction records; buyer corrections remain seller-only.
+  payment evidence and seller transaction records; buyer corrections remain seller-only.
   Forwarding can expose public terms or allow someone else to submit first; this
   risk is accepted for the seller-assisted workflow.
-- Store generated screenshots in a persistent repository-local folder excluded
-  through `.gitignore`. Serve files through authorized endpoints, never a public
-  static directory. Verify the ignore rule before creating files; ignoring a path
-  does not untrack existing files or provide access control.
+- Historical requirement: store generated screenshots in a persistent
+  repository-local folder excluded through `.gitignore` and serve them only through
+  authorized endpoints. That surface is retired; do not restore it. Current raw
+  SMS/address evidence and structured retention rules are documented in
+  [retention lifecycle](retention-lifecycle.md).
 - A future Drive-based storage solution may be evaluated if needed. No provider
   is selected; assess private access, durable identifiers, deletion/retention,
   outages and recovery before adopting it. Local results do not prove hosted storage.
@@ -93,7 +105,7 @@ the evidence record.
 Follow the [self-test sequence](phase-1-self-test.md) for the immediate milestone.
 The following sequence describes the later pilot-readiness path, not approval to
 execute it. Complete gates 1–3 before exercising the hosted buyer workflow. Gate 4 must pass
-before collecting real screenshots or other raw evidence. Complete gates 5–7
+before collecting real raw evidence. Complete gates 5-7
 before inviting pilot users, then gate 8 before beginning the next product phase.
 Assign one accountable owner to each gate and record completion evidence below.
 
@@ -154,13 +166,16 @@ approved policy; forbidden projections and operations remain inaccessible.
 
 ### 4. Make evidence storage and retention operational
 
-The current [file store](../backend/app/services/evidence_store.py) defaults to
-process memory. A database connection does not make screenshot bytes durable.
+The historical file-store reference was removed with payment-screenshot retirement.
+Current retention work is implemented by `backend/app/services/raw_evidence_*` and
+`structured_retention*`; that code does not make raw evidence or retention durable
+without the deployment gates below.
 
 - [ ] Wire durable private storage at startup. Choose a managed private object store
   or a persistent filesystem with explicit deployment, backup and access constraints.
-- [ ] Verify restart persistence, unauthorized read rejection, image validation,
-  upload/read/delete outages, and cleanup of partially failed uploads.
+- [ ] Verify restart persistence, unauthorized read rejection, input validation,
+  provider/storage outage handling, and cleanup of partially failed writes for the
+  remaining raw-evidence and structured-retention surfaces.
 - [ ] Schedule raw-evidence cleanup and structured-retention processing; define the
   operator, cadence, retry behavior and alerts for overdue/failed deletion.
 - [ ] Prove the 30-day raw and 12-calendar-month completed-record rules using controlled

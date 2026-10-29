@@ -10,6 +10,21 @@ Issues and specs for this repo live as markdown files in `.scratch/`.
 - Triage state is recorded as a `Status:` line near the top of each issue file (see `triage-labels.md` for the role strings)
 - Comments and conversation history append to the bottom of the file under a `## Comments` heading
 
+## Storage boundaries
+
+- Scratch contains **Markdown work records only**: specifications, issues, indexes,
+  acceptance notes, and contract annexes. Completed records stay in place.
+- Put disposable execution output (logs, JSON results, screenshots, previews, probes)
+  in ignored `.cache/`. Put reusable historical verification evidence in
+  `docs/verification/`. Maintained tools belong in `scripts/`.
+- Root `npm run check` includes a tracked-scratch guard that rejects non-Markdown
+  files under `.scratch/`. See [repository conventions](../CONVENTIONS.md).
+
+## Commands
+
+Use the root wrappers and focused commands listed in [`AGENTS.md`](../../AGENTS.md).
+Record the fresh `.cache/checks/<run>/result.json` after the final `npm run check`.
+
 ## When a skill says "publish to the issue tracker"
 
 Create a new file under `.scratch/<feature-slug>/` (creating the directory if needed).

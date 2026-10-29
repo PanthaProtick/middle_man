@@ -5,11 +5,16 @@ Routine task commands are listed in root `AGENTS.md` and `package.json`.
 
 ## Results and logs
 
-`npm run check` executes eight stages: tooling tests, backend lint/types/tests,
-frontend lint/tests/build (including TypeScript), and HTTP smoke. It stops at the
-first failure. `check:backend` and `check:frontend` use the same stage definitions.
-Gates reject arguments so a filtered suite cannot be reported as a full pass;
-use focused test commands while editing.
+`npm run check` executes nine stages: tooling tests, repository conventions,
+backend lint/types/tests, frontend lint/tests/build (including TypeScript), and
+HTTP smoke. It stops at the first failure. `check:backend` and `check:frontend`
+use the same stage definitions. Gates reject arguments so a filtered suite cannot
+be reported as a full pass; use focused test commands while editing.
+
+The repository-conventions stage runs `scripts/conventions.mjs` and checks tracked
+scratch Markdown, source/test size limits, maintained-document links, and documented
+root commands. It does not exercise application behavior. See
+[conventions](../CONVENTIONS.md) for scope, exceptions, and limitations.
 
 Every invocation prints its unique `.cache/checks/<run>/result.json` path before
 running stages. That machine-readable result records timestamps, duration,
@@ -62,9 +67,9 @@ backend/.venv/Scripts/python.exe backend/tests/buyer_browser_demo.py
 
 Add `--resume` to reuse the prior schema recorded in `.cache/buyer-browser.json`.
 The harness serves the production build on `127.0.0.1:8013` and injects public
-buyer permission only for that synthetic launcher. It is not part of
-`npm run check` and does not establish live authentication or provider behavior.
-Ticket 09 decides whether it remains a maintained browser seam.
+buyer permission only for that synthetic launcher. It remains an optional,
+manually invoked offline harness; it is not part of `npm run check` and does not
+establish live authentication or provider behavior.
 
 ## Comparing agent quality
 

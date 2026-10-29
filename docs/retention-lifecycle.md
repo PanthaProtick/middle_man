@@ -4,10 +4,9 @@ This document records the retention, storage deletion, and external lifecycle po
 
 ## Retention Boundaries
 
-1. **Raw Payment Evidence (30 Days)**
-   - **Screenshots / Images**: Uploaded buyer payment screenshots (`order_evidence` table) and associated storage files.
+1. **Raw Evidence (30 Days)**
    - **Raw SMS Bodies**: Incoming SMS message text (`sms_evidence.raw_text`).
-   - **Raw AI Prompts / Responses**: Gemini raw request text and raw model output in `address_extractions` (`raw_request`, `raw_response`) and `payment_extractions` (`raw_response`).
+   - **Raw AI Prompts / Responses**: Gemini raw request text and raw model output in `address_extractions` (`raw_request`, `raw_response`).
    - **Retention Deadline**: Exactly 30 days from original collection instant (`delete_after = collected_at + 30 days`).
    - **Immutability of Deadlines**: Reprocessing, re-imports, order edits, and customer support actions never extend or reset the original 30-day deletion deadline.
 
@@ -19,11 +18,14 @@ This document records the retention, storage deletion, and external lifecycle po
 
 ## Storage and Storage Outage Safety
 
-- When raw images reach their deadline, cleanup invokes `delete_evidence_file(storage_key)`.
-- If an outage occurs during deletion (e.g. storage service 5xx or filesystem IO failure), the transaction fails safely for that item:
-  - Database records are **never** marked deleted before the underlying storage copy is confirmed removed.
+- Raw evidence cleanup clears the retained raw columns only after the transaction can
+  commit; structured records and replay markers remain intact.
+- If a database outage occurs during cleanup, the transaction fails safely for that
+  item: rows are **never** reported deleted before the write is confirmed.
   - The item remains pending cleanup and is reported as overdue/failed in seller retention status.
-  - Subsequent cleanup runs safely retry deletion. Complete deletion is acknowledged only after file removal succeeds.
+  - Subsequent cleanup runs safely retry deletion. Complete deletion is acknowledged only after the commit succeeds.
+- Completed-order structured retention removes eligible personal records while
+  preserving tombstones and minimal payment markers described in the contract annex.
 
 ## Local Invocations
 
@@ -54,5 +56,5 @@ Local unit tests and PostgreSQL integration run offline using isolated adapters 
    - *Launch Gate*: Database backup retention schedules must be documented with explicit backup expiration windows. Application deletion cannot claim immediate physical purge from historical backup archives.
 
 3. **External Provider Logging (Google Gemini)**
-   - Gemini API calls transmit buyer address text and screenshot image tokens.
+   - Gemini API calls transmit buyer address text. Screenshot extraction was retired by ADR-0005.
    - *Launch Gate*: Enterprise API data governance terms must be bound to ensure model provider requests are subject to zero-data-retention or matching retention lifecycles, and that prompt caching or abuse monitoring logs align with privacy policy commitments.

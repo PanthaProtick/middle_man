@@ -2,6 +2,7 @@ import { existsSync, readdirSync } from 'node:fs';
 import path from 'node:path';
 import { backend, backendEnvironment, frontend, root, run, runSteps } from './process.mjs';
 import { checkRun } from './checks.mjs';
+import { conventions } from './conventions.mjs';
 import { context } from './context.mjs';
 
 const [task, ...args] = process.argv.slice(2);
@@ -44,13 +45,14 @@ function doctor() {
 const tasks = {
   doctor,
   context: () => console.log(context(args)),
+  conventions,
   setup: () => runSteps([
     () => run('uv', ['sync', '--locked', '--all-groups'], { cwd: path.join(root, 'backend'), env: backendEnvironment() }),
     () => frontend(['ci']),
     () => run('git', ['config', 'core.hooksPath', '.githooks']),
   ]),
   prepare: () => run('git', ['config', 'core.hooksPath', '.githooks']),
-  check: () => checkRun(task, [['Tooling tests', testTooling], ...backendChecks, ...frontendChecks, ['HTTP smoke', smoke]]),
+  check: () => checkRun(task, [['Tooling tests', testTooling], ['Repository conventions', () => conventions()], ...backendChecks, ...frontendChecks, ['HTTP smoke', smoke]]),
   smoke,
   'check:backend': () => checkRun(task, backendChecks),
   'check:frontend': () => checkRun(task, frontendChecks),

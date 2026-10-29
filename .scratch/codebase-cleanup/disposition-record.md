@@ -379,3 +379,12 @@ Base `26a3e70`. Full ownership rationale and checks are in
 
 Ticket 09 still owns convention enforcement/documentation; ticket 10 owns final
 integrated acceptance. External gates remain separate and unrun in ticket 08.
+
+## Ticket 09 convention enforcement (2026-10-29)
+
+Base `6c4e182`. Added authoritative `docs/CONVENTIONS.md`, split the API contract
+index into domain annexes, reconciled architecture and historical-plan claims,
+retained the optional offline browser harness, and added the repository-conventions
+stage to root `npm run check`. Scratch has 101 Markdown records and zero tracked
+non-Markdown artifacts; producers use `.cache/`. Exact checks, limits, and the final
+result artifact are in [ticket 09](issues/09-prevent-convention-and-artifact-regressions.md#final-execution-record--2026-10-29).

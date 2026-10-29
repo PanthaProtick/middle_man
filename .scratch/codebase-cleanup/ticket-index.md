@@ -1,11 +1,10 @@
 # Codebase cleanup ticket index
 
 Breakdown approved on 2026-10-28. Parent: [cleanup specification](spec.md).
-Each ticket is `ready-for-agent`; blocking edges still govern eligibility.
-Ticket 01 records the inventory baseline in
-[disposition-record.md](disposition-record.md) and a resumable
-[implementation handoff](implementation-handoff.md). Implementation cleanup has
-not started.
+Tickets 01-09 have implementation records; ticket 10 remains the integrated
+verification. Blocking edges still govern eligibility. Ticket 01 records the
+inventory baseline in [disposition-record.md](disposition-record.md) and a resumable
+[implementation handoff](implementation-handoff.md).
 
 | Ticket | Blocked by | Spec acceptance focus |
 | --- | --- | --- |

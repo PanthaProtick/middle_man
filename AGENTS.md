@@ -23,7 +23,9 @@
   `any`; feature-specific UI, hooks, types, and tests in `frontend/src/features/`.
 - Source files: review at 250 physical lines, 300 maximum. Tests follow the same
   rule; only narrow documented cohesive-scenario or fixture exceptions may exceed
-  300. Decompose by responsibility, not by compressed formatting.
+  300. Decompose by responsibility, not by compressed formatting. Documentation
+  reviews at 250 and splits by topic without rewriting historical records.
+  Ownership, exception, and storage details: [conventions](docs/CONVENTIONS.md).
 - Development and unit tests support offline standby behavior without live
   credentials. Current item routes use process memory; Clerk settings alone do
   not implement authentication. Configuration flags do not establish readiness.
@@ -61,7 +63,7 @@
   read the output and deliver one report once that event arrives.
 - Windows PowerShell: Use PowerShell-compatible syntax (comma-separated lists
   `file1, file2` instead of bash braces `{file1,file2}`). Write scratch Python to
-  `.scratch/` with UTF-8 instead of nested inline quotes (`-c "..."`).
+  ignored `.cache/` with UTF-8 instead of nested inline quotes (`-c "..."`).
 - Context and diffs: Run `git diff --stat` before full diffs; scope diffs to
   target files. Bound large reads with `StartLine`/`EndLine` or `npm run context` to avoid truncation.
 - Testing tier: Use focused test commands (`npm run test:backend`,
@@ -72,7 +74,9 @@
 
 Use root wrappers to preserve cache and lockfile handling:
 
-- `npm run check`: tooling, lint, strict types, tests, build, and HTTP smoke.
+- `npm run check`: tooling, repository conventions, lint, strict types, tests,
+  build, and HTTP smoke.
+- `npm run conventions`: low-cost size, scratch, documentation link, and command checks.
 - `npm run test:backend -- tests/<file>.py` or
   `npm run test:frontend -- src/<path>.test.ts`: focused iteration.
 - `npm run typecheck`: check both applications' types.
@@ -90,7 +94,8 @@ Read only references needed for the current decision:
 - Verification failures, browser/live acceptance, or log interpretation:
   [verification reference](docs/agents/verification.md).
 - Architecture/state changes: [architecture](docs/ARCHITECTURE.md).
-- API/client changes: [contracts](docs/API_CONTRACTS.md).
+- API/client changes: [contracts](docs/API_CONTRACTS.md) and its domain annexes.
+- Size, ownership, and work-storage rules: [conventions](docs/CONVENTIONS.md).
 - Resumable or multi-session work: use [the task template](tasks/task-template.md).
   Small changes need no separate plan file. Update an existing ticket instead of
   duplicating its status. Load imported skills only when relevant to the task.

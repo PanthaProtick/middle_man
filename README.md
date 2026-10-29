@@ -9,7 +9,7 @@ Dev Template brings a typed frontend, validated API contracts, optional Gemini d
 - **React 19 + TypeScript:** Vite development server, strict types, and feature folders for UI and related tests.
 - **FastAPI + Pydantic v2:** Typed Python endpoints with interactive API documentation.
 - **Working demos:** Gemini chat, structured idea generation, and item creation/listing.
-- **Checks from the root:** Tooling tests, Ruff, Mypy, pytest, Oxlint, Vitest, production build, and local HTTP smoke.
+- **Checks from the root:** Tooling tests, repository conventions, Ruff, Mypy, pytest, Oxlint, Vitest, production build, and local HTTP smoke.
 - **Agent guidance:** Shared rules in [AGENTS.md](AGENTS.md), focused references in `docs/`, and resumable task templates.
 - **GitHub Actions:** The same setup and verification commands on Windows and Ubuntu for pushes and pull requests targeting `main` or `master`.
 
@@ -104,6 +104,7 @@ Run these from the project root so the wrappers preserve cache and lockfile hand
 | `npm run doctor` | Check prerequisites, backend package metadata, and the local TypeScript executable |
 | `npm run context` | List source paths; append paths or quoted `path#L10-L40` ranges for bounded context |
 | `npm run check` | Run the complete local verification gate |
+| `npm run conventions` | Check source/test sizes, tracked scratch Markdown, documentation links, and root commands |
 | `npm run test` | Run tooling, backend, and frontend tests |
 | `npm run lint` | Run backend and frontend linters |
 | `npm run typecheck` | Check Python and TypeScript types |
@@ -141,7 +142,11 @@ AGENTS.md            Shared working rules for coding agents
 
 Read [AGENTS.md](AGENTS.md) before making changes. Trace the relevant contracts and callers, keep changes focused, and add meaningful tests when changing behavior. Run `npm run check` before handing off code; record failed, blocked, and unrun gates explicitly.
 
-Use the [architecture guide](docs/ARCHITECTURE.md) for module boundaries, the [verification reference](docs/agents/verification.md) for acceptance limits, and the [task template](tasks/task-template.md) when work needs a handoff or multiple sessions. Replace sample domain content and the team roster as you adapt the template.
+Use the [architecture guide](docs/ARCHITECTURE.md) for module boundaries, the
+[repository conventions](docs/CONVENTIONS.md) for size and work-storage rules, the
+[verification reference](docs/agents/verification.md) for acceptance limits, and the
+[task template](tasks/task-template.md) when work needs a handoff or multiple
+sessions. Replace sample domain content and the team roster as you adapt the template.
 
 ## License
 
