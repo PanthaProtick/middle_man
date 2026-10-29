@@ -48,6 +48,9 @@ The number of the payment account used to send the delivery advance. The buyer s
 **Payment match**:
 Agreement between a buyer's payment claim and a received-payment record belonging to the same shop and designated receiving account. It includes both TrxID and payment sender number, alongside the provider and amount checks; it does not independently prove receipt through the payment provider.
 
+**Review assistant**:
+An advisory aid that explains an unresolved order review and suggests a corrective action using the order and directly related records belonging to the same shop. Its advice is not payment verification or a seller decision.
+
 **Courier draft**:
 _Bengali_: কুরিয়ার অনুরোধের খসড়া
 
