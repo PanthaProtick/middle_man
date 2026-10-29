@@ -171,64 +171,56 @@ export function TransactionInbox({
         )}
       </div>
 
-      {loading && transactions.length === 0 ? (
-        <div
-          role="status"
-          style={{
-            padding: '32px 16px',
-            textAlign: 'center',
-            background: 'var(--bg-surface)',
-            borderRadius: '8px',
-            border: '1px dashed var(--border-subtle)',
-          }}
-        >
-          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            {c("Loading received payments…")}
-          </p>
-        </div>
-      ) : transactions.length === 0 ? (
-        <div
-          style={{
-            padding: '32px 16px',
-            textAlign: 'center',
-            background: 'var(--bg-surface)',
-            borderRadius: '8px',
-            border: '1px dashed var(--border-subtle)',
-          }}
-        >
-          <Search size={24} style={{ color: 'var(--text-muted)', margin: '0 auto 8px' }} />
-          <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-            {emptyMessage}
-          </p>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {transactions.map((tx) => (
-            <React.Fragment key={tx.id}>
-              <TransactionCard
-                transaction={tx}
-                isExpanded={expandedId === tx.id}
-                onToggleExpand={() => toggleExpand(tx.id)}
-              />
-              {expandedId === tx.id && token && (
-                <EvidenceResolution receiptId={tx.id} token={token} accounts={accounts} onResolved={onResolved ?? (() => {})} />
-              )}
-            </React.Fragment>
-          ))}
+      <div className="ledger-scroll-viewport" data-testid="transaction-scroll-viewport">
+        {loading && transactions.length === 0 ? (
+          <div
+            className="ledger-scroll-empty-state"
+            role="status"
+            style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}
+          >
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+              {c("Loading received payments…")}
+            </p>
+          </div>
+        ) : transactions.length === 0 ? (
+          <div
+            className="ledger-scroll-empty-state"
+            style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}
+          >
+            <Search size={24} style={{ color: 'var(--text-muted)', margin: '0 auto 8px' }} />
+            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+              {emptyMessage}
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {transactions.map((tx) => (
+              <React.Fragment key={tx.id}>
+                <TransactionCard
+                  transaction={tx}
+                  isExpanded={expandedId === tx.id}
+                  onToggleExpand={() => toggleExpand(tx.id)}
+                />
+                {expandedId === tx.id && token && (
+                  <EvidenceResolution receiptId={tx.id} token={token} accounts={accounts} onResolved={onResolved ?? (() => {})} />
+                )}
+              </React.Fragment>
+            ))}
 
-          {nextCursor && onLoadMore && (
-            <div style={{ textAlign: 'center', marginTop: '12px' }}>
-              <button
-                className="btn btn-secondary btn-sm"
-                onClick={onLoadMore}
-                disabled={loading}
-              >
-                {c("Load More Received Payments")}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+            {nextCursor && onLoadMore && (
+              <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                <button
+                  className="btn btn-secondary btn-sm"
+                  onClick={onLoadMore}
+                  disabled={loading}
+                >
+                  {c("Load More Received Payments")}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
