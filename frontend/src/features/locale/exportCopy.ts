@@ -63,5 +63,3 @@ const bn: Record<keyof typeof en, string> = {
 };
 
 export const exportCopy = { en, bn };
-
-export type ExportCopy = typeof en;

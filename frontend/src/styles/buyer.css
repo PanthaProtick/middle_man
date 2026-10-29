@@ -69,28 +69,6 @@
   margin-top: 24px;
 }
 
-.buyer-section-title {
-  margin: 4px 0 12px;
-  color: #c7d2fe;
-  font-family: var(--font-heading);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.buyer-help {
-  margin: 4px 0 0;
-  color: var(--text-muted);
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.buyer-order-summary {
-  display: grid;
-  gap: 12px;
-}
-
 .buyer-order-item {
   padding: 14px;
   border: 1px solid var(--border-subtle);

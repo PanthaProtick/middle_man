@@ -99,13 +99,6 @@
   margin-bottom: 14px;
 }
 
-.form-grid-3 {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
 /* Modal Section Isolation */
 .detail-section-card {
   background: var(--bg-surface);

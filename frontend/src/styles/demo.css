@@ -41,61 +41,6 @@
   font-family: var(--font-mono);
 }
 
-/* Team Roster Grid */
-.team-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 20px;
-}
-
-.member-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 20px;
-  transition: all 0.2s ease;
-}
-
-.member-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(99, 102, 241, 0.35);
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-}
-
-.member-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.avatar {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #1e293b, #334155);
-  border: 2px solid rgba(99, 102, 241, 0.4);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
-  color: var(--primary-accent);
-}
-
-.member-name {
-  font-family: var(--font-heading);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.member-role {
-  font-size: 0.8rem;
-  color: var(--primary-accent);
-  font-weight: 500;
-}
-
 .tag-list {
   display: flex;
   flex-wrap: wrap;
@@ -198,8 +143,6 @@
 @media (max-width: 768px) {
   .app-container { padding: 16px 12px 40px; }
   .navbar { flex-direction: column; gap: 16px; align-items: flex-start; padding: 16px; }
-  .hero h2 { font-size: 2.1rem; }
-  .hero p { font-size: 0.95rem; }
   .grid-2 { grid-template-columns: 1fr; }
   .metrics-ribbon { grid-template-columns: repeat(2, 1fr); }
   .portal-shell { padding: 16px 12px 40px; }

@@ -102,8 +102,6 @@ input::placeholder, textarea::placeholder { color: #687d73; opacity: 1; }
 .portal-header { gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; }
 .portal-brand { color: var(--primary-accent); font-family: var(--font-body); font-size: .95rem; }
 .portal-main { gap: var(--section-gap); }
-.buyer-section-title { color: var(--primary-accent); font-size: 1rem; }
-.buyer-help { color: var(--text-secondary); line-height: 1.8; }
 .buyer-order-item { background: var(--bg-surface); border-radius: 10px; }
 .buyer-payment-destination { background: #eaf4ee; border: 1px solid #b8d5c5; border-radius: 12px; }
 .portal-notice { background: white; color: var(--text-primary); border-radius: 12px; }
@@ -198,7 +196,7 @@ fieldset { border: 0; }
 .tab-btn { min-height: 44px; color: var(--text-secondary); }
 .tab-btn.active { background: var(--primary-accent); color: white; box-shadow: none; }
 .tab-btn:hover { background: #e2ece6; color: var(--primary-accent); }
-.chat-container, .idea-box, .member-card { background: var(--bg-surface); }
+.chat-container, .idea-box { background: var(--bg-surface); }
 .message-bubble.ai { color: var(--text-primary); background: white; }
 .message-bubble.user { color: var(--primary-accent); background: #e3eee8; }
 
