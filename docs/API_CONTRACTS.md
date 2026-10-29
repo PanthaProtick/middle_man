@@ -23,11 +23,11 @@ current route/service/model split; update the owning annex when behavior changes
   courier proposals, protected submission outcomes, reconciliation, and
   post-submission changes.
 - [Buyer access and corrections](contracts/buyer-access-and-corrections.md): link
-  reissue/revocation, public admission limits, address assistance, seller buyer
-  corrections, and address-assistance language metadata.
+  reissue/revocation, public admission limits, manual address entry, and seller
+  buyer corrections.
 - [Retention, AI policy, and retired surfaces](contracts/retention-ai-and-retired-surfaces.md):
   raw-evidence and structured-record retention, self-test AI policy, and the
-  retirement of buyer payment screenshots.
+  retirement of buyer payment screenshots and address AI.
 
 ## Related contracts
 

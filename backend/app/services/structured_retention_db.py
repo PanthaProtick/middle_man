@@ -4,7 +4,6 @@ from datetime import datetime
 from sqlalchemy import delete, select, tuple_, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.address_entities import AddressExtractionTable
 from app.models.courier import CourierDraftTable
 from app.models.entities import (
     AllocationTable,
@@ -83,7 +82,7 @@ async def remove_order(db: AsyncSession, order: OrderTable, now: datetime,
     attempts = await erase_courier_details(db, order.shop_id, order.id)
     await redact_replays(db, {order.id, *(r.id for r in revisions), *attempts}, order.shop_id)
     await db.execute(delete(CourierDraftTable).where(CourierDraftTable.order_id == order.id))
-    for model in (BuyerRevisionTable, OrderReviewReasonTable, AddressExtractionTable):
+    for model in (BuyerRevisionTable, OrderReviewReasonTable):
         await db.execute(delete(model).where(model.order_id == order.id))
     await db.execute(delete(AuditEventTable).where(AuditEventTable.shop_id == order.shop_id,
         AuditEventTable.aggregate_id.in_({order.id, *attempts})))

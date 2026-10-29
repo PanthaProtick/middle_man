@@ -24,8 +24,6 @@ describe('EvidenceRetentionPanel', () => {
     counts: {
       sms_active: 2,
       sms_purged: 5,
-      ai_extractions_active: 1,
-      ai_extractions_purged: 4,
     },
     overdue_count: 0,
     failed_count: 0,
@@ -39,17 +37,14 @@ describe('EvidenceRetentionPanel', () => {
     counts: {
       sms_active: 3,
       sms_purged: 1,
-      ai_extractions_active: 2,
-      ai_extractions_purged: 0,
     },
     overdue_count: 2,
     failed_count: 1,
     last_cleanup_at: '2026-10-23T10:00:00Z',
     overdue_items: [
       {
-        evidence_type: 'address_ai',
-        evidence_id: 'ev-overdue-1',
-        order_id: 'ord-101',
+        evidence_type: 'sms',
+        evidence_id: 'sms-overdue-1',
         delete_after: '2026-10-20T10:00:00Z',
         error: 'Cleanup overdue: retained beyond 30 days',
       },
@@ -73,6 +68,7 @@ describe('EvidenceRetentionPanel', () => {
     expect(container.textContent).toContain('30-Day Raw Evidence Retention');
     expect(container.textContent).toContain('Raw evidence clean');
     expect(container.textContent).toContain('2 retained / 5 purged');
+    expect(container.textContent).not.toMatch(/AI Prompts|address AI/i);
   });
 
   it('displays warning and lists overdue items when cleanup is needed', async () => {
@@ -84,7 +80,7 @@ describe('EvidenceRetentionPanel', () => {
     });
 
     expect(container.textContent).toContain('2 raw evidence items overdue');
-    expect(container.textContent).toContain('ev-overdue-1');
+    expect(container.textContent).toContain('sms-overdue-1');
     expect(container.textContent).toContain('sms-overdue-2');
   });
 
@@ -189,9 +185,8 @@ describe('EvidenceRetentionPanel', () => {
       status: 'partial_failure',
       failures: [
         {
-          evidence_type: 'address_ai',
-          evidence_id: 'ev-overdue-1',
-          order_id: 'ord-101',
+          evidence_type: 'sms',
+          evidence_id: 'sms-overdue-1',
           delete_after: '2026-10-20T10:00:00Z',
           error: 'Storage service unavailable: failed to remove file',
         },
@@ -214,6 +209,6 @@ describe('EvidenceRetentionPanel', () => {
     expect(container.textContent).toContain('Purged 1 raw items (1 failed, 1 overdue remaining).');
     expect(container.textContent).toContain('1 raw evidence items overdue');
     expect(container.textContent).toContain('(1 storage failure)');
-    expect(container.textContent).toContain('ev-overdue-1');
+    expect(container.textContent).toContain('sms-overdue-1');
   });
 });

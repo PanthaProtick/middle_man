@@ -3,7 +3,6 @@ import { Send, AlertCircle, MapPin } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import { BuyerContactFields } from './BuyerContactFields';
 import { PaymentClaimFields } from './PaymentClaimFields';
-import { AddressAssistance } from './AddressAssistance';
 import { PathaoLocations } from './PathaoLocations';
 import { useLocale } from '../locale';
 import { validateBuyerDraft } from './validateBuyerDraft';
@@ -156,10 +155,6 @@ export function BuyerSubmissionForm({
               <div id="address_raw-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
             )}
           </div>
-
-          {order.ai_assistance_available !== true && <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', margin: '4px 0' }}>{t('buyer.form.manual')}</p>}
-          {portalToken && order.ai_assistance_available === true && <AddressAssistance portalToken={portalToken} address={draft.address_raw}
-            onUse={value => updateField('address_raw', value)} disabled={isSubmitting || isLocked} />}
         </div>
 
         {/* Section 3: Advance Payment Information */}

@@ -6,9 +6,11 @@ This document records the retention, storage deletion, and external lifecycle po
 
 1. **Raw Evidence (30 Days)**
    - **Raw SMS Bodies**: Incoming SMS message text (`sms_evidence.raw_text`).
-   - **Raw AI Prompts / Responses**: Gemini raw request text and raw model output in `address_extractions` (`raw_request`, `raw_response`).
    - **Retention Deadline**: Exactly 30 days from original collection instant (`delete_after = collected_at + 30 days`).
    - **Immutability of Deadlines**: Reprocessing, re-imports, order edits, and customer support actions never extend or reset the original 30-day deletion deadline.
+   - Address AI was retired by ADR-0007; its historical raw requests, responses and
+     suggestions are erased by migration `0027_retire_address_ai.sql`, so it is no
+     longer a raw-evidence store.
 
 2. **Structured Dependencies and Replay Protection**
    - Deletion removes raw originals only.
@@ -52,9 +54,9 @@ Local unit tests and PostgreSQL integration run offline using isolated adapters 
    - *Launch Gate*: Before live deployment, object bucket lifecycle rules must be explicitly configured to permanently expire noncurrent versions within the 30-day retention window.
 
 2. **Database Backup & WAL Retention**
-   - Point-in-time recovery (PITR) backups and write-ahead logs (WAL) retain historical database states containing raw SMS text and extraction responses prior to deletion.
+   - Point-in-time recovery (PITR) backups and write-ahead logs (WAL) retain historical database states containing raw SMS text prior to deletion.
    - *Launch Gate*: Database backup retention schedules must be documented with explicit backup expiration windows. Application deletion cannot claim immediate physical purge from historical backup archives.
 
 3. **External Provider Logging (Google Gemini)**
-   - Gemini API calls transmit buyer address text. Screenshot extraction was retired by ADR-0005.
+   - Address parsing no longer sends buyer text to Gemini (ADR-0007). Screenshot extraction was retired by ADR-0005. Shared Gemini demos remain template surfaces.
    - *Launch Gate*: Enterprise API data governance terms must be bound to ensure model provider requests are subject to zero-data-retention or matching retention lifecycles, and that prompt caching or abuse monitoring logs align with privacy policy commitments.

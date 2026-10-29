@@ -25,7 +25,6 @@ describe('BuyerReplacementIsolation Component', () => {
     created_at: '2026-10-24T12:00:00Z',
     expires_at: '2026-10-26T12:00:00Z',
     completed_at: '2026-10-24T14:00:00Z',
-    ai_assistance_available: false,
   };
 
   const mockPredecessorExpired: PublicOrder = {

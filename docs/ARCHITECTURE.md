@@ -43,7 +43,7 @@ flowchart LR
   detail, buyer links, payments, corrections, reconciliation, retention, and courier
   review. Colocated hooks and tests stay with the screen or workflow they serve.
 - `frontend/src/features/buyer/` owns the public `/orders/:token` portal, buyer
-  submission and corrections, address assistance, and public status projection.
+  submission and corrections, Pathao location choices, and public status projection.
 - `frontend/src/features/locale/` owns Bengali/English copy, formatting, and the
   typed locale provider. Keep business values out of translation catalogs.
 - `frontend/src/features/{demo,gemini,items}/`, `components/`, and `services/`
@@ -63,7 +63,7 @@ Routers are split by workflow rather than one central routes module:
 | `api/orders.py` | `/api/seller` order creation, decisions, buyer details, history |
 | `api/order_export.py` | `/api/seller/orders` search, date filtering, CSV export |
 | `api/link_access.py` | `/api/seller/orders` buyer-link revoke/reissue |
-| `api/public_orders.py` | `/api/public/orders` public reads, submission, address AI |
+| `api/public_orders.py` | `/api/public/orders` public reads, submission, Pathao locations |
 | `api/transactions.py` | `/api/seller/transactions` listing, comparison, corrections |
 | `api/sms.py` | `/api/seller/transactions` SMS import and parsing |
 | `api/courier.py` | `/api/seller/orders` courier drafts, submission, reconciliation |

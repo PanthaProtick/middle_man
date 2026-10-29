@@ -45,16 +45,20 @@ async def test_revoke_preserves_order_and_blocks_submission_replay(client, selle
 
 
 @pytest.mark.asyncio
-async def test_revoked_link_denies_address_assistance(client, seller_identity):
+async def test_revoked_link_denies_public_operations_and_retired_route_is_absent(client, seller_identity):
     order = await _create_test_order(client)
     public = f"/api/public/orders/{order['portal_token']}"
     result = await client.post(f"/api/seller/orders/{order['id']}/revoke-link",
                               json={"expected_version": 1}, headers={"Idempotency-Key": "revoke"})
     assert result.status_code == 200
-    for suffix, payload in (("address-extraction", {"raw_text": "Synthetic Dhaka address"}),):
-        denied = await client.post(public + "/" + suffix, json={**payload, "ai_opt_in": True}, headers={"Idempotency-Key": "extract"})
-        assert denied.status_code == 410, denied.text
-        assert denied.json()["error"]["code"] == "BUYER_LINK_REVOKED"
+    denied = await client.get(public)
+    assert denied.status_code == 410, denied.text
+    assert denied.json()["error"]["code"] == "BUYER_LINK_REVOKED"
+    retired = await client.post(public + "/address-extraction",
+                                json={"raw_text": "Synthetic Dhaka address", "ai_opt_in": True},
+                                headers={"Idempotency-Key": "extract"})
+    assert retired.status_code == 404
+    assert retired.headers["cache-control"] == "no-store, private"
 
 
 async def confirmed_order_revocation(client):

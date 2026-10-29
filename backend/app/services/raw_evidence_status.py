@@ -4,14 +4,12 @@ from typing import Any, Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.address_entities import AddressExtractionTable
 from app.models.cleanup import (
     CleanupFailureItem,
     EvidenceCleanupTable,
     RetentionStatusResponse,
 )
 from app.models.sms_entities import SmsEvidenceTable
-from app.services.address_assistance import _memory as _memory_address
 from app.services.sms_import import _memory_evidence as _memory_sms
 
 
@@ -24,8 +22,6 @@ async def get_retention_status(
     counts: dict[str, int] = {
         "sms_active": 0,
         "sms_purged": 0,
-        "ai_extractions_active": 0,
-        "ai_extractions_purged": 0,
     }
     overdue_items: list[CleanupFailureItem] = []
     failed_count = 0
@@ -47,25 +43,6 @@ async def get_retention_status(
                             evidence_id=sms.id,
                             delete_after=sms.delete_after,
                             error="Cleanup overdue: raw SMS retained beyond 30 days",
-                        )
-                    )
-
-        addr_rows = (await db.scalars(
-            select(AddressExtractionTable).where(AddressExtractionTable.shop_id == shop_id)
-        )).all()
-        for addr in addr_rows:
-            if addr.raw_request is None and addr.raw_response is None:
-                counts["ai_extractions_purged"] += 1
-            else:
-                counts["ai_extractions_active"] += 1
-                if addr.delete_after <= now:
-                    overdue_items.append(
-                        CleanupFailureItem(
-                            evidence_type="address_ai",
-                            evidence_id=addr.id,
-                            order_id=addr.order_id,
-                            delete_after=addr.delete_after,
-                            error="Cleanup overdue: AI address text retained beyond 30 days",
                         )
                     )
 
@@ -103,23 +80,6 @@ async def get_retention_status(
                             evidence_id=sms.id,
                             delete_after=sms.delete_after,
                             error="Cleanup overdue: raw SMS retained beyond 30 days",
-                        )
-                    )
-
-    for k, addr in _memory_address.items():
-        if addr.shop_id == shop_id:
-            if addr.raw_request is None and addr.raw_response is None:
-                counts["ai_extractions_purged"] += 1
-            else:
-                counts["ai_extractions_active"] += 1
-                if addr.delete_after <= now:
-                    overdue_items.append(
-                        CleanupFailureItem(
-                            evidence_type="address_ai",
-                            evidence_id=addr.id,
-                            order_id=addr.order_id,
-                            delete_after=addr.delete_after,
-                            error="Cleanup overdue: AI address text retained beyond 30 days",
                         )
                     )
 

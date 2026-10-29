@@ -10,7 +10,6 @@ from app.services.structured_retention import calendar_deadline
 async def purge_memory(now: datetime, shop_id: str) -> int:
     from app.core.idempotency import _memory_idempotency_store
     from app.models.sms import ImportResult
-    from app.services.address_assistance import _memory as addresses
     from app.services.buyer_service import _memory_buyer_revisions
     from app.services.order_service import _memory_orders
     from app.services.payment_marker_protection import verify_marker_key
@@ -64,9 +63,6 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
             if references_identity(record['data'], erased):
                 record['data'] = {'record_unavailable': True}
                 record['payload_hash'] = ''
-        for key, address in list(addresses.items()):
-            if address.order_id == row['id']:
-                del addresses[key]
         for imported in _memory_imports.values():
             if imported.shop_id != shop_id:
                 continue

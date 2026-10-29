@@ -58,37 +58,22 @@ burst either side of window reset. Workers/restarts have independent quotas. Thi
 local self-test admission control, not distributed hosted abuse protection.
 
 
-## Optional address assistance
+## Address entry without AI
 
-`POST /api/public/orders/{token}/address-extraction` requires `Idempotency-Key`
-and `{raw_text, ai_opt_in: true}`. Consent must be a JSON boolean. The existing
-public gate applies; orders must still be unsubmitted and unexpired, including on
-replay. A changed payload with the same key returns 409. At most five distinct
-requests per order are accepted; the manual submission remains available.
+Address AI is retired by [ADR-0007](../adr/0007-review-assistant-data-and-authority-boundary.md).
+No public route parses, suggests or extracts delivery addresses, and configured
+Gemini credentials cannot restore that behavior. `POST
+/api/public/orders/{token}/address-extraction` no longer exists (404). Buyers enter
+the written address themselves and may also submit the structured
+`district`/`thana`/`area`/`street_line`/`landmark` fields. Those confirmed fields
+belong to the buyer revision and remain readable by the owning seller.
 
-The response has `available` (boolean), `suggestions`,
-`review_required: true`, and `message`. Suggestions contain required nullable
-`district`, `thana`, `area`, `street_line`, `landmark`, and `clarification_question`
-strings, plus a required boolean `needs_clarification`.
-Invalid, blocked, oversized, incomplete or unavailable provider output returns a
-manual fallback. Suggestions never submit orders or confirm payments. The buyer
-edits the separate review fields and explicitly applies them to the readable
-address; nulls remain empty. Address edits, submission and navigation invalidate
-late responses. A transport retry retains the same address/key.
-
-Gemini is backend-only, with no tools, no automatic retries, a five-second HTTP
-timeout and a six-second total provider deadline. The adapter uses the official
-[generateContent contract](https://ai.google.dev/api/generate-content). Tests use
-an explicit offline provider/HTTP transport. Current model suitability, service
-data terms and actual configured-provider behavior remain launch gates.
-
-`address_extractions` owns raw requests/responses by shop and order, with immutable
-collection time and original 30-day deadlines. Raw text is excluded from generic
-idempotency records, audit logs and public status projections. Cleanup must clear
-both raw columns by `delete_after`; ticket 16 owns scheduled cleanup and overdue
-reporting, alongside the shared backup/provider purge launch gates. Structured
-results are retained separately for replay and remain personal data under the
-shared completed-order retention policy. Replays never extend raw deadlines.
+Migration `0027_retire_address_ai.sql` erases historical extraction raw requests,
+provider responses, generated suggestions and extraction replay results by dropping
+`address_extractions`, and removes the obsolete `ai_assistance_available` key from
+cached submission responses. Buyer revisions, payment claims, receipts, allocations,
+lifecycle and duplicate-payment protection are preserved. This slice does not make
+Pathao selections mandatory.
 
 ## Seller buyer corrections
 
@@ -118,8 +103,8 @@ shared completed-order retention policy. Replays never extend raw deadlines.
   return 404. Database failures return 503 and require identical-payload/key retry.
 - Revocation, version increment, audit event and replay record commit together under
   the shop-then-order lock. It preserves lifecycle, terms, deadline and allocation.
-  Public reads, submission/upload replay and AI assistance return 410
-  `BUYER_LINK_REVOKED` before cached results, storage reads or provider work. Public
+  Public reads and submission replay return 410
+  `BUYER_LINK_REVOKED` before cached results or provider work. Public
   authorization refreshes locked database rows to avoid stale session state.
 - Migration `0018_buyer_link_revocation.sql` is additive. Apply it before running
   this version against a persistent database. Local disposable-schema verification
@@ -127,12 +112,5 @@ shared completed-order retention policy. Replays never extend raw deadlines.
 
 ## Address assistance language metadata
 
-`POST /api/public/orders/{token}/address-extraction` accepts optional `language`
-(`en` or `bn`, default `en`) to guide a fresh provider clarification. The
-response includes nullable `explanation_language`; historical responses without
-metadata remain valid and have an unknown language. This hint is excluded from
-the existing idempotency fingerprint: a retry in another language replays the
-original extraction and language without another provider call. Address fields
-remain unchanged and require buyer review. Provider output language is requested,
-not independently verified. AI opt-in, limits, retention, and lifecycle gates remain
-unchanged.
+Retired with address AI. No public route accepts an address extraction language
+hint or returns `explanation_language`; historical responses are not served.

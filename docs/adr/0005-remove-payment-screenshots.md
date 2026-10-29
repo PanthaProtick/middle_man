@@ -9,6 +9,10 @@ friction and private-data storage at the cost of losing a visual aid in disputes
 manual payment details, SMS reconciliation, address assistance, and development
 screenshots remain in scope of the existing system.
 
+Superseded in part: address assistance was later retired by
+[ADR-0007](0007-review-assistant-data-and-authority-boundary.md); the manual
+payment, SMS and development-screenshot boundaries above remain.
+
 Stop old application processes before the forward migration and file purge.
 Filesystem deletion cannot be rolled back by PostgreSQL; verify the storage root
 and retain retryable progress until files and database removal are both verified.

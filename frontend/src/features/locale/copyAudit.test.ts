@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { addressAssistanceCopy } from './addressAssistanceCopy';
 import { bnBuyerErrors, enBuyerErrors } from './buyerErrors';
 import { bnBuyerLocations, enBuyerLocations } from './buyerLocations';
 import { bnBuyerMessages, enBuyerMessages } from './buyerMessages';
@@ -36,7 +35,6 @@ const pairedCopies: Record<string, PairedCopy> = {
   correctionOutcomeCopy,
   exportCopy,
   sellerCopy,
-  addressAssistanceCopy,
   buyerMessages: { en: enBuyerMessages, bn: bnBuyerMessages },
   buyerLocations: { en: enBuyerLocations, bn: bnBuyerLocations },
   buyerErrors: { en: enBuyerErrors, bn: bnBuyerErrors },

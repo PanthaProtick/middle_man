@@ -1,7 +1,6 @@
 import type { PathaoSelection } from './pathaoTypes';
 
 export interface PublicOrder {
-  ai_assistance_available?: boolean;
   id: string;
   shop_display_name: string;
   product_name: string;

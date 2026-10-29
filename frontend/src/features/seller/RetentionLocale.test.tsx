@@ -8,7 +8,7 @@ import { StructuredRetentionPanel } from './StructuredRetentionPanel';
 afterEach(() => { vi.restoreAllMocks(); localStorage.clear(); });
 it('translates partial purge counts and deadlines without repeating deletion', async () => {
   localStorage.setItem('middleman.locale', 'en');
-  const status = {counts:{sms_active:2,sms_purged:3,ai_extractions_active:0,ai_extractions_purged:1},overdue_count:1,failed_count:1,last_cleanup_at:'2026-10-24T00:00:00Z',overdue_items:[{evidence_type:'sms',evidence_id:'sms-১২',delete_after:'2026-10-23T00:00:00Z',error:'private driver text'}]};
+  const status = {counts:{sms_active:2,sms_purged:3},overdue_count:1,failed_count:1,last_cleanup_at:'2026-10-24T00:00:00Z',overdue_items:[{evidence_type:'sms',evidence_id:'sms-১২',delete_after:'2026-10-23T00:00:00Z',error:'private driver text'}]};
   const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValueOnce(new Response(JSON.stringify(status)))
     .mockResolvedValueOnce(new Response(JSON.stringify({items_purged:2,items_failed:1,overdue_remaining:1})))
     .mockResolvedValueOnce(new Response(JSON.stringify(status)));

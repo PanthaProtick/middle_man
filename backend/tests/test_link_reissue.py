@@ -118,7 +118,7 @@ async def test_confirmed_allocation_survives_rotation(client, seller_identity):
 
 
 @pytest.mark.asyncio
-async def test_old_token_denies_address_assistance(client, seller_identity):
+async def test_old_token_route_is_retired_and_new_token_still_submits(client, seller_identity):
     order = await _create_test_order(client)
     public = f"/api/public/orders/{order['portal_token']}"
     fresh = await client.post(f"/api/seller/orders/{order['id']}/reissue-link",
@@ -126,9 +126,9 @@ async def test_old_token_denies_address_assistance(client, seller_identity):
     assert fresh.status_code == 200
     assert fresh.headers["cache-control"] == "no-store, private"
     assert fresh.headers["referrer-policy"] == "no-referrer"
-    for suffix, payload in (("address-extraction", {"raw_text": "Synthetic Dhaka address"}),):
-        denied = await client.post(public + "/" + suffix, json={**payload, "ai_opt_in": True},
-                                   headers={"Idempotency-Key": "extract"})
-        assert denied.status_code == 404
+    retired = await client.post(public + "/address-extraction",
+                                json={"raw_text": "Synthetic Dhaka address", "ai_opt_in": True},
+                                headers={"Idempotency-Key": "extract"})
+    assert retired.status_code == 404
     new_public = f"/api/public/orders/{fresh.json()['portal_token']}"
     assert (await client.post(new_public + "/submission", json=PAYLOAD, headers={"Idempotency-Key": "submit"})).status_code == 200

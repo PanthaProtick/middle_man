@@ -43,7 +43,7 @@ async def test_enabled_policy_allows_token_possession_without_buyer_identity(cli
         "id", "shop_display_name", "product_name", "total_minor", "required_advance_minor",
         "expected_cod_minor", "actual_cod_minor", "account_provider", "account_receiving_number",
         "account_label", "lifecycle", "status_message", "submission_acknowledgement",
-        "created_at", "expires_at", "completed_at", "ai_assistance_available",
+        "created_at", "expires_at", "completed_at",
     }
     assert response.headers["cache-control"] == "no-store, private"
     assert response.headers["referrer-policy"] == "no-referrer"

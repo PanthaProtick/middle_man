@@ -1,9 +1,8 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, computed_field, field_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validator
 
-from app.core.config import settings
 from app.models.order import MAX_SAFE_INTEGER
 from app.models.pathao_location import LocationResolution
 from app.models.seller import canonicalize_bd_phone
@@ -106,12 +105,6 @@ class BuyerSubmission(BaseModel):
 
 
 class PublicOrder(BaseModel):
-    @computed_field  # type: ignore[prop-decorator]
-    @property
-    def ai_assistance_available(self) -> bool:
-        # Current policy must also apply to saved submission responses.
-        return settings.ai_assistance_available
-
     id: str
     shop_display_name: str
     product_name: str

@@ -79,7 +79,6 @@ EXPECTED_SCHEMA_TABLES = [
     "sms_evidence",
     "sms_imports",
     "payment_metrics",
-    "address_extractions",
     "evidence_cleanups",
     "payment_marker_keys",
     "courier_drafts",

@@ -1,6 +1,6 @@
 # Bound review assistance to one shop and advisory authority
 
-Status: accepted design; not implemented.
+Status: accepted design; address AI retirement implemented, review assistant not implemented.
 
 On 2026-10-30, we agreed that review assistance uses backend-enforced shop
 isolation and a minimal snapshot of one order review and directly related
@@ -48,4 +48,5 @@ remaining free quota and reset with the accepted in-memory counters on restart.
 
 The user subsequently requested specification only. See the published
 [specification](../../.scratch/review-assistant/spec.md), marked ready-for-agent.
-No application behavior or historical-data cleanup has been implemented.
+The address-retirement decision is implemented (ticket 01, migration
+`0027_retire_address_ai.sql`); seller review assistance remains unimplemented.

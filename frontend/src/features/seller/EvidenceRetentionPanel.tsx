@@ -90,7 +90,7 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
             <Shield size={18} /> {tr("30-Day Raw Evidence Retention")}
           </h4>
           <p className="isolated-section-desc">
-            {tr("Original raw SMS text and address AI requests/responses are retained for up to 30 days from collection. Reprocessing never resets this deadline. Structured claims, accepted allocations, and COD remain intact after deletion.")}
+            {tr("Original raw SMS text is retained for up to 30 days from collection. Reprocessing never resets this deadline. Structured claims, accepted allocations, and COD remain intact after deletion.")}
           </p>
         </div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -139,12 +139,6 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
                 {formatCount(status.counts.sms_active)} {tr("retained")} / {formatCount(status.counts.sms_purged)} {tr("purged")}
               </strong>
             </div>
-            <div className="isolated-subcard" style={{ marginBottom: 0 }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block' }}>{tr("AI Prompts/Outputs")}</span>
-              <strong style={{ fontSize: '0.9rem', color: 'var(--text-primary)' }}>
-                {formatCount(status.counts.ai_extractions_active)} {tr("retained")} / {formatCount(status.counts.ai_extractions_purged)} {tr("purged")}
-              </strong>
-            </div>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', flexWrap: 'wrap' }}>
@@ -175,7 +169,7 @@ export function EvidenceRetentionPanel({ token }: EvidenceRetentionPanelProps): 
               <ul style={{ margin: 0, paddingLeft: '16px', fontSize: '0.78rem', color: 'var(--amber-accent)' }}>
                 {status.overdue_items.map((item) => (
                   <li key={item.evidence_id} style={{ marginBottom: '4px' }}>
-                    <strong>{tr(["sms", "address_ai"].includes(item.evidence_type) ? item.evidence_type : "Unknown evidence type; review the record.")}</strong> (ID: {item.evidence_id}) — {tr("Deadline")}: {formatBangladeshDateTime(item.delete_after, locale)} — {tr("Cleanup overdue. Retry cleanup; contact support if it continues.")}
+                    <strong>{tr(item.evidence_type === "sms" ? item.evidence_type : "Unknown evidence type; review the record.")}</strong> (ID: {item.evidence_id}) — {tr("Deadline")}: {formatBangladeshDateTime(item.delete_after, locale)} — {tr("Cleanup overdue. Retry cleanup; contact support if it continues.")}
                   </li>
                 ))}
               </ul>

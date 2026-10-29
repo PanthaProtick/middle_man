@@ -2,10 +2,9 @@ import datetime
 import uuid
 from typing import Any, Literal, Optional
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.address_entities import AddressExtractionTable
 from app.models.cleanup import (
     CleanupFailureItem,
     EvidenceCleanupTable,
@@ -13,7 +12,6 @@ from app.models.cleanup import (
     RetentionStatusResponse,
 )
 from app.models.sms_entities import SmsEvidenceTable
-from app.services.address_assistance import _memory as _memory_address
 from app.services.raw_evidence_status import get_retention_status as _get_retention_status
 from app.services.sms_import import _memory_evidence as _memory_sms
 
@@ -35,7 +33,6 @@ async def purge_raw_evidence(
     status_val: Literal["clean", "partial_failure", "failed"] = "clean"
 
     if db is not None:
-        # 2. SMS Evidence
         sms_query = select(SmsEvidenceTable).where(
             SmsEvidenceTable.delete_after <= now,
             SmsEvidenceTable.raw_text.is_not(None),
@@ -45,22 +42,6 @@ async def purge_raw_evidence(
         sms_records = (await db.scalars(sms_query)).all()
         for sms in sms_records:
             sms.raw_text = None
-            purged_count += 1
-
-        # 3. Address AI extractions
-        addr_query = select(AddressExtractionTable).where(
-            AddressExtractionTable.delete_after <= now,
-            or_(
-                AddressExtractionTable.raw_request.is_not(None),
-                AddressExtractionTable.raw_response.is_not(None),
-            ),
-        )
-        if shop_id:
-            addr_query = addr_query.where(AddressExtractionTable.shop_id == shop_id)
-        addr_records = (await db.scalars(addr_query)).all()
-        for addr in addr_records:
-            addr.raw_request = None
-            addr.raw_response = None
             purged_count += 1
 
         status_val = "clean" if failed_count == 0 else "partial_failure"
@@ -81,19 +62,10 @@ async def purge_raw_evidence(
             SmsEvidenceTable.delete_after <= now,
             SmsEvidenceTable.raw_text.is_not(None),
         )
-        rem_addr_q = select(func.count(AddressExtractionTable.id)).where(
-            AddressExtractionTable.delete_after <= now,
-            or_(
-                AddressExtractionTable.raw_request.is_not(None),
-                AddressExtractionTable.raw_response.is_not(None),
-            ),
-        )
         if shop_id:
             rem_sms_q = rem_sms_q.where(SmsEvidenceTable.shop_id == shop_id)
-            rem_addr_q = rem_addr_q.where(AddressExtractionTable.shop_id == shop_id)
 
         overdue_rem += (await db.scalar(rem_sms_q)) or 0
-        overdue_rem += (await db.scalar(rem_addr_q)) or 0
 
         return RetentionCleanupResponse(
             shop_id=shop_id or "all",
@@ -106,21 +78,11 @@ async def purge_raw_evidence(
         )
 
     # In-memory mode
-    # 2. SMS
     for k, sms in list(_memory_sms.items()):
         if shop_id and sms.shop_id != shop_id:
             continue
         if sms.delete_after <= now and sms.raw_text is not None:
             sms.raw_text = None
-            purged_count += 1
-
-    # 3. Address
-    for k, addr in list(_memory_address.items()):
-        if shop_id and addr.shop_id != shop_id:
-            continue
-        if addr.delete_after <= now and (addr.raw_request is not None or addr.raw_response is not None):
-            addr.raw_request = None
-            addr.raw_response = None
             purged_count += 1
 
     status_val = "clean" if failed_count == 0 else "partial_failure"
@@ -136,19 +98,10 @@ async def purge_raw_evidence(
         }
     )
 
-    overdue_rem = (
-        sum(
-            1 for sms in _memory_sms.values()
-            if (not shop_id or sms.shop_id == shop_id)
-            and sms.delete_after <= now and sms.raw_text is not None
-        )
-        + sum(
-            1 for addr in _memory_address.values()
-            if (not shop_id or addr.shop_id == shop_id)
-            and addr.delete_after <= now
-            and (addr.raw_request is not None or addr.raw_response is not None)
-        )
-
+    overdue_rem = sum(
+        1 for sms in _memory_sms.values()
+        if (not shop_id or sms.shop_id == shop_id)
+        and sms.delete_after <= now and sms.raw_text is not None
     )
 
     return RetentionCleanupResponse(

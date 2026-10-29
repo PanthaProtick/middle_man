@@ -42,7 +42,7 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
             <span>Demo Sandbox & Technical Tools</span>
           </div>
           <p className="card-subtitle">
-            Diagnostic tools, AI address assistance, database views, and automated retention policies preserved for demonstration and technical evaluation.
+            Diagnostic tools, database views, and automated retention policies preserved for demonstration and technical evaluation.
           </p>
         </div>
       </div>
@@ -108,10 +108,10 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
         <section aria-labelledby="demo-gemini-title">
           <div style={{ marginBottom: '14px', padding: '12px 16px', background: 'rgba(255, 71, 126, 0.08)', border: '1px solid rgba(255, 71, 126, 0.2)', borderRadius: 'var(--radius-sm)' }}>
             <h4 id="demo-gemini-title" style={{ fontSize: '0.88rem', color: 'var(--primary-accent)', margin: '0 0 4px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Flame size={14} /> AI Assistance Capabilities
+              <Flame size={14} /> Local Gemini Sandbox
             </h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Test optional address assistance with synthetic delivery addresses. Enter payment details manually.
+              Chat and idea generation run from the template demos. Buyers enter delivery and payment details manually.
             </p>
           </div>
           <GeminiPlayground />
@@ -194,7 +194,7 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Optional address suggestions require buyer consent and review.
+                Demo chat and idea generation only. Buyer addresses are never sent for parsing.
               </p>
             </div>
           </div>

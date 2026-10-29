@@ -167,8 +167,6 @@ export interface RetentionStatusResponse {
   counts: {
     sms_active: number;
     sms_purged: number;
-    ai_extractions_active: number;
-    ai_extractions_purged: number;
   };
   overdue_count: number;
   failed_count: number;

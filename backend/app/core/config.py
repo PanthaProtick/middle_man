@@ -1,5 +1,4 @@
 import json
-import re
 from typing import List, Literal, Union
 
 from pydantic import Field, field_validator
@@ -53,14 +52,6 @@ class Settings(BaseSettings):
     def ai_enabled(self) -> bool:
         """Self-test policy overrides provider credentials and cached suggestions."""
         return not self.SELF_TEST_MODE
-
-    @property
-    def ai_assistance_available(self) -> bool:
-        return (
-            self.ai_enabled
-            and not _has_placeholder(self.GEMINI_API_KEY, ["your-gemini-api-key"])
-            and re.fullmatch(r"[a-zA-Z0-9._-]+", self.GEMINI_MODEL) is not None
-        )
 
     # Order Link Encryption
     ORDER_LINK_ENCRYPTION_KEY: str = ""

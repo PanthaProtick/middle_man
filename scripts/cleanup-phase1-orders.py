@@ -73,7 +73,7 @@ def allowed_rows(data, receipt_ids):
             if table == 'orders':
                 matches = row['id'] in TARGETS
             elif table in {'buyer_revisions', 'order_review_reasons',
-                           'address_extractions', 'allocations'}:
+                           'allocations'}:
                 matches = row['order_id'] in TARGETS
             elif table == 'received_transactions':
                 matches = row['id'] in receipt_ids

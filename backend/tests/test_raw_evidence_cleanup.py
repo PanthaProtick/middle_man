@@ -7,7 +7,6 @@ from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.public_gate import allow_synthetic_buyer_demo, verify_public_access_gate
 from app.main import app
 from app.models.sms import SmsImportInput
-from app.services.address_assistance import reset_address_memory
 from app.services.buyer_service import reset_buyer_memory_store
 from app.services.order_service import reset_order_memory_store
 from app.services.raw_evidence_cleanup import (
@@ -26,7 +25,6 @@ def clean_stores():
     reset_buyer_memory_store()
     reset_cleanup_memory()
     _memory_sms.clear()
-    reset_address_memory()
     app.dependency_overrides[verify_public_access_gate] = allow_synthetic_buyer_demo
     yield
     app.dependency_overrides.pop(verify_public_access_gate, None)
@@ -36,7 +34,6 @@ def clean_stores():
     reset_buyer_memory_store()
     reset_cleanup_memory()
     _memory_sms.clear()
-    reset_address_memory()
 
 
 @pytest.mark.asyncio

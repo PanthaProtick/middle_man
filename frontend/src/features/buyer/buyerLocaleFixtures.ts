@@ -17,7 +17,6 @@ export const awaitingOrder: PublicOrder = {
   created_at: '2026-10-23T12:00:00Z',
   expires_at: '2026-10-25T12:00:00Z',
   completed_at: null,
-  ai_assistance_available: false,
 };
 
 export function findLanguageButton(container: HTMLElement, name: string): HTMLButtonElement {
