@@ -124,3 +124,26 @@ Unresolved risks:
 Next action: none for this ticket; ticket 02 (seller review assistant) remains the
 follow-on slice.
 
+## Independent verification (2026-10-30)
+
+- Reviewed `65b4218...ddcdee5` with separate standards and spec reviews; no
+  actionable retirement defects found. No application code changed during review.
+- Minor copy observation: `DemoTools.tsx:111` says "Local Gemini Sandbox" while
+  demos can still call Gemini outside self-test mode. Prefer "Gemini Sandbox"
+  until ticket 03 makes them permanently local; this does not block ticket 01.
+- Focused backend retirement/access/retention/link suites: 33 passed, migration
+  initially skipped without its opt-in database URL. Focused rendered frontend
+  retirement/portal/retention suites: 4 files, 16 passed.
+- Reran migration, durable storage, structured retention, and obsolete cleanup on
+  disposable loopback PostgreSQL 18.4: 19 passed, including actual migration 0027
+  erasure, preserved business records, duplicate-payment blocking, and repeat cleanup.
+- Final `npm run check`: PASS, `.cache/checks/check-7kuaYr/result.json`;
+  backend 484 passed / 174 skipped, frontend 82 files / 434 passed, and all other
+  gate stages passed. PostgreSQL opt-in tests ran separately as recorded above.
+- First gate attempt stopped at a Windows pytest temp-directory permission error
+  (`check-AiS5AA`); rerun used repository-local `TEMP`/`TMP` and passed.
+- Hosted, real-browser, and live-provider acceptance were not run. Provider-held
+  copies and backups remain outside application migration evidence.
+- Next action: ticket 01 is verified locally. Ticket 02 requires available Pathao
+  choices; seller review assistance starts in ticket 04 (per the shared index).
+
