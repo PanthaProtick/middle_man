@@ -1,24 +1,20 @@
-import { formatOrderAmount } from './orderNumbers';
+import { OrderOverview } from './OrderOverview';
+import { OrderPaymentDetails } from './OrderPaymentDetails';
 import React, { useEffect, useId, useRef, useState } from 'react';
 import './OrderDetailModal.css';
-import { X, Clock, ShieldCheck, Package, ExternalLink, CheckCircle2, AlertTriangle } from 'lucide-react';
+import { X, Package, ExternalLink } from 'lucide-react';
 import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { SellerOrder } from './types';
-import { formatRemainingCod } from './api';
 import { BuyerCorrection } from './BuyerCorrection';
-import { PaymentException } from './PaymentException';
-import { PaymentHistory } from './PaymentHistory';
 import { CourierWorkspace } from './CourierWorkspace';
 import { OrderOutcomes } from './OrderOutcomes';
 import { OrderExport } from './OrderExport';
 import { BuyerLinkCopy } from './BuyerLinkCopy';
 import { BuyerLinkAccess } from './BuyerLinkAccess';
-import { formatBangladeshDateTime } from '../locale/format';
-import { orderCopy, lifecycleLabel, reviewLabel, allocationLabel } from '../locale/orderCopy';
+import { orderCopy, lifecycleLabel } from '../locale/orderCopy';
 import { LocaleSwitch } from '../locale/LocaleSwitch';
 import { useLocale } from '../locale/context';
 import { buyerLinkCopy } from '../locale/buyerLinkCopy';
-import { DeveloperDetailsPanel } from './DeveloperDetailsPanel';
 
 interface OrderDetailModalProps {
   order: SellerOrder;
@@ -32,7 +28,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
   const text = orderCopy[locale];
   const [order, setOrder] = useState(initialOrder);
   const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(null);
-  const [showReviewCodes, setShowReviewCodes] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -62,7 +57,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
       if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
     };
   }, []);
-  const isExpired = order.lifecycle === 'expired';
   const isConfirmed = order.lifecycle === 'confirmed';
   const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
 
@@ -106,158 +100,11 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
       </div>
 
       <section role="tabpanel" id={`${titleId}-overview-panel`} aria-labelledby={`${titleId}-overview-tab`} hidden={activeTab !== 0}>
-      <div style={{ marginBottom: '16px' }}>
-        {order.predecessor_order_id && (
-          <div style={{ fontSize: '0.75rem', color: 'var(--primary-accent)', marginBottom: '4px' }}>
-            {text.predecessor} #{order.predecessor_order_id.slice(0, 8)}
-          </div>
-        )}
-        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{text.product}</div>
-        <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>{order.product_name}</div>
-      </div>
-
-      <div className="modal-terms-grid">
-        <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{text.agreed}</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-            BDT {formatOrderAmount(order.total_minor)}
-          </div>
-        </div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{text.required}</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--cyan-accent)' }}>
-            BDT {formatOrderAmount(order.required_advance_minor)}
-          </div>
-        </div>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-            {isConfirmed ? text.actualRemaining : text.expectedRemaining}
-          </div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: isConfirmed ? 'var(--emerald-accent)' : 'var(--primary-accent)' }}>
-            {formatRemainingCod(order)}
-          </div>
-        </div>
-      </div>
-
-      <div className="detail-section-card">
-        <div className="detail-section-header">
-          <div className="detail-section-title" style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)' }}>
-            <Clock size={14} /> {text.deadlines}
-          </div>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '8px', fontSize: '0.8rem' }}>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{text.status}</span>
-            <span style={{ fontWeight: 600, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-              {lifecycleLabel(order.lifecycle, text)}
-            </span>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{text.version}</span>
-            <span style={{ color: 'var(--text-primary)' }}>v{order.version}</span>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{text.created}</span>
-            <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshDateTime(order.created_at, locale)}</span>
-          </div>
-          <div>
-            <span style={{ color: 'var(--text-secondary)' }}>{isExpired ? text.expiredShort : text.deadlineShort}</span>
-            <span style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)' }}>
-              {formatBangladeshDateTime(order.expires_at, locale)}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <DeveloperDetailsPanel order={order} />
-
+        <OrderOverview order={order} />
       </section>
       <section role="tabpanel" id={`${titleId}-payment-panel`} aria-labelledby={`${titleId}-payment-tab`} hidden={activeTab !== 1}>
-      {isConfirmed && (
-        <div style={{ marginBottom: '16px', background: 'rgba(16, 185, 129, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--emerald-accent)', marginBottom: '6px' }}>
-            <CheckCircle2 size={14} /> {text.allocation}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '8px', fontSize: '0.8rem' }}>
-            <div>
-              <span style={{ color: 'var(--text-secondary)' }}>{text.basis}</span>
-              <span style={{ fontWeight: 600, color: 'var(--text-primary)', textTransform: 'capitalize' }}>
-                {allocationLabel(order.allocation_basis, text)}
-              </span>
-            </div>
-            <div>
-              <span style={{ color: 'var(--text-secondary)' }}>{text.accepted}</span>
-              <span style={{ fontWeight: 600, color: 'var(--cyan-accent)' }}>
-                BDT {formatOrderAmount(order.total_minor - (order.actual_cod_minor ?? order.expected_cod_minor))}
-              </span>
-            </div>
-            {order.completed_at && (
-              <div style={{ gridColumn: '1 / -1' }}>
-                <span style={{ color: 'var(--text-secondary)' }}>{text.confirmedAt}</span>
-                <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshDateTime(order.completed_at, locale)}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {isConfirmed && <p>{text.confirmationHelp}</p>}
-
-      {hasReviewReasons && (
-        <div style={{ marginBottom: '16px', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--rose-accent)' }}>
-              <AlertTriangle size={14} /> {text.reviewRequired}
-            </div>
-            <button
-              type="button"
-              className="btn btn-secondary btn-xs"
-              onClick={() => setShowReviewCodes((prev) => !prev)}
-              style={{ fontSize: '0.7rem', padding: '2px 8px' }}
-              aria-expanded={showReviewCodes}
-            >
-              {showReviewCodes ? text.hideErrors : text.showErrors}
-            </button>
-          </div>
-          <p>{order.review_reasons.map(reason => reviewLabel(reason, text)).join(" · ")}</p>
-          <div style={{ display: showReviewCodes ? 'flex' : 'none', flexWrap: 'wrap', gap: '6px' }}>
-            {order.review_reasons.map((reason) => (
-              <span
-                key={reason}
-                style={{
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  border: '1px solid rgba(239, 68, 68, 0.4)',
-                  color: 'var(--rose-accent)',
-                  fontSize: '0.75rem',
-                  padding: '2px 8px',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {reason}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      <div className="detail-section-card">
-        <div className="detail-section-header">
-          <div className="detail-section-title">
-            <ShieldCheck size={14} /> {text.snapshot}
-          </div>
-        </div>
-        <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 500 }}>
-          {order.account_label} — {order.account_provider.toUpperCase()} ({order.account_receiving_number})
-        </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
-          {text.immutable}
-        </div>
-      </div>
-
-      {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
-      {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
-        onAccepted={fresh => {setOrder(fresh); onCorrected?.(fresh);}} />}
+        <OrderPaymentDetails order={order} token={token}
+          onCorrected={fresh => { setOrder(fresh); onCorrected?.(fresh); }} />
       </section>
       <section role="tabpanel" id={`${titleId}-delivery-panel`} aria-labelledby={`${titleId}-delivery-tab`} hidden={activeTab !== 2}>
       <section className="detail-section-card" aria-label={text.parcel}>

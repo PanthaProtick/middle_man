@@ -309,3 +309,16 @@ focused component/API test where practical.
 Next action: compact the context, then execute ticket 02 from
 `implementation-handoff.md`; do not start feature reorganization before scratch
 and producers are clean.
+
+## Ticket 05 execution update (2026-10-29)
+
+Seller details now separates dialog/state (`OrderDetailModal`, 163 lines),
+overview inspection (`OrderOverview`, 87), and payment inspection/actions
+(`OrderPaymentDetails`, 112). Oversized workspace/date tests are split by
+rendered UI vs client, selection vs requests, and list vs export, with colocated
+support and all assertions retained. No runtime backend changes or deletions.
+Ticket 04's split order-route suites remain authoritative. See
+[issue 05](issues/05-organize-seller-shell-and-orders.md) for exact paths/results.
+Retained review-trigger shell/service/client/model files have cohesion evidence
+there; tickets 06/08 coordinate shared account/client/entity ownership. No test
+size exceptions remain among ticket 05 targets.
