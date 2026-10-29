@@ -36,12 +36,14 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   const requestRef = useRef(0);
 
   const load = useCallback(
-    async (cursor?: string) => {
+    async (cursor?: string, clear: boolean = true) => {
       if (!token) return;
       const requestId = requestRef.current + 1;
       requestRef.current = requestId;
       if (!cursor) {
-        setTransactions([]);
+        if (clear) {
+          setTransactions([]);
+        }
         setNextCursor(null);
       }
       setLoading(true);
@@ -67,7 +69,7 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
     [token, onError],
   );
 
-  const reload = useCallback(() => load(), [load]);
+  const reload = useCallback(() => load(undefined, false), [load]);
   const applyDates = useCallback((dateRange: OrderDateRange | null) => {
     queryRef.current = { ...queryRef.current, dateRange };
     void load();
@@ -89,7 +91,7 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   const upsert = useCallback((receipt: ReceiptView) => {
     // A filtered inbox must re-query, otherwise the new row could violate the filter.
     if (queryRef.current.search.trim() || queryRef.current.filter || queryRef.current.dateRange) {
-      void load();
+      void load(undefined, false);
       return;
     }
     setTransactions((previous) =>

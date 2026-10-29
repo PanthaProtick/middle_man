@@ -6,6 +6,7 @@ import { EvidenceResolution } from './EvidenceResolution';
 import { TransactionCard } from './TransactionCard';
 import { OrderDateControls } from './OrderDateControls';
 import type { useDateSelection } from './useDateSelection';
+import { useScrollRetention } from './useScrollRetention';
 
 interface TransactionInboxProps {
   dates?: ReturnType<typeof useDateSelection>;
@@ -40,6 +41,8 @@ export function TransactionInbox({
 }: TransactionInboxProps): React.JSX.Element {
   const c = usePaymentInboxCopy();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const resetKey = `${filter}|${search}|${dates?.appliedDateRange?.from ?? ''}|${dates?.appliedDateRange?.to ?? ''}`;
+  const { viewportRef, handleScroll } = useScrollRetention(transactions, resetKey);
 
   const toggleExpand = (id: string) => {
     setExpandedId((prev) => (prev === id ? null : id));
@@ -171,7 +174,12 @@ export function TransactionInbox({
         )}
       </div>
 
-      <div className="ledger-scroll-viewport" data-testid="transaction-scroll-viewport">
+      <div
+        ref={viewportRef}
+        onScroll={handleScroll}
+        className="ledger-scroll-viewport"
+        data-testid="transaction-scroll-viewport"
+      >
         {loading && transactions.length === 0 ? (
           <div
             className="ledger-scroll-empty-state"

@@ -149,3 +149,44 @@ it('renders empty state inside the scroll viewport with empty-state styling', as
   expect(emptyState).not.toBeNull();
   expect(emptyState?.textContent).toBeTruthy();
 });
+
+it('retains scroll position on transactions update and resets on filter change', async () => {
+  const sampleTx2: ReceiptView = {
+    ...sampleTx,
+    id: 'tx-viewport-2',
+    trx_id: 'TRX_VIEWPORT_TEST_2',
+  };
+
+  const { host, root } = await mount(
+    <Harness transactions={[sampleTx, sampleTx2]} filter="" />,
+  );
+
+  const viewport = host.querySelector('.ledger-scroll-viewport') as HTMLDivElement;
+  expect(viewport).not.toBeNull();
+
+  viewport.scrollTop = 120;
+  await act(async () => {
+    viewport.dispatchEvent(new Event('scroll'));
+  });
+
+  const sampleTx3: ReceiptView = {
+    ...sampleTx,
+    id: 'tx-viewport-3',
+    trx_id: 'TRX_VIEWPORT_TEST_3',
+  };
+  await act(async () => {
+    root.render(
+      <Harness transactions={[sampleTx, sampleTx2, sampleTx3]} filter="" />,
+    );
+  });
+
+  expect(viewport.scrollTop).toBe(120);
+
+  await act(async () => {
+    root.render(
+      <Harness transactions={[sampleTx]} filter="used" />,
+    );
+  });
+
+  expect(viewport.scrollTop).toBe(0);
+});

@@ -26,6 +26,7 @@ The ui-ux-pro-max design-system search initially suggested a marketplace pattern
 - Label page-derived metrics as loaded records rather than claiming shop-wide totals from a filtered, paginated response.
 - At least 44px primary control targets, visible keyboard focus, reduced-motion support, 16px form controls and an accessible skip link. Light is the supported theme; no dark-mode toggle is offered.
 - Shared semantic colors cover seller/buyer states and dialogs. CSS is split by responsibility instead of extending the previous monolithic stylesheet.
+- Bounded scrolling ledgers (`.ledger-scroll-viewport`) for the orders list and received payments inbox constrain list height to `clamp(380px, 60vh, 680px)` with `overscroll-behavior-y: contain` to prevent scroll chaining to the page. Section headers, search inputs, status/reconciliation filter tabs, date controls, and export buttons remain pinned outside the scroll viewport so operators maintain query context while scanning lengthy queues. In-place data refreshes, reloads, and mutations preserve the current scroll position (`useScrollRetention`), while user-initiated filter, search, or date changes explicitly reset scroll to the top.
 
 ## Validation boundaries
 

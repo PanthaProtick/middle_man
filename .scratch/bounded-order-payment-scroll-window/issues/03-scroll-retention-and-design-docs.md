@@ -4,9 +4,9 @@
 
 **Blocked by:** 01: Bounded Scroll Container and Pinned Filters for Orders List, 02: Bounded Scroll Container and Pinned Filters for Received Payments Inbox
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] In-place data refreshes and mutations preserve the current scroll position in the orders list and received payments ledger instead of resetting to the top.
-- [ ] `docs/ui-audience-and-design.md` records the bounded scrolling ledger and pinned filter interaction pattern under interaction decisions.
-- [ ] All code modifications adhere to line-count conventions (< 250 review, < 300 max).
-- [ ] Full pre-handoff verification passes (`npm run check`), including types, linting, tests, and build.
+- [x] In-place data refreshes and mutations preserve the current scroll position in the orders list and received payments ledger instead of resetting to the top.
+- [x] `docs/ui-audience-and-design.md` records the bounded scrolling ledger and pinned filter interaction pattern under interaction decisions.
+- [x] All code modifications adhere to line-count conventions (< 250 review, < 300 max).
+- [x] Full pre-handoff verification passes (`npm run check`), including types, linting, tests, and build.

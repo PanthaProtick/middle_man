@@ -8,6 +8,7 @@ import { OrderExport } from './OrderExport';
 import { OrderDateControls } from './OrderDateControls';
 import { OrderCard } from './OrderCard';
 import type { OrderDateError, OrderDateMode, OrderDateRange } from './orderDateFilter';
+import { useScrollRetention } from './useScrollRetention';
 
 interface OrderListProps {
   token?: string;
@@ -63,6 +64,8 @@ export function OrderList({
   const text = orderCopy[locale];
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
   const [expandedReviewIds, setExpandedReviewIds] = useState<Record<string, boolean>>({});
+  const resetKey = `${statusFilter}|${search}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`;
+  const { viewportRef, handleScroll } = useScrollRetention(orders, resetKey);
 
   const toggleReviewCodes = (id: string) => {
     setExpandedReviewIds((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -171,8 +174,13 @@ export function OrderList({
         toDate={appliedDateRange?.to}
         token={token}
       />
-      <div className="ledger-scroll-viewport" data-testid="order-scroll-viewport">
-        {loading ? (
+      <div
+        ref={viewportRef}
+        onScroll={handleScroll}
+        className="ledger-scroll-viewport"
+        data-testid="order-scroll-viewport"
+      >
+        {loading && orders.length === 0 ? (
           <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
             <p role="status" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
               {text.loading}

@@ -24,12 +24,14 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   const requestRef = useRef(0);
 
   const load = useCallback(
-    async (cursor?: string) => {
+    async (cursor?: string, clear: boolean = true) => {
       if (!token) return;
       const requestId = requestRef.current + 1;
       requestRef.current = requestId;
       if (!cursor) {
-        setOrders([]);
+        if (clear) {
+          setOrders([]);
+        }
         setNextCursor(null);
         setLoading(true);
       }
@@ -55,7 +57,7 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
     [token, onError],
   );
 
-  const reload = useCallback(() => load(), [load]);
+  const reload = useCallback(() => load(undefined, false), [load]);
   const changeStatus = useCallback((status: string) => {
     queryRef.current = { ...queryRef.current, status };
     setStatusFilter(status);

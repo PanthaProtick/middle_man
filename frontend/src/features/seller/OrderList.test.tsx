@@ -129,3 +129,71 @@ it('renders empty state inside the scroll viewport with empty-state styling', as
   expect(emptyState).not.toBeNull();
   expect(emptyState?.textContent).toBeTruthy();
 });
+
+it('retains scroll position on order list data updates and resets on filter change', async () => {
+  const sampleOrder2: SellerOrder = {
+    ...sampleOrder,
+    id: 'ord-test-2',
+  };
+
+  const { host, root } = await mount(
+    <LocaleProvider>
+      <OrderList
+        token="test-token"
+        orders={[sampleOrder, sampleOrder2]}
+        statusFilter=""
+        onFilterChange={() => undefined}
+        nextCursor={null}
+        onLoadMore={() => undefined}
+      />
+    </LocaleProvider>,
+  );
+
+  const viewport = host.querySelector('.ledger-scroll-viewport') as HTMLDivElement;
+  expect(viewport).not.toBeNull();
+
+  viewport.scrollTop = 100;
+  await act(async () => {
+    viewport.dispatchEvent(new Event('scroll'));
+  });
+
+  // Re-render with updated order data (e.g. mutation or in-place refresh)
+  const sampleOrder3: SellerOrder = {
+    ...sampleOrder,
+    id: 'ord-test-3',
+  };
+  await act(async () => {
+    root.render(
+      <LocaleProvider>
+        <OrderList
+          token="test-token"
+          orders={[sampleOrder, sampleOrder2, sampleOrder3]}
+          statusFilter=""
+          onFilterChange={() => undefined}
+          nextCursor={null}
+          onLoadMore={() => undefined}
+        />
+      </LocaleProvider>,
+    );
+  });
+
+  expect(viewport.scrollTop).toBe(100);
+
+  // Changing statusFilter resets scroll position
+  await act(async () => {
+    root.render(
+      <LocaleProvider>
+        <OrderList
+          token="test-token"
+          orders={[sampleOrder]}
+          statusFilter="confirmed"
+          onFilterChange={() => undefined}
+          nextCursor={null}
+          onLoadMore={() => undefined}
+        />
+      </LocaleProvider>,
+    );
+  });
+
+  expect(viewport.scrollTop).toBe(0);
+});
