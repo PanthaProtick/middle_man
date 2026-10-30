@@ -81,7 +81,8 @@ export function OrderList({
   const exceptionCount = orders.filter((o) => o.lifecycle === 'pending' && o.review_reasons?.length > 0).length;
 
   return (
-    <AssistantWorkspace>
+    <AssistantWorkspace eligibleOrderIds={token ? [...orders.filter(order => order.id !== detailOrder?.id), ...(detailOrder ? [detailOrder] : [])]
+      .filter(order => order.lifecycle === 'pending' && order.buyer_revision !== null).map(order => order.id) : []}>
     <div className="isolated-section" style={{ marginTop: '20px' }}>
       <div className="isolated-section-header">
         <div>

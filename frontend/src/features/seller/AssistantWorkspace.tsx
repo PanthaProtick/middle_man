@@ -2,7 +2,7 @@ import React, { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import './ReviewAssistantSidePanel.css';
 import { AssistantWorkspaceContext as Context } from './useAssistantWorkspace';
 
-export function AssistantWorkspace({ children }: { children: React.ReactNode }): React.JSX.Element {
+export function AssistantWorkspace({ children, eligibleOrderIds }: { children: React.ReactNode; eligibleOrderIds: string[] }): React.JSX.Element {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [modalId, setModalId] = useState<string | null>(null);
   const [modalTarget, setTarget] = useState<HTMLDivElement | null>(null);
@@ -34,6 +34,7 @@ export function AssistantWorkspace({ children }: { children: React.ReactNode }):
     restoreFocus.current = returnFocus;
     setActiveId(null);
   }, []);
+  if (activeId && !eligibleOrderIds.includes(activeId)) setActiveId(null);
   return <Context.Provider value={{activeId, modalId, target, setTarget, close,
     open: (id, trigger) => { focusOrderId.current = id; opener.current = trigger; setActiveId(id); },
     followModal,

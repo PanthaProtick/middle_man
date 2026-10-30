@@ -29,6 +29,9 @@
 .review-assistant-side-panel .assistant-back {
   display: none;
 }
+.review-assistant-side-panel .assistant-back-required {
+  display: inline-flex;
+}
 .order-detail-dialog:has(.review-assistant-side-panel) {
   max-width: 1120px;
 }

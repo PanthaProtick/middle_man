@@ -1,7 +1,7 @@
 # Review assistant side panel
 
 Date: 2026-10-30
-Status: implementation complete; final review and root verification pending.
+Status: complete.
 Parent: [review assistant specification](../spec.md).
 Baseline inspected: `72a370657476457e01a347724fba7e6756684fc5`.
 
@@ -88,12 +88,22 @@ Baseline inspected: `72a370657476457e01a347724fba7e6756684fc5`.
   guidance with localized Back to order. Parent forms and selections stay mounted.
 - Dismissal restores an available trigger or order control. Approved actions close
   guidance before navigating. Newer list facts refresh an open detail view.
-- Focused assistant suite: 46 tests passed. Typechecking and frontend lint passed
-  during implementation; final root gate pending.
+- Focused assistant suite: 48 tests passed across the final gate (including five
+  side-panel integration scenarios). Typechecking and frontend lint passed.
+- Standards review: no findings. Spec review found unavailable receipt shells and
+  stale eligibility after detail decisions; both fixed, reproduced in regression
+  tests, and re-reviewed with no remaining findings.
+- Final root `npm run check`: PASS, result
+  `.cache/checks/check-KfCUsF/result.json`. All nine stages passed: backend tests
+  585 passed / 174 skipped; frontend tests 489 passed across 90 files; build and
+  HTTP smoke passed. PostgreSQL cases remain skipped without a configured database.
+- Earlier final-gate attempt `.cache/checks/check-qS9VsN/result.json` failed on
+  Windows pytest temp-directory access. Reruns used
+  `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/assistant-pytest-final` and passed.
 - Real browser, synthetic API harness: desktop list and modal placement and
   interactivity verified; 390px narrow list/modal Back and trigger focus verified;
   first Escape closes guidance and second Escape closes details. No live providers.
   Harness and screenshots are ignored under `.cache/` and `frontend/.cache/`.
 - Preserve the pre-existing deletion of `../05-implementation-plan.md`.
-- Next: two-axis code review, address findings, run root `npm run check`, record
-  its fresh result, and finalize the current-branch commit.
+- No implementation work remains. Physical-device and live-provider acceptance
+  were not run; browser checks used synthetic responses only.

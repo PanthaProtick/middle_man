@@ -11,6 +11,7 @@ export const reviewAssistanceCopy = {
     retry: 'Try again',
     close: 'Close guidance',
     backToOrder: 'Back to order',
+    receiptUnavailable: 'Waiting for a current receipt preview. If it cannot load, return to the order and refresh the selected receipt.',
     suggestedActions: 'Suggested actions',
     factsTitle: 'Review details',
     conditions: {
@@ -79,6 +80,7 @@ export const reviewAssistanceCopy = {
     retry: 'আবার চেষ্টা করুন',
     close: 'নির্দেশনা বন্ধ করুন',
     backToOrder: 'অর্ডারে ফিরে যান',
+    receiptUnavailable: 'বর্তমান রসিদের প্রাকদর্শনের অপেক্ষায়। লোড না হলে অর্ডারে ফিরে নির্বাচিত রসিদের প্রাকদর্শন আবার লোড করুন।',
     suggestedActions: 'প্রস্তাবিত পদক্ষেপ',
     factsTitle: 'পর্যালোচনার বিবরণ',
     conditions: {

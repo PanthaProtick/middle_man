@@ -22,14 +22,14 @@ interface ReviewAssistantProps {
 
 export function ReviewAssistant(props: ReviewAssistantProps): React.JSX.Element | null {
   const { order, token, receiptId, receiptVersion, selectionKey, selectionUnavailable } = props;
-  if (!token || order.lifecycle !== 'pending' || order.buyer_revision === null || selectionUnavailable) return null;
+  if (!token || order.lifecycle !== 'pending' || order.buyer_revision === null) return null;
   // A new authorized view never inherits content or an in-flight request.
   const key = JSON.stringify([token, order.shop_id, order.id, order.version,
-    order.buyer_revision, order.lifecycle, order.review_reasons, receiptId, receiptVersion, selectionKey]);
+    order.buyer_revision, order.lifecycle, order.review_reasons, receiptId, receiptVersion, selectionKey, selectionUnavailable]);
   return <AuthorizedReviewAssistant key={key} {...props} />;
 }
 
-function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, onAction, withinModal = false }: ReviewAssistantProps): React.JSX.Element {
+function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, onAction, withinModal = false, selectionUnavailable }: ReviewAssistantProps): React.JSX.Element {
   const { locale } = useLocale();
   const text = reviewAssistanceCopy[locale];
   const workspace = useAssistantWorkspace();
@@ -65,7 +65,7 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
 
   // Reopening/focus/actions recheck facts without generation or persistent caching.
   const refresh = useCallback(async (actionId?: ReviewAction, generate = false) => {
-    if (busy.current) return;
+    if (busy.current || selectionUnavailable) return;
     const epoch = requestEpoch.current;
     busy.current = true;
     setLoading(true);
@@ -96,7 +96,7 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
         if (alive.current) setLoading(false);
       }
     }
-  }, [order.id, order.version, order.buyer_revision, token, receiptId, receiptVersion, assistance, onAction, close]);
+  }, [order.id, order.version, order.buyer_revision, token, receiptId, receiptVersion, assistance, onAction, close, selectionUnavailable]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -129,8 +129,11 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
   const panel = isOpen && <aside ref={panelRef} tabIndex={-1} className="review-assistant-side-panel"
     aria-label={text.askAi}>
     <h3>{order.product_name}</h3><p>{order.id}</p>
-    <button type="button" className="btn btn-secondary assistant-back" onClick={() => close()}>{text.backToOrder}</button>
-    <ReviewAssistantPanel loading={loading} error={error ? text.error : null}
+    <button type="button" className={`btn btn-secondary assistant-back${selectionUnavailable ? ' assistant-back-required' : ''}`} onClick={() => close()}>{text.backToOrder}</button>
+    {selectionUnavailable ? <div data-testid="review-assistant-panel" role="region" aria-label={text.askAi}>
+      <p role="status">{text.receiptUnavailable}</p>
+      <button type="button" className="btn btn-secondary" aria-label={text.close} onClick={() => close()}>{text.close}</button>
+    </div> : <ReviewAssistantPanel loading={loading} error={error ? text.error : null}
         assistance={assistance}
         explanation={assistance
           ? assistance.locale === locale
@@ -143,7 +146,7 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
           : ''}
         locale={locale} onClose={() => close()} onRetry={() => void refresh()}
         onGenerate={() => void refresh(undefined, true)}
-        onAction={actionId => void refresh(actionId)} />
+        onAction={actionId => void refresh(actionId)} />}
     </aside>;
   return (
     <div style={{ margin: '10px 0' }} data-testid="review-assistant-root">
