@@ -42,7 +42,7 @@ export function ReviewAssistantPanel({
         marginTop: '8px',
         padding: '12px 14px',
         borderRadius: '8px',
-        background: 'rgba(15, 23, 42, 0.65)',
+        background: 'var(--bg-card)',
         border: '1px solid rgba(56, 189, 248, 0.25)',
       }}
       data-testid="review-assistant-panel"

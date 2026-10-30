@@ -114,7 +114,7 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
 
       {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
       {token && order.lifecycle === 'pending' && (
-        <ReviewAssistant
+        <ReviewAssistant withinModal
           key={`assistance-${order.id}`}
           order={order}
           token={token}

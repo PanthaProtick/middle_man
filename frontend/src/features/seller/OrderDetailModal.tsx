@@ -1,3 +1,4 @@
+import { useAssistantWorkspace } from './useAssistantWorkspace';
 import { OrderOverview } from './OrderOverview';
 import { OrderPaymentDetails } from './OrderPaymentDetails';
 import React, { useEffect, useId, useRef, useState } from 'react';
@@ -26,9 +27,12 @@ interface OrderDetailModalProps {
 }
 
 export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected, initialTab = 0, onCheckTransactions }: OrderDetailModalProps): React.JSX.Element {
+  const assistant = useAssistantWorkspace();
   const { locale } = useLocale();
   const text = orderCopy[locale];
-  const [order, setOrder] = useState(initialOrder);
+  const [updatedOrder, setOrder] = useState(initialOrder);
+  const order = initialOrder.id !== updatedOrder.id || initialOrder.version > updatedOrder.version
+    ? initialOrder : updatedOrder;
   const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(null);
   const [activeTab, setActiveTab] = useState(initialTab);
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -59,6 +63,12 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
       if (opener instanceof HTMLElement && opener.isConnected) opener.focus();
     };
   }, []);
+  const followModal = assistant?.followModal;
+  useEffect(() => {
+    followModal?.(order.id);
+    return () => followModal?.(null);
+  }, [order.id, followModal]);
+  const requestClose = () => { if (assistant?.activeId) assistant.close(); else onClose(); };
   const isConfirmed = order.lifecycle === 'confirmed';
   const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
 
@@ -66,9 +76,11 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
     <dialog
       ref={dialogRef}
       aria-labelledby={titleId}
-      onCancel={event => { event.preventDefault(); onClose(); }}
+      onCancel={event => { event.preventDefault(); requestClose(); }}
       className="card order-detail-dialog"
     >
+      <div className="order-detail-layout">
+      <div className="order-detail-main">
       <LocaleSwitch />
       <OrderExport orderId={order.id} token={token} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '16px' }}>
@@ -80,7 +92,7 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
           ref={closeRef}
           type="button"
           aria-label={text.closeDetails}
-          onClick={onClose}
+          onClick={requestClose}
           style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}
         >
           <X size={20} />
@@ -105,7 +117,14 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         <OrderOverview order={order} />
       </section>
       <section role="tabpanel" id={`${titleId}-payment-panel`} aria-labelledby={`${titleId}-payment-tab`} hidden={activeTab !== 1}>
-        <OrderPaymentDetails order={order} token={token} onNavigateTab={selectTab}
+        <OrderPaymentDetails order={order} token={token} onNavigateTab={index => {
+          selectTab(index);
+          requestAnimationFrame(() => {
+            const panel = dialogRef.current?.querySelector<HTMLElement>(`#${CSS.escape(titleId)}-${tabKeys[index]}-panel`);
+            (panel?.querySelector<HTMLElement>('input, textarea, button') ??
+              dialogRef.current?.querySelector<HTMLElement>(`[id$="-${tabKeys[index]}-tab"]`))?.focus();
+          });
+        }}
           onCheckTransactions={() => { onClose(); onCheckTransactions?.(); }}
           onCorrected={fresh => { setOrder(fresh); onCorrected?.(fresh); }} />
       </section>
@@ -157,9 +176,12 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
           <button type="button" className="btn btn-secondary" disabled={activeTab === 0} onClick={() => selectTab(activeTab - 1)}>{text.backTab}</button>
           <button type="button" className="btn btn-secondary" disabled={activeTab === tabs.length - 1} onClick={() => selectTab(activeTab + 1)}>{text.nextTab}</button>
         </div>
-        <button className="btn btn-secondary" onClick={onClose}>
+        <button className="btn btn-secondary" onClick={requestClose}>
           {text.close}
         </button>
+      </div>
+      </div>
+      <div className="assistant-slot" ref={assistant?.setTarget} />
       </div>
     </dialog>
   );

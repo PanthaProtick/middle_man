@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AssistantWorkspace } from './AssistantWorkspace';
 import { ShoppingBag } from 'lucide-react';
 import type { SellerOrder } from './types';
 import { useLocale } from '../locale/context';
@@ -73,10 +74,14 @@ export function OrderList({
     setExpandedReviewIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
+  const listedSelection = orders.find(order => order.id === selectedOrder?.id);
+  const detailOrder = listedSelection && selectedOrder && listedSelection.version > selectedOrder.version
+    ? listedSelection : selectedOrder;
   const confirmedCount = orders.filter((o) => o.lifecycle === 'confirmed').length;
   const exceptionCount = orders.filter((o) => o.lifecycle === 'pending' && o.review_reasons?.length > 0).length;
 
   return (
+    <AssistantWorkspace>
     <div className="isolated-section" style={{ marginTop: '20px' }}>
       <div className="isolated-section-header">
         <div>
@@ -230,10 +235,11 @@ export function OrderList({
           onCheckTransactions={onCheckTransactions}
           token={token}
           onCorrected={fresh => {setSelectedOrder(fresh); onCorrected?.(fresh);}}
-          order={selectedOrder}
+          order={detailOrder!}
           onClose={() => setSelectedOrder(null)}
         />
       )}
     </div>
+    </AssistantWorkspace>
   );
 }

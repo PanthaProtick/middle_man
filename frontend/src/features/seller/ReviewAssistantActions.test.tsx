@@ -36,6 +36,8 @@ it('routes approved card and detail actions to Received Payments and the buyer c
   await click('[data-testid="ask-ai-button"]');
   await click('[data-testid="action-CHECK_TRANSACTIONS"]');
   expect(onCheckTransactions).toHaveBeenCalledTimes(1);
+  expect(container.querySelector('[data-testid="review-assistant-panel"]')).toBeNull();
+  await click('[data-testid="ask-ai-button"]');
   await click('[data-testid="action-CORRECT_BUYER_DETAILS"]');
   const dialog = container.querySelector('dialog')!;
   const correction = dialog.querySelector('[data-testid="buyer-correction"]')!;

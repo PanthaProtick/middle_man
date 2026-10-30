@@ -88,11 +88,7 @@ it('fetches and renders local guidance, actions, and reuses cache on reopen', as
   });
   expect(actionMock).toHaveBeenCalledWith('CHECK_TRANSACTIONS');
 
-  // Close guidance
-  const closeBtn = container.querySelector<HTMLButtonElement>('button[aria-label="Close guidance"]')!;
-  await act(async () => {
-    closeBtn.click();
-  });
+  // An approved action closes guidance before navigating.
   expect(container.querySelector('[data-testid="review-assistant-panel"]')).toBeNull();
 
   // Reopen revalidates the local context before reusing advice

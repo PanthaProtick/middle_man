@@ -10,6 +10,7 @@ export const reviewAssistanceCopy = {
     error: 'Unable to load review assistance.',
     retry: 'Try again',
     close: 'Close guidance',
+    backToOrder: 'Back to order',
     suggestedActions: 'Suggested actions',
     factsTitle: 'Review details',
     conditions: {
@@ -77,6 +78,7 @@ export const reviewAssistanceCopy = {
     error: 'পর্যালোচনা সহায়তা লোড করা যায়নি।',
     retry: 'আবার চেষ্টা করুন',
     close: 'নির্দেশনা বন্ধ করুন',
+    backToOrder: 'অর্ডারে ফিরে যান',
     suggestedActions: 'প্রস্তাবিত পদক্ষেপ',
     factsTitle: 'পর্যালোচনার বিবরণ',
     conditions: {

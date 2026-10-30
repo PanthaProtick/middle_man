@@ -39,8 +39,8 @@ it('retries an error in the open panel and prevents duplicate requests', async (
   const view = await mount();
   await view.click();
   expect(view.container.textContent).not.toContain('private failure');
-  await view.click('[data-testid="review-assistant-panel"] button.btn');
-  await view.click();
+  const retry = view.container.querySelector<HTMLButtonElement>('[data-testid="review-assistant-panel"] button.btn')!;
+  await act(async () => { retry.click(); retry.click(); });
   expect(fetchSpy).toHaveBeenCalledTimes(2);
   await act(async () => finish(response()));
   expect(view.container.querySelector('[data-testid="assistance-explanation"]')).not.toBeNull();
@@ -88,7 +88,8 @@ it('revalidates hidden receipt changes on reopen and on focus without navigating
   await view.click('[data-testid="action-CHECK_TRANSACTIONS"]');
   expect(view.onAction).toHaveBeenCalledWith('CHECK_TRANSACTIONS');
   await act(async () => window.dispatchEvent(new Event('focus')));
-  expect(fetchSpy).toHaveBeenCalledTimes(5);
+  expect(fetchSpy).toHaveBeenCalledTimes(4);
+  expect(view.container.querySelector('[data-testid="review-assistant-panel"]')).toBeNull();
   await act(async () => view.root.unmount());
 });
 
