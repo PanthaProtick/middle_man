@@ -5,6 +5,7 @@ import { formatBangladeshDateTime } from '../locale/format';
 import { orderCopy, reviewLabel, allocationLabel } from '../locale/orderCopy';
 import { PaymentHistory } from './PaymentHistory';
 import { PaymentException } from './PaymentException';
+import { ReviewAssistant } from './ReviewAssistant';
 import type { SellerOrder } from './types';
 import { useLocale } from '../locale/context';
 
@@ -12,9 +13,11 @@ interface OrderPaymentDetailsProps {
   order: SellerOrder;
   token?: string;
   onCorrected: (order: SellerOrder) => void;
+  onNavigateTab?: (tabIndex: number) => void;
+  onCheckTransactions?: () => void;
 }
 
-export function OrderPaymentDetails({ order, token, onCorrected }: OrderPaymentDetailsProps): React.JSX.Element {
+export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, onCheckTransactions }: OrderPaymentDetailsProps): React.JSX.Element {
   const { locale } = useLocale();
   const text = orderCopy[locale];
   const [showReviewCodes, setShowReviewCodes] = useState(false);
@@ -105,6 +108,19 @@ export function OrderPaymentDetails({ order, token, onCorrected }: OrderPaymentD
       </div>
 
       {token && order.allocation_basis === 'manual' && <PaymentHistory orderId={order.id} token={token} />}
+      {token && order.lifecycle === 'pending' && (
+        <ReviewAssistant
+          key={`assistance-${order.id}`}
+          order={order}
+          token={token}
+          onAction={actionId => {
+            if (actionId === 'CHECK_TRANSACTIONS') onCheckTransactions?.();
+            if (actionId === 'CORRECT_BUYER_DETAILS' && onNavigateTab) {
+              onNavigateTab(3);
+            }
+          }}
+        />
+      )}
       {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
         onAccepted={onCorrected} />}
     </>

@@ -12,6 +12,7 @@ import { useScrollRetention } from './useScrollRetention';
 
 interface OrderListProps {
   token?: string;
+  onCheckTransactions?: () => void;
   onCorrected?: (order: SellerOrder) => void;
   orders: SellerOrder[];
   statusFilter: string;
@@ -37,7 +38,7 @@ interface OrderListProps {
 }
 
 export function OrderList({
-  token, onCorrected,
+  token, onCorrected, onCheckTransactions,
   orders,
   statusFilter,
   onFilterChange,
@@ -63,6 +64,7 @@ export function OrderList({
   const { locale } = useLocale();
   const text = orderCopy[locale];
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
+  const [initialTab, setInitialTab] = useState(0);
   const [expandedReviewIds, setExpandedReviewIds] = useState<Record<string, boolean>>({});
   const resetKey = `${statusFilter}|${search}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`;
   const { viewportRef, handleScroll } = useScrollRetention(orders, resetKey);
@@ -198,10 +200,15 @@ export function OrderList({
               <OrderCard
                 key={ord.id}
                 order={ord}
+                token={token}
                 text={text}
                 locale={locale}
                 expanded={Boolean(expandedReviewIds[ord.id])}
-                onInspect={setSelectedOrder}
+                onInspect={order => { setInitialTab(0); setSelectedOrder(order); }}
+                onReviewAction={(order, action) => {
+                  if (action === 'CHECK_TRANSACTIONS') onCheckTransactions?.();
+                  else { setInitialTab(3); setSelectedOrder(order); }
+                }}
                 onToggleReview={toggleReviewCodes}
               />
             ))}
@@ -219,6 +226,8 @@ export function OrderList({
 
       {selectedOrder && (
         <OrderDetailModal
+          initialTab={initialTab}
+          onCheckTransactions={onCheckTransactions}
           token={token}
           onCorrected={fresh => {setSelectedOrder(fresh); onCorrected?.(fresh);}}
           order={selectedOrder}

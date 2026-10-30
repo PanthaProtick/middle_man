@@ -5,6 +5,8 @@ import { formatRemainingCod } from './api';
 import { formatBangladeshDateTime } from '../locale/format';
 import { lifecycleLabel, reviewLabel, type OrderCopy } from '../locale/orderCopy';
 import { BuyerLinkCopy } from './BuyerLinkCopy';
+import { ReviewAssistant } from './ReviewAssistant';
+import type { ReviewAction } from './reviewAssistanceApi';
 
 const LIFECYCLE_BADGES: Record<OrderLifecycle, { bg: string; color: string }> = {
   awaiting_buyer: { bg: 'rgba(245, 158, 11, 0.15)', color: 'var(--amber-accent)' },
@@ -17,6 +19,8 @@ const LIFECYCLE_BADGES: Record<OrderLifecycle, { bg: string; color: string }> = 
 
 interface OrderCardProps {
   order: SellerOrder;
+  token?: string;
+  onReviewAction?: (order: SellerOrder, action: ReviewAction) => void;
   text: OrderCopy;
   locale: 'en' | 'bn';
   expanded: boolean;
@@ -25,7 +29,7 @@ interface OrderCardProps {
 }
 
 export function OrderCard({
-  order, text, locale, expanded, onInspect, onToggleReview,
+  order, token, text, locale, expanded, onInspect, onToggleReview, onReviewAction,
 }: OrderCardProps): React.JSX.Element {
   const badge = Object.hasOwn(LIFECYCLE_BADGES, order.lifecycle)
     ? LIFECYCLE_BADGES[order.lifecycle]
@@ -138,6 +142,14 @@ export function OrderCard({
             ))}
           </div>
         </div>
+      )}
+
+      {order.lifecycle === 'pending' && (
+        <ReviewAssistant
+          order={order}
+          token={token}
+          onAction={action => onReviewAction?.(order, action)}
+        />
       )}
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)', paddingTop: '6px' }}>

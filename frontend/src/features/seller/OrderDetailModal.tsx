@@ -20,15 +20,17 @@ interface OrderDetailModalProps {
   order: SellerOrder;
   onClose: () => void;
   token?: string;
+  initialTab?: number;
+  onCheckTransactions?: () => void;
   onCorrected?: (order: SellerOrder) => void;
 }
 
-export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected }: OrderDetailModalProps): React.JSX.Element {
+export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrected, initialTab = 0, onCheckTransactions }: OrderDetailModalProps): React.JSX.Element {
   const { locale } = useLocale();
   const text = orderCopy[locale];
   const [order, setOrder] = useState(initialOrder);
   const [courierAttemptStatus, setCourierAttemptStatus] = useState<CourierAttemptStatus | null>(null);
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(initialTab);
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const titleId = useId();
@@ -103,7 +105,8 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
         <OrderOverview order={order} />
       </section>
       <section role="tabpanel" id={`${titleId}-payment-panel`} aria-labelledby={`${titleId}-payment-tab`} hidden={activeTab !== 1}>
-        <OrderPaymentDetails order={order} token={token}
+        <OrderPaymentDetails order={order} token={token} onNavigateTab={selectTab}
+          onCheckTransactions={() => { onClose(); onCheckTransactions?.(); }}
           onCorrected={fresh => { setOrder(fresh); onCorrected?.(fresh); }} />
       </section>
       <section role="tabpanel" id={`${titleId}-delivery-panel`} aria-labelledby={`${titleId}-delivery-tab`} hidden={activeTab !== 2}>

@@ -167,6 +167,7 @@ export function SellerWorkspace({
               )}
 
               <OrderList
+                onCheckTransactions={() => handleSectionSelect('payments')}
                 token={token}
                 onCorrected={() => { void reloadOrders(); }}
                 orders={orders}

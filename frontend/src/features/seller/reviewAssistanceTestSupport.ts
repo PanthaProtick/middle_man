@@ -1,0 +1,26 @@
+import type { SellerOrder } from './types';
+
+export const baseOrder: SellerOrder = {
+  id: 'order-1',
+  shop_id: 'shop-1',
+  payment_account_id: 'acc-1',
+  product_name: 'Mechanical Keyboard',
+  total_minor: 1200000,
+  required_advance_minor: 200000,
+  expected_cod_minor: 1000000,
+  actual_cod_minor: null,
+  account_provider: 'bkash',
+  account_receiving_number: '01712345678',
+  account_label: 'Primary',
+  lifecycle: 'pending',
+  version: 1,
+  review_reasons: [],
+  buyer_revision: 1,
+  allocation_basis: null,
+  portal_token: 'token-123',
+  portal_url: '/orders/token-123',
+  created_at: '2026-10-30T00:00:00Z',
+  updated_at: '2026-10-30T00:00:00Z',
+  expires_at: '2026-10-31T00:00:00Z',
+  completed_at: null,
+};

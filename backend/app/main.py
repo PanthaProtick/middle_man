@@ -15,6 +15,7 @@ from app.api.order_export import router as order_export_router
 from app.api.orders import router as orders_router
 from app.api.pathao import router as pathao_router
 from app.api.public_orders import router as public_orders_router
+from app.api.review_assistance import router as review_assistance_router
 from app.api.routes import router as api_router
 from app.api.seller import router as seller_router
 from app.api.sms import router as sms_router
@@ -150,6 +151,7 @@ app.include_router(seller_router, prefix=settings.API_PREFIX)
 app.include_router(structured_retention_router, prefix=settings.API_PREFIX)
 app.include_router(order_export_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
+app.include_router(review_assistance_router, prefix=settings.API_PREFIX)
 app.include_router(courier_router, prefix=settings.API_PREFIX)
 app.include_router(pathao_router, prefix=settings.API_PREFIX)
 app.include_router(link_access_router, prefix=settings.API_PREFIX)
