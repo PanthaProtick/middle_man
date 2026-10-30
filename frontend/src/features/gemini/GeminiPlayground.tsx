@@ -15,8 +15,9 @@ export default function GeminiPlayground(): React.JSX.Element {
   const [messages, setMessages] = useState<ChatMessageItem[]>([
     {
       sender: 'ai',
-      text: 'Hello! I am your hackathon assistant powered by Google Gemini. Ask me to outline architecture, draft API models, or refine your pitch.',
-      model: 'gemini-2.5-flash'
+      text: 'Hello! This playground is a local demonstration running in mock mode. API credentials are reserved for seller review features.',
+      model: 'mock-gemini-preview',
+      isMock: true,
     }
   ]);
   const [inputMessage, setInputMessage] = useState('');
@@ -82,7 +83,7 @@ export default function GeminiPlayground(): React.JSX.Element {
               <Sparkles size={18} color="var(--primary-accent)" />
               <span>Gemini AI Chat Loop</span>
             </div>
-            <p className="card-subtitle">Fast multimodal responses via FastAPI backend</p>
+            <p className="card-subtitle">Local mock demonstration via FastAPI backend</p>
           </div>
         </div>
 
@@ -92,14 +93,14 @@ export default function GeminiPlayground(): React.JSX.Element {
               <div>{msg.text}</div>
               {msg.model && (
                 <div className="message-meta">
-                  {msg.model} {msg.isMock ? '• [Mock Mode]' : '• [Live API]'}
+                  {msg.model} • [Mock Mode]
                 </div>
               )}
             </div>
           ))}
           {isChatLoading && (
             <div className="message-bubble ai" style={{ opacity: 0.7 }}>
-              <span>Thinking with Gemini...</span>
+              <span>Generating mock response...</span>
             </div>
           )}
         </div>
@@ -127,7 +128,7 @@ export default function GeminiPlayground(): React.JSX.Element {
               <Lightbulb size={18} color="#f59e0b" />
               <span>Structured Pitch Generator</span>
             </div>
-            <p className="card-subtitle">Pydantic-enforced structured JSON output</p>
+            <p className="card-subtitle">Pydantic-enforced structured mock output</p>
           </div>
         </div>
 

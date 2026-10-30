@@ -2,7 +2,7 @@
 
 A React and FastAPI starting point for developers building full-stack prototypes with Codex or Antigravity.
 
-Dev Template brings a typed frontend, validated API contracts, optional Gemini demos, and a shared verification command into one workspace. Start locally without cloud credentials, then replace the demo behavior with your application's domain logic.
+Dev Template brings a typed frontend, validated API contracts, local mock Gemini demos, and a shared verification command into one workspace. Start locally without cloud credentials, then replace the demo behavior with your application's domain logic.
 
 ## What's included
 
@@ -38,7 +38,7 @@ In a second terminal, also at the project root:
 npm run dev:frontend
 ```
 
-Open the [app](http://localhost:5173) and [interactive API docs](http://localhost:8000/docs). With no provider credentials, the API runs locally and Gemini chat returns a mock response. Vite prints the actual frontend URL if port 5173 is occupied; a different origin may require updating backend CORS settings.
+Open the [app](http://localhost:5173) and [interactive API docs](http://localhost:8000/docs). Public chat and idea-generation demos always return local mock responses, including when Gemini credentials are configured, and consume no provider quota. Vite prints the actual frontend URL if port 5173 is occupied; a different origin may require updating backend CORS settings.
 
 To verify the workspace:
 
@@ -61,8 +61,8 @@ The API exposes these routes under the default `/api` prefix:
 | Method | Route | Purpose |
 | --- | --- | --- |
 | GET | `/api/health` | Runtime status and provider configuration flags |
-| POST | `/api/chat` | Gemini chat or mock response |
-| POST | `/api/generate-idea` | Structured project idea |
+| POST | `/api/chat` | Local mock chat response |
+| POST | `/api/generate-idea` | Local structured sample idea |
 | GET | `/api/items` | List demo items |
 | POST | `/api/items` | Create a demo item |
 | GET | `/api/team` | Sample team roster |
@@ -76,7 +76,7 @@ Environment files are optional for the local standby demo. To customize settings
 | Setting | Location | Current role |
 | --- | --- | --- |
 | `PROJECT_NAME` | Backend | API title and health response; defaults to `Dev Template API` |
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | Backend | Enable and select live Gemini generation |
+| `GEMINI_API_KEY`, `GEMINI_MODEL` | Backend | Shared settings reserved for the later seller review assistant; public demos remain local mocks |
 | `DATABASE_URL` or individual `PG*` fields | Backend | Configure the optional SQLAlchemy/asyncpg database layer |
 | `DIRECT_URL` | Backend | Reserved configuration; no migration workflow is included |
 | `CLERK_*` | Backend | Configuration scaffolding; authentication is not enforced |

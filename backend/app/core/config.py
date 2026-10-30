@@ -150,6 +150,14 @@ class Settings(BaseSettings):
             secret, ["your-marker-secret", "your-payment-secret"]
         )
 
+    @property
+    def is_gemini_configured(self) -> bool:
+        """Checks if Gemini API key is configured and AI is enabled."""
+        key = self.GEMINI_API_KEY.strip()
+        return bool(key) and self.ai_enabled and not _has_placeholder(
+            key, ["your-gemini-api-key"]
+        )
+
     @field_validator("CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:

@@ -111,7 +111,7 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
               <Flame size={14} /> Local Gemini Sandbox
             </h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-              Chat and idea generation run from the template demos. Buyers enter delivery and payment details manually.
+              Chat and idea generation run locally in mock mode without consuming provider quota. Buyer addresses are never sent to AI providers.
             </p>
           </div>
           <GeminiPlayground />
@@ -189,12 +189,12 @@ export function DemoTools({ health }: DemoToolsProps): React.JSX.Element {
             <div style={{ background: 'var(--bg-surface)', padding: '16px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-subtle)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
                 <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Google Gemini</span>
-                <span className={`badge ${health?.gemini_configured ? 'online' : 'active'}`}>
-                  <Sparkles size={11} /> {health?.gemini_configured ? 'Ready' : 'Mock Mode'}
+                <span className={`badge ${health?.gemini_configured ? 'online' : 'info'}`}>
+                  <Sparkles size={11} /> {health?.gemini_configured ? 'Configured' : 'Standby'}
                 </span>
               </div>
               <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0 }}>
-                Demo chat and idea generation only. Buyer addresses are never sent for parsing.
+                API credentials reserved for seller review assistance. Public demo endpoints run permanently in local mock mode.
               </p>
             </div>
           </div>
@@ -231,7 +231,7 @@ cd frontend&#10;npm run dev
               <span>Environment Configuration (.env)</span>
             </h4>
             <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-              To connect live production services, configure <code style={{ color: 'var(--primary-accent)' }}>backend/.env</code> with <strong>DATABASE_URL</strong> (Neon), <strong>CLERK_SECRET_KEY</strong>, and <strong>GEMINI_API_KEY</strong>. Set <strong>VITE_CLERK_PUBLISHABLE_KEY</strong> in <code style={{ color: 'var(--primary-accent)' }}>frontend/.env</code>. The starter runs seamlessly in offline standby mode until live credentials are provided.
+              To connect live production services, configure <code style={{ color: 'var(--primary-accent)' }}>backend/.env</code> with <strong>DATABASE_URL</strong> (Neon), <strong>CLERK_SECRET_KEY</strong>, and <strong>GEMINI_API_KEY</strong> (for seller review assistance). Set <strong>VITE_CLERK_PUBLISHABLE_KEY</strong> in <code style={{ color: 'var(--primary-accent)' }}>frontend/.env</code>. Public playground demos run locally without live provider calls.
             </p>
           </div>
         </section>
