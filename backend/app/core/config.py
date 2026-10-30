@@ -47,6 +47,8 @@ class Settings(BaseSettings):
     # Google Gemini API
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-2.5-flash"
+    REVIEW_GEMINI_ENABLED: bool = False
+    REVIEW_GEMINI_SHOP_DAILY_LIMIT: int = Field(default=5, ge=1, le=5)
 
     @property
     def ai_enabled(self) -> bool:

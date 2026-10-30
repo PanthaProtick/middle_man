@@ -67,6 +67,7 @@ export interface ReviewAssistanceResponse {
   buyer_revision: number | null;
   lifecycle: string;
   source: 'local' | 'generated';
+  fallback_status?: 'disabled' | 'unconfigured' | 'busy' | 'limited' | 'timeout' | 'rejected' | 'malformed' | 'unavailable' | null;
   condition: ReviewCondition;
   context_token: string;
   reason_codes: AutomaticReviewReason[];
@@ -92,7 +93,8 @@ export async function fetchReviewAssistance(
   orderId: string,
   token: string | undefined,
   language: 'en' | 'bn',
-  receiptId?: string
+  receiptId?: string,
+  generate = false
 ): Promise<ReviewAssistanceResponse> {
   const res = await sellerFetch(
     `/api/seller/orders/${encodeURIComponent(orderId)}/review-assistance`,
@@ -103,6 +105,7 @@ export async function fetchReviewAssistance(
       },
       body: JSON.stringify({
         language,
+        ...(generate ? { generate: true } : {}),
         ...(receiptId ? { receipt_id: receiptId } : {}),
       }),
     },

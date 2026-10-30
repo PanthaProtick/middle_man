@@ -31,7 +31,7 @@ current route/service/model split; update the owning annex when behavior changes
 
 ## Related contracts
 
-- [Local seller review assistance](contracts/review-assistance.md)
+- [Seller review assistance](contracts/review-assistance.md)
 - [Pathao account settings](pathao-account-contract.md)
 - [Pathao locations](pathao-location-contract.md)
 - [Pathao review](pathao-review-contract.md)

@@ -1,7 +1,7 @@
-# Local seller review assistance
+# Seller review assistance
 
 `POST /api/seller/orders/{order_id}/review-assistance` accepts `language` (`en`
-or `bn`, default `en`) and optional `receipt_id`. Unknown fields are rejected
+or `bn`, default `en`), optional `receipt_id`, and `generate` (default `false`). Unknown fields are rejected
 with 422. It never accepts a shop, prompt, findings, or allowed actions.
 
 Seller identity establishes the owning shop. Missing/foreign orders and selected
@@ -12,10 +12,10 @@ change during context construction returns 409 `REVIEW_CHANGED`; the seller must
 refresh the order before requesting advice again.
 
 The typed response contains order/version/buyer-revision/lifecycle, an opaque
-`context_token`, `source: local`, locale, condition, current reason codes,
+`context_token`, `source: local | generated`, locale, condition, current reason codes,
 `unknown_reason_present`, explanation, approved actions, narrow facts, and a typed
-provider `context`. There is no external AI request, mutation, saved conversation,
-or server content cache.
+provider `context`. The default request is entirely local. Only `generate: true`
+can request Gemini wording. There is no mutation, saved conversation, or server content cache.
 
 ## Explicit selected receipt scope
 
@@ -142,5 +142,43 @@ result only after authorization and context revalidation on reopening, window
 focus/visibility return, and before following a suggested action. Locale changes
 translate local guidance and fact labels without a request; server explanation is
 used only while its locale matches the active locale. No assistant content enters
-browser storage. Later generation must preserve this local revalidation path without
-dispatching a provider call.
+browser storage. Revalidation never dispatches a provider call.
+
+## Optional Gemini wording
+
+For private synthetic reviews only, manually set `REVIEW_GEMINI_ENABLED=true` and
+configure `GEMINI_API_KEY`; `GEMINI_MODEL` selects one Gemini model. Credentials
+alone do not enable generation. Set the flag to `false` to disable it again.
+`SELF_TEST_MODE=true` overrides enablement and prevents live AI calls. Public demos
+remain local and address extraction remains retired, regardless of these settings.
+No live provider verification is part of automated testing.
+
+The panel first loads local guidance. Its separate Generate with Gemini control
+sends the explicit request. Generated wording is plain text; approved navigation,
+facts, and blockers always remain backend-owned. Output must be a bounded typed
+object with `explanation` and a subset of permitted `action_ids`; invalid objects,
+links, or excess output fall back to deterministic guidance.
+
+Atomic reservations permit five attempts per Asia/Dhaka day application-wide,
+one attempt per 60 seconds, five per unchanged context across days, and a shop
+daily limit configured with `REVIEW_GEMINI_SHOP_DAILY_LIMIT` (1–5, default 5).
+Failures count. Busy, disabled, unconfigured, limited, and local revalidation
+requests do not dispatch or consume attempts. One review has one in-flight call.
+The provider has a 12-second transport timeout and a 15-second overall deadline;
+wire responses are bounded at 16 KiB, generated JSON at 8 KiB, and explanations at
+2000 characters. No automatic retries, redirects, alternate model, or provider fallback.
+
+`fallback_status` distinguishes `disabled`, `unconfigured`, `busy`, `limited`,
+`timeout`, `rejected`, `malformed`, and `unavailable`; the panel supplies Bengali
+and English status text alongside useful local guidance. Only current-view output
+with matching authorization, context, and locale is reused. Locale changes never
+generate automatically. Generation completion rechecks shop ownership and the
+entire context; stale results are discarded without regeneration.
+
+Counters are content-free hashes in one process and reset on restart. Daily shop
+metadata has at most five entries; unchanged-context counters retain at most 1024
+entries per process lifetime, rejecting new contexts at capacity rather than
+evicting exhausted counters. These are application controls, not Google's remaining
+quota. Free-provider availability and production readiness are not guaranteed.
+No durable counters, prompts, outputs, conversation history, or provider-body logs
+are added. Automated tests block external networking and intercept the provider.

@@ -8,6 +8,7 @@ class ReviewAssistanceRequest(BaseModel):
 
     language: Literal["en", "bn"] = "en"
     receipt_id: Optional[str] = Field(default=None, min_length=1, max_length=36)
+    generate: bool = False
 
 
 AutomaticReviewReason = Literal[
@@ -95,6 +96,9 @@ class ReviewAssistanceResponse(BaseModel):
     buyer_revision: Optional[int] = None
     lifecycle: Literal["pending"]
     source: Literal["local", "generated"] = "local"
+    fallback_status: Optional[Literal[
+        "disabled", "unconfigured", "busy", "limited", "timeout", "rejected", "malformed", "unavailable"
+    ]] = None
     condition: ReviewCondition
     context_token: str
     reason_codes: list[AutomaticReviewReason] = Field(default_factory=list)

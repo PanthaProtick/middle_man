@@ -42,23 +42,25 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
     return () => { alive.current = false; };
   }, []);
 
-  // This interface is always local: reopening/focus/action rechecks authorization
-  // and current facts without generation or a persistent content cache.
-  const refresh = useCallback(async (actionId?: ReviewAction) => {
+  // Reopening/focus/actions recheck facts without generation or persistent caching.
+  const refresh = useCallback(async (actionId?: ReviewAction, generate = false) => {
     if (busy.current) return;
     busy.current = true;
     setLoading(true);
     setError(false);
     try {
-      const data = await fetchReviewAssistance(order.id, token, localeRef.current, receiptId);
+      const requestedLocale = localeRef.current;
+      const data = await fetchReviewAssistance(order.id, token, requestedLocale, receiptId, generate);
       if (!alive.current) return;
+      if (generate && requestedLocale !== localeRef.current) return;
       if (data.order_id !== order.id || data.order_version !== order.version ||
           data.buyer_revision !== order.buyer_revision || data.lifecycle !== 'pending' ||
           (receiptId && (data.selected_receipt_id !== receiptId ||
             (receiptVersion !== undefined && data.selected_receipt_version !== receiptVersion)))) {
         throw new Error('Review changed');
       }
-      setAssistance(previous => previous?.context_token === data.context_token ? previous : data);
+      setAssistance(previous => !generate && previous?.context_token === data.context_token &&
+        previous.locale === data.locale ? previous : data);
       if (actionId && assistance?.context_token === data.context_token &&
           data.suggested_actions.some(action => action.action_id === actionId)) {
         onAction?.(actionId);
@@ -104,6 +106,7 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
               : getConditionExplanation(assistance.condition, locale, assistance.explanation)
           : ''}
         locale={locale} onClose={() => setOpen(false)} onRetry={() => void refresh()}
+        onGenerate={() => void refresh(undefined, true)}
         onAction={actionId => void refresh(actionId)} />}
     </div>
   );

@@ -5,6 +5,7 @@ import { getActionLabel, reviewAssistanceCopy } from '../locale/reviewAssistance
 import { isReviewAction, type ReviewAction, type ReviewAssistanceResponse } from './reviewAssistanceApi';
 import { ReviewFactsList } from './ReviewFactsList';
 import { SelectedPreviewAdvice } from './SelectedPreviewAdvice';
+import { reviewGenerationCopy } from '../locale/reviewGenerationCopy';
 
 interface ReviewAssistantPanelProps {
   loading: boolean;
@@ -14,6 +15,7 @@ interface ReviewAssistantPanelProps {
   locale: Locale;
   onClose: () => void;
   onRetry: () => void;
+  onGenerate?: () => void;
   onAction?: (actionId: ReviewAction) => void;
 }
 
@@ -25,9 +27,12 @@ export function ReviewAssistantPanel({
   locale,
   onClose,
   onRetry,
+  onGenerate,
   onAction,
 }: ReviewAssistantPanelProps): React.JSX.Element {
   const text = reviewAssistanceCopy[locale];
+  const generated = assistance?.source === 'generated' && assistance.locale === locale;
+  const generationText = reviewGenerationCopy[locale];
 
   return (
     <div
@@ -67,7 +72,7 @@ export function ReviewAssistantPanel({
             }}
           >
             <Bot size={12} />
-            {text.localBadge}
+            {generated ? generationText.generated : text.localBadge}
           </span>
         </div>
 
@@ -92,6 +97,12 @@ export function ReviewAssistantPanel({
           {text.loading}
         </div>
       )}
+
+      {assistance?.fallback_status && <p role="status">{generationText[assistance.fallback_status]}</p>}
+      {assistance && !generated && <button type="button" className="btn btn-secondary btn-sm"
+        data-testid="generate-review" disabled={loading} onClick={onGenerate}>
+        {generationText.generate}
+      </button>}
 
       {error && (
         <div
