@@ -109,3 +109,23 @@ slice, not a later hardening ticket.
 - No live Gemini requests, browser/device acceptance, PostgreSQL integration,
   or hosted/provider verification performed. Limits remain single-process and
   reset on restart; enablement is documented for private synthetic reviews only.
+
+## Gemini response compatibility fix — 2026-10-30
+
+- Live synthetic verification confirmed Gemini returns a valid explanation part
+  containing `text` plus `thoughtSignature`; the previous exact-key check rejected
+  this documented transport metadata as malformed advice.
+- Accept optional string signatures and explicit `thought: false` on the single
+  text part. Ignore signatures rather than displaying, retaining, or logging them.
+  Continue rejecting thought content, tool payloads, unknown part fields,
+  non-string text, and all existing unsafe-advice conditions.
+- HTTP transport regressions reproduced rejection before the fix. All 46 focused
+  generation tests passed; full root gate passed with 596 backend tests passed /
+  174 skipped, and 489 frontend tests passed. Evidence:
+  `.cache/checks/check-R4i96N/result.json`. Used repository-local pytest basetemp.
+- Manual live check with a synthetic Bengali review: HTTP 200, STOP, valid output
+  schema, `source=generated`, no fallback. Only structural diagnostics were emitted;
+  no generated text, signatures, credential values, or real order data were saved.
+  An earlier diagnostic timed out; no automatic retries or policy limits changed.
+- API format reference: [Gemini Part fields](https://ai.google.dev/api/generate-content).
+- Existing implementation-plan deletion remains unrelated and unstaged.

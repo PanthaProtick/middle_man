@@ -53,9 +53,16 @@ async def generate(context: ReviewProviderContext) -> str:
     if candidate.get("finishReason") != "STOP":
         raise RejectedGeneration()
     parts = candidate["content"]["parts"]
-    if len(parts) != 1 or set(parts[0]) != {"text"}:
+    if len(parts) != 1 or not isinstance(parts[0], dict):
         raise ValueError("Malformed response")
-    return str(parts[0]["text"])
+    part = parts[0]
+    text = part.get("text")
+    # Signatures are transport metadata, not generated advice or chat history.
+    if (not set(part).issubset({"text", "thought", "thoughtSignature"}) or
+            not isinstance(text, str) or part.get("thought", False) is not False or
+            ("thoughtSignature" in part and not isinstance(part["thoughtSignature"], str))):
+        raise ValueError("Malformed response")
+    return text
 
 
 async def generate_review(local: ReviewAssistanceResponse, shop_id: str) -> ReviewAssistanceResponse:

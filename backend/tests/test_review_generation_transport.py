@@ -11,8 +11,12 @@ from app.main import app
 from app.services import review_generation
 
 
+@pytest.mark.parametrize("metadata", [
+    {}, {"thoughtSignature": "synthetic-opaque-signature"},
+    {"thought": False, "thoughtSignature": "synthetic-opaque-signature"},
+])
 @pytest.mark.parametrize("status", [200, 429, 503])
-async def test_wire_request_and_no_provider_retries(client, pending, live, monkeypatch, status):  # noqa: F811
+async def test_wire_request_and_no_provider_retries(client, pending, live, monkeypatch, status, metadata):  # noqa: F811
     captured = []
     original_client = httpx.AsyncClient
 
@@ -21,7 +25,7 @@ async def test_wire_request_and_no_provider_retries(client, pending, live, monke
         return httpx.Response(status, json={"candidates": [{
             "finishReason": "STOP", "content": {"parts": [{"text": json.dumps({
                 "explanation": "Inspect the seller records.", "action_ids": ["CHECK_TRANSACTIONS"],
-            })}]},
+            }), **metadata}]},
         }]})
 
     def provider_client(**kwargs):
@@ -86,4 +90,25 @@ async def test_unusable_wire_response_is_local(client, pending, live, monkeypatc
     result = (await client.post(pending, json={"generate": True})).json()
     assert result["source"] == "local"
     assert result["fallback_status"] in ("malformed", "rejected")
+    assert review_generation.limits.total == 1
+
+
+@pytest.mark.parametrize("part", [
+    {"thought": True},
+    {"thought": "false"},
+    {"thoughtSignature": {"text": "untrusted"}},
+    {"functionCall": {"name": "approve"}},
+    {"text": {"explanation": "Do not coerce non-text output", "action_ids": []}},
+])
+async def test_invalid_part_metadata_keeps_local_guidance(client, pending, live, monkeypatch, part):  # noqa: F811
+    original_client = httpx.AsyncClient
+    part = {"text": json.dumps({"explanation": "Inspect the seller records.", "action_ids": []}), **part}
+    body = {"candidates": [{"finishReason": "STOP", "content": {"parts": [part]}}]}
+    monkeypatch.setattr(review_generation.httpx, "AsyncClient", lambda **kwargs: original_client(
+        transport=httpx.MockTransport(lambda request: httpx.Response(200, json=body)), **kwargs,
+    ))
+    result = (await client.post(pending, json={"generate": True})).json()
+    assert result["source"] == "local"
+    assert result["fallback_status"] == "malformed"
+    assert len(result["suggested_actions"]) == 2
     assert review_generation.limits.total == 1
