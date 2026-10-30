@@ -2,7 +2,9 @@ import React from 'react';
 import { Bot, AlertCircle, X, ChevronRight } from 'lucide-react';
 import type { Locale } from '../locale/storage';
 import { getActionLabel, reviewAssistanceCopy } from '../locale/reviewAssistanceCopy';
-import type { ReviewAction, ReviewAssistanceResponse } from './reviewAssistanceApi';
+import { isReviewAction, type ReviewAction, type ReviewAssistanceResponse } from './reviewAssistanceApi';
+import { ReviewFactsList } from './ReviewFactsList';
+import { SelectedPreviewAdvice } from './SelectedPreviewAdvice';
 
 interface ReviewAssistantPanelProps {
   loading: boolean;
@@ -128,7 +130,12 @@ export function ReviewAssistantPanel({
             {explanation}
           </p>
 
-          {assistance.suggested_actions && assistance.suggested_actions.length > 0 && (
+          {assistance.facts && <ReviewFactsList facts={assistance.facts} locale={locale} />}
+          {assistance.selected_receipt_id && <SelectedPreviewAdvice assistance={assistance} locale={locale} />}
+
+          {assistance.suggested_actions && assistance.suggested_actions.some(
+            action => isReviewAction(action.action_id),
+          ) && (
             <div style={{ marginTop: '10px' }}>
               <div
                 style={{
@@ -143,7 +150,7 @@ export function ReviewAssistantPanel({
                 {text.suggestedActions}
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {assistance.suggested_actions.map((action) => {
+                {assistance.suggested_actions.filter(action => isReviewAction(action.action_id)).map((action) => {
                   const actionLabel = getActionLabel(action.action_id, locale, action.label);
                   return (
                     <button

@@ -150,6 +150,13 @@ async def test_unknown_cause_explanation(client: AsyncClient, seller_identity):
     assert tx_res.status_code == 201
 
     from app.services.reconciliation_store import _memory_order_review_reasons
+    from app.services.transaction_store import _memory_transactions
+
+    tx = tx_res.json()
+    _memory_transactions[tx["id"]].update(
+        sender_number_canonical="01711111111",
+        occurred_at=_memory_orders[order["id"]]["created_at"],
+    )
     _memory_order_review_reasons[order["id"]] = []
 
     res = await client.post(
@@ -172,7 +179,25 @@ async def test_unsupported_stored_reason_code_guidance(client: AsyncClient, sell
 
     order = await _create_test_order(client)
     await _submit_buyer_claim(client, order["portal_token"], trx_id="DIFF123")
-    _memory_order_review_reasons[order["id"]] = ["SENDER_MISMATCH"]
+    tx_res = await client.post(
+        "/api/seller/transactions",
+        json={
+            "payment_account_id": order["payment_account_id"],
+            "provider": "bkash",
+            "trx_id": "DIFF123",
+            "amount_minor": 200000,
+        },
+        headers={"Idempotency-Key": "tx-future-reason"},
+    )
+    assert tx_res.status_code == 201
+    from app.services.transaction_store import _memory_transactions
+
+    tx = tx_res.json()
+    _memory_transactions[tx["id"]].update(
+        sender_number_canonical="01711111111",
+        occurred_at=_memory_orders[order["id"]]["created_at"],
+    )
+    _memory_order_review_reasons[order["id"]] = ["FUTURE_REASON"]
 
     res = await client.post(
         f"/api/seller/orders/{order['id']}/review-assistance",
@@ -182,7 +207,9 @@ async def test_unsupported_stored_reason_code_guidance(client: AsyncClient, sell
     data = res.json()
     assert data["source"] == "local"
     assert data["condition"] == "UNSUPPORTED_REASON_CODE"
-    assert data["reason_codes"] == ["SENDER_MISMATCH"]
+    assert data["reason_codes"] == []
+    assert data["unknown_reason_present"] is True
+    assert data["facts"] == {"has_matching_receipt": True}
     assert "require manual verification" in data["explanation"]
 
 

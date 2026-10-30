@@ -14,10 +14,14 @@ from app.services.reconciliation_store import _memory_used_payment_markers
 from app.services.seller_service import SellerDomainException
 
 
-async def payment_preview(db: AsyncSession | None, shop_id: str, order_id: str, receipt_id: str) -> PaymentPreview:
+async def payment_preview(
+    db: AsyncSession | None, shop_id: str, order_id: str, receipt_id: str, *, read_only: bool = False,
+) -> PaymentPreview:
     from app.services.payment_marker_protection import verify_marker_key
-    await verify_marker_key(db, shop_id)
-    order = await OrderService(db).get_order(shop_id, order_id)
+    await verify_marker_key(db, shop_id, read_only=read_only)
+    from app.services.payment_preview_order import advisory_order
+    order = (await advisory_order(db, shop_id, order_id) if read_only
+             else await OrderService(db).get_order(shop_id, order_id))
     comparison = await compare_receipt(db, shop_id, receipt_id)
     receipt = comparison.receipt
     if order.lifecycle != 'pending' or not order.buyer_revision:

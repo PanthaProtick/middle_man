@@ -5,24 +5,28 @@ import { getConditionExplanation, reviewAssistanceCopy } from '../locale/reviewA
 import { fetchReviewAssistance, type ReviewAction, type ReviewAssistanceResponse } from './reviewAssistanceApi';
 import { ReviewAssistantPanel } from './ReviewAssistantPanel';
 import type { SellerOrder } from './types';
+import { selectedPreviewCopy } from '../locale/selectedPreviewCopy';
 
 interface ReviewAssistantProps {
   order: SellerOrder;
   token?: string;
   receiptId?: string;
+  receiptVersion?: number;
+  selectionKey?: string;
+  selectionUnavailable?: boolean;
   onAction?: (actionId: ReviewAction) => void;
 }
 
 export function ReviewAssistant(props: ReviewAssistantProps): React.JSX.Element | null {
-  const { order, token, receiptId } = props;
-  if (!token || order.lifecycle !== 'pending' || order.buyer_revision === null) return null;
+  const { order, token, receiptId, receiptVersion, selectionKey, selectionUnavailable } = props;
+  if (!token || order.lifecycle !== 'pending' || order.buyer_revision === null || selectionUnavailable) return null;
   // A new authorized view never inherits content or an in-flight request.
   const key = JSON.stringify([token, order.shop_id, order.id, order.version,
-    order.buyer_revision, order.lifecycle, order.review_reasons, receiptId]);
+    order.buyer_revision, order.lifecycle, order.review_reasons, receiptId, receiptVersion, selectionKey]);
   return <AuthorizedReviewAssistant key={key} {...props} />;
 }
 
-function AuthorizedReviewAssistant({ order, token, receiptId, onAction }: ReviewAssistantProps): React.JSX.Element {
+function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, onAction }: ReviewAssistantProps): React.JSX.Element {
   const { locale } = useLocale();
   const text = reviewAssistanceCopy[locale];
   const [isOpen, setOpen] = useState(false);
@@ -49,7 +53,9 @@ function AuthorizedReviewAssistant({ order, token, receiptId, onAction }: Review
       const data = await fetchReviewAssistance(order.id, token, localeRef.current, receiptId);
       if (!alive.current) return;
       if (data.order_id !== order.id || data.order_version !== order.version ||
-          data.buyer_revision !== order.buyer_revision || data.lifecycle !== 'pending') {
+          data.buyer_revision !== order.buyer_revision || data.lifecycle !== 'pending' ||
+          (receiptId && (data.selected_receipt_id !== receiptId ||
+            (receiptVersion !== undefined && data.selected_receipt_version !== receiptVersion)))) {
         throw new Error('Review changed');
       }
       setAssistance(previous => previous?.context_token === data.context_token ? previous : data);
@@ -63,7 +69,7 @@ function AuthorizedReviewAssistant({ order, token, receiptId, onAction }: Review
       busy.current = false;
       if (alive.current) setLoading(false);
     }
-  }, [order.id, order.version, order.buyer_revision, token, receiptId, assistance, onAction]);
+  }, [order.id, order.version, order.buyer_revision, token, receiptId, receiptVersion, assistance, onAction]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -88,7 +94,15 @@ function AuthorizedReviewAssistant({ order, token, receiptId, onAction }: Review
       </button>
       {isOpen && <ReviewAssistantPanel loading={loading} error={error ? text.error : null}
         assistance={assistance}
-        explanation={assistance ? getConditionExplanation(assistance.condition, locale, assistance.explanation) : ''}
+        explanation={assistance
+          ? assistance.locale === locale
+            ? assistance.explanation
+            : assistance.selected_receipt_id
+              ? [selectedPreviewCopy[locale].intro, ...assistance.reason_codes.map(
+                code => getConditionExplanation(code, locale),
+              )].join(' ')
+              : getConditionExplanation(assistance.condition, locale, assistance.explanation)
+          : ''}
         locale={locale} onClose={() => setOpen(false)} onRetry={() => void refresh()}
         onAction={actionId => void refresh(actionId)} />}
     </div>

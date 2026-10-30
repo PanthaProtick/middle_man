@@ -10,8 +10,9 @@ import type { ReceiptView, SellerOrder } from './types';
 
 const money = (minor: number) => `BDT ${(minor / 100).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}`;
 
-export function PaymentException({orderId, token, onAccepted}: {
+export function PaymentException({orderId, token, onAccepted, onPreviewChange}: {
   orderId: string; token: string; onAccepted: (order: SellerOrder) => void;
+  onPreviewChange?: (receiptId: string, preview: PaymentPreview | null) => void;
 }) {
   const { locale } = useLocale();
   const text = paymentExceptionCopy[locale];
@@ -41,9 +42,12 @@ export function PaymentException({orderId, token, onAccepted}: {
   async function loadPreview(id: string) {
     const request = ++sequence.current.value;
     setReceiptId(id);setPreview(null);setError('');setStale(false);
+    onPreviewChange?.(id, null);
     if(!id)return;
     setBusy(true);
-    try {const data = await previewPayment(orderId,id,token);if(request===sequence.current.value)setPreview(data);}
+    try {const data = await previewPayment(orderId,id,token);if(request===sequence.current.value){
+      setPreview(data);onPreviewChange?.(id, data);
+    }}
     catch(e){if(request===sequence.current.value)setError(message(e));}
     finally{if(request===sequence.current.value)setBusy(false);}
   }
@@ -58,7 +62,7 @@ export function PaymentException({orderId, token, onAccepted}: {
     try {const result=await acceptPayment(orderId,pending.current.payload,pending.current.key,token);
       pending.current=null;setRetry(false);onAccepted(result);}
     catch(e){setError(message(e));
-      if(e instanceof SellerApiError && e.status>=400 && e.status<500){pending.current=null;setRetry(false);setStale(true);}
+      if(e instanceof SellerApiError && e.status>=400 && e.status<500){pending.current=null;setRetry(false);setStale(true);onPreviewChange?.(receiptId, null);}
       else setRetry(true);}
     finally{setBusy(false);}
   }

@@ -54,6 +54,10 @@ async def test_revalidation_tracks_receipts_reasons_and_locale_without_mutation(
     again = (await request_advice(client, order, language='bn')).json()
     assert first['context_token'] == again['context_token']
     tx = await receipt(client, order)
+    _memory_transactions[tx['id']].update(
+        sender_number_canonical='01711111111',
+        occurred_at=_memory_orders[order['id']]['created_at'],
+    )
     _memory_order_review_reasons[order['id']] = []
     before = deepcopy((_memory_orders, _memory_buyer_revisions, _memory_transactions))
     matched = (await request_advice(client, order)).json()

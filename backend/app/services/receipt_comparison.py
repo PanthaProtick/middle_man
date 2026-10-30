@@ -20,7 +20,8 @@ from app.services.transaction_store import _memory_observations, _memory_transac
 async def compare_receipt(db: AsyncSession | None, shop_id: str, receipt_id: str) -> ReceiptComparison:
     if db is not None:
         tx = await db.scalar(select(ReceivedTransactionTable).where(
-            ReceivedTransactionTable.id == receipt_id, ReceivedTransactionTable.shop_id == shop_id))
+            ReceivedTransactionTable.id == receipt_id, ReceivedTransactionTable.shop_id == shop_id)
+            .execution_options(populate_existing=True))
         if tx is None:
             raise NotFoundError()
         if tx.retained_at:
@@ -28,13 +29,15 @@ async def compare_receipt(db: AsyncSession | None, shop_id: str, receipt_id: str
             raise unavailable_record()
         observations = list((await db.scalars(select(TransactionObservationTable).where(
             TransactionObservationTable.transaction_id == receipt_id,
-        ).order_by(TransactionObservationTable.created_at, TransactionObservationTable.id))).all())
+        ).order_by(TransactionObservationTable.created_at, TransactionObservationTable.id)
+            .execution_options(populate_existing=True))).all())
         receipt = to_receipt_view(tx, observations)
         rows = (await db.execute(select(OrderTable, BuyerRevisionTable).join(
             BuyerRevisionTable, (BuyerRevisionTable.order_id == OrderTable.id)
             & (BuyerRevisionTable.revision_number == OrderTable.buyer_revision),
         ).where(OrderTable.shop_id == shop_id, BuyerRevisionTable.payment_provider == tx.provider,
-                BuyerRevisionTable.payment_trx_id == tx.trx_id).order_by(OrderTable.id))).all()
+                BuyerRevisionTable.payment_trx_id == tx.trx_id).order_by(OrderTable.id)
+            .execution_options(populate_existing=True))).all()
         order_ids = [o.id for o, _ in rows]
         reason_rows = (await db.execute(select(OrderReviewReasonTable.order_id, OrderReviewReasonTable.reason).where(
             OrderReviewReasonTable.order_id.in_(order_ids)))).all()

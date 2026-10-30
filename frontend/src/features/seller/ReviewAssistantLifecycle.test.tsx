@@ -80,7 +80,7 @@ it('revalidates hidden receipt changes on reopen and on focus without navigating
   const changed = { ...advice, context_token: 'changed', condition: 'UNKNOWN_CAUSE' };
   fetchSpy.mockImplementation(async () => response(changed));
   await view.click();
-  expect(view.container.textContent).toContain('unknown reason');
+  expect(view.container.textContent).toContain('Missing receipt');
   expect(fetchSpy).toHaveBeenCalledTimes(2);
   fetchSpy.mockImplementation(async () => response({ ...changed, context_token: 'changed-again' }));
   await view.click('[data-testid="action-CHECK_TRANSACTIONS"]');

@@ -38,17 +38,17 @@ def key_unavailable() -> SellerDomainException:
         'Payment identity protection is unavailable. Restore the original key before retrying.')
 
 
-async def verify_marker_key(db: AsyncSession | None, shop_id: str) -> None:
+async def verify_marker_key(db: AsyncSession | None, shop_id: str, *, read_only: bool = False) -> None:
     from app.services.receipt_identity import receipt_identities
     from app.services.reconciliation import compute_payment_digest
-    if db is not None:
+    if db is not None and not read_only:
         await db.execute(select(ShopTable.id).where(ShopTable.id == shop_id).with_for_update())
     try:
         fingerprint = compute_payment_digest(shop_id, 'marker-key-binding-v1', 'key-check')
     except RuntimeError as error:
         raise key_unavailable() from error
     if db is None:
-        previous = _memory_keys.setdefault(shop_id, fingerprint)
+        previous = _memory_keys.get(shop_id, fingerprint) if read_only else _memory_keys.setdefault(shop_id, fingerprint)
         if not hmac.compare_digest(previous, fingerprint):
             raise key_unavailable()
         return
@@ -69,8 +69,9 @@ async def verify_marker_key(db: AsyncSession | None, shop_id: str) -> None:
         valid = {(p, compute_payment_digest(shop_id, p, t)) for p, t in identities}
         if any((m.provider, m.transaction_digest) not in valid for m in markers):
             raise key_unavailable()
-    db.add(PaymentMarkerKeyTable(shop_id=shop_id, fingerprint=fingerprint))
-    await db.flush()
+    if not read_only:
+        db.add(PaymentMarkerKeyTable(shop_id=shop_id, fingerprint=fingerprint))
+        await db.flush()
 
 
 async def reject_used_identity(db: AsyncSession | None, shop_id: str, provider: str, trx_id: str) -> None:

@@ -8,6 +8,7 @@ import { PaymentException } from './PaymentException';
 import { ReviewAssistant } from './ReviewAssistant';
 import type { SellerOrder } from './types';
 import { useLocale } from '../locale/context';
+import type { PaymentPreview } from './paymentDecisions';
 
 interface OrderPaymentDetailsProps {
   order: SellerOrder;
@@ -21,6 +22,10 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
   const { locale } = useLocale();
   const text = orderCopy[locale];
   const [showReviewCodes, setShowReviewCodes] = useState(false);
+  const [selection, setSelection] = useState<{
+    orderId: string; receiptId: string; preview: PaymentPreview | null;
+  } | null>(null);
+  const selected = selection?.orderId === order.id ? selection : null;
   const isConfirmed = order.lifecycle === 'confirmed';
   const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
   return (
@@ -113,6 +118,10 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
           key={`assistance-${order.id}`}
           order={order}
           token={token}
+          receiptId={selected?.receiptId || undefined}
+          receiptVersion={selected?.preview?.expected_transaction_version}
+          selectionKey={JSON.stringify(selected?.preview)}
+          selectionUnavailable={Boolean(selected?.receiptId && !selected.preview)}
           onAction={actionId => {
             if (actionId === 'CHECK_TRANSACTIONS') onCheckTransactions?.();
             if (actionId === 'CORRECT_BUYER_DETAILS' && onNavigateTab) {
@@ -122,7 +131,8 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
         />
       )}
       {token && order.lifecycle === 'pending' && <PaymentException key={`payment-${order.id}`} orderId={order.id} token={token}
-        onAccepted={onCorrected} />}
+        onAccepted={onCorrected}
+        onPreviewChange={(receiptId, preview) => setSelection({orderId: order.id, receiptId, preview})} />}
     </>
   );
 }
