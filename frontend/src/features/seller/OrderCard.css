@@ -1,0 +1,114 @@
+.ledger-scroll-viewport.order-scroll-viewport {
+  max-height: clamp(440px, 75vh, 840px);
+}
+
+.order-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.order-card-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.order-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.order-card-identity {
+  display: flex;
+  flex: 1;
+  min-width: min(100%, 360px);
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+}
+
+.order-card-review {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  margin: 0;
+  font-size: 0.825rem;
+}
+
+.isolated-subcard.order-card {
+  padding: 10px 12px;
+  margin-bottom: 0;
+}
+
+.order-card-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
+  gap: 4px 12px;
+  margin-bottom: 6px;
+  font-size: 0.825rem;
+}
+
+.order-card-facts > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.order-card-facts > div > span:last-child {
+  display: inline-block;
+}
+
+.order-card-mobile-summary {
+  display: none;
+}
+
+@media (max-width: 600px) {
+  .order-card-mobile-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 6px 8px;
+    align-items: center;
+    width: 100%;
+    min-height: 44px;
+    padding: 2px 0;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    text-align: start;
+    cursor: pointer;
+  }
+
+  .order-card-mobile-summary:focus-visible {
+    outline: 2px solid var(--primary-accent);
+    outline-offset: 4px;
+  }
+
+  .order-card-mobile-name {
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .order-card-mobile-status {
+    justify-self: start;
+    border-radius: 9999px;
+    padding: 2px 8px;
+    font-size: 0.725rem;
+  }
+
+  .order-card-mobile-total {
+    grid-column: 1 / -1;
+    font-size: 0.825rem;
+  }
+
+  .order-card-chevron-open { transform: rotate(180deg); }
+  .order-card-body { display: none; }
+  .order-card-body-open { display: block; margin-top: 10px; }
+  .order-card-identity > span { display: none; }
+  .order-card-identity:not(:has(.order-card-review)) { display: none; }
+}

@@ -59,6 +59,7 @@ class Settings(BaseSettings):
     ORDER_LINK_ENCRYPTION_KEY: str = ""
     PATHAO_CREDENTIAL_ENCRYPTION_KEY: str = ""
     PATHAO_LOCATION_ENVIRONMENT: Literal['offline', 'sandbox', 'production'] = 'offline'
+    PATHAO_PRODUCTION_BOOKING_ENABLED: bool = False
 
     # Payment Marker Protection
     PAYMENT_MARKER_SECRET: str = ""
@@ -108,9 +109,9 @@ class Settings(BaseSettings):
         """Determines whether durable persistence is strictly required.
 
         In offline development, memory fallbacks are allowed.
-        In self-test integration mode or production, durable persistence is required.
+        Self-test integration, production, and real courier booking require durable persistence.
         """
-        return self.ENV == "production" or self.SELF_TEST_MODE
+        return self.ENV == "production" or self.SELF_TEST_MODE or self.PATHAO_PRODUCTION_BOOKING_ENABLED
 
     @property
     def is_clerk_configured(self) -> bool:

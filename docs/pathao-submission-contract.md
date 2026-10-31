@@ -1,5 +1,9 @@
 # Courier submission contract
 
+2026-10-31: [Production trial opt-in](pathao-production-trial.md) supersedes the
+production rejection described below. New production bookings default to disabled;
+production consignment lookup remains available for recovery even when disabled.
+
 Seller-only `POST /api/seller/orders/{id}/courier-submission` executes the protected
 submission workflow against the selected offline or Pathao sandbox connection.
 Production submission remains disabled and is rejected server-side.

@@ -18,7 +18,7 @@ export interface PathaoConnection {
   status: 'disconnected' | 'connected';
   merchant_hint: string | null;
   simulated: boolean;
-  production_booking_enabled: false;
+  production_booking_enabled: boolean;
   default_store_id: number | null;
   default_delivery_type: PathaoDeliveryType | null;
 }

@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.core.database import ensure_durable_storage
 from app.models.entities import ShopTable
 from app.models.pathao import (
@@ -62,6 +63,7 @@ def view(env: Environment, revision: Revision) -> ConnectionView:
         unseal(revision.encrypted_credentials)
     return ConnectionView(
         environment=env, version=revision.version, simulated=env == 'offline',
+        production_booking_enabled=settings.PATHAO_PRODUCTION_BOOKING_ENABLED,
         status='connected' if revision.version else 'disconnected',
         merchant_hint=('Simulated merchant' if env == 'offline' else '••••') if revision.version else None,
         default_store_id=revision.store_id,

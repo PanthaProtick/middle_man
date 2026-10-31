@@ -102,6 +102,8 @@ export function trackedFiles(workspace) {
 }
 
 export function checkConventions({ workspace = root, files = trackedFiles(workspace), exceptions = sizeExceptions } = {}) {
+  // Git still lists unstaged deletions; validate files present in this checkout.
+  files = files.filter(file => existsSync(path.join(workspace, file)));
   const findings = [...scratchFindings(files)];
   const sources = files.filter(isSource).map(file => ({
     path: file,

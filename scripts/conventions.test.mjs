@@ -31,6 +31,15 @@ test('tracked scratch accepts Markdown work records and rejects execution artifa
   assert.match(findings[1], /^\.scratch\/feature\/browser\.cjs: /);
 });
 
+test('checkout checks skip deleted tracked sources while preserving broken-link findings', t => {
+  const { directory, write } = fixture(t);
+  write('README.md', '[removed source](frontend/src/Removed.tsx)\n');
+  const report = checkConventions({ workspace: directory,
+    files: ['README.md', 'frontend/src/Removed.tsx'], exceptions: new Map() });
+  assert.equal(report.checked, 1);
+  assert.ok(report.findings.some(finding => finding.includes('link target does not exist')));
+});
+
 test('size review reports the trigger, fails above the maximum, and permits only explained test exceptions', () => {
   const files = [
     { path: 'backend/app/large.py', lines: 301 },

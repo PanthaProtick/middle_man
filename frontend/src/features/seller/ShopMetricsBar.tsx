@@ -2,18 +2,15 @@ import React from 'react';
 import { useLocale } from '../locale';
 import { sellerCopy } from '../locale/sellerCopy';
 import { ShoppingBag, CheckCircle2, Clock, AlertTriangle, Smartphone } from 'lucide-react';
-import type { SellerOrder } from './types';
+import type { TodayMetrics } from './useTodayMetrics';
+import './ShopMetricsBar.css';
 
 interface ShopMetricsBarProps {
-  orders: SellerOrder[];
-  transactionsCount: number;
+  metrics: TodayMetrics | null;
 }
 
-export function ShopMetricsBar({ orders, transactionsCount }: ShopMetricsBarProps): React.JSX.Element {
+export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Element {
   const text = sellerCopy[useLocale().locale];
-  const confirmedCount = orders.filter((o) => o.lifecycle === 'confirmed').length;
-  const awaitingCount = orders.filter((o) => o.lifecycle === 'awaiting_buyer').length;
-  const pendingCount = orders.filter((o) => o.lifecycle === 'pending').length;
 
   return (
     <div className="metrics-ribbon" role="region" aria-label={text.overview}>
@@ -22,7 +19,7 @@ export function ShopMetricsBar({ orders, transactionsCount }: ShopMetricsBarProp
           <ShoppingBag size={18} />
         </div>
         <div>
-          <div className="metric-val">{orders.length}</div>
+          <div className="metric-val">{metrics?.orders ?? '—'}</div>
           <div className="metric-lbl">{text.loadedOrders}</div>
         </div>
       </div>
@@ -32,7 +29,7 @@ export function ShopMetricsBar({ orders, transactionsCount }: ShopMetricsBarProp
           <CheckCircle2 size={18} />
         </div>
         <div>
-          <div className="metric-val" style={{ color: 'var(--emerald-accent)' }}>{confirmedCount}</div>
+          <div className="metric-val" style={{ color: 'var(--emerald-accent)' }}>{metrics?.confirmed ?? '—'}</div>
           <div className="metric-lbl">{text.confirmed}</div>
         </div>
       </div>
@@ -42,7 +39,7 @@ export function ShopMetricsBar({ orders, transactionsCount }: ShopMetricsBarProp
           <Clock size={18} />
         </div>
         <div>
-          <div className="metric-val" style={{ color: 'var(--amber-accent)' }}>{awaitingCount}</div>
+          <div className="metric-val" style={{ color: 'var(--amber-accent)' }}>{metrics?.awaiting ?? '—'}</div>
           <div className="metric-lbl">{text.awaiting}</div>
         </div>
       </div>
@@ -52,7 +49,7 @@ export function ShopMetricsBar({ orders, transactionsCount }: ShopMetricsBarProp
           <AlertTriangle size={18} />
         </div>
         <div>
-          <div className="metric-val" style={{ color: 'var(--rose-accent)' }}>{pendingCount}</div>
+          <div className="metric-val" style={{ color: 'var(--rose-accent)' }}>{metrics?.pending ?? '—'}</div>
           <div className="metric-lbl">{text.pending}</div>
         </div>
       </div>
@@ -62,7 +59,7 @@ export function ShopMetricsBar({ orders, transactionsCount }: ShopMetricsBarProp
           <Smartphone size={18} />
         </div>
         <div>
-          <div className="metric-val" style={{ color: 'var(--primary-accent)' }}>{transactionsCount}</div>
+          <div className="metric-val" style={{ color: 'var(--primary-accent)' }}>{metrics?.payments ?? '—'}</div>
           <div className="metric-lbl">{text.loadedPayments}</div>
         </div>
       </div>

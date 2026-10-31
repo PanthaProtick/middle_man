@@ -1,5 +1,8 @@
 # Pathao merchant settings contract
 
+2026-10-31: [Production trial opt-in](pathao-production-trial.md) supersedes the
+setup-only restriction below. `production_booking_enabled` is now a boolean capability.
+
 Source review: 2026-10-26. Ticket: `.scratch/pathao-courier/issues/03-connect-seller-pathao-account.md`.
 
 Seller settings are independent of receiving-payment accounts. Creating links and collecting orders

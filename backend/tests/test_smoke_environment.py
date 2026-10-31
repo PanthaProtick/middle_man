@@ -8,7 +8,7 @@ from pathlib import Path
 
 def test_smoke_overrides_inherited_and_dotenv_self_test_mode(tmp_path):
     dotenv = tmp_path / '.env'
-    dotenv.write_text('SELF_TEST_MODE=true\nENV=production\n', encoding='utf-8')
+    dotenv.write_text('SELF_TEST_MODE=true\nENV=production\nPATHAO_PRODUCTION_BOOKING_ENABLED=true\n', encoding='utf-8')
     script = Path(__file__).parents[2] / 'scripts/smoke.py'
     probe = """
 import json, os, runpy, sys
@@ -22,6 +22,7 @@ print(json.dumps({'durable': settings.is_durable_mode, 'database': settings.is_d
 """
     result = subprocess.run([sys.executable, '-c', probe, str(script), str(dotenv)],
         cwd=Path(__file__).parents[1], env={**os.environ, 'SELF_TEST_MODE': 'true',
+            'PATHAO_PRODUCTION_BOOKING_ENABLED': 'true',
             'ENV': 'production', 'DATABASE_URL': 'postgresql://synthetic:synthetic@example.invalid/test',
             'GEMINI_API_KEY': 'synthetic-key', 'CLERK_SECRET_KEY': 'synthetic-key'},
         capture_output=True, text=True, timeout=15, check=True)

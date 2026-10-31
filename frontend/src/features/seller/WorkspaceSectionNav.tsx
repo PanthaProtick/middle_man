@@ -31,7 +31,7 @@ export function WorkspaceSectionNav({
       >
         <ShoppingBag size={14} />
         <span>{text.orders}</span>
-        <span className="section-tab-count">{ordersCount}</span>
+        {ordersCount > 0 && <span className="section-tab-count" aria-label={`${ordersCount} ${text.newEntries}`}>{ordersCount}</span>}
       </button>
 
       <button
@@ -43,7 +43,7 @@ export function WorkspaceSectionNav({
       >
         <Smartphone size={14} />
         <span>{text.payments}</span>
-        <span className="section-tab-count">{transactionsCount}</span>
+        {transactionsCount > 0 && <span className="section-tab-count" aria-label={`${transactionsCount} ${text.newEntries}`}>{transactionsCount}</span>}
       </button>
 
       <button
@@ -55,7 +55,7 @@ export function WorkspaceSectionNav({
       >
         <CreditCard size={14} />
         <span>{text.accounts}</span>
-        <span className="section-tab-count">{accountsCount}</span>
+        {accountsCount > 0 && <span className="section-tab-count" aria-label={`${accountsCount} ${text.newEntries}`}>{accountsCount}</span>}
       </button>
 
       <button

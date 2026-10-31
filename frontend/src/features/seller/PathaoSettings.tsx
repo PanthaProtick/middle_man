@@ -1,23 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
 import { requestJson, SellerApiError } from './api';
 import { useCourierText } from '../locale/courierCopy';
+import './PathaoSettings.css';
 import type { PathaoConnectInput, PathaoConnection, PathaoDefaultsInput, PathaoDeliveryType, PathaoEnvironment, PathaoStores } from './pathaoTypes';
 
 export function PathaoSettings({ token }: { token: string }): React.JSX.Element {
   const t = useCourierText();
-  const [environment, setEnvironment] = useState<PathaoEnvironment>('offline');
+  const [environment, setEnvironment] = useState<'sandbox' | 'production'>('production');
   return <section aria-label={t('Pathao courier settings')} className="pathao-settings-panel">
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
       <h4 style={{ margin: 0, color: 'var(--primary-accent)', fontSize: '0.95rem' }}>{t('Pathao courier account')}</h4>
-      <span className="badge info">{t(environment)}</span>
     </div>
     <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: '0 0 4px' }}>{t('Optional: keep creating buyer links and collecting orders without a courier connection.')}</p>
-    <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: '0 0 12px' }}>{t('Production booking is disabled. These settings do not create a booking.')}</p>
-    <label style={{ display: 'block', fontSize: '0.85rem', marginBottom: '12px' }}>{t('Courier environment')}
-      <select className="form-control" style={{ marginTop: '4px', maxWidth: '320px' }} value={environment} onChange={event => setEnvironment(event.target.value as PathaoEnvironment)}>
-        <option value="offline">{t('Offline — simulated')}</option>
+    <label className="pathao-environment-field"><span>{t('Courier environment')}</span>
+      <select className="form-control" value={environment} onChange={event => setEnvironment(event.target.value === 'sandbox' ? 'sandbox' : 'production')}>
         <option value="sandbox">{t('Pathao sandbox')}</option>
-        <option value="production">{t('Pathao production — setup only')}</option>
+        <option value="production">{t('Pathao production')}</option>
       </select>
     </label>
     <ConnectionForm key={`${token}:${environment}`} token={token} environment={environment} />
@@ -121,36 +119,50 @@ function ConnectionForm({ token, environment }: { token: string; environment: Pa
 
   if (denied) return <p role="alert">{error && t(error)}</p>;
   return <div aria-busy={busy}>
-    <p role="status">{connection ? `${t(connection.status)} · ${t('Revision')} ${connection.version} · ${connection.merchant_hint ?? t('No merchant')}` : error ? t('Settings unavailable') : t('Loading settings…')}</p>
+    {connection && <p>{t(connection.production_booking_enabled
+      ? 'Production booking is enabled. Submit a reviewed order to create a real courier booking.'
+      : 'Production booking is disabled. These settings do not create a booking.')}</p>}
+    <div className={`pathao-connection-card pathao-connection-card--${error ? 'unavailable' : busy ? 'loading' : connection?.status ?? 'loading'}`}>
+      <div className="pathao-connection-copy" role="status">
+        <span className="pathao-connection-label">{t('Merchant connection')}</span>
+        <strong className="pathao-connection-state"><span aria-hidden="true" className="pathao-connection-dot" />{error ? t('Settings unavailable') : busy ? t('Checking connection…') : connection?.status === 'connected' ? t('Connected') : connection ? t('Disconnected') : t('Loading settings…')}</strong>
+        <p>{error ? t('Reload settings to confirm the current connection.') : busy || !connection ? t('Retrieving your courier account settings.') : connection.status === 'connected' ? t('Your merchant account is linked. Review your courier defaults below.') : t('Connect your merchant account to set up Pathao delivery.')}</p>
+        {connection && <span className="pathao-connection-meta">{connection.merchant_hint ?? t('No merchant')} · {t('Revision')} {connection.version}</span>}
+      </div>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={() => void reload()} disabled={busy}>{t('Reload settings')}</button>
+    </div>
     {environment === 'offline' && <p>{t('Simulated setup and pickup stores. No credentials or Pathao requests.')}</p>}
     {error && <p role="alert">{t(error)}</p>}
-    <button type="button" className="btn btn-secondary btn-sm" style={{ marginBottom: '12px' }} onClick={() => void reload()} disabled={busy}>{t('Reload settings')}</button>
-    <form ref={credentials} onSubmit={connect} autoComplete="off">
-      <fieldset disabled={busy || !connection}>
-        <legend>{connection?.status === 'connected' ? t('Replace merchant connection') : t('Connect merchant')}</legend>
-        {environment !== 'offline' && <>
-          <p>{t('Credentials are write-only. Replacing the connection clears pickup and service defaults.')}</p>
-          <label>{t('Client ID')}<input name="client_id" className="form-control" type="password" required maxLength={256} autoComplete="off" /></label>
-          <label>{t('Client secret')}<input name="client_secret" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
-          <label>{t('Merchant email')}<input name="username" className="form-control" type="email" required maxLength={256} autoComplete="off" /></label>
-          <label>{t('Merchant password')}<input name="password" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
-        </>}
-        <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '8px' }}>{environment === 'offline' ? t('Connect simulated account') : t('Verify and save connection')}</button>
-      </fieldset>
-    </form>
-    {connection?.status === 'connected' && <form data-defaults onSubmit={saveDefaults} style={{ marginTop: '12px' }}>
-      <fieldset disabled={busy || !stores}>
-        <legend>{t('Courier defaults')}</legend>
-        {stores?.stores.length === 0 && <p>{t('No active pickup stores. Add one in Pathao, then reload settings.')}</p>}
-        <label>{t('Pickup store')}<select name="pickup" className="form-control" value={pickup} required onChange={event => setPickup(event.target.value)}>
-          <option value="">{t('Choose a pickup store')}</option>
-          {stores?.stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
-        </select></label>
-        <label>{t('Delivery service')}<select className="form-control" value={service} onChange={event => setService(event.target.value === '12' ? 12 : 48)}>
-          <option value="48">{t('Normal delivery (48)')}</option><option value="12">{t('On-demand delivery (12)')}</option>
-        </select></label>
-        <button className="btn btn-primary btn-sm" type="submit" disabled={!pickup || !stores?.stores.length} style={{ marginTop: '8px' }}>{t('Save courier defaults')}</button>
-      </fieldset>
-    </form>}
+    <details className="pathao-settings-disclosure">
+      <summary>{connection?.status === 'connected' ? t('Replace merchant connection') : t('Connect merchant')}</summary>
+      <form ref={credentials} onSubmit={connect} autoComplete="off">
+        <fieldset disabled={busy || !connection} aria-label={connection?.status === 'connected' ? t('Replace merchant connection') : t('Connect merchant')}>
+          {environment !== 'offline' && <>
+            <p>{t('Credentials are write-only. Replacing the connection clears pickup and service defaults.')}</p>
+            <label>{t('Client ID')}<input name="client_id" className="form-control" type="password" required maxLength={256} autoComplete="off" /></label>
+            <label>{t('Client secret')}<input name="client_secret" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
+            <label>{t('Merchant email')}<input name="username" className="form-control" type="email" required maxLength={256} autoComplete="off" /></label>
+            <label>{t('Merchant password')}<input name="password" className="form-control" type="password" required maxLength={2048} autoComplete="new-password" /></label>
+          </>}
+          <button className="btn btn-primary btn-sm" type="submit" style={{ marginTop: '8px' }}>{environment === 'offline' ? t('Connect simulated account') : t('Verify and save connection')}</button>
+        </fieldset>
+      </form>
+    </details>
+    {connection?.status === 'connected' && <details className="pathao-settings-disclosure">
+      <summary>{t('Courier defaults')}</summary>
+      <form data-defaults onSubmit={saveDefaults}>
+        <fieldset disabled={busy || !stores} aria-label={t('Courier defaults')}>
+          {stores?.stores.length === 0 && <p>{t('No active pickup stores. Add one in Pathao, then reload settings.')}</p>}
+          <label>{t('Pickup store')}<select name="pickup" className="form-control" value={pickup} required onChange={event => setPickup(event.target.value)}>
+            <option value="">{t('Choose a pickup store')}</option>
+            {stores?.stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
+          </select></label>
+          <label>{t('Delivery service')}<select className="form-control" value={service} onChange={event => setService(event.target.value === '12' ? 12 : 48)}>
+            <option value="48">{t('Normal delivery (48)')}</option><option value="12">{t('On-demand delivery (12)')}</option>
+          </select></label>
+          <button className="btn btn-primary btn-sm" type="submit" disabled={!pickup || !stores?.stores.length} style={{ marginTop: '8px' }}>{t('Save courier defaults')}</button>
+        </fieldset>
+      </form>
+    </details>}
   </div>;
 }

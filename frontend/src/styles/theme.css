@@ -56,8 +56,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .badge.info { color: var(--cyan-accent); }
 .badge.active { color: var(--primary-accent); }
 .badge-dot { box-shadow: none !important; }
-.demo-pill-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 12px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-secondary); }
-.demo-pill-btn:hover, .demo-pill-btn.active { background: #e3eee8; color: var(--primary-accent); }
+.header-action-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; padding: 8px 12px; background: transparent; border: 1px solid var(--border-subtle); border-radius: 10px; color: var(--text-secondary); }
+.header-action-btn:hover, .header-action-btn.active { background: #e3eee8; color: var(--primary-accent); }
 .app-masthead { display: grid; grid-template-columns: minmax(0, 1fr) 300px; align-items: center; gap: 56px; padding: 42px 0 32px; }
 .eyebrow { font-size: .75rem; color: var(--primary-accent); font-weight: 700; margin-bottom: 12px; }
 .app-masthead h2 { font-family: var(--font-heading); font-size: clamp(1.9rem, 3.4vw, 2.9rem); line-height: 1.18; letter-spacing: -.055em; margin-bottom: 14px; }
@@ -90,6 +90,13 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .text-input, .text-area, .form-control, select { min-height: 46px; font-size: 16px; border-color: #b8c9c0; }
 .text-input:focus, .text-area:focus, .form-control:focus, select:focus { background: white; box-shadow: 0 0 0 3px #14665320; }
 select option { background: white; color: var(--text-primary); }
+select option:checked {
+  background: var(--primary-accent);
+  color: #ffffff;
+}
+@media (forced-colors: active) {
+  select option:checked { background: Highlight; color: HighlightText; }
+}
 input::placeholder, textarea::placeholder { color: #687d73; opacity: 1; }
 .btn { min-height: 44px; white-space: normal; transition: background 180ms, border-color 180ms; line-height: 1.4; }
 .btn-primary { color: white; background: var(--primary-accent); box-shadow: none; }
@@ -189,7 +196,7 @@ input, textarea, fieldset { min-width: 0; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
 
-button:not(.btn):not(.workspace-section-tab):not(.demo-pill-btn) { min-height: 44px; }
+button:not(.btn):not(.workspace-section-tab):not(.header-action-btn) { min-height: 44px; }
 fieldset { border: 0; }
 
 .tabs-nav { background: var(--bg-surface); backdrop-filter: none; flex-wrap: wrap; gap: var(--pill-gap); }

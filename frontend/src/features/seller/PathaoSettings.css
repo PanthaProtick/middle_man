@@ -1,0 +1,41 @@
+.pathao-settings-panel label.pathao-environment-field {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+.pathao-settings-panel .pathao-environment-field select {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 0;
+}
+
+.pathao-connection-card {
+  --connection-color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 20px;
+  margin: 16px 0;
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--connection-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-card);
+}
+.pathao-connection-card--connected {
+  --connection-color: var(--emerald-accent);
+  background: #eef8f2;
+}
+.pathao-connection-card--disconnected,
+.pathao-connection-card--unavailable {
+  --connection-color: var(--amber-accent);
+  background: #fff8eb;
+}
+.pathao-connection-copy { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
+.pathao-connection-label { display: block; color: var(--text-secondary); font-size: .8rem; font-weight: 600; }
+.pathao-connection-state { display: flex; align-items: center; gap: 10px; margin-top: 6px; color: var(--connection-color); font-size: 1.2rem; }
+.pathao-connection-dot { width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
+.pathao-connection-copy p { margin: 8px 0; color: var(--text-secondary); font-size: .85rem; }
+.pathao-connection-meta { color: var(--text-muted); font-size: .75rem; }
+.pathao-connection-card button { min-height: 44px; white-space: normal; }

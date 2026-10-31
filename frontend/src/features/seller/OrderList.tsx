@@ -185,7 +185,7 @@ export function OrderList({
       <div
         ref={viewportRef}
         onScroll={handleScroll}
-        className="ledger-scroll-viewport"
+        className="ledger-scroll-viewport order-scroll-viewport"
         data-testid="order-scroll-viewport"
       >
         {loading && orders.length === 0 ? (
@@ -201,7 +201,7 @@ export function OrderList({
             </p>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div className="order-card-list">
             {orders.map((ord) => (
               <OrderCard
                 key={ord.id}

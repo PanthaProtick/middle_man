@@ -44,6 +44,8 @@ def standby_environment() -> dict[str, str]:
     environment.update(
         ENV="test", DEBUG="false", API_PREFIX="/api", PGPORT="5432", PGSSLMODE="require",
         SELF_TEST_MODE="false",
+        PATHAO_PRODUCTION_BOOKING_ENABLED="false",
+        PATHAO_LOCATION_ENVIRONMENT="offline",
         CORS_ORIGINS='["http://localhost:5173"]', GEMINI_MODEL="gemini-2.5-flash",
     )
     return environment

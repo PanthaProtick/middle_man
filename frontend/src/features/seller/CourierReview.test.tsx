@@ -220,12 +220,12 @@ it('displays session loss error and enables retry when submission is unauthorize
   await act(async () => root.unmount());
 });
 
-it('submits a reviewed sandbox draft and reports a non-simulated consignment', async () => {
+it.each(['sandbox', 'production'] as const)('submits a reviewed %s draft and reports its environment', async environment => {
   const sandboxReview = {
     ...review,
     reviewed: true,
     submission_enabled: true,
-    choices: { ...review.choices, environment: 'sandbox' },
+    choices: { ...review.choices, environment },
     connection: { ...review.connection, simulated: false, merchant_hint: 'masked' },
   };
   const bookedReview = {
@@ -233,7 +233,7 @@ it('submits a reviewed sandbox draft and reports a non-simulated consignment', a
     submission_enabled: false,
     latest_attempt: {
       id: 'att-sandbox', order_id: 'a', attempt_number: 1, status: 'success' as const,
-      environment: 'sandbox' as const, simulated: false, reviewed_token: review.token,
+      environment, simulated: false, reviewed_token: review.token,
       correlation_id: 'a-1', consignment_id: 'PT-SANDBOX-1', booking_snapshot: null,
       error_code: null, error_message: null, created_at: '', updated_at: '',
     },
@@ -246,9 +246,9 @@ it('submits a reviewed sandbox draft and reports a non-simulated consignment', a
   const host = document.createElement('div'); document.body.append(host); const root = createRoot(host);
   await act(async () => root.render(<CourierReview orderId="a" token="seller" />));
   const submitBtn = host.querySelector<HTMLButtonElement>('[data-submit]')!;
-  expect(submitBtn.textContent).toContain('Pathao sandbox');
+  expect(submitBtn.textContent).toContain(`Pathao ${environment}`);
   await act(async () => submitBtn.click());
-  expect(host.textContent).toContain('Booking confirmed in Pathao sandbox');
+  expect(host.textContent).toContain(`Booking confirmed in Pathao ${environment}`);
   expect(host.textContent).toContain('PT-SANDBOX-1');
   expect(host.textContent).not.toContain('Simulated consignment');
   await act(async () => root.unmount());

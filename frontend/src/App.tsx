@@ -6,7 +6,6 @@ import {
 import Header from './components/Header';
 import { SellerWorkspace } from './features/seller';
 import { BuyerPortal } from './features/buyer';
-import { DemoTools } from './features/demo';
 import { LocaleProvider, LocaleSwitch, useLocale } from './features/locale';
 import { sellerCopy } from './features/locale/sellerCopy';
 import { fetchHealth, type HealthStatus } from './services/api';
@@ -29,7 +28,6 @@ export default function App(props: AppProps = {}): React.JSX.Element {
 export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JSX.Element {
   const { t, locale } = useLocale();
   const text = sellerCopy[locale];
-  const [activeTab, setActiveTab] = useState<'orders' | 'demo'>('orders');
   const [health, setHealth] = useState<HealthStatus | null>(null);
 
   const pathname = typeof window !== 'undefined' ? window.location.pathname : '';
@@ -80,11 +78,9 @@ export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): R
   return (
     <div className="app-container">
       <a href="#workspace" className="skip-link">{text.skip}</a>
-      {/* Navbar with Clean Store Status & Demo Trigger */}
+      {/* Shop navigation and connection status */}
       <Header
         health={health}
-        onOpenDemo={() => setActiveTab(activeTab === 'demo' ? 'orders' : 'demo')}
-        isDemoActive={activeTab === 'demo'}
         isAuthenticated={Boolean(token)}
         onSignOut={onSignOut}
       />
@@ -106,11 +102,7 @@ export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): R
 
       {/* Main View Area */}
       <main id="workspace" tabIndex={-1}>
-        {activeTab === 'demo' ? (
-          <DemoTools health={health} />
-        ) : (
-          <SellerWorkspace key={sessionId ?? 'signed-out'} token={token} onSignIn={onSignIn} />
-        )}
+        <SellerWorkspace key={sessionId ?? 'signed-out'} token={token} onSignIn={onSignIn} />
       </main>
 
       {/* Footer */}

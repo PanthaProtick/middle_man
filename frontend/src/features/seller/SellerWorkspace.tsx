@@ -20,6 +20,8 @@ import { RetentionSection } from './RetentionSection';
 import { useSellerBootstrap } from './useSellerBootstrap';
 import { useSellerOrders } from './useSellerOrders';
 import { useTransactionInbox } from './useTransactionInbox';
+import { useTodayMetrics } from './useTodayMetrics';
+import { useUnseenEntries } from './useUnseenEntries';
 
 export type WorkspaceSection = 'orders' | 'payments' | 'accounts' | 'retention';
 
@@ -113,6 +115,9 @@ export function SellerWorkspace({
     captureError: captureWorkspaceError,
     reloadLists: reloadWorkspaceLists,
   });
+  const todayMetrics = useTodayMetrics(shop && !setupNeeded ? token : undefined, orders, transactions);
+  const unseen = useUnseenEntries(token, shop?.id, currentSection, orders, transactions, accounts,
+    !loading && !setupNeeded);
   if (!token) return <WorkspaceState state="signedOut" onSignIn={onSignIn} onRetry={() => undefined} />;
   const state = loading ? 'loading' : errorText && !shop && !setupNeeded ? 'error' : null;
   if (state) return <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn} onRetry={retry} />;
@@ -141,14 +146,14 @@ export function SellerWorkspace({
         />
       ) : (
         <div style={{ marginTop: '16px' }}>
-          <ShopMetricsBar orders={orders} transactionsCount={transactions.length} />
+          <ShopMetricsBar metrics={todayMetrics} />
 
           <WorkspaceSectionNav
             currentSection={currentSection}
             onSelectSection={handleSectionSelect}
-            ordersCount={orders.length}
-            transactionsCount={transactions.length}
-            accountsCount={accounts.length}
+            ordersCount={unseen.orders}
+            transactionsCount={unseen.payments}
+            accountsCount={unseen.accounts}
           />
 
           {currentSection === 'orders' && (

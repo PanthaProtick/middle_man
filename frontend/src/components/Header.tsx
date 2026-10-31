@@ -1,21 +1,17 @@
 import React from 'react';
-import { Sparkles, ShoppingBag, LogOut } from 'lucide-react';
+import { ShoppingBag, LogOut } from 'lucide-react';
 import type { HealthStatus } from '../services/api';
 import { sellerCopy } from '../features/locale/sellerCopy';
 import { LocaleSwitch, useLocale } from '../features/locale';
 
 interface HeaderProps {
   health: HealthStatus | null;
-  onOpenDemo?: () => void;
-  isDemoActive?: boolean;
   isAuthenticated?: boolean;
   onSignOut?: () => void;
 }
 
 export default function Header({
   health,
-  onOpenDemo,
-  isDemoActive,
   isAuthenticated,
   onSignOut,
 }: HeaderProps): React.JSX.Element {
@@ -48,7 +44,7 @@ export default function Header({
           <button
             type="button"
             onClick={onSignOut}
-            className="demo-pill-btn"
+            className="header-action-btn"
             title={text.signOutTitle}
           >
             <LogOut size={13} color="var(--rose-accent)" aria-hidden="true" />
@@ -56,15 +52,6 @@ export default function Header({
           </button>
         )}
 
-        <button
-          type="button"
-          onClick={onOpenDemo}
-          className={`demo-pill-btn ${isDemoActive ? 'active' : ''}`}
-          title={text.demoTitle}
-        >
-          <Sparkles size={13} color="var(--primary-accent)" aria-hidden="true" />
-          <span>{isDemoActive ? text.back : text.demo}</span>
-        </button>
       </div>
     </header>
   );

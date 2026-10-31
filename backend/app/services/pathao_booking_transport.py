@@ -1,4 +1,4 @@
-"""Narrow Pathao sandbox create-order and consignment lookup transport.
+"""Narrow Pathao create-order and consignment lookup transport.
 
 No automatic replay: transport retries are disabled and a create-order POST is
 issued at most once per call. Ambiguous failures propagate for the caller to

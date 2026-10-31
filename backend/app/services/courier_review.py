@@ -160,7 +160,7 @@ async def read(db: AsyncSession | None, shop: str, order: str) -> CourierReview:
     submission_enabled = (
         is_reviewed
         and not blockers
-        and choices.environment in ('offline', 'sandbox')
+        and (choices.environment != 'production' or settings.PATHAO_PRODUCTION_BOOKING_ENABLED)
         and not has_active_attempt
         and current.lifecycle == 'confirmed'
     )

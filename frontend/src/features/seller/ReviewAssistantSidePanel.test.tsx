@@ -19,6 +19,10 @@ it('keeps one side panel outside cards, switches orders and returns focus on Esc
   await act(async () => root.render(<OrderList orders={[baseOrder, {...baseOrder, id: 'order-2'}]}
     token="seller" statusFilter="" onFilterChange={() => undefined} nextCursor={null} onLoadMore={() => undefined} />));
   const triggers = host.querySelectorAll<HTMLButtonElement>('[data-testid="ask-ai-button"]');
+  expect(triggers).toHaveLength(2);
+  for (const trigger of triggers) {
+    expect(trigger.closest('.order-card-actions')).not.toBeNull();
+  }
   await act(async () => triggers[0].click());
   expect(host.querySelector('.isolated-subcard [data-testid="review-assistant-panel"]')).toBeNull();
   expect(host.querySelector('[data-testid="review-assistant-panel"]')?.textContent).toContain('order-1');
@@ -46,7 +50,7 @@ it('moves an open assistant into order details and dismisses it before the dialo
   await act(async () => root.render(<OrderList orders={[baseOrder]} token="seller" statusFilter=""
     onFilterChange={() => undefined} nextCursor={null} onLoadMore={() => undefined} />));
   await act(async () => host.querySelector<HTMLButtonElement>('[data-testid="ask-ai-button"]')!.click());
-  const inspect = host.querySelector<HTMLButtonElement>('.isolated-subcard button')!;
+  const inspect = host.querySelector<HTMLButtonElement>('.order-card-actions button')!;
   await act(async () => inspect.click());
   const dialog = host.querySelector('dialog')!;
   expect(dialog.querySelector('[data-testid="review-assistant-panel"]')).not.toBeNull();
@@ -147,7 +151,7 @@ it('closes guidance after a detail decision even while the list retains the olde
   await act(async () => root.render(<OrderList token="seller" orders={[baseOrder]} statusFilter=""
     onFilterChange={() => undefined} nextCursor={null} onLoadMore={() => undefined} />));
   await act(async () => host.querySelector<HTMLButtonElement>('[data-testid="ask-ai-button"]')!.click());
-  await act(async () => host.querySelector<HTMLButtonElement>('.isolated-subcard button')!.click());
+  await act(async () => host.querySelector<HTMLButtonElement>('.order-card-actions button')!.click());
   const dialog = host.querySelector('dialog')!;
   await act(async () => dialog.querySelector<HTMLButtonElement>('[id$="-buyer-tab"]')!.click());
   const reject = Array.from(dialog.querySelectorAll('button')).find(button => button.textContent?.includes('Reject Submission'))!;

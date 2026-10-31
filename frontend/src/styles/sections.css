@@ -213,7 +213,7 @@
   width: 100%;
 }
 
-.pathao-settings-panel fieldset {
+.pathao-settings-disclosure {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   padding: 12px 14px;
@@ -221,11 +221,23 @@
   background: var(--bg-card);
 }
 
-.pathao-settings-panel legend {
+.pathao-settings-disclosure summary {
   font-size: 0.85rem;
   font-weight: 600;
   color: var(--primary-accent);
-  padding: 0 6px;
+  min-height: 44px;
+  align-content: center;
+}
+
+.pathao-settings-disclosure summary:focus-visible {
+  outline: 2px solid var(--primary-accent);
+  outline-offset: 3px;
+}
+
+.pathao-settings-disclosure fieldset {
+  border: 0;
+  padding: 12px 0 0;
+  margin: 0;
 }
 
 .ledger-scroll-viewport {

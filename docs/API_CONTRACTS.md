@@ -31,6 +31,8 @@ current route/service/model split; update the owning annex when behavior changes
 
 ## Related contracts
 
+- [Unseen seller entries](contracts/unseen-entries.md)
+- [Daily shop metrics](contracts/daily-shop-metrics.md)
 - [Seller review assistance](contracts/review-assistance.md)
 - [Pathao account settings](pathao-account-contract.md)
 - [Pathao locations](pathao-location-contract.md)

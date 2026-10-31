@@ -170,6 +170,9 @@ describe('DeveloperDetailsPanel and toggle buttons', () => {
       b.textContent === 'Show codes'
     );
     expect(toggleBtn).toBeDefined();
+    const identity = toggleBtn?.closest('.order-card-identity');
+    expect(identity?.textContent).toContain('Pending Review');
+    expect(identity?.querySelector('.order-card-review')).not.toBeNull();
 
     await act(async () => {
       toggleBtn?.click();

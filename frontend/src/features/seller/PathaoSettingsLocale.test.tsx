@@ -37,9 +37,9 @@ it('keeps a selected provider store and translates a saved settings failure with
   localStorage.setItem('middleman.locale', 'bn');
   const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
     if (init?.method === 'PATCH') return Response.json({ error: { code: 'STALE_VERSION', message: 'Private provider detail' } }, { status: 409 });
-    if (String(url).includes('/stores')) return Response.json({ environment: 'offline', version: 2, simulated: true,
+    if (String(url).includes('/stores')) return Response.json({ environment: 'production', version: 2, simulated: false,
       stores: [{ id: 123, name: 'My Store ১২' }] });
-    return Response.json({ environment: 'offline', version: 2, status: 'connected', simulated: true,
+    return Response.json({ environment: 'production', version: 2, status: 'connected', simulated: false,
       merchant_hint: 'Merchant ১২', default_store_id: null, default_delivery_type: null,
       production_booking_enabled: false });
   });

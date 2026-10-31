@@ -95,10 +95,10 @@ it('explains loaded record counts in both languages without changing counts', as
   const container = document.createElement('div'); document.body.append(container);
   const root = createRoot(container);
   try {
-    await act(async () => root.render(<LocaleProvider><LocaleSwitch /><ShopMetricsBar orders={[]} transactionsCount={5} /></LocaleProvider>));
-    expect(container.textContent).toContain('currently loaded records and filters');
+    await act(async () => root.render(<LocaleProvider><LocaleSwitch /><ShopMetricsBar metrics={{ date: '2026-10-31', timezone: 'Asia/Dhaka', orders: 0, confirmed: 0, awaiting: 0, pending: 0, payments: 5 }} /></LocaleProvider>));
+    expect(container.textContent).toContain('Today in Bangladesh time');
     await act(async () => Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
-    expect(container.textContent).toContain('বর্তমানে লোড করা তথ্য');
+    expect(container.textContent).toContain('বাংলাদেশ সময়ে আজ');
     expect(container.textContent).toContain('5');
   } finally { await act(async () => root.unmount()); container.remove(); localStorage.clear(); }
 });

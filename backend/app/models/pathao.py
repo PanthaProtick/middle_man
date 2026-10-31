@@ -38,7 +38,7 @@ class ConnectionView(BaseModel):
     status: Literal['disconnected', 'connected'] = 'disconnected'
     merchant_hint: str | None = None
     simulated: bool
-    production_booking_enabled: Literal[False] = False
+    production_booking_enabled: bool = False
     default_store_id: int | None = None
     default_delivery_type: DeliveryType | None = None
 

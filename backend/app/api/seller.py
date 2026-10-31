@@ -1,6 +1,6 @@
-from typing import List, Optional
+from typing import Annotated, List, Optional
 
-from fastapi import APIRouter, Depends, Header, Response
+from fastapi import APIRouter, Depends, Header, Query, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import SellerIdentity, get_seller_identity
@@ -14,10 +14,37 @@ from app.models.seller import (
     ShopInput,
     ShopStatusResponse,
 )
+from app.models.shop_metrics import TodayShopMetrics
+from app.models.unseen_entries import UnseenEntryCounts, UnseenEntryQuery
 from app.services.raw_evidence_cleanup import get_retention_status, purge_raw_evidence
 from app.services.seller_service import NotFoundError, SellerService
+from app.services.shop_metrics import today_shop_metrics
+from app.services.unseen_entries import unseen_entry_counts
 
 router = APIRouter(prefix="/seller", tags=["seller"])
+
+
+@router.get("/unseen-entries", response_model=UnseenEntryCounts)
+async def get_unseen_entries(
+    query: Annotated[UnseenEntryQuery, Query()],
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> UnseenEntryCounts:
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if shop is None:
+        raise NotFoundError("Shop not found")
+    return await unseen_entry_counts(db, shop.id, query, get_utc_now())
+
+
+@router.get("/metrics/today", response_model=TodayShopMetrics)
+async def get_today_metrics(
+    seller: SellerIdentity = Depends(get_seller_identity),
+    db: Optional[AsyncSession] = Depends(get_db),
+) -> TodayShopMetrics:
+    shop = await SellerService(db).get_shop_by_owner(seller.owner_id)
+    if shop is None:
+        raise NotFoundError("Shop not found")
+    return await today_shop_metrics(db, shop.id, get_utc_now())
 
 
 @router.get("/shop", response_model=ShopStatusResponse, summary="Get current seller shop")

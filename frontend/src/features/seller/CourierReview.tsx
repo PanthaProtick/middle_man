@@ -56,7 +56,8 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
   const review = state?.identity === identity ? state.review : undefined;
   const choices = editing?.identity === identity ? editing.choices : undefined;
   const dirty = review && choices && JSON.stringify(review.choices) !== JSON.stringify(choices);
-  const target = review?.choices?.environment === 'sandbox' ? 'Pathao sandbox' : 'Pathao (simulated)';
+  const target = review?.choices?.environment === 'production' ? 'Pathao production'
+    : review?.choices?.environment === 'sandbox' ? 'Pathao sandbox' : 'Pathao (simulated)';
 
   const mutate = async (method: 'PUT' | 'POST') => {
     if (!review || !choices || busy) return;

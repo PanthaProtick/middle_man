@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import settings
 from app.models.courier_submission import (
     CourierAttemptTable,
     CourierAttemptView,
@@ -39,7 +40,7 @@ async def reserve_attempt(
         raise SellerDomainException(409, "REVIEW_REQUIRED", "Review must be approved before submission.")
     if review.blockers:
         raise SellerDomainException(409, "COURIER_NOT_READY", "Resolve all readiness blockers before submission.")
-    if review.choices.environment == "production":
+    if review.choices.environment == "production" and not settings.PATHAO_PRODUCTION_BOOKING_ENABLED:
         raise SellerDomainException(422, "REAL_BOOKING_DISABLED", "Production booking remains disabled.")
 
     # Phase 2: Hold locks through final validation and reservation commit.

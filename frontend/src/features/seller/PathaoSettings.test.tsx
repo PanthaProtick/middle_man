@@ -5,14 +5,24 @@ import { PathaoSettings } from './PathaoSettings';
 
 afterEach(() => { vi.restoreAllMocks(); document.body.innerHTML = ''; });
 
-const disconnected = { environment: 'offline', version: 0, status: 'disconnected', simulated: true,
+const disconnected = { environment: 'production', version: 0, status: 'disconnected', simulated: false,
   merchant_hint: null, default_store_id: null, default_delivery_type: null, production_booking_enabled: false };
 
-it('connects simulated settings and saves an explicitly chosen store and service', async () => {
+it('reports enabled production booking from server capability', async () => {
+  vi.spyOn(globalThis, 'fetch').mockResolvedValue(Response.json({ ...disconnected, production_booking_enabled: true }));
+  const host = document.createElement('div'); document.body.append(host);
+  const root = createRoot(host);
+  await act(async () => root.render(<PathaoSettings token="seller-a" />));
+  expect(host.textContent).toContain('Production booking is enabled');
+  expect(host.textContent).not.toContain('Production booking is disabled');
+  await act(async () => root.unmount());
+});
+
+it('offers only provider environments, connects and saves an explicitly chosen store and service', async () => {
   let current = disconnected;
   const fetcher = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, options) => {
-    if (String(url).includes('/stores')) return Response.json({ environment: 'offline', version: current.version,
-      simulated: true, stores: [{ id: 123, name: 'Simulated pickup store' }] });
+    if (String(url).includes('/stores')) return Response.json({ environment: 'production', version: current.version,
+      simulated: false, stores: [{ id: 123, name: 'Merchant pickup store' }] });
     if (options?.method === 'PUT') current = { ...current, version: 1, status: 'connected' };
     if (options?.method === 'PATCH') current = { ...current, version: 2,
       ...JSON.parse(String(options.body)) as { default_store_id: null; default_delivery_type: null } };
@@ -21,13 +31,38 @@ it('connects simulated settings and saves an explicitly chosen store and service
   const host = document.createElement('div'); document.body.append(host);
   const root = createRoot(host);
   await act(async () => root.render(<PathaoSettings token="seller-a" />));
-  expect(host.textContent).toContain('disconnected');
+  expect(host.querySelector('[role="status"]')?.textContent).toContain('Disconnected');
+  expect(host.querySelector('.pathao-connection-card--disconnected')).not.toBeNull();
+  const environment = host.querySelector<HTMLSelectElement>('select')!;
+  expect(environment.value).toBe('production');
+  expect(Array.from(environment.options, option => option.value)).toEqual(['sandbox', 'production']);
+  expect(fetcher.mock.calls.every(([url]) => !String(url).includes('/offline'))).toBe(true);
   expect(host.textContent).toContain('Production booking is disabled');
+  const merchantSection = host.querySelector<HTMLDetailsElement>('details')!;
+  expect(merchantSection.open).toBe(false);
+  expect(merchantSection.querySelector('summary')?.textContent).toBe('Connect merchant');
+  await act(async () => merchantSection.querySelector('summary')!.click());
+  expect(merchantSection.open).toBe(true);
+  for (const input of host.querySelectorAll<HTMLInputElement>('input')) {
+    input.value = input.type === 'email' ? 'merchant@example.test' : 'synthetic-credential';
+  }
   await act(async () => host.querySelector<HTMLFormElement>('form')!.requestSubmit());
-  expect(host.textContent).toContain('connected');
+  expect(host.querySelector('[role="status"]')?.textContent).toContain('Connected');
+  expect(host.querySelector('.pathao-connection-card--connected')).not.toBeNull();
+  expect(merchantSection.querySelector('summary')?.textContent).toBe('Replace merchant connection');
+  const defaultsSection = host.querySelectorAll<HTMLDetailsElement>('details')[1];
+  expect(defaultsSection.querySelector('summary')?.textContent).toBe('Courier defaults');
+  expect(defaultsSection.open).toBe(false);
+  await act(async () => defaultsSection.querySelector('summary')!.click());
+  expect(defaultsSection.open).toBe(true);
   const store = host.querySelector<HTMLSelectElement>('[name="pickup"]')!;
   expect(store.value).toBe('');
   await act(async () => { store.value = '123'; store.dispatchEvent(new Event('change', { bubbles: true })); });
+  await act(async () => defaultsSection.querySelector('summary')!.click());
+  expect(defaultsSection.open).toBe(false);
+  expect(merchantSection.open).toBe(true);
+  await act(async () => defaultsSection.querySelector('summary')!.click());
+  expect(store.value).toBe('123');
   await act(async () => host.querySelector<HTMLFormElement>('form[data-defaults]')!.requestSubmit());
   expect(fetcher.mock.calls.some(([, options]) => options?.method === 'PATCH' &&
     JSON.parse(String(options.body)).default_store_id === 123)).toBe(true);
@@ -91,11 +126,31 @@ it('ends loading on an initial outage and recovers by reloading', async () => {
   const host = document.createElement('div'); document.body.append(host);
   const root = createRoot(host);
   await act(async () => root.render(<PathaoSettings token="seller" />));
-  expect(host.querySelector('[role="status"]')?.textContent).toBe('Settings unavailable');
+  expect(host.querySelector('[role="status"]')?.textContent).toContain('Settings unavailable');
+  expect(host.querySelector('.pathao-connection-card--unavailable')).not.toBeNull();
   expect(host.querySelector('[role="alert"]')).not.toBeNull();
   outage = false;
   await act(async () => Array.from(host.querySelectorAll('button')).find(button => button.textContent === 'Reload settings')!.click());
-  expect(host.textContent).toContain('disconnected');
+  expect(host.querySelector('[role="status"]')?.textContent).toContain('Disconnected');
   expect(host.querySelector('[role="alert"]')).toBeNull();
+  await act(async () => root.unmount());
+});
+
+it('does not present a previously connected account as confirmed after reload fails', async () => {
+  let outage = false;
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async url => {
+    if (outage) return Response.json({}, { status: 503 });
+    if (String(url).includes('/stores')) return Response.json({ stores: [] });
+    return Response.json({ ...disconnected, status: 'connected', version: 3 });
+  });
+  const host = document.createElement('div'); document.body.append(host);
+  const root = createRoot(host);
+  await act(async () => root.render(<PathaoSettings token="seller" />));
+  expect(host.querySelector('.pathao-connection-card--connected')).not.toBeNull();
+  outage = true;
+  await act(async () => Array.from(host.querySelectorAll('button')).find(button => button.textContent === 'Reload settings')!.click());
+  expect(host.querySelector('.pathao-connection-card--connected')).toBeNull();
+  expect(host.querySelector('[role="status"]')?.textContent).toContain('Settings unavailable');
+  expect(host.querySelector('[role="status"]')?.textContent).toContain('Reload settings to confirm');
   await act(async () => root.unmount());
 });

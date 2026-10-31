@@ -33,10 +33,11 @@ export function CourierOutcomes({ review, orderId, token, onResolved }: {
       {review.latest_attempt?.status === 'success' && (
         <div role="status" className="booking-result">
           <p><strong>{review.latest_attempt.resolution_action === 'attach_existing'
-            ? `${t('Existing booking attached')} (${review.latest_attempt.simulated ? t('simulated offline') : t('Pathao sandbox')}).`
+            ? `${t('Existing booking attached')} (${review.latest_attempt.simulated ? t('simulated offline') : t(review.latest_attempt.environment === 'production' ? 'Pathao production' : 'Pathao sandbox')}).`
             : review.latest_attempt.simulated
               ? t('Booking confirmed (simulated offline).')
-              : t('Booking confirmed in Pathao sandbox.')}</strong></p>
+              : t(review.latest_attempt.environment === 'production'
+                ? 'Booking confirmed in Pathao production.' : 'Booking confirmed in Pathao sandbox.')}</strong></p>
           <p>{t(review.latest_attempt.simulated ? 'Simulated consignment' : 'Consignment')}: <code>{review.latest_attempt.consignment_id}</code></p>
           {review.latest_attempt.resolution_action === 'attach_existing' && (
             <p>{t("The original unknown attempt and its reviewed snapshot are preserved.")}</p>

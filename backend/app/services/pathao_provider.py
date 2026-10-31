@@ -1,6 +1,6 @@
-"""Courier adapter boundary: bounded auth/stores plus offline and sandbox bookings.
+"""Courier adapter boundary: bounded auth/stores and explicitly enabled bookings.
 
-No automatic retries or token retention; production booking remains rejected.
+No automatic retries or token retention; production creation requires explicit opt-in.
 """
 import asyncio
 import hashlib
@@ -10,6 +10,7 @@ from typing import Literal
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from app.core.config import settings
 from app.models.courier_submission import CourierBookingSnapshot
 from app.models.pathao import Environment, MerchantCredentials, PickupStore
 from app.services.seller_service import SellerDomainException
@@ -140,7 +141,7 @@ async def submit_booking(
     credentials: MerchantCredentials | None = None,
 ) -> CourierBookingResult:
     if env != 'offline':
-        if env == 'production':
+        if env == 'production' and not settings.PATHAO_PRODUCTION_BOOKING_ENABLED:
             raise CourierDefinitiveFailure('Production booking is disabled.')
         if credentials is None:
             raise CourierDefinitiveFailure('Pathao merchant credentials are required.')
@@ -173,7 +174,7 @@ async def lookup_booking(
 ) -> CourierBookingEvidence:
     """Verifies an existing consignment against the account, order reference, and environment."""
     if env != 'offline':
-        if env == 'production' or credentials is None:
+        if credentials is None:
             raise CourierEvidenceUnavailable('Consignment verification is unavailable for this connection.')
         from app.services import pathao_booking_transport
         return await pathao_booking_transport.lookup(

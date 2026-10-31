@@ -1,4 +1,6 @@
-import { Clock, AlertTriangle, Eye } from 'lucide-react';
+import { useId, useState } from 'react';
+import { Clock, AlertTriangle, Eye, ChevronDown } from 'lucide-react';
+import './OrderCard.css';
 import type { OrderLifecycle, SellerOrder } from './types';
 import { formatOrderAmount } from './orderNumbers';
 import { formatRemainingCod } from './api';
@@ -31,6 +33,8 @@ interface OrderCardProps {
 export function OrderCard({
   order, token, text, locale, expanded, onInspect, onToggleReview, onReviewAction,
 }: OrderCardProps): React.JSX.Element {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const bodyId = useId();
   const badge = Object.hasOwn(LIFECYCLE_BADGES, order.lifecycle)
     ? LIFECYCLE_BADGES[order.lifecycle]
     : { bg: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)' };
@@ -38,9 +42,20 @@ export function OrderCard({
   const isExpired = order.lifecycle === 'expired';
 
   return (
-    <div className="isolated-subcard">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px', marginBottom: '8px' }}>
-        <div style={{ minWidth: 0, maxWidth: '100%' }}>
+    <div className="isolated-subcard order-card">
+      <button type="button" className="order-card-mobile-summary"
+        aria-expanded={mobileOpen} aria-controls={bodyId}
+        onClick={() => setMobileOpen(open => !open)}>
+        <span className="order-card-mobile-name">{order.product_name}</span>
+        <ChevronDown size={18} className={mobileOpen ? 'order-card-chevron-open' : ''} />
+        <span className="order-card-mobile-status" style={{ background: badge.bg, color: badge.color }}>
+          {lifecycleLabel(order.lifecycle, text)}
+        </span>
+        <span className="order-card-mobile-total">{text.total} BDT {formatOrderAmount(order.total_minor)}</span>
+      </button>
+      <div id={bodyId} className={`order-card-body${mobileOpen ? ' order-card-body-open' : ''}`}>
+      <div className="order-card-header">
+        <div className="order-card-identity">
           <span style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.95rem', marginRight: '8px', wordBreak: 'break-word' }}>
             {order.product_name}
           </span>
@@ -60,9 +75,52 @@ export function OrderCard({
             {isExpired && <AlertTriangle size={11} />}
             {lifecycleLabel(order.lifecycle, text)}
           </span>
+          {order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0 && (
+            <div className="order-card-review">
+              <span style={{ fontSize: '0.725rem', color: 'var(--rose-accent)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                <AlertTriangle size={11} /> {text.review}
+              </span>
+              <button
+                type="button"
+                onClick={() => onToggleReview(order.id)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: 'var(--primary-accent)',
+                  cursor: 'pointer',
+                  fontSize: '0.7rem',
+                  textDecoration: 'underline',
+                  padding: '0 2px',
+                }}
+                aria-expanded={expanded}
+                title={text.toggleCodes}
+              >
+                {expanded ? text.hideCodes : text.showCodes}
+              </button>
+              <span>{order.review_reasons.map((reason) => reviewLabel(reason, text)).join(' · ')}</span>
+              <div style={{ display: expanded ? 'inline-flex' : 'none', gap: '4px', flexWrap: 'wrap' }}>
+                {order.review_reasons.map((reason) => (
+                  <span
+                    key={reason}
+                    style={{
+                      fontSize: '0.7rem',
+                      padding: '1px 6px',
+                      background: 'rgba(239, 68, 68, 0.2)',
+                      border: '1px solid rgba(239, 68, 68, 0.3)',
+                      color: 'var(--rose-accent)',
+                      borderRadius: '4px',
+                      fontFamily: 'monospace',
+                    }}
+                  >
+                    {reason}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div className="order-card-actions">
           <button
             className="btn btn-secondary btn-sm"
             onClick={() => onInspect(order)}
@@ -72,10 +130,17 @@ export function OrderCard({
             <span>{text.inspect}</span>
           </button>
           <BuyerLinkCopy key={order.portal_url} portalUrl={order.portal_url} />
+          {order.lifecycle === 'pending' && (
+            <ReviewAssistant
+              order={order}
+              token={token}
+              onAction={action => onReviewAction?.(order, action)}
+            />
+          )}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 140px), 1fr))', gap: '8px', marginBottom: '10px', fontSize: '0.825rem' }}>
+      <div className="order-card-facts">
         <div>
           <span style={{ color: 'var(--text-secondary)' }}>{text.total}</span>
           <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>BDT {formatOrderAmount(order.total_minor)}</span>
@@ -100,58 +165,6 @@ export function OrderCard({
         </div>
       </div>
 
-      {order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0 && (
-        <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-          <span style={{ fontSize: '0.725rem', color: 'var(--rose-accent)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-            <AlertTriangle size={11} /> {text.review}
-          </span>
-          <button
-            type="button"
-            onClick={() => onToggleReview(order.id)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: 'var(--primary-accent)',
-              cursor: 'pointer',
-              fontSize: '0.7rem',
-              textDecoration: 'underline',
-              padding: '0 2px',
-            }}
-            aria-expanded={expanded}
-            title={text.toggleCodes}
-          >
-            {expanded ? text.hideCodes : text.showCodes}
-          </button>
-          <span>{order.review_reasons.map((reason) => reviewLabel(reason, text)).join(' · ')}</span>
-          <div style={{ display: expanded ? 'inline-flex' : 'none', gap: '4px', flexWrap: 'wrap' }}>
-            {order.review_reasons.map((reason) => (
-              <span
-                key={reason}
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '1px 6px',
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: 'var(--rose-accent)',
-                  borderRadius: '4px',
-                  fontFamily: 'monospace',
-                }}
-              >
-                {reason}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {order.lifecycle === 'pending' && (
-        <ReviewAssistant
-          order={order}
-          token={token}
-          onAction={action => onReviewAction?.(order, action)}
-        />
-      )}
-
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '6px', fontSize: '0.75rem', color: 'var(--text-secondary)', borderTop: '1px solid var(--border-subtle)', paddingTop: '6px' }}>
         <div>{text.created} {formatBangladeshDateTime(order.created_at, locale)}</div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: isExpired ? 'var(--rose-accent)' : isAwaiting ? 'var(--amber-accent)' : 'var(--text-secondary)' }}>
@@ -161,6 +174,7 @@ export function OrderCard({
             {formatBangladeshDateTime(order.expires_at, locale)}
           </span>
         </div>
+      </div>
       </div>
     </div>
   );

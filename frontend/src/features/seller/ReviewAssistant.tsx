@@ -149,7 +149,7 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
         onAction={actionId => void refresh(actionId)} />}
     </aside>;
   return (
-    <div style={{ margin: '10px 0' }} data-testid="review-assistant-root">
+    <div style={{ margin: withinModal ? '10px 0' : 0 }} data-testid="review-assistant-root">
       <button ref={triggerRef} type="button" className="btn btn-secondary btn-sm"
         data-review-order={order.id} aria-expanded={isOpen} aria-label={text.askAiAria} data-testid="ask-ai-button"
         onClick={() => {
