@@ -1,7 +1,3 @@
-.ledger-scroll-viewport.order-scroll-viewport {
-  max-height: clamp(440px, 75vh, 840px);
-}
-
 .order-card-list {
   display: flex;
   flex-direction: column;
