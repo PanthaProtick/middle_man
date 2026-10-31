@@ -59,22 +59,21 @@ async def test_atomic_replacement_checkout_window_and_isolation(monkeypatch):
     assert (await store.snapshot(None, 'shop', 'offline')).id == current.id
 
 
-async def test_failed_refresh_keeps_snapshot_and_lease_prevents_duplicate_work(monkeypatch):
+async def test_failed_finish_keeps_snapshot_and_lease_prevents_duplicate_work(monkeypatch):
     old = await publish()
     now = jobs.get_utc_now() + dt.timedelta(days=2)
     monkeypatch.setattr(jobs, 'get_utc_now', lambda: now)
-    calls = []
-    async def failed(shop, env, revision):
-        calls.append(env)
-        assert await jobs.claim(None, 'shop', 'offline', True) is None
-        raise ValueError('malformed partial tree')
-    monkeypatch.setattr(sync, 'crawl', failed)
-    await sync.refresh(None, 'shop', 'offline')
+    claim = await jobs.claim(None, 'shop', 'offline', False)
+    assert claim is not None
+    # Duplicate claim while lease is active is prevented
+    assert await jobs.claim(None, 'shop', 'offline', True) is None
+    # Finishing with None indicates a failure, retaining the existing snapshot
+    await jobs.finish(None, 'shop', 'offline', *claim, None)
     status = await jobs.status(None, 'shop', 'offline')
     assert status.failed and not status.refreshing and status.catalog_version == old.id
-    assert calls == ['offline']
-    await sync.refresh(None, 'shop', 'offline')
-    assert calls == ['offline']  # Failed scheduled jobs have a bounded retry cadence.
+    # Retired sync run_one is a no-op and does not alter snapshot or cause duplicate claims
+    await sync.run_one('shop', 'offline')
+    assert (await store.snapshot(None, 'shop', 'offline')).id == old.id
 
 
 async def test_defaults_keep_generation_reconnect_and_disconnect_revoke_authority(monkeypatch):
@@ -93,13 +92,10 @@ async def test_defaults_keep_generation_reconnect_and_disconnect_revoke_authorit
     assert (await jobs.status(None, 'shop', 'offline')).catalog_version is None
 
 
-async def test_incomplete_crawl_never_publishes_and_expired_lease_cannot_publish(monkeypatch):
-    async def broken(shop, env, revision, level, parent):
-        if level == 'area':
-            raise ValueError('Malformed area response')
-        return tree()[(level, parent or 0)]
-    monkeypatch.setattr(sync.catalog, 'fetch', broken)
-    await sync.refresh(None, 'shop', 'offline')
+async def test_failed_finish_never_publishes_and_expired_lease_cannot_publish(monkeypatch):
+    claim = await jobs.claim(None, 'shop', 'offline', True)
+    assert claim
+    await jobs.finish(None, 'shop', 'offline', *claim, None)
     assert await store.snapshot(None, 'shop', 'offline') is None
     assert (await jobs.status(None, 'shop', 'offline')).failed
     now = jobs.get_utc_now() + dt.timedelta(hours=1)

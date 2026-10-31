@@ -1,8 +1,6 @@
 """On-demand, tenant/revision-scoped location lists with bounded process-local coordination."""
 import asyncio
 from collections import OrderedDict
-from collections.abc import AsyncIterator, Awaitable, Callable
-from contextlib import asynccontextmanager
 from functools import partial
 from time import monotonic
 from typing import Literal, TypeVar
@@ -157,17 +155,6 @@ async def fetch(shop: str, env: Environment, revision: Revision, level: Level,
     if env == 'offline':
         return simulated(level, parent)
     return await _fetch_list(shop, env, revision, level, parent)
-
-
-@asynccontextmanager
-async def reader(shop: str, env: Environment, revision: Revision) -> AsyncIterator[
-    Callable[[Level, int | None], Awaitable[list[LocationChoice]]]
-]:
-    """Reuse authentication for a seller crawl; each list still has its own failure boundary."""
-    if env == 'offline':
-        yield partial(fetch, shop, env, revision)
-        return
-    yield partial(_fetch_list, shop, env, revision)
 
 
 def _release(flight_key: tuple[CacheKey, bool], task: asyncio.Task[list[LocationChoice]]) -> None:

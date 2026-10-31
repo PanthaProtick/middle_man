@@ -3,10 +3,18 @@ import datetime as dt
 
 from sqlalchemy import text
 
+from app.models.pathao_location import LocationChoice
 from app.services import pathao_connections as connections
 from app.services import pathao_snapshot_jobs as jobs
 from app.services import pathao_snapshot_store as store
-from app.services.pathao_snapshot_sync import refresh
+
+
+def sample_tree(city_name='Dhaka'):
+    return {
+        ('city', 0): [LocationChoice(id=1, name=city_name)],
+        ('zone', 1): [LocationChoice(id=10, name='Zone 10')],
+        ('area', 10): [LocationChoice(id=100, name='Area 100', home_delivery_available=True)],
+    }
 
 
 async def test_persisted_catalog_is_retained_but_never_gates_buyer_choices(postgres_buyer, monkeypatch):
@@ -19,9 +27,21 @@ async def test_persisted_catalog_is_retained_but_never_gates_buyer_choices(postg
     first = await client.get(path)
     assert first.status_code == 200 and len(first.json()['choices']) == 2
     assert first.json()['catalog_version'] is None
-    assert (await client.post('/api/seller/courier/pathao/offline/catalog/refresh')).status_code == 202
-    saved = (await client.get('/api/seller/courier/pathao/offline/catalog')).json()['catalog_version']
-    assert saved
+
+    # Retired manual refresh endpoints return 404
+    assert (await client.post('/api/seller/courier/pathao/offline/catalog/refresh')).status_code == 404
+    assert (await client.get('/api/seller/courier/pathao/offline/catalog')).status_code == 404
+
+    # Seed historical snapshot directly to verify existing snapshot tables and rows remain intact
+    shop = await sql.fetchval('SELECT shop_id FROM orders WHERE id=$1', order['id'])
+    async with sessions() as db:
+        claim = await jobs.claim(db, shop, 'offline', True)
+        assert claim is not None
+        await jobs.finish(db, shop, 'offline', *claim, sample_tree())
+        saved_snapshot = await store.snapshot(db, shop, 'offline')
+        assert saved_snapshot is not None
+        saved = saved_snapshot.id
+
     store._snapshots.clear()
     jobs._jobs.clear()
     connections._memory.clear()
@@ -55,7 +75,9 @@ async def test_database_leases_atomic_failure_and_replaced_version_expiry(postgr
         assert (await store.snapshot(two, shop, 'offline')).id == old.id
         assert (await jobs.status(two, shop, 'offline')).failed
         now += dt.timedelta(hours=1)
-        await refresh(one, shop, 'offline')
+        claim2 = await jobs.claim(one, shop, 'offline', True)
+        assert claim2 is not None
+        await jobs.finish(one, shop, 'offline', *claim2, sample_tree('New city'))
         current = await store.snapshot(two, shop, 'offline')
         assert current.id != old.id
         assert (await store.snapshot(two, shop, 'offline', old.id)).id == old.id
@@ -82,7 +104,7 @@ async def test_database_leases_atomic_failure_and_replaced_version_expiry(postgr
         assert (await two.execute(text('SELECT count(*) FROM pathao_catalog_lists'))).scalar() > 0
 
 
-async def test_scheduled_sweep_refreshes_due_catalogues_only(postgres_buyer, monkeypatch):
+async def test_scheduled_sweep_is_retired_and_preserves_historical_snapshots(postgres_buyer, monkeypatch):
     from app.core import database
     from app.services import pathao_snapshot_sync
     client, sql, sessions, order = postgres_buyer
@@ -97,7 +119,8 @@ async def test_scheduled_sweep_refreshes_due_catalogues_only(postgres_buyer, mon
     await pathao_snapshot_sync.run_due()
     async with sessions() as db:
         current = await store.snapshot(db, shop, 'offline')
-    assert current.id != old.id
-    assert await sql.fetchval('SELECT count(*) FROM pathao_catalog_snapshots') == 2
+    # Retired run_due does not create new snapshots or alter existing ones
+    assert current.id == old.id
+    assert await sql.fetchval('SELECT count(*) FROM pathao_catalog_snapshots') == 1
     await pathao_snapshot_sync.run_due()
-    assert await sql.fetchval('SELECT count(*) FROM pathao_catalog_snapshots') == 2
+    assert await sql.fetchval('SELECT count(*) FROM pathao_catalog_snapshots') == 1

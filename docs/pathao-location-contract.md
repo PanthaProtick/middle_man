@@ -38,11 +38,12 @@ are never cached as successful empty catalogues. Connection replacement or
 disconnection revokes old authority, including in-flight results; pickup/service
 default changes do not.
 
-Snapshot synchronization remains available for its retained operational workflow,
-but connecting a shop no longer starts a full crawl and buyer requests do not depend
-on it. Manual refresh/status surfaces are retained until the separate retirement work
-removes them. See [catalogue operations](pathao-catalog-operations.md) for migration,
-bounds, leases and retention details.
+Full hierarchy snapshot synchronization and its manual refresh/status endpoints have
+been retired. Connecting a shop does not start a crawl, scheduled workers execute as
+no-ops without provider requests, and seller settings no longer expose refresh
+controls. Existing snapshot tables and historical records remain intact in the database
+without destructive schema migrations. See [catalogue operations](pathao-catalog-operations.md)
+for decommissioning details.
 
 Seller location browsing retains its process-local five-minute LRU. Seller courier
 review bypasses buyer caches to obtain current membership and coverage. Neither a

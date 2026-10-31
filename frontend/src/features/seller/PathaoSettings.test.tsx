@@ -50,6 +50,9 @@ it('offers only provider environments, connects and saves an explicitly chosen s
   expect(host.querySelector('[role="status"]')?.textContent).toContain('Connected');
   expect(host.querySelector('.pathao-connection-card--connected')).not.toBeNull();
   expect(merchantSection.querySelector('summary')?.textContent).toBe('Replace merchant connection');
+  expect(host.textContent).not.toContain('Refresh locations');
+  expect(host.textContent).not.toContain('Buyer delivery locations');
+  expect(host.textContent).toContain('Disconnect Pathao');
   const defaultsSection = host.querySelectorAll<HTMLDetailsElement>('details')[1];
   expect(defaultsSection.querySelector('summary')?.textContent).toBe('Courier defaults');
   expect(defaultsSection.open).toBe(false);
