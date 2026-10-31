@@ -11,3 +11,4 @@ class TodayShopMetrics(BaseModel):
     awaiting: int = Field(default=0, ge=0)
     pending: int = Field(default=0, ge=0)
     payments: int = Field(default=0, ge=0)
+    staged_for_delivery: int = Field(default=0, ge=0)

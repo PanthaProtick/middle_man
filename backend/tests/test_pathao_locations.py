@@ -114,19 +114,24 @@ async def test_cached_catalog_outage_fallback_and_untrusted_ids(client, monkeypa
     outage = True
     assert (await client.get(path + '/pathao-locations?city_id=5&zone_id=6')).json() == first.json()
     assert len(catalog_requests) == 3
-    clock += 301  # TTL expiry requires fresh provider evidence; failures aren't cached.
-    failed = await client.get(path + '/pathao-locations')
-    assert failed.json()['condition'] == 'unavailable'
-    assert 'private' not in failed.text
+    clock += 301  # Buyer snapshots survive the former provider-cache TTL.
+    cached = await client.get(path + '/pathao-locations')
+    assert cached.json()['condition'] == 'resolved'
+    assert 'private' not in cached.text
     payload = {**PAYLOAD, 'address': {**PAYLOAD['address'], 'pathao': {
         'city_id': 999, 'zone_id': 998, 'area_id': 997, 'condition': 'resolved', 'booking_blocked': False}}}
-    saved = await client.post(path + '/submission', json=payload, headers={'Idempotency-Key': 'outage-fallback'})
+    invalid = await client.post(path + '/submission', json=payload, headers={'Idempotency-Key': 'forged'})
+    assert invalid.status_code == 422  # An outage never bypasses saved membership checks.
+    payload['address']['pathao'] = {'city_id': 5, 'zone_id': 6, 'area_id': 7}
+    saved = await client.post(path + '/submission', json=payload, headers={'Idempotency-Key': 'saved-snapshot'})
     assert saved.status_code == 200, saved.text
     item = (await client.get(f"/api/seller/orders/{order['id']}/history")).json()['items'][0]
-    assert item['address']['pathao']['condition'] == 'unavailable'
-    assert item['address']['pathao']['city_id'] is None
+    assert item['address']['pathao']['condition'] == 'resolved'
+    assert item['address']['pathao']['city_id'] == 5
     assert item['address']['pathao']['booking_blocked'] is True
     assert item['payment_claim']['trx_id'] == PAYLOAD['payment_claim']['trx_id']
+    assert len(catalog_requests) == 3
+
 
 
 @pytest.mark.usefixtures('seller_identity')

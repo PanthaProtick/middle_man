@@ -112,3 +112,17 @@
   .order-card-identity > span { display: none; }
   .order-card-identity:not(:has(.order-card-review)) { display: none; }
 }
+
+.order-delivery-label { font-size: 0.75rem; color: var(--text-secondary); padding: 2px 8px; border: 1px solid var(--border-subtle); border-radius: 999px; }
+
+.order-delivery-label--staged {
+  color: #065f46;
+  background: #d1fae5;
+  border-color: #6ee7b7;
+}
+
+.order-delivery-label--unstaged {
+  color: #92400e;
+  background: #fef3c7;
+  border-color: #fcd34d;
+}

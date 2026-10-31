@@ -79,7 +79,7 @@ export function BuyerSubmissionForm({
       contact_number: draft.contact_number.trim(),
       address: {
         raw_text: draft.address_raw.trim(),
-        ...(draft.pathao ? {pathao: draft.pathao} : {}),
+        ...(draft.pathao ? {pathao: {...draft.pathao, catalog_version: availability.catalog_version ?? draft.pathao.catalog_version}} : {}),
       },
       payment_claim: {
         provider: draft.payment_provider,

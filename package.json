@@ -13,6 +13,7 @@
     "audit:frontend": "node scripts/workspace.mjs audit:frontend",
     "check": "node scripts/workspace.mjs check",
     "conventions": "node scripts/workspace.mjs conventions",
+    "refresh:locations": "node scripts/workspace.mjs refresh:locations",
     "check:backend": "node scripts/workspace.mjs check:backend",
     "check:frontend": "node scripts/workspace.mjs check:frontend",
     "test": "node scripts/workspace.mjs test",

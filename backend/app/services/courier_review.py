@@ -124,10 +124,10 @@ async def read(db: AsyncSession | None, shop: str, order: str) -> CourierReview:
     location = LocationResolution(environment=choices.environment, condition='disconnected')
     stores = []
     connection = ConnectionView(environment=choices.environment, version=revision.version,
-                                status='connected' if revision.version else 'disconnected',
+                                status='connected' if revision.connected else 'disconnected',
                                 simulated=choices.environment == 'offline',
                                 default_store_id=revision.store_id, default_delivery_type=revision.delivery_type)
-    if not revision.version:
+    if not revision.connected:
         blockers.append('COURIER_CONNECTION_REQUIRED')
     else:
         try:

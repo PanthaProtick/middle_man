@@ -89,10 +89,10 @@ async def fetch(env: Environment, revision: Revision, level: Level, parent: int 
 
 
 async def choices(shop: str, env: Environment, revision: Revision, level: Level,
-                  parent: int | None = None) -> list[LocationChoice]:
+                  parent: int | None = None, *, fresh: bool = False) -> list[LocationChoice]:
     key = (shop, env, revision.version, level, parent)
     hit = _cache.get(key)
-    if hit and hit[0] > monotonic():
+    if not fresh and hit and hit[0] > monotonic():
         _cache.move_to_end(key)
         return hit[1]
     try:

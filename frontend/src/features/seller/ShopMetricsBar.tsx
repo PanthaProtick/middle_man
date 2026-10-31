@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocale } from '../locale';
 import { sellerCopy } from '../locale/sellerCopy';
-import { ShoppingBag, CheckCircle2, Clock, AlertTriangle, Smartphone } from 'lucide-react';
+import { ShoppingBag, CheckCircle2, Clock, Truck, AlertTriangle, Smartphone } from 'lucide-react';
 import type { TodayMetrics } from './useTodayMetrics';
 import './ShopMetricsBar.css';
 
@@ -63,6 +63,16 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
           <div className="metric-lbl">{text.loadedPayments}</div>
         </div>
       </div>
+      <div className="metric-chip" title={text.stagedHelp}>
+        <div className="metric-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-accent)' }}>
+          <Truck size={18} />
+        </div>
+        <div>
+          <div className="metric-val">{metrics?.staged_for_delivery ?? '—'}</div>
+          <div className="metric-lbl">{text.staged}</div>
+        </div>
+      </div>
+      <p className="metric-lbl metrics-explanation">{text.stagedHelp}</p>
       <p className="metric-lbl metrics-explanation">{text.metricsHelp}</p>
     </div>
   );

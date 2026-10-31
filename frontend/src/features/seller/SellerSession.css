@@ -1,0 +1,5 @@
+.seller-session-notice { max-width: 640px; margin: 24px auto; padding: 28px; }
+.seller-session-notice h3 { margin: 0 0 12px; color: var(--text-primary); }
+.seller-session-notice p { color: var(--text-secondary); line-height: 1.6; }
+.seller-session-notice details { margin-top: 20px; font-size: 0.85rem; color: var(--text-secondary); }
+.seller-session-notice summary { cursor: pointer; }

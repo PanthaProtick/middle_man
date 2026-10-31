@@ -1,6 +1,6 @@
 # Buyer Pathao destination collection
 
-Ticket 04, source review and local verification: 2026-10-26. Booking remains disabled.
+Updated 2026-10-31 for the persisted buyer catalogue. Historical provider source review: 2026-10-26. Booking readiness remains governed by seller review and submission contracts.
 
 `GET /api/public/orders/{portal_token}/pathao-locations` returns cities; `?city_id=N`
 returns that city's zones; `?city_id=N&zone_id=M` returns that zone's areas. IDs are
@@ -18,17 +18,30 @@ visibly simulated. A missing connection returns `condition: disconnected` and an
 empty list. Provider/auth/key/format failures return `unavailable` and an empty list.
 Invalid known relationships return 422 `PATHAO_LOCATION_INVALID`.
 
-Catalog results use a process-local LRU cache: 128 entries, five-minute TTL, maximum
-5000 entries per list and 1 MiB upstream response. Keys include shop, environment,
-connection revision, level and parent ID. Failures are not cached. A four-operation
-semaphore bounds upstream concurrency; each lookup has an eight-second deadline
-including queue wait, TLS, authentication and body reading. Submission validation
-has one ten-second hierarchy deadline and never holds a database transaction across
-provider requests. No retries, bearer-token retention or response-body logging.
-Each worker owns its cache/quota; these limits are not distributed rate limiting.
+Buyer browsing and submission read merchant/environment-scoped persistent snapshots;
+they never fetch Pathao locations. Connection replacement or disconnection revokes
+old catalogue authority; pickup/service default changes do not. The initial read
+returns `catalog_version`; clients pass it on child reads and submission. Retired
+versions remain usable for 48 hours after replacement without extending buyer-link
+lifetime. An expired or foreign version yields 422 `PATHAO_CATALOG_EXPIRED` and a
+city field error; explicit lookup retry loads the active version while preserving
+other form details. Legacy clients without a version use the active snapshot.
+
+Synchronization runs separately on connection, seller request, and a scheduled
+worker sweep. Only a complete validated hierarchy is published, atomically; failed
+refreshes retain the last successful version. Without an initial successful version,
+written-address/payment fallback remains available. Seller settings show last update,
+refresh progress/failure, manual refresh and disconnection. See
+[catalogue operations](pathao-catalog-operations.md) for migration, bounds, leases,
+retention and the required hourly deployment schedule.
+
+Seller location browsing retains its process-local five-minute LRU. Seller courier
+review bypasses that cache to obtain current membership and coverage. Neither a
+persisted buyer choice nor old advertised coverage independently authorizes booking.
+No database transaction is held during provider I/O. Tokens are never persisted.
 
 Buyer submission adds optional `address.pathao: {city_id?, zone_id?, area_id?,
-unsupported?}`. Server-only labels, environment, condition and `booking_blocked`
+unsupported?, catalog_version?}`. Server-only labels, environment, condition and `booking_blocked`
 are derived again, never trusted from the request. Existing district/thana/area
 text stays separate. Membership validation uses one connection revision; a changed
 revision invalidates the result. The original submitted payload determines retry
@@ -48,16 +61,15 @@ as established unavailability rather than permission to skip verification: the
 written address and payment claim are preserved as `missing_choices`, and any
 unverified saved IDs are discarded instead of being rejected or fabricated.
 
-`resolved` means selected IDs/labels were found in this catalog and the selected
+`resolved` means selected IDs/labels were found in the chosen catalogue version and the selected
 area advertises home delivery; it does not prove booking readiness. `missing_choices`,
 `disconnected`, `unavailable`, `unsupported`, and `no_area_unverified` all require seller
 resolution. During outage/disconnection, unverified IDs and labels are discarded while
 the written address and payment claim are retained. Unsupported coverage never
 triggers ID substitution; supplied IDs are still validated, and an explicit
 unsupported flag keeps the result `unsupported`. Empty area lists do not require a
-nonexistent choice, but remain `no_area_unverified`. All resolutions currently carry
-`booking_blocked: true`; existing draft blockers and absence of a submission endpoint
-remain in effect. Later review/booking work must establish current readiness.
+nonexistent choice, but remain `no_area_unverified`. Buyer resolutions carry `booking_blocked: true`; seller review and the current
+booking submission safeguards must establish readiness independently.
 The explicit unsupported flag is retained in saved metadata and courier review;
 supported IDs alone cannot clear a buyer's stated coverage problem. The seller must
 explicitly resolve the destination in review before approval becomes available.

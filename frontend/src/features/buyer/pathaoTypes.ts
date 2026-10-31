@@ -1,4 +1,5 @@
 export interface PathaoSelection {
+  catalog_version?: string;
   city_id?: number;
   zone_id?: number;
   area_id?: number;
@@ -17,12 +18,14 @@ export interface PathaoResolution extends Omit<PathaoSelection, 'city_id' | 'zon
 }
 export interface LocationChoice { id: number; name: string; home_delivery_available?: boolean | null }
 export interface LocationAvailability {
+  catalog_version?: string;
   state: 'loading' | 'ready' | 'unavailable';
   city: boolean;
   zone: boolean;
   area: boolean;
 }
 export interface LocationCatalog {
+  catalog_version?: string;
   condition: PathaoResolution['condition'];
   environment: PathaoResolution['environment'];
   simulated: boolean;

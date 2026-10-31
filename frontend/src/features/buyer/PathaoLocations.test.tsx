@@ -6,7 +6,7 @@ import type { PathaoSelection } from './pathaoTypes';
 import { LOCALE_STORAGE_KEY, LocaleProvider, LocaleSwitch } from '../locale';
 import { findLanguageButton } from './buyerLocaleFixtures';
 
-it('searches choices, resets children and retains the selection during a catalog retry', async () => {
+it('shows choices, resets children and retains the selection during a catalog retry', async () => {
   let fail = false;
   vi.spyOn(globalThis, 'fetch').mockImplementation(async url => {
     if (fail) throw new TypeError('outage');
@@ -31,15 +31,7 @@ it('searches choices, resets children and retains the selection during a catalog
   try {
     await act(async () => root.render(<Harness />));
     expect(container.textContent).toContain('Simulated');
-    const search = container.querySelector<HTMLInputElement>('input[type="search"]')!;
-    const searchFor = (text: string) => act(async () => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(search, text);
-      search.dispatchEvent(new Event('input', {bubbles: true}));
-    });
-    await searchFor('chatto');
-    expect(container.querySelector('select[name="pathao_city"]')?.textContent).not.toContain('Dhaka');
-    expect(container.querySelector('select[name="pathao_city"]')?.textContent).toContain('Chattogram');
-    await searchFor('');
+    expect(container.querySelector('input[type="search"]')).toBeNull();
     await select('pathao_city', '1');
     await select('pathao_zone', '10');
     await select('pathao_area', '100');
@@ -47,7 +39,7 @@ it('searches choices, resets children and retains the selection during a catalog
     fail = true;
     await act(async () => container.querySelector<HTMLButtonElement>('button')!.click());
     expect(container.querySelector('[role="alert"]')?.textContent).toContain('written address');
-    expect(container.querySelector('select[name="pathao_area"]')?.textContent).toContain('Saved choice (ID 100)');
+    expect(container.querySelector<HTMLSelectElement>('select[name="pathao_area"]')?.value).toBe('100');
     expect(container.querySelector('output')?.textContent).toContain('"area_id":100');
     fail = false;
     await act(async () => container.querySelector<HTMLButtonElement>('button')!.click());
@@ -59,7 +51,7 @@ it('searches choices, resets children and retains the selection during a catalog
   }
 });
 
-it('switches catalog failures and selected locations without another read or lost search, then recovers', async () => {
+it('switches catalog failures and selected locations without another read or lost focus, then recovers', async () => {
   window.localStorage.setItem(LOCALE_STORAGE_KEY, 'bn');
   let fail = true;
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
@@ -77,17 +69,12 @@ it('switches catalog failures and selected locations without another read or los
     expect(container.querySelector('[role="alert"]')?.textContent).toContain('Pathao-এর এলাকার তালিকা পাওয়া যাচ্ছে না।');
     expect(container.textContent).not.toContain('Private provider detail');
     expect(container.querySelector('select[name="pathao_city"]')?.textContent).toContain('সংরক্ষিত এলাকা (ID 1)');
-    const search = container.querySelector<HTMLInputElement>('input[type="search"]')!;
-    await act(async () => {
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(search, 'Dhaka');
-      search.dispatchEvent(new Event('input', {bubbles: true}));
-      search.focus();
-    });
+    const city = container.querySelector<HTMLSelectElement>('select[name="pathao_city"]')!;
+    city.focus();
     const calls = fetchMock.mock.calls.length;
     await act(async () => findLanguageButton(container, 'English').click());
     expect(fetchMock).toHaveBeenCalledTimes(calls);
-    expect(document.activeElement).toBe(search);
-    expect(search.value).toBe('Dhaka');
+    expect(document.activeElement).toBe(city);
     expect(container.textContent).toContain('Pathao locations are unavailable.');
     expect(onChange).not.toHaveBeenCalled();
     fail = false;

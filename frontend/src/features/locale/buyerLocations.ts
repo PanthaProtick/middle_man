@@ -1,4 +1,5 @@
 export const enBuyerLocations = {
+  "buyer.location.expired": "Location choices changed. Retry location lookup and recheck your city, zone, and area. Your other details are preserved.",
   "buyer.location.label": "Pathao delivery location",
   "buyer.location.help": "Choose the Pathao city, zone, and area when they are listed. Write house, road and delivery directions in the full address below.",
   "buyer.location.simulated": "Simulated Pathao locations — offline demonstration only.",
@@ -28,6 +29,7 @@ export const enBuyerLocations = {
 } as const;
 
 export const bnBuyerLocations = {
+  "buyer.location.expired": "এলাকার তালিকা বদলেছে। আবার তালিকা লোড করে শহর, জোন ও এলাকা যাচাই করুন। আপনার অন্য তথ্য সংরক্ষিত আছে।",
   "buyer.location.label": "Pathao-এর ডেলিভারির এলাকা",
   "buyer.location.help": "তালিকায় থাকলে Pathao-এর শহর, জোন ও এলাকা বেছে নিন। নিচের সম্পূর্ণ ঠিকানায় বাড়ি, রাস্তা ও পৌঁছানোর নির্দেশনা লিখুন।",
   "buyer.location.simulated": "Pathao-এর নমুনা এলাকার তালিকা — শুধু অফলাইন প্রদর্শনীর জন্য।",

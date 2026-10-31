@@ -38,6 +38,8 @@ export function OrderCard({
   const badge = Object.hasOwn(LIFECYCLE_BADGES, order.lifecycle)
     ? LIFECYCLE_BADGES[order.lifecycle]
     : { bg: 'rgba(255,255,255,0.1)', color: 'var(--text-primary)' };
+  const stagingClass = `order-delivery-label order-delivery-label--${order.delivery_staged ? 'staged' : 'unstaged'}`;
+  const stagingLabel = order.delivery_staged ? text.deliveryStaged : text.deliveryUnstaged;
   const isAwaiting = order.lifecycle === 'awaiting_buyer';
   const isExpired = order.lifecycle === 'expired';
 
@@ -51,6 +53,7 @@ export function OrderCard({
         <span className="order-card-mobile-status" style={{ background: badge.bg, color: badge.color }}>
           {lifecycleLabel(order.lifecycle, text)}
         </span>
+        <span className={stagingClass}>{stagingLabel}</span>
         <span className="order-card-mobile-total">{text.total} BDT {formatOrderAmount(order.total_minor)}</span>
       </button>
       <div id={bodyId} className={`order-card-body${mobileOpen ? ' order-card-body-open' : ''}`}>
@@ -75,6 +78,7 @@ export function OrderCard({
             {isExpired && <AlertTriangle size={11} />}
             {lifecycleLabel(order.lifecycle, text)}
           </span>
+          <span className={stagingClass}>{stagingLabel}</span>
           {order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0 && (
             <div className="order-card-review">
               <span style={{ fontSize: '0.725rem', color: 'var(--rose-accent)', display: 'inline-flex', alignItems: 'center', gap: '3px' }}>

@@ -151,14 +151,14 @@ it('recovers automatically after a transient periodic token acquisition failure'
   } finally { vi.useRealTimers(); }
 });
 
-it('makes Sign in recover a rejected session when Clerk still considers the user signed in', async () => {
+it('recovers a rejected session from the notice when Clerk still considers the user signed in', async () => {
   vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
     ? Response.json({ error: { code: 'UNAUTHORIZED', message: 'Rejected' } }, { status: 401 })
     : Response.json({ status: 'healthy' }));
   await act(async () => root.render(<SellerSession />));
   expect(container.textContent).toContain('Your seller session has expired');
   vi.mocked(fetch).mockImplementation(async () => Response.json({ setup_needed: true, shop: null }));
-  const signIn = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Sign in');
+  const signIn = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'Retry seller session');
   await act(async () => signIn?.click());
   expect(container.textContent).toContain('Shop Setup');
   expect(clerk.openSignIn).not.toHaveBeenCalled();
@@ -166,10 +166,10 @@ it('makes Sign in recover a rejected session when Clerk still considers the user
 
 it('shows the safe rejection category without needing the aborted response body', async () => {
   vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
-    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'not_yet_valid' } })
+    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'invalid_signature' } })
     : Response.json({ status: 'healthy' }));
   await act(async () => root.render(<SellerSession />));
-  expect(container.textContent).toContain('Session diagnostic: not_yet_valid');
+  expect(container.textContent).toContain('Session diagnostic: invalid_signature');
   expect(container.textContent).not.toContain('Shop Setup');
 });
 
@@ -241,19 +241,54 @@ it('shares the enclosing locale selection without reacquiring the seller token',
 it('translates a rejected session without repeating authentication or requests', async () => {
   localStorage.setItem('middleman.locale', 'en');
   vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
-    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'not_yet_valid' } })
+    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'invalid_signature' } })
     : Response.json({ status: 'healthy' }));
   try {
     await act(async () => root.render(<SellerSession />));
-    expect(container.textContent).toContain('Session diagnostic: not_yet_valid');
+    expect(container.textContent).toContain('Session diagnostic: invalid_signature');
     const calls = vi.mocked(fetch).mock.calls.length;
     const tokens = clerk.getToken.mock.calls.length;
     const button = Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!;
     button.focus();
     await act(async () => button.click());
-    expect(container.textContent).toContain('এখনও কার্যকর নয়');
+    expect(container.textContent).toContain('স্বাক্ষর সঠিক নয়');
     expect(document.activeElement).toBe(button);
     expect(fetch).toHaveBeenCalledTimes(calls);
     expect(clerk.getToken).toHaveBeenCalledTimes(tokens);
   } finally { localStorage.clear(); }
+});
+
+it('automatically recovers a temporarily not-yet-valid session without a sign-in demand', async () => {
+  vi.useFakeTimers();
+  let ready = false;
+  vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/') && !ready
+    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'not_yet_valid' } })
+    : Response.json(String(url).includes('/seller/shop') ? { setup_needed: true, shop: null } : { status: 'healthy' }));
+  try {
+    await act(async () => root.render(<SellerSession />));
+    expect(container.textContent).not.toContain('Please sign in again');
+    expect(container.querySelector('[role="status"].seller-session-notice')).not.toBeNull();
+    expect(container.textContent).not.toContain('Shop Setup');
+    ready = true;
+    await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(container.textContent).toContain('Shop Setup');
+    expect(clerk.signOut).not.toHaveBeenCalled();
+  } finally { vi.useRealTimers(); }
+});
+
+it('bounds clock recovery and offers a manual retry for persistent timing failures', async () => {
+  vi.useFakeTimers();
+  vi.mocked(fetch).mockImplementation(async (url) => String(url).includes('/seller/')
+    ? new Response('{}', { status: 401, headers: { 'X-Seller-Auth-Reason': 'not_yet_valid' } })
+    : Response.json({ status: 'healthy' }));
+  try {
+    await act(async () => root.render(<SellerSession />));
+    for (let attempt = 0; attempt < 3; attempt++) await act(async () => vi.advanceTimersByTimeAsync(5000));
+    expect(container.querySelector('.seller-session-notice[role="alert"]')).not.toBeNull();
+    expect(container.textContent).toContain('date and time');
+    const calls = vi.mocked(fetch).mock.calls.filter(([url]) => String(url).includes('/seller/')).length;
+    await act(async () => vi.advanceTimersByTimeAsync(30000));
+    expect(vi.mocked(fetch).mock.calls.filter(([url]) => String(url).includes('/seller/'))).toHaveLength(calls);
+    expect(container.querySelector('details')?.open).toBe(false);
+  } finally { vi.useRealTimers(); }
 });

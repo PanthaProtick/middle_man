@@ -207,8 +207,8 @@ async def test_empty_catalogs_preserve_fallback_without_fabricated_ids(
         client, sandbox_provider, empty_level, selection, condition):
     calls, catalogs = sandbox_provider
     order = await _create_test_order(client)
-    await connect_sandbox(client)
     catalogs[empty_level] = []
+    await connect_sandbox(client)
     path = f"/api/public/orders/{order['portal_token']}/submission"
     result = await client.post(path, json=payload(selection), headers={'Idempotency-Key': 'empty'})
     assert result.status_code == 200, result.text

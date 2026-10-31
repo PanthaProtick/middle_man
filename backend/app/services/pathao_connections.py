@@ -38,6 +38,11 @@ class Revision:
     encrypted_credentials: str | None = None
     store_id: int | None = None
     delivery_type: DeliveryType | None = None
+    enabled: bool = True
+
+    @property
+    def connected(self) -> bool:
+        return self.version > 0 and self.enabled
 
 
 _memory: dict[tuple[str, Environment], list[Revision]] = {}
@@ -52,20 +57,43 @@ async def latest(db: AsyncSession | None, shop: str, env: Environment) -> Revisi
         PathaoConnectionTable.shop_id == shop, PathaoConnectionTable.environment == env,
     ).order_by(PathaoConnectionTable.version.desc()).limit(1))
     result = Revision(row.version, row.encrypted_credentials, row.default_store_id,
-                      row.default_delivery_type) if row else Revision(0)
+                      row.default_delivery_type, row.enabled) if row else Revision(0)
     # Release read transactions before any provider request.
     await db.commit()
     return result
 
 
+async def generation(db: AsyncSession | None, shop: str, env: Environment) -> int:
+    """Connection revisions clear defaults; defaults-only revisions retain identity.
+
+    Leave the caller's transaction intact so refresh publication can hold its lock.
+    """
+    ensure_durable_storage(db, 'Pathao settings')
+    if db is None:
+        revisions = _memory.get((shop, env), [])
+        if not revisions or not revisions[-1].connected:
+            return 0
+        return next((r.version for r in reversed(revisions) if r.store_id is None), 0)
+    current = await db.scalar(select(PathaoConnectionTable).where(
+        PathaoConnectionTable.shop_id == shop, PathaoConnectionTable.environment == env,
+    ).order_by(PathaoConnectionTable.version.desc()).limit(1))
+    if current is None or not current.enabled:
+        return 0
+    version = await db.scalar(select(PathaoConnectionTable.version).where(
+        PathaoConnectionTable.shop_id == shop, PathaoConnectionTable.environment == env,
+        PathaoConnectionTable.default_store_id.is_(None),
+    ).order_by(PathaoConnectionTable.version.desc()).limit(1))
+    return version or 0
+
+
 def view(env: Environment, revision: Revision) -> ConnectionView:
-    if revision.version and env != 'offline':
+    if revision.connected and env != 'offline':
         unseal(revision.encrypted_credentials)
     return ConnectionView(
         environment=env, version=revision.version, simulated=env == 'offline',
         production_booking_enabled=settings.PATHAO_PRODUCTION_BOOKING_ENABLED,
-        status='connected' if revision.version else 'disconnected',
-        merchant_hint=('Simulated merchant' if env == 'offline' else '••••') if revision.version else None,
+        status='connected' if revision.connected else 'disconnected',
+        merchant_hint=('Simulated merchant' if env == 'offline' else '••••') if revision.connected else None,
         default_store_id=revision.store_id,
         default_delivery_type=revision.delivery_type,
     )
@@ -91,6 +119,7 @@ async def append(db: AsyncSession | None, shop: str, env: Environment, expected:
             shop_id=shop, environment=env, version=revision.version,
             encrypted_credentials=revision.encrypted_credentials,
             default_store_id=revision.store_id, default_delivery_type=revision.delivery_type,
+            enabled=revision.enabled,
         ))
         await db.commit()
     return view(env, revision)
@@ -108,7 +137,7 @@ async def submission_credentials(
     if env == 'offline':
         return None
     revision = await latest(db, shop, env)
-    if not revision.version:
+    if not revision.connected:
         raise CourierSetupError(422, 'COURIER_CONNECTION_REQUIRED', 'Connect Pathao before submitting.')
     if revision.version != expected_version:
         raise CourierSetupError(
@@ -139,7 +168,7 @@ async def connect(db: AsyncSession | None, shop: str, env: Environment, data: Co
 async def choices(db: AsyncSession | None, shop: str, env: Environment, expected: int) -> StoreChoices:
     revision = await latest(db, shop, env)
     check_version(revision, expected)
-    if not revision.version:
+    if not revision.connected:
         raise SellerDomainException(409, 'PATHAO_DISCONNECTED', 'Connect Pathao first.')
     stores = await stores_for(shop, env, revision)
     check_version(await latest(db, shop, env), expected)
@@ -155,3 +184,9 @@ async def defaults(db: AsyncSession | None, shop: str, env: Environment, data: D
     return await append(db, shop, env, revision.version, Revision(
         revision.version + 1, revision.encrypted_credentials, data.default_store_id, data.default_delivery_type,
     ))
+
+
+async def disconnect(db: AsyncSession | None, shop: str, env: Environment, expected: int) -> ConnectionView:
+    revision = await latest(db, shop, env)
+    check_version(revision, expected)
+    return await append(db, shop, env, expected, Revision(expected + 1, enabled=False))

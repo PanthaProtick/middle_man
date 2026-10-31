@@ -3,6 +3,7 @@ import { useAuth, useClerk } from '@clerk/react';
 import { SellerSignIn } from './SellerSignIn';
 import { AppShell } from '../../App';
 import { LocaleProvider, LocaleSwitch, useLocale } from '../locale';
+import './SellerSession.css';
 import { sessionReason } from './sessionReason';
 import { sellerCopy } from '../locale/sellerCopy';
 import { bindSellerSession, renewSellerSessionToken, type AuthReason, type SessionFailure } from './sessionRequest';
@@ -23,8 +24,16 @@ function SellerSessionContent(): React.JSX.Element {
   const [signingOut, setSigningOut] = useState(false);
   const [signedOutSession, setSignedOutSession] = useState<string | null>();
   const [failure, setFailure] = useState<{ sessionId: string; kind: SessionFailure; reason?: AuthReason }>();
+  const [recoveryAttempts, setRecoveryAttempts] = useState({ sessionId, count: 0 });
   const [retry, setRetry] = useState(0);
   const blocked = failure !== undefined && failure.sessionId === sessionId;
+
+  const recovering = blocked && failure.reason === 'not_yet_valid' && (recoveryAttempts.sessionId !== sessionId || recoveryAttempts.count <= 3);
+  useEffect(() => {
+    if (!recovering) return;
+    const timer = window.setTimeout(() => setFailure(undefined), 5000);
+    return () => window.clearTimeout(timer);
+  }, [recovering, failure]);
 
   // Keep the seller tab title localized even while Clerk or the session is loading.
   useEffect(() => {
@@ -70,7 +79,10 @@ function SellerSessionContent(): React.JSX.Element {
   useLayoutEffect(() => {
     if (!token || !sessionId) return;
     return bindSellerSession(token, (kind, reason) => {
-      setCredential(undefined);
+      if (reason === 'not_yet_valid') setRecoveryAttempts(previous => ({
+        sessionId, count: previous.sessionId === sessionId ? previous.count + 1 : 1,
+      }));
+      else setCredential(undefined);
       setFailure({ sessionId, kind, reason });
     }, () => getToken({ skipCache: true }));
   }, [token, sessionId, getToken]);
@@ -92,6 +104,7 @@ function SellerSessionContent(): React.JSX.Element {
     }
   };
   const retrySession = () => {
+    setRecoveryAttempts({ sessionId, count: 0 });
     setFailure(undefined);
     setError(undefined);
     setRetry(value => value + 1);
@@ -100,16 +113,21 @@ function SellerSessionContent(): React.JSX.Element {
   if (!isLoaded) return <><LocaleSwitch /><p role="status">{text.sessionLoading}</p></>;
   if (signInOpen && !isSignedIn) return <SellerSignIn />;
 
-  return <>
-    {error && <p role="alert">{error === 'token' ? text.sessionToken : text.sessionSignOut}</p>}
-    {blocked && <div role="alert">
-      <p>{failure?.kind === 'unauthorized'
+  const notice = blocked || error ? <section className="card seller-session-notice"
+    role={recovering ? 'status' : 'alert'} aria-live={recovering ? 'polite' : 'assertive'}>
+    <h3>{recovering ? text.sessionReconnecting : text.sessionAttention}</h3>
+    <p>{error ? error === 'token' ? text.sessionToken : text.sessionSignOut
+      : failure?.reason === 'not_yet_valid' ? recovering ? text.sessionClockWaiting : text.sessionClockHelp
+      : failure?.kind === 'unauthorized'
         ? failure?.reason && failure.reason !== 'expired' ? text.sessionRejected : text.sessionExpired
         : text.sessionUnavailable}</p>
-      {failure?.reason && <p>{text.diagnostic}: {sessionReason(failure.reason, locale)}</p>}
-      <button onClick={retrySession}>{text.sessionRetry}</button>
-    </div>}
-    <AppShell token={token} sessionId={token ? sessionId ?? undefined : undefined}
+    {!recovering && <button className="btn btn-primary" onClick={retrySession}>{text.sessionRetry}</button>}
+    {!recovering && failure?.reason && <details><summary>{text.diagnostic}</summary>
+      <p>{text.diagnostic}: {sessionReason(failure.reason, locale)}</p>
+    </details>}
+  </section> : undefined;
+  return <>
+    <AppShell token={token} sessionId={token ? sessionId ?? undefined : undefined} sessionNotice={notice}
       onSignIn={() => {
         if (isSignedIn && sessionId !== signedOutSession) retrySession();
         else setSignInOpen(true);

@@ -15,6 +15,7 @@ export function formFieldName(field: string): string {
 }
 
 export function fieldMessage(t: Translate, field: NonNullable<ApiError['fields']>[number]): string {
+  if (field.code === 'pathao_catalog_expired') return t('buyer.location.expired');
   if (field.code === 'pathao_location_invalid') return t('buyer.location.invalid');
   const maxLength = field.params?.max_length;
   const minLength = field.params?.min_length;
@@ -58,6 +59,7 @@ export function submissionMessage(t: Translate, error: BuyerApiError | undefined
     case 'IDEMPOTENCY_KEY_REUSED': message = t('buyer.error.conflict'); break;
     case 'PATHAO_LOCATION_REQUIRED': message = t('buyer.location.required'); break;
     case 'PATHAO_LOCATION_INVALID': message = t('buyer.location.invalid'); break;
+    case 'PATHAO_CATALOG_EXPIRED': message = t('buyer.location.expired'); break;
     default: return t(uncertain ? 'buyer.error.unknown' : 'buyer.error.failed');
   }
   return uncertain ? `${message} ${t('buyer.error.unknown')}` : message;

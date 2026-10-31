@@ -13,6 +13,7 @@ import { fetchHealth, type HealthStatus } from './services/api';
 interface AppProps {
   token?: string;
   sessionId?: string;
+  sessionNotice?: React.ReactNode;
   onSignIn?: () => void;
   onSignOut?: () => void;
 }
@@ -25,7 +26,7 @@ export default function App(props: AppProps = {}): React.JSX.Element {
   );
 }
 
-export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): React.JSX.Element {
+export function AppShell({ token, sessionId, sessionNotice, onSignIn, onSignOut }: AppProps): React.JSX.Element {
   const { t, locale } = useLocale();
   const text = sellerCopy[locale];
   const [health, setHealth] = useState<HealthStatus | null>(null);
@@ -102,7 +103,7 @@ export function AppShell({ token, sessionId, onSignIn, onSignOut }: AppProps): R
 
       {/* Main View Area */}
       <main id="workspace" tabIndex={-1}>
-        <SellerWorkspace key={sessionId ?? 'signed-out'} token={token} onSignIn={onSignIn} />
+        {sessionNotice ?? <SellerWorkspace key={sessionId ?? 'signed-out'} token={token} onSignIn={onSignIn} />}
       </main>
 
       {/* Footer */}

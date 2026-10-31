@@ -85,6 +85,9 @@ EXPECTED_SCHEMA_TABLES = [
     "pathao_connection_revisions",
     "courier_attempts",
     "courier_reconciliations",
+    "pathao_catalog_snapshots",
+    "pathao_catalog_lists",
+    "pathao_catalog_sync",
 ]
 
 

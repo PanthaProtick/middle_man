@@ -18,6 +18,7 @@ from app.models.order import (
 from app.models.payment_decision import PaymentDecision, PaymentDecisionEvent, PaymentPreview, PaymentSummary
 from app.models.replacement import OrderReplacementInput
 from app.services.buyer_correction import correct, history
+from app.services.delivery_staging import label_orders
 from app.services.order_replacement import replace_order
 from app.services.order_service import OrderService
 from app.services.payment_decision import decide_order
@@ -89,6 +90,7 @@ async def list_orders(
         shop_id=shop.id, cursor=cursor, limit=limit, status_filter=status,
         review_filter=review, search=search, from_date=from_date, to_date=to_date,
     )
+    await label_orders(db, shop.id, items)
     return SellerOrderListResponse(items=items, next_cursor=next_cursor)
 
 
@@ -128,7 +130,9 @@ async def get_order(
         raise NotFoundError("Order not found")
 
     order_svc = OrderService(db)
-    return await order_svc.get_order(shop_id=shop.id, order_id=order_id)
+    order = await order_svc.get_order(shop_id=shop.id, order_id=order_id)
+    await label_orders(db, shop.id, [order])
+    return order
 
 
 @router.post(

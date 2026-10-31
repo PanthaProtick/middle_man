@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { requestJson, SellerApiError } from './api';
 import { useCourierText } from '../locale/courierCopy';
 import './PathaoSettings.css';
+import { PathaoCatalogStatus } from './PathaoCatalogStatus';
 import type { PathaoConnectInput, PathaoConnection, PathaoDefaultsInput, PathaoDeliveryType, PathaoEnvironment, PathaoStores } from './pathaoTypes';
 
 export function PathaoSettings({ token }: { token: string }): React.JSX.Element {
@@ -148,6 +149,14 @@ function ConnectionForm({ token, environment }: { token: string; environment: Pa
         </fieldset>
       </form>
     </details>
+    {connection?.status === 'connected' && <PathaoCatalogStatus key={connection.version} token={token} environment={environment} />}
+    {connection?.status === 'connected' && <button type="button" className="btn btn-secondary btn-sm" disabled={busy}
+      onClick={() => {
+        setBusy(true);
+        void requestJson<PathaoConnection>(`${path}?expected_version=${connection.version}`, {method: 'DELETE'}, token)
+          .then(result => {if (alive.current) {setConnection(result); setStores(undefined);}})
+          .catch(fail).finally(() => {if (alive.current) setBusy(false);});
+      }}>{t('Disconnect Pathao')}</button>}
     {connection?.status === 'connected' && <details className="pathao-settings-disclosure">
       <summary>{t('Courier defaults')}</summary>
       <form data-defaults onSubmit={saveDefaults}>

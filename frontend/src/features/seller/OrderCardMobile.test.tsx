@@ -8,10 +8,13 @@ it('provides independent collapsed mobile summaries with linked details and work
   const host = document.createElement('div');
   document.body.append(host);
   const root = createRoot(host);
-  await act(async () => root.render(<OrderList orders={[baseOrder, { ...baseOrder, id: 'second' }]}
+  await act(async () => root.render(<OrderList orders={[{ ...baseOrder, delivery_staged: true }, { ...baseOrder, id: 'second', delivery_staged: false }]}
     statusFilter="" onFilterChange={vi.fn()} nextCursor={null} onLoadMore={vi.fn()} />));
   const summaries = host.querySelectorAll<HTMLButtonElement>('.order-card-mobile-summary');
   expect(summaries).toHaveLength(2);
+  expect(summaries[0].textContent).toContain('Delivery staged');
+  expect(summaries[1].textContent).toContain('Delivery unstaged');
+  expect(host.querySelectorAll('.order-card-identity .order-delivery-label')[0].textContent).toBe('Delivery staged');
   for (const summary of summaries) {
     expect(summary.textContent).toContain(baseOrder.product_name);
     expect(summary.textContent).toContain('BDT');

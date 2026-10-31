@@ -10,6 +10,7 @@ export interface TodayMetrics {
   awaiting: number;
   pending: number;
   payments: number;
+  staged_for_delivery: number;
 }
 
 export function useTodayMetrics(token: string | undefined, orders: SellerOrder[], receipts: ReceiptView[]) {

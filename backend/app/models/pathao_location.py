@@ -10,6 +10,7 @@ Condition = Literal['resolved', 'missing_choices', 'disconnected', 'unavailable'
 
 class LocationSelection(BaseModel):
     model_config = ConfigDict(extra='forbid')
+    catalog_version: Annotated[str | None, Field(pattern=r'^[a-f0-9-]{36}$')] = None
     city_id: Annotated[int | None, Field(gt=0, strict=True)] = None
     zone_id: Annotated[int | None, Field(gt=0, strict=True)] = None
     area_id: Annotated[int | None, Field(gt=0, strict=True)] = None
@@ -39,6 +40,7 @@ class LocationChoice(BaseModel):
 
 
 class LocationCatalog(BaseModel):
+    catalog_version: str | None = None
     condition: Condition
     environment: Environment
     simulated: bool

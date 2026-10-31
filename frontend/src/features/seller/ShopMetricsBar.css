@@ -1,18 +1,7 @@
-@media (max-width: 600px) {
-  .metrics-ribbon[role="region"] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-  }
-
-  .metrics-ribbon .metric-chip {
-    min-width: 0;
-    gap: 8px;
-    padding: 10px;
-    border-radius: 10px;
-  }
-
-  .metrics-ribbon .metric-chip > div:last-child { min-width: 0; }
-  .metrics-ribbon .metric-icon-wrap { width: 30px; height: 30px; }
-  .metrics-ribbon .metric-lbl { overflow-wrap: anywhere; }
-  .metrics-ribbon .metric-chip:nth-child(5) { grid-column: 1 / -1; }
+.metrics-ribbon[role="region"] {
+  grid-template-columns: repeat(6, minmax(150px, 1fr));
+  overflow-x: auto;
 }
+
+.metrics-ribbon .metric-chip { min-width: 0; }
+.metrics-ribbon .metric-lbl { overflow-wrap: anywhere; }

@@ -63,7 +63,7 @@ it.each([
   expect(fetchMock).toHaveBeenCalledTimes(calls);
 });
 
-it('keeps all saved courier IDs and search text when the language changes', async () => {
+it('keeps all saved courier IDs when the language changes', async () => {
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async url => {
     const path = String(url);
     return new Response(JSON.stringify({condition: 'resolved', simulated: false, choices:

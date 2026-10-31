@@ -2,7 +2,7 @@
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, SecretStr
-from sqlalchemy import ForeignKey, Integer, String, Text
+from sqlalchemy import Boolean, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -64,3 +64,4 @@ class PathaoConnectionTable(Base):
     encrypted_credentials: Mapped[str | None] = mapped_column(Text)
     default_store_id: Mapped[int | None] = mapped_column(Integer)
     default_delivery_type: Mapped[DeliveryType | None] = mapped_column(Integer)
+    enabled: Mapped[bool] = mapped_column(Boolean, default=True, server_default='true')

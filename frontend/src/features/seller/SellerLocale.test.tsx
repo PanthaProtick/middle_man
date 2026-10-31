@@ -95,7 +95,7 @@ it('explains loaded record counts in both languages without changing counts', as
   const container = document.createElement('div'); document.body.append(container);
   const root = createRoot(container);
   try {
-    await act(async () => root.render(<LocaleProvider><LocaleSwitch /><ShopMetricsBar metrics={{ date: '2026-10-31', timezone: 'Asia/Dhaka', orders: 0, confirmed: 0, awaiting: 0, pending: 0, payments: 5 }} /></LocaleProvider>));
+    await act(async () => root.render(<LocaleProvider><LocaleSwitch /><ShopMetricsBar metrics={{ date: '2026-10-31', timezone: 'Asia/Dhaka', staged_for_delivery: 7, orders: 0, confirmed: 0, awaiting: 0, pending: 0, payments: 5 }} /></LocaleProvider>));
     expect(container.textContent).toContain('Today in Bangladesh time');
     await act(async () => Array.from(container.querySelectorAll('button')).find(b => b.textContent === 'বাংলা')!.click());
     expect(container.textContent).toContain('বাংলাদেশ সময়ে আজ');

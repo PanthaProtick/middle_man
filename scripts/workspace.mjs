@@ -43,6 +43,7 @@ function doctor() {
 }
 
 const tasks = {
+  'refresh:locations': () => backend(['python', '-m', 'app.services.pathao_snapshot_sync']),
   doctor,
   context: () => console.log(context(args)),
   conventions,

@@ -25,6 +25,7 @@ async def pathao_locations(
     portal_token: str,
     city_id: int | None = Query(None, gt=0),
     zone_id: int | None = Query(None, gt=0),
+    catalog_version: str | None = Query(None, pattern=r'^[a-f0-9-]{36}$'),
     clock: Callable[[], datetime.datetime] = Depends(get_buyer_clock),
     is_gate_approved: bool = Depends(verify_public_access_gate),
     db: Optional[AsyncSession] = Depends(get_db),
@@ -34,7 +35,7 @@ async def pathao_locations(
     await link_shop(db, portal_token, clock)
     if zone_id is not None and city_id is None:
         raise invalid('city')
-    result = await catalog(db, portal_token, city_id, zone_id)
+    result = await catalog(db, portal_token, city_id, zone_id, catalog_version)
     await link_shop(db, portal_token, clock)
     return result
 

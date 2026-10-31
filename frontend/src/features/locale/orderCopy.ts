@@ -1,4 +1,5 @@
 const en = {
+  deliveryStaged: 'Delivery staged', deliveryUnstaged: 'Delivery unstaged',
   list: 'Orders & Active Buyer Links', confirmed: 'Confirmed', exceptions: 'Review Exceptions:', status: 'Status:',
   all: 'All Statuses', awaiting_buyer: 'Awaiting Buyer', pending: 'Pending Review', rejected: 'Rejected',
   cancelled: 'Cancelled', expired: 'Expired', unknown: 'Unknown status. Refresh and review the order before continuing.',
@@ -39,6 +40,7 @@ const en = {
   dateDaysInvalid: 'Enter a whole number of days from 1 to 3650.',
 } as const;
 const bn: Record<keyof typeof en, string> = {
+  deliveryStaged: 'ডেলিভারির জন্য প্রস্তুত রাখা', deliveryUnstaged: 'ডেলিভারির জন্য প্রস্তুত রাখা হয়নি',
   list: 'অর্ডার ও সক্রিয় ক্রেতার লিংক', confirmed: 'নিশ্চিত করা', exceptions: 'পর্যালোচনার অসঙ্গতি:', status: 'অবস্থা:',
   all: 'সব অবস্থা', awaiting_buyer: 'ক্রেতার অপেক্ষায়', pending: 'পর্যালোচনার অপেক্ষায়', rejected: 'প্রত্যাখ্যাত',
   cancelled: 'বাতিল', expired: 'মেয়াদ শেষ', unknown: 'অজানা অবস্থা। রিফ্রেশ করে অর্ডার পর্যালোচনা করুন।',

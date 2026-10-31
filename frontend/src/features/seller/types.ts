@@ -44,6 +44,7 @@ export type OrderLifecycle =
   | 'expired';
 
 export interface SellerOrder {
+  delivery_staged?: boolean;
   buyer_link_revoked_at?: string | null;
   id: string;
   shop_id: string;

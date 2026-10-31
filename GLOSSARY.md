@@ -61,3 +61,6 @@ A delivery request accepted by Pathao under the seller's own merchant account, w
 
 **Pickup store**:
 A location registered under the seller's Pathao merchant account from which parcels are to be collected.
+
+**Pathao location catalogue**:
+The cities, zones, areas, and advertised delivery coverage associated with a shop's Pathao merchant connection. Inclusion identifies a delivery location; it does not guarantee that a booking will be accepted.
