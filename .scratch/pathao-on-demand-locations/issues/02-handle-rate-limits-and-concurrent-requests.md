@@ -7,7 +7,7 @@ the provider becomes available again.
 
 **Blocked by:** 01 — Restore on-demand buyer location selection and submission.
 
-**Status:** done
+**Status:** verification found gaps (see follow-up below)
 
 ## Acceptance criteria
 
@@ -97,3 +97,35 @@ Verification:
   live-provider behavior remain unverified.
 - Next action: implement ticket 03 to retire crawl entry points and seller
   refresh/status controls without dropping snapshot tables.
+
+## Independent verification (2026-10-31)
+
+Reviewed implementation at `b04cf62` with a clean initial checkout. No production
+code was changed during verification. Three acceptance gaps were reproduced with
+controlled time and synthetic transport/work in `.cache/verify_pathao_02.py`:
+
+- A successful list request started before another request's HTTP 429 removes
+  that newer scope cooldown. Reproducer observed 60 seconds remaining immediately
+  after the 429, then zero after the earlier request succeeded. Preserve newer
+  cooldowns when recording success from already-running requests.
+- Both auth and list cooldown expiry delete the failure counter. Consecutive
+  unguided 429s therefore each wait five seconds instead of the documented
+  exponential backoff. Preserve failure history until successful recovery.
+- Distinct misses create tasks and pending-map entries before semaphore admission.
+  The reproducer retained 200 pending entries with only four admitted requests;
+  there is no pending-entry cap. Token locks also cannot be trimmed past a locked
+  oldest entry. Bound admission/storage without breaking identical-request sharing.
+
+Fresh checks:
+
+- Focused backend: 54 passed; focused rendered buyer UI: 26 passed.
+- Initial root check: 639 passed, 177 skipped, one pytest temporary-directory
+  permission error; result `.cache/checks/check-P8vsW3/result.json`.
+- Root `npm run check` with repository-local `PYTEST_ADDOPTS=--basetemp=...`:
+  PASS; result `.cache/checks/check-QuFw9C/result.json`.
+- Browser, PostgreSQL, hosted and live-provider acceptance: unrun. No live
+  throttling probes or booking calls were made.
+
+Next action: fix the three coordination gaps and add regression cases for
+overlapping success/429, repeated 429 windows and concurrent storage pressure.
+Passing existing tests does not close those reproduced acceptance gaps.
