@@ -77,7 +77,7 @@ async def test_unresolved_destinations_preserve_payment(client, zone, area, cond
 
 
 @pytest.mark.usefixtures('seller_identity')
-async def test_cached_catalog_outage_fallback_and_untrusted_ids(client, monkeypatch):
+async def test_cached_catalog_outage_fallback_and_recovery(client, monkeypatch):
     import httpx
     from cryptography.fernet import Fernet
     from test_pathao_connections import CREDENTIALS
@@ -92,7 +92,7 @@ async def test_cached_catalog_outage_fallback_and_untrusted_ids(client, monkeypa
     catalog_requests = []
     async def provider(request):
         if request.url.path.endswith('issue-token'):
-            return httpx.Response(200, json={'token_type': 'Bearer', 'expires_in': 60, 'access_token': 'private-token'})
+            return httpx.Response(200, json={'token_type': 'Bearer', 'expires_in': 3600, 'access_token': 'private-token'})
         if request.url.path.endswith('/stores'):
             return httpx.Response(200, json={'data': {'data': [], 'current_page': 1, 'last_page': 1}})
         catalog_requests.append(request.url.path)
@@ -114,24 +114,51 @@ async def test_cached_catalog_outage_fallback_and_untrusted_ids(client, monkeypa
     outage = True
     assert (await client.get(path + '/pathao-locations?city_id=5&zone_id=6')).json() == first.json()
     assert len(catalog_requests) == 3
-    clock += 301  # Buyer snapshots survive the former provider-cache TTL.
-    cached = await client.get(path + '/pathao-locations')
-    assert cached.json()['condition'] == 'resolved'
-    assert 'private' not in cached.text
+    clock += 301  # Expired lists do not acquire an indefinite stale lifetime.
+    expired = await client.get(path + '/pathao-locations')
+    assert expired.json()['condition'] == 'unavailable'
+    assert expired.json()['choices'] == []
+    assert 'private' not in expired.text
+    assert len(catalog_requests) == 4
+    outage = False
+    recovered = await client.get(path + '/pathao-locations')
+    assert recovered.json()['condition'] == 'resolved'
+    assert recovered.json()['choices'][0]['id'] == 5
+    outage = True
+    clock += 301
     payload = {**PAYLOAD, 'address': {**PAYLOAD['address'], 'pathao': {
         'city_id': 999, 'zone_id': 998, 'area_id': 997, 'condition': 'resolved', 'booking_blocked': False}}}
-    invalid = await client.post(path + '/submission', json=payload, headers={'Idempotency-Key': 'forged'})
-    assert invalid.status_code == 422  # An outage never bypasses saved membership checks.
-    payload['address']['pathao'] = {'city_id': 5, 'zone_id': 6, 'area_id': 7}
-    saved = await client.post(path + '/submission', json=payload, headers={'Idempotency-Key': 'saved-snapshot'})
-    assert saved.status_code == 200, saved.text
+    fallback = await client.post(path + '/submission', json=payload, headers={'Idempotency-Key': 'forged'})
+    assert fallback.status_code == 200, fallback.text
     item = (await client.get(f"/api/seller/orders/{order['id']}/history")).json()['items'][0]
-    assert item['address']['pathao']['condition'] == 'resolved'
-    assert item['address']['pathao']['city_id'] == 5
+    assert item['address']['pathao']['condition'] == 'unavailable'
+    assert item['address']['pathao']['city_id'] is None
     assert item['address']['pathao']['booking_blocked'] is True
+    assert item['address']['raw_text'] == PAYLOAD['address']['raw_text']
     assert item['payment_claim']['trx_id'] == PAYLOAD['payment_claim']['trx_id']
-    assert len(catalog_requests) == 3
 
+
+
+@pytest.mark.usefixtures('seller_identity')
+async def test_invalid_browse_result_from_a_replaced_connection_becomes_unavailable(client, monkeypatch):
+    from app.services import pathao_locations
+    from app.services.pathao_connections import Revision, _memory
+    order = await _create_test_order(client)
+    await client.put('/api/seller/courier/pathao/offline', json={'expected_version': 0})
+
+    async def changed(*args, **kwargs):
+        try:
+            raise pathao_locations.InvalidLocation(field='address.pathao.city_id')
+        finally:
+            shop, environment = args[0], args[1]
+            _memory[(shop, environment)] = [Revision(2)]
+
+    monkeypatch.setattr(pathao_locations.pathao_catalog, 'hierarchy', changed)
+    path = f"/api/public/orders/{order['portal_token']}/pathao-locations"
+    result = await client.get(path, params={'city_id': 999})
+    assert result.status_code == 200
+    assert result.json()['condition'] == 'unavailable'
+    assert result.json()['choices'] == []
 
 
 @pytest.mark.usefixtures('seller_identity')

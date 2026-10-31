@@ -1,6 +1,6 @@
 # Buyer Pathao destination collection
 
-Updated 2026-10-31 for the persisted buyer catalogue. Historical provider source review: 2026-10-26. Booking readiness remains governed by seller review and submission contracts.
+Updated 2026-10-31 for on-demand buyer lookups. Historical provider source review: 2026-10-26. Booking readiness remains governed by seller review and submission contracts.
 
 `GET /api/public/orders/{portal_token}/pathao-locations` returns cities; `?city_id=N`
 returns that city's zones; `?city_id=N&zone_id=M` returns that zone's areas. IDs are
@@ -18,25 +18,34 @@ visibly simulated. A missing connection returns `condition: disconnected` and an
 empty list. Provider/auth/key/format failures return `unavailable` and an empty list.
 Invalid known relationships return 422 `PATHAO_LOCATION_INVALID`.
 
-Buyer browsing and submission read merchant/environment-scoped persistent snapshots;
-they never fetch Pathao locations. Connection replacement or disconnection revokes
-old catalogue authority; pickup/service default changes do not. The initial read
-returns `catalog_version`; clients pass it on child reads and submission. Retired
-versions remain usable for 48 hours after replacement without extending buyer-link
-lifetime. An expired or foreign version yields 422 `PATHAO_CATALOG_EXPIRED` and a
-city field error; explicit lookup retry loads the active version while preserving
-other form details. Legacy clients without a version use the active snapshot.
+Buyer browsing and submission resolve cities, zones and areas on demand through the
+backend. A connected shop with no saved catalogue can load and submit choices. Only
+the requested branch and the parent membership lists needed to validate it are
+fetched. Existing snapshot tables and historical records remain intact, but they no
+longer gate buyer choices or submission validation. Legacy `catalog_version` values
+are accepted and ignored rather than trusted as authority.
 
-Synchronization runs separately on connection, seller request, and a scheduled
-worker sweep. Only a complete validated hierarchy is published, atomically; failed
-refreshes retain the last successful version. Without an initial successful version,
-written-address/payment fallback remains available. Seller settings show last update,
-refresh progress/failure, manual refresh and disconnection. See
-[catalogue operations](pathao-catalog-operations.md) for migration, bounds, leases,
-retention and the required hourly deployment schedule.
+Valid provider tokens are reused until shortly before provider expiry. Requested
+lists are cached for five minutes, bounded and keyed by shop, environment, connection
+revision, hierarchy level and parent. Identical concurrent lookups within one process
+share provider work. Authentication and location rate limits set bounded cooldowns
+using valid `Retry-After` guidance or exponential backoff, scoped to the same shop,
+environment and connection revision. This coordination is process-local; it does not
+claim deployment-wide rate-limit protection. A still-valid cached list may serve a
+request during a provider problem, but expired entries are never treated as
+indefinite stale data. Provider failures return `unavailable` with an empty list and
+are never cached as successful empty catalogues. Connection replacement or
+disconnection revokes old authority, including in-flight results; pickup/service
+default changes do not.
+
+Snapshot synchronization remains available for its retained operational workflow,
+but connecting a shop no longer starts a full crawl and buyer requests do not depend
+on it. Manual refresh/status surfaces are retained until the separate retirement work
+removes them. See [catalogue operations](pathao-catalog-operations.md) for migration,
+bounds, leases and retention details.
 
 Seller location browsing retains its process-local five-minute LRU. Seller courier
-review bypasses that cache to obtain current membership and coverage. Neither a
+review bypasses buyer caches to obtain current membership and coverage. Neither a
 persisted buyer choice nor old advertised coverage independently authorizes booking.
 No database transaction is held during provider I/O. Tokens are never persisted.
 

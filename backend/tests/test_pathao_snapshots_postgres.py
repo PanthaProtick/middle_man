@@ -9,7 +9,7 @@ from app.services import pathao_snapshot_store as store
 from app.services.pathao_snapshot_sync import refresh
 
 
-async def test_persisted_catalog_survives_memory_reset_and_reconnect_revokes_it(postgres_buyer, monkeypatch):
+async def test_persisted_catalog_is_retained_but_never_gates_buyer_choices(postgres_buyer, monkeypatch):
     from app.core.config import settings
     monkeypatch.setattr(settings, 'PATHAO_LOCATION_ENVIRONMENT', 'offline')
     client, sql, sessions, order = postgres_buyer
@@ -18,7 +18,10 @@ async def test_persisted_catalog_survives_memory_reset_and_reconnect_revokes_it(
     path = f"/api/public/orders/{order['portal_token']}/pathao-locations"
     first = await client.get(path)
     assert first.status_code == 200 and len(first.json()['choices']) == 2
-    saved = first.json()['catalog_version']
+    assert first.json()['catalog_version'] is None
+    assert (await client.post('/api/seller/courier/pathao/offline/catalog/refresh')).status_code == 202
+    saved = (await client.get('/api/seller/courier/pathao/offline/catalog')).json()['catalog_version']
+    assert saved
     store._snapshots.clear()
     jobs._jobs.clear()
     connections._memory.clear()
@@ -27,10 +30,11 @@ async def test_persisted_catalog_survives_memory_reset_and_reconnect_revokes_it(
     monkeypatch.setattr('app.services.pathao_catalog.fetch', forbidden)
     second = await client.get(path, params={'catalog_version': saved, 'city_id': 1})
     assert second.status_code == 200 and second.json()['choices'][0]['id'] == 10
+    assert second.json()['catalog_version'] is None
     disconnected = await client.delete('/api/seller/courier/pathao/offline?expected_version=1')
     assert disconnected.status_code == 200 and disconnected.json()['status'] == 'disconnected'
     assert (await client.get(path)).json()['condition'] == 'disconnected'
-    # Stored data remains, but its old connection cannot grant buyer authority.
+    # Historical snapshot rows remain stored even though they no longer gate buyer authority.
     assert await sql.fetchval('SELECT count(*) FROM pathao_catalog_snapshots WHERE id=$1', saved) == 1
 
 

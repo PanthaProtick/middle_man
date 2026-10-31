@@ -1,5 +1,5 @@
 ---
-status: proposed
+status: accepted
 ---
 
 # Fetch buyer Pathao locations on demand
@@ -7,9 +7,11 @@ status: proposed
 The owner reports that fetching the complete city/zone/area hierarchy triggers
 Pathao rate limits. Replace the persisted-catalogue prerequisite in
 [ADR-0008](0008-persisted-buyer-pathao-location-catalog.md) with backend-mediated,
-on-demand Pathao requests. The owner accepted the decisions below on 2026-10-31;
-final confirmation of the complete design remains pending. This document does
-not establish implemented or verified behavior.
+on-demand Pathao requests. The owner accepted the decisions below on 2026-10-31.
+Implementation retains the existing snapshot tables and historical records while
+removing their authority over buyer choices. See the
+[location contract](../pathao-location-contract.md) for the resulting behavior and
+verification evidence.
 
 ## Agreed design
 

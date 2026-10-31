@@ -1,6 +1,12 @@
 # Pathao catalogue synchronization
 
-Approved scope: [ADR-0008](adr/0008-persisted-buyer-pathao-location-catalog.md).
+Historical scope: [ADR-0008](adr/0008-persisted-buyer-pathao-location-catalog.md),
+superseded for buyer choices by
+[ADR-0009](adr/0009-on-demand-buyer-pathao-locations.md). Buyer browsing and
+submission now load provider lists on demand; this retained snapshot workflow no
+longer gates those choices. Connecting a merchant no longer starts a crawl, and
+manual refresh/status surfaces remain only until the separate retirement work
+removes them.
 
 Apply migration `0028_pathao_catalog_snapshots.sql` before deploying this version.
 Application readiness requires the three new catalogue tables. This migration also
@@ -16,12 +22,12 @@ failed or abandoned refreshes. Schedule this command **hourly** in the deploymen
 job runner. An hourly sweep provides daily refreshes and bounded failure recovery;
 the application does not install or claim a hosted schedule itself.
 
-Connecting or replacing a merchant starts an initial refresh after the settings
-response. The worker recovers if that best-effort background task is interrupted.
-Seller settings expose catalogue timestamps, refresh failures, manual refresh, and
-status reload. A manual refresh can start at most once per minute per shop and
-environment; scheduled failure retries wait at least one hour. Default pickup or
-service changes retain catalogue authority; replacing credentials does not.
+Connecting or replacing a merchant does not start a refresh. Buyer requests do not
+wait for or require this catalogue. Seller settings expose catalogue timestamps,
+refresh failures, manual refresh, and status reload for the retained workflow. A
+manual refresh can start at most once per minute per shop and environment; scheduled
+failure retries wait at least one hour. Default pickup or service changes retain
+catalogue authority; replacing credentials does not.
 
 The refresh owns its database session. A short shop-row lock claims a unique
 30-minute lease; no database lock or transaction spans provider I/O. At most two
@@ -30,7 +36,7 @@ Each crawl validates complete city/zone/area responses, duplicate IDs, coverage
 types, globally unique zone parents, at most 20,000 lists and 200,000 choices.
 Existing provider response-size and per-request transport timeouts remain in use.
 Provider credentials and tokens are never written into catalogue rows or error
-messages. The existing transport issues a short-lived token for each list request;
+messages. A crawl reuses one valid token through the shared location transport;
 tokens are not persisted. No automatic retry loop calls Pathao within a crawl.
 
 Publication atomically inserts the complete hierarchy and retires the previous
@@ -42,30 +48,34 @@ settings history and cannot authorize current buyer choices.
 
 ## Buyer and seller boundaries
 
-Buyer browsing and submission read only saved catalogue lists. Lists are stored
-separately so a single city/zone request does not deserialize the whole national
-hierarchy. Buyer links still enforce permission, expiry, revocation, retention and
-unsubmitted-order checks. Responses remain private and non-cacheable over HTTP.
+Buyer browsing and submission load the requested city, zone or area on demand and do
+not read saved snapshot lists. Only the selected branch and the parent membership
+lists needed to validate it are requested. Buyer links still enforce permission,
+expiry, revocation, retention and unsubmitted-order checks before cache hits or
+provider work. Responses remain private and non-cacheable over HTTP.
 
-The buyer's first catalogue read returns an opaque `catalog_version`. Subsequent
-child reads and submission use that version. Replaced versions remain valid for
-48 hours after replacement; this never extends the order's own 48-hour buyer-link
-lifetime. A disconnected/replaced merchant invalidates old versions immediately.
-An expired version returns 422 `PATHAO_CATALOG_EXPIRED` with a city field error.
-The buyer can explicitly retry lookup to load the current version while keeping
-other form details. Old client payloads without a version use the active catalogue.
+Valid tokens are reused until shortly before expiry. Lists are cached for five
+minutes and keyed by shop, environment, connection revision, hierarchy level and
+parent. Identical in-process requests share provider work, and auth/location rate
+limits set bounded cooldowns using valid `Retry-After` guidance or exponential
+backoff. This coordination is process-local, not deployment-wide. A still-valid
+cached list may serve a request during a provider problem; expired entries do not
+acquire an indefinite stale lifetime. Provider failures are not cached as successful
+empty lists. Legacy `catalog_version` payloads are accepted and ignored.
 
-No initial catalogue means written-address/payment fallback, with seller resolution
-required before booking. Failed refreshes retain the last successful catalogue
-without an age cutoff for buyer browsing. Seller courier review bypasses the
-short-lived live catalogue cache to obtain current provider membership and coverage;
-provider failure or unsupported destinations prevent booking approval. Existing
-submission/replay, revision, approval and ambiguous-booking safeguards still apply.
+Provider unavailability means written-address/payment fallback, with seller
+resolution required before booking. Seller courier review bypasses buyer caches to
+obtain current provider membership and coverage; provider failure or unsupported
+destinations prevent booking approval. Existing submission/replay, revision,
+approval and ambiguous-booking safeguards still apply.
 
 ## Acceptance evidence
 
-Unit and disposable PostgreSQL tests exercise persistence, replacement, expiry,
-merchant scope, failed refreshes and leases. Pending-request frontend tests exercise
-interactive parents and ignored late responses. These do not establish live Pathao
+Unit and disposable PostgreSQL tests exercise retained snapshot persistence,
+replacement, expiry, merchant scope, failed refreshes and leases. Controlled
+provider-transport tests exercise on-demand token/list reuse, concurrent requests,
+rate-limit cooldowns, failures, cancellation cleanup and recovery. Rendered
+frontend tests exercise interactive parents, ignored late responses, retained
+details and retry after unavailability. These do not establish live Pathao
 coverage, physical-device behavior or hosted schedule execution. Those remain
 separate deployment/browser/provider acceptance gates.

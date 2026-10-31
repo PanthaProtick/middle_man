@@ -46,9 +46,10 @@ async def test_atomic_replacement_checkout_window_and_isolation(monkeypatch):
     assert current.id != old.id
     assert (await store.hierarchy(None, current))[0].name == 'New city'
     pinned = await store.snapshot(None, 'shop', 'offline', old.id)
+    assert (await store.hierarchy(None, pinned))[0].name == 'Old city'
     selected = LocationSelection(city_id=1, zone_id=10, area_id=100, catalog_version=old.id)
-    resolved = await resolve_choices('shop', 'offline', connections.Revision(1), selected, saved=pinned)
-    assert resolved.city_name == 'Old city' and resolved.condition == 'resolved'
+    resolved = await resolve_choices('shop', 'offline', connections.Revision(1), selected)
+    assert resolved.city_name == 'Simulated Dhaka' and resolved.condition == 'resolved'
     for shop, env in [('foreign', 'offline'), ('shop', 'sandbox')]:
         with pytest.raises(store.CatalogExpired):
             await store.snapshot(None, shop, env, old.id)
@@ -63,7 +64,7 @@ async def test_failed_refresh_keeps_snapshot_and_lease_prevents_duplicate_work(m
     now = jobs.get_utc_now() + dt.timedelta(days=2)
     monkeypatch.setattr(jobs, 'get_utc_now', lambda: now)
     calls = []
-    async def failed(env, revision):
+    async def failed(shop, env, revision):
         calls.append(env)
         assert await jobs.claim(None, 'shop', 'offline', True) is None
         raise ValueError('malformed partial tree')
@@ -93,7 +94,7 @@ async def test_defaults_keep_generation_reconnect_and_disconnect_revoke_authorit
 
 
 async def test_incomplete_crawl_never_publishes_and_expired_lease_cannot_publish(monkeypatch):
-    async def broken(env, revision, level, parent):
+    async def broken(shop, env, revision, level, parent):
         if level == 'area':
             raise ValueError('Malformed area response')
         return tree()[(level, parent or 0)]
@@ -112,45 +113,45 @@ async def test_incomplete_crawl_never_publishes_and_expired_lease_cannot_publish
         await store.snapshot(None, 'shop', 'offline', str(uuid4()))
 
 
-async def test_seller_review_uses_fresh_coverage_instead_of_buyer_snapshot(monkeypatch):
+async def test_seller_review_uses_fresh_coverage_instead_of_buyer_cache(monkeypatch):
     from app.services import pathao_catalog
-    saved = await publish()
     selected = LocationSelection(city_id=1, zone_id=10, area_id=100)
-    # Warm the live cache with old advertised coverage too.
-    await pathao_catalog.choices('shop', 'offline', connections.Revision(1), 'area', 10)
-    async def changed(env, revision, level, parent):
+    calls = []
+    async def choose(shop, env, revision, level, parent=None, *, fresh=False):
+        calls.append(fresh)
         items = tree()[(level, parent or 0)]
-        return [item.model_copy(update={'home_delivery_available': False}) for item in items] if level == 'area' else items
-    monkeypatch.setattr(pathao_catalog, 'fetch', changed)
-    buyer = await resolve_choices('shop', 'offline', connections.Revision(1), selected, saved=saved)
+        return [item.model_copy(update={'home_delivery_available': False}) for item in items] if fresh and level == 'area' else items
+    monkeypatch.setattr(pathao_catalog, 'choices', choose)
+    buyer = await resolve_choices('shop', 'offline', connections.Revision(1), selected, fresh=False)
     seller = await resolve_choices('shop', 'offline', connections.Revision(1), selected)
+    assert calls == [False, False, False, True, True, True]
     assert buyer.condition == 'resolved'
     assert seller.condition == 'unsupported'
 
 
 @pytest.mark.parametrize('changed', [False, True])
-async def test_expired_submission_rechecks_connection_before_rejecting(monkeypatch, changed):
+async def test_legacy_catalog_version_never_requires_a_snapshot_and_connection_change_wins(monkeypatch, changed):
     from app.core.config import settings
     from app.models.buyer import Address
     from app.models.pathao_location import LocationResolution
     from app.services import pathao_locations
+    from app.services.pathao_catalog import InvalidLocation
 
     monkeypatch.setattr(settings, 'PATHAO_LOCATION_ENVIRONMENT', 'offline')
     async def shop(*args):
         return 'shop'
-    async def expired_snapshot(*args):
-        if changed:
-            connections._memory[('shop', 'offline')].append(connections.Revision(2, enabled=False))
-        raise store.expired()
     monkeypatch.setattr(pathao_locations, 'link_shop', shop)
-    monkeypatch.setattr(store, 'snapshot', expired_snapshot)
     address = Address(raw_text='Preserve written address', pathao=LocationResolution(
-        city_id=1, zone_id=10, area_id=100, catalog_version=str(uuid4())))
-    if not changed:
-        with pytest.raises(store.CatalogExpired):
-            await pathao_locations.resolve(None, 'token', address)
-    else:
+        city_id=999, zone_id=998, area_id=997, catalog_version=str(uuid4())))
+    if changed:
+        async def changed_connection(*args, **kwargs):
+            connections._memory[('shop', 'offline')].append(connections.Revision(2, enabled=False))
+            raise InvalidLocation(field='address.pathao.city_id')
+        monkeypatch.setattr(pathao_locations, 'resolve_choices', changed_connection)
         resolved = await pathao_locations.resolve(None, 'token', address)
         assert resolved.raw_text == address.raw_text
         assert resolved.pathao.condition == 'unavailable'
         assert resolved.pathao.city_id is None and resolved.pathao.booking_blocked
+    else:
+        with pytest.raises(InvalidLocation):
+            await pathao_locations.resolve(None, 'token', address)

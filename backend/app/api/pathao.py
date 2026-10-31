@@ -32,11 +32,10 @@ async def read(environment: Environment, shop: str = Depends(shop_scope),
 
 
 @router.put('/{environment}', response_model=ConnectionView)
-async def connect(environment: Environment, data: ConnectInput, background: BackgroundTasks, shop: str = Depends(shop_scope),
+async def connect(environment: Environment, data: ConnectInput, shop: str = Depends(shop_scope),
                   db: AsyncSession | None = Depends(get_db)) -> ConnectionView:
-    result = await connections.connect(db, shop, environment, data)
-    background.add_task(pathao_snapshot_sync.run_one, shop, environment, True, db.bind if db else None)
-    return result
+    # Buyer lists load on demand; connecting must not start a full hierarchy crawl.
+    return await connections.connect(db, shop, environment, data)
 
 
 @router.get('/{environment}/stores', response_model=StoreChoices)

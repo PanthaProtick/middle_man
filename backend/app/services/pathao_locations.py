@@ -1,4 +1,4 @@
-"""Buyer-scoped catalog; no provider I/O while submission locks are held."""
+"""Buyer-scoped on-demand location lookup; no provider I/O while submission locks are held."""
 import datetime
 import hashlib
 from collections.abc import Callable
@@ -11,9 +11,8 @@ from app.models.buyer import Address
 from app.models.entities import OrderTable
 from app.models.pathao import Environment
 from app.models.pathao_location import LocationCatalog, LocationChoice, LocationResolution, LocationSelection
-from app.services import pathao_snapshot_store as snapshots
+from app.services import pathao_catalog
 from app.services.pathao_catalog import InvalidLocation, Level, member, required
-from app.services.pathao_catalog import choices as live_choices
 from app.services.pathao_connections import Revision, latest
 from app.services.public_order_access import require_public_order_access
 from app.services.seller_service import NotFoundError, SellerDomainException
@@ -51,28 +50,26 @@ async def link_shop(db: AsyncSession | None, token: str,
 
 
 async def catalog(db: AsyncSession | None, token: str, city: int | None = None,
-                  zone: int | None = None, version: str | None = None) -> LocationCatalog:
+                  zone: int | None = None) -> LocationCatalog:
     shop = await link_shop(db, token)
     env = settings.PATHAO_LOCATION_ENVIRONMENT
     revision = await latest(db, shop, env)
     result = LocationCatalog(condition='disconnected', environment=env, simulated=env == 'offline')
     if not revision.connected:
         return result
+    validation_error: InvalidLocation | None = None
     try:
-        saved = await snapshots.snapshot(db, shop, env, version)
-        if saved is None:
-            result.condition = 'unavailable'
-        else:
-            result.choices = await snapshots.hierarchy(db, saved, city, zone)
-            result.catalog_version = saved.id
-            result.condition = 'resolved'
-    except SellerDomainException as error:
-        if isinstance(error, (InvalidLocation, snapshots.CatalogExpired)):
-            raise
+        result.choices = await pathao_catalog.hierarchy(shop, env, revision, city, zone)
+        result.condition = 'resolved'
+    except InvalidLocation as error:
+        validation_error = error
+    except SellerDomainException:
         result.condition = 'unavailable'
     await link_shop(db, token)  # Revocation/retention may have changed during I/O.
     if (await latest(db, shop, env)).version != revision.version:
         result.condition, result.choices = 'unavailable', []
+    elif validation_error is not None:
+        raise validation_error
     return result
 
 
@@ -100,19 +97,11 @@ async def resolve(db: AsyncSession | None, token: str, address: Address) -> Addr
     if revision.connected:
         validation_error: SellerDomainException | None = None
         try:
-            saved = await snapshots.snapshot(db, shop, env, selected.catalog_version)
-            if saved is None:
-                resolution = LocationResolution(condition='unavailable', environment=env)
-            else:
-                resolution = await resolve_choices(shop, env, revision, selected, db=db, saved=saved)
-                resolution.catalog_version = saved.id
+            resolution = await resolve_choices(shop, env, revision, selected, fresh=False)
         except InvalidLocation as error:
             validation_error = error
-        except SellerDomainException as error:
-            if isinstance(error, snapshots.CatalogExpired):
-                validation_error = error
-            else:
-                resolution = LocationResolution(condition='unavailable', environment=env)
+        except SellerDomainException:
+            resolution = LocationResolution(condition='unavailable', environment=env)
         await link_shop(db, token)
         if (await latest(db, shop, env)).version != revision.version:
             resolution = LocationResolution(condition='unavailable', environment=env)
@@ -126,15 +115,11 @@ async def resolve(db: AsyncSession | None, token: str, address: Address) -> Addr
 
 
 async def resolve_choices(shop: str, env: Environment, revision: Revision,
-                          selected: LocationSelection, *, db: AsyncSession | None = None,
-                          saved: snapshots.Snapshot | None = None) -> LocationResolution:
+                          selected: LocationSelection, *, fresh: bool = True) -> LocationResolution:
     async def load(city: int | None = None, zone: int | None = None) -> list[LocationChoice]:
-        if saved is not None:
-            return await snapshots.hierarchy(db, saved, city, zone)
-        # The caller has already checked each parent. Seller review must obtain
-        # current coverage rather than grant readiness from a buyer snapshot.
+        # Seller review obtains current coverage; buyer submission may reuse a still-valid list.
         level: Level = 'area' if zone is not None else 'zone' if city is not None else 'city'
-        return await live_choices(shop, env, revision, level, zone or city, fresh=True)
+        return await pathao_catalog.choices(shop, env, revision, level, zone or city, fresh=fresh)
 
     resolution = LocationResolution(condition='missing_choices', environment=env, unsupported=selected.unsupported)
     if selected.unsupported and not (selected.city_id or selected.zone_id or selected.area_id):

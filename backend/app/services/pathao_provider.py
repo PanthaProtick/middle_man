@@ -3,8 +3,11 @@
 No automatic retries or token retention; production creation requires explicit opt-in.
 """
 import asyncio
+import datetime
 import hashlib
 import json
+import math
+from email.utils import parsedate_to_datetime
 from typing import Literal
 
 import httpx
@@ -51,7 +54,36 @@ def unavailable() -> SellerDomainException:
                                  'Pathao stores are unavailable. Your saved settings are unchanged; retry later.')
 
 
+class ProviderRateLimited(SellerDomainException):
+    """Provider asked us to wait; keep its guidance when it is valid."""
+
+    def __init__(self, retry_after: float | None) -> None:
+        super().__init__(429, 'PATHAO_RATE_LIMITED', 'Pathao is rate limiting requests. Retry later.')
+        self.retry_after = retry_after
+
+
+def retry_after_seconds(value: str | None) -> float | None:
+    if not value:
+        return None
+    value = value.strip()
+    try:
+        seconds = float(value)
+    except ValueError:
+        try:
+            when = parsedate_to_datetime(value)
+        except (TypeError, ValueError, OverflowError):
+            return None
+        if when.tzinfo is None:
+            when = when.replace(tzinfo=datetime.timezone.utc)
+        seconds = (when - datetime.datetime.now(datetime.timezone.utc)).total_seconds()
+    if not math.isfinite(seconds) or seconds <= 0:
+        return None
+    return seconds
+
+
 def check_response(response: httpx.Response) -> None:
+    if response.status_code == 429:
+        raise ProviderRateLimited(retry_after_seconds(response.headers.get('Retry-After')))
     if response.status_code in (400, 401, 403, 422):
         raise SellerDomainException(422, 'PATHAO_CREDENTIALS_REJECTED',
                                      'Pathao rejected access. Check credentials and merchant permissions.')

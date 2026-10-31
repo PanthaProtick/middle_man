@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 _capacity = asyncio.Semaphore(2)
 
 
-async def crawl(env: Environment, revision: connections.Revision) -> store.Tree:
+async def crawl(shop: str, env: Environment, revision: connections.Revision) -> store.Tree:
     tree: store.Tree = {}
     total = 0
     async def load(level: catalog.Level, parent: int = 0) -> list[LocationChoice]:
@@ -31,7 +31,7 @@ async def crawl(env: Environment, revision: connections.Revision) -> store.Tree:
             raise ValueError('Catalogue exceeds synchronization bounds')
         tree[(level, parent)] = items
         return items
-    async with catalog.reader(env, revision) as read:
+    async with catalog.reader(shop, env, revision) as read:
         for city in await load('city'):
             for zone in await load('zone', city.id):
                 if ('area', zone.id) in tree:
@@ -49,7 +49,7 @@ async def refresh(db: AsyncSession | None, shop: str, env: Environment, manual: 
     try:
         revision = await connections.latest(db, shop, env)
         async with asyncio.timeout(29 * 60), _capacity:
-            tree = await crawl(env, revision)
+            tree = await crawl(shop, env, revision)
     except (SellerDomainException, httpx.HTTPError, ValueError, TimeoutError):
         logger.warning('Pathao catalogue refresh failed; retaining the last complete catalogue.')
     await jobs.finish(db, shop, env, lease, gen, tree)

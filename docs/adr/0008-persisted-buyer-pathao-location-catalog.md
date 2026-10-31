@@ -1,8 +1,14 @@
 ---
-status: accepted
+status: superseded
+superseded-by: 0009-on-demand-buyer-pathao-locations.md
 ---
 
 # Persisted Pathao location catalogue for buyers
+
+Superseded for buyer location authority by
+[ADR-0009](0009-on-demand-buyer-pathao-locations.md) on 2026-10-31. Its independent
+decisions about buyer interaction, seller review and booking safety remain in force;
+snapshot tables and historical records are retained.
 
 The buyer location controls currently clear their option lists and disable every
 select while sequential catalogue requests finish. On 2026-10-31, the owner agreed

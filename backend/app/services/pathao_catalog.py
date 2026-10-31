@@ -1,29 +1,52 @@
-"""Bounded, tenant/revision-scoped catalog cache; stores no credentials or buyer data."""
+"""On-demand, tenant/revision-scoped location lists with bounded process-local coordination."""
 import asyncio
 from collections import OrderedDict
 from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
 from functools import partial
 from time import monotonic
-from typing import Literal
+from typing import Literal, TypeVar
 
 import httpx
 from pydantic import ValidationError
 
 from app.models.pathao import Environment
 from app.models.pathao_location import LocationChoice
+from app.services import pathao_location_access as access
 from app.services import pathao_provider as provider
 from app.services.pathao_connections import Revision
-from app.services.pathao_secrets import unseal
 from app.services.seller_service import SellerDomainException
 
 Level = Literal['city', 'zone', 'area']
-_cache: OrderedDict[tuple[str, Environment, int, Level, int | None], tuple[float, list[LocationChoice]]] = OrderedDict()
+CacheKey = tuple[str, Environment, int, Level, int | None]
+CooldownKey = tuple[str, Environment, int]
+_Key = TypeVar('_Key')
+_Value = TypeVar('_Value')
+
+_LIST_TTL = 300.0
+_CACHE_CAPACITY = 128
+_COOLDOWN_CAPACITY = 128
+_MAX_COOLDOWN_SECONDS = 3600.0
+_FALLBACK_BASE_SECONDS = 5.0
+_FALLBACK_MAX_SECONDS = 300.0
+
+_cache: OrderedDict[CacheKey, tuple[float, list[LocationChoice]]] = OrderedDict()
+_inflight: dict[tuple[CacheKey, bool], asyncio.Task[list[LocationChoice]]] = {}
+_cooldowns: OrderedDict[CooldownKey, tuple[float, int]] = OrderedDict()
 _capacity = asyncio.Semaphore(4)
 
 
 def clear_cache() -> None:
+    """Clear all process-local provider coordination between isolated tests or workers."""
     _cache.clear()
+    _inflight.clear()
+    _cooldowns.clear()
+    access.clear_access()
+
+
+def _bounded(store: OrderedDict[_Key, _Value], capacity: int) -> None:
+    while len(store) > capacity:
+        store.popitem(last=False)
 
 
 class InvalidLocation(SellerDomainException):
@@ -55,37 +78,40 @@ def simulated(level: Level, parent: int | None) -> list[LocationChoice]:
             LocationChoice(id=101, name='Simulated unsupported area', home_delivery_available=False)] if parent == 10 else []
 
 
-async def fetch(env: Environment, revision: Revision, level: Level, parent: int | None) -> list[LocationChoice]:
-    if env == 'offline':
-        return simulated(level, parent)
-    async with reader(env, revision) as load:
-        return await load(level, parent)
+def _cooldown_key(shop: str, env: Environment, revision: Revision) -> CooldownKey:
+    return (shop, env, revision.version)
 
 
-@asynccontextmanager
-async def reader(env: Environment, revision: Revision) -> AsyncIterator[
-    Callable[[Level, int | None], Awaitable[list[LocationChoice]]]
-]:
-    """Reuse authentication and connections within one crawl, never across shops/jobs."""
-    if env == 'offline':
-        yield partial(fetch, env, revision)
-        return
-    credentials = unseal(revision.encrypted_credentials)
-    if credentials is None:
+def _cooldown_remaining(key: CooldownKey) -> float:
+    entry = _cooldowns.get(key)
+    if entry is None:
+        return 0.0
+    remaining = entry[0] - monotonic()
+    if remaining <= 0:
+        _cooldowns.pop(key, None)
+        return 0.0
+    return remaining
+
+
+def _raise_if_cooling(key: CooldownKey) -> None:
+    if _cooldown_remaining(key) > 0:
         raise provider.unavailable()
-    async with httpx.AsyncClient(base_url=provider.BASE_URLS[env], timeout=httpx.Timeout(5, connect=3),
-                                 follow_redirects=False, trust_env=False, transport=provider.transport(),
-                                 headers={'Accept': 'application/json'}) as client:
-        token = provider.Token.model_validate(await provider.request_json(
-            client, 'POST', '/aladdin/api/v1/issue-token', payload={
-                **{name: value.get_secret_value() for name, value in credentials}, 'grant_type': 'password'}))
-        yield partial(_read, client, token.access_token)
 
 
-async def _read(client: httpx.AsyncClient, token: str, level: Level, parent: int | None) -> list[LocationChoice]:
-    path = '/aladdin/api/v1/' + (
-        'city-list' if level == 'city' else f'cities/{parent}/zone-list' if level == 'zone' else f'zones/{parent}/area-list')
-    result = await provider.request_json(client, 'GET', path, headers={'Authorization': f'Bearer {token}'})
+def _record_rate_limit(key: CooldownKey, retry_after: float | None) -> None:
+    failures = _cooldowns.get(key, (0.0, 0))[1] + 1
+    delay = (min(retry_after, _MAX_COOLDOWN_SECONDS) if retry_after is not None
+             else min(_FALLBACK_MAX_SECONDS, _FALLBACK_BASE_SECONDS * 2 ** min(failures - 1, 6)))
+    _cooldowns[key] = (monotonic() + delay, failures)
+    _cooldowns.move_to_end(key)
+    _bounded(_cooldowns, _COOLDOWN_CAPACITY)
+
+
+def _record_success(key: CooldownKey) -> None:
+    _cooldowns.pop(key, None)
+
+
+def _parse(result: object, level: Level) -> list[LocationChoice]:
     # Owning SDK accepts nested data.data or direct data lists. Never infer absent lists.
     if isinstance(result, dict):
         result = result.get('data')
@@ -108,23 +134,81 @@ async def _read(client: httpx.AsyncClient, token: str, level: Level, parent: int
     return choices
 
 
-async def choices(shop: str, env: Environment, revision: Revision, level: Level,
-                  parent: int | None = None, *, fresh: bool = False) -> list[LocationChoice]:
-    key = (shop, env, revision.version, level, parent)
-    hit = _cache.get(key)
-    if not fresh and hit and hit[0] > monotonic():
-        _cache.move_to_end(key)
-        return hit[1]
+async def _fetch_list(shop: str, env: Environment, revision: Revision,
+                      level: Level, parent: int | None) -> list[LocationChoice]:
+    location_key = _cooldown_key(shop, env, revision)
+    _raise_if_cooling(location_key)
     try:
-        async with asyncio.timeout(8), _capacity:
-            result = await fetch(env, revision, level, parent)
+        result, _ = await access.read(shop, env, revision, level, parent, monotonic())
+        choices = _parse(result, level)
+    except access.AuthRateLimited:
+        raise provider.unavailable() from None
+    except provider.ProviderRateLimited as error:
+        _record_rate_limit(location_key, error.retry_after)
+        raise provider.unavailable() from None
     except (httpx.HTTPError, ValueError, ValidationError, TimeoutError):
         raise provider.unavailable() from None
-    _cache[key] = (monotonic() + 300, result)
+    _record_success(location_key)
+    return choices
+
+
+async def fetch(shop: str, env: Environment, revision: Revision, level: Level,
+                parent: int | None) -> list[LocationChoice]:
+    if env == 'offline':
+        return simulated(level, parent)
+    return await _fetch_list(shop, env, revision, level, parent)
+
+
+@asynccontextmanager
+async def reader(shop: str, env: Environment, revision: Revision) -> AsyncIterator[
+    Callable[[Level, int | None], Awaitable[list[LocationChoice]]]
+]:
+    """Reuse authentication for a seller crawl; each list still has its own failure boundary."""
+    if env == 'offline':
+        yield partial(fetch, shop, env, revision)
+        return
+    yield partial(_fetch_list, shop, env, revision)
+
+
+def _release(flight_key: tuple[CacheKey, bool], task: asyncio.Task[list[LocationChoice]]) -> None:
+    if _inflight.get(flight_key) is task:
+        _inflight.pop(flight_key, None)
+    if not task.cancelled():
+        task.exception()  # Mark a shared failure as observed even if every waiter was cancelled.
+
+
+async def _load(shop: str, env: Environment, revision: Revision, key: CacheKey,
+                level: Level, parent: int | None) -> list[LocationChoice]:
+    try:
+        async with asyncio.timeout(8), _capacity:
+            result = await _fetch_list(shop, env, revision, level, parent)
+    except (httpx.HTTPError, ValueError, ValidationError, TimeoutError):
+        raise provider.unavailable() from None
+    _cache[key] = (monotonic() + _LIST_TTL, result)
     _cache.move_to_end(key)
-    while len(_cache) > 128:
-        _cache.popitem(last=False)
+    _bounded(_cache, _CACHE_CAPACITY)
     return result
+
+
+async def choices(shop: str, env: Environment, revision: Revision, level: Level,
+                  parent: int | None = None, *, fresh: bool = False) -> list[LocationChoice]:
+    if env == 'offline':
+        return simulated(level, parent)
+    key: CacheKey = (shop, env, revision.version, level, parent)
+    if not fresh:
+        hit = _cache.get(key)
+        if hit and hit[0] > monotonic():
+            _cache.move_to_end(key)
+            return hit[1]
+        _cache.pop(key, None)
+    flight_key = (key, fresh)
+    task = _inflight.get(flight_key)
+    if task is None:
+        task = asyncio.create_task(_load(shop, env, revision, key, level, parent))
+        _inflight[flight_key] = task
+        task.add_done_callback(partial(_release, flight_key))
+    # A cancelled buyer request must not cancel work shared with other buyers.
+    return await asyncio.shield(task)
 
 
 def member(options: list[LocationChoice], selected: int, level: Level) -> LocationChoice:

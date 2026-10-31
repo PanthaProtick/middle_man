@@ -35,7 +35,8 @@ async def pathao_locations(
     await link_shop(db, portal_token, clock)
     if zone_id is not None and city_id is None:
         raise invalid('city')
-    result = await catalog(db, portal_token, city_id, zone_id, catalog_version)
+    # Legacy forms may still send catalog_version; on-demand lists no longer trust it.
+    result = await catalog(db, portal_token, city_id, zone_id)
     await link_shop(db, portal_token, clock)
     return result
 

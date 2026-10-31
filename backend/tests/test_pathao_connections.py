@@ -74,7 +74,7 @@ async def test_sandbox_secret_configuration_redaction_and_provider_contract(clie
     monkeypatch.setattr('app.services.pathao_provider.transport', lambda: httpx.MockTransport(provider))
     saved = await client.put(path, json={'expected_version': 0, 'credentials': CREDENTIALS})
     assert saved.status_code == 200, saved.text
-    assert len(requests) == 4  # Connection verification plus initial catalogue synchronization.
+    assert len(requests) == 2  # Connection verification only; location lists load on demand.
     assert all(r.url.host == 'courier-api-sandbox.pathao.com' for r in requests)
     assert saved.json()['merchant_hint'] == '••••'
     choices = await client.get(path + '/stores', params={'expected_version': 1})
@@ -140,7 +140,7 @@ async def test_provider_failures_do_not_replace_saved_settings(client, monkeypat
     monkeypatch.setattr('app.services.pathao_provider.transport', lambda: httpx.MockTransport(provider))
     result = await client.put(path, json={'expected_version': 0, 'credentials': CREDENTIALS})
     assert result.status_code == (200 if failure == 'empty' else 422 if failure == 'invalid' else 503)
-    assert len(calls) == (4 if failure == 'empty' else 2 if failure == 'malformed' else 1)
+    assert len(calls) == (2 if failure in ('empty', 'malformed') else 1)
     assert (await client.get(path)).json()['version'] == (1 if failure == 'empty' else 0)
     for secret in CREDENTIALS.values():
         assert secret not in result.text + caplog.text
