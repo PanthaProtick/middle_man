@@ -1,6 +1,9 @@
 """Bounded, tenant/revision-scoped catalog cache; stores no credentials or buyer data."""
 import asyncio
 from collections import OrderedDict
+from collections.abc import AsyncIterator, Awaitable, Callable
+from contextlib import asynccontextmanager
+from functools import partial
 from time import monotonic
 from typing import Literal
 
@@ -55,17 +58,34 @@ def simulated(level: Level, parent: int | None) -> list[LocationChoice]:
 async def fetch(env: Environment, revision: Revision, level: Level, parent: int | None) -> list[LocationChoice]:
     if env == 'offline':
         return simulated(level, parent)
+    async with reader(env, revision) as load:
+        return await load(level, parent)
+
+
+@asynccontextmanager
+async def reader(env: Environment, revision: Revision) -> AsyncIterator[
+    Callable[[Level, int | None], Awaitable[list[LocationChoice]]]
+]:
+    """Reuse authentication and connections within one crawl, never across shops/jobs."""
+    if env == 'offline':
+        yield partial(fetch, env, revision)
+        return
     credentials = unseal(revision.encrypted_credentials)
     if credentials is None:
         raise provider.unavailable()
-    path = '/aladdin/api/v1/' + (
-        'city-list' if level == 'city' else f'cities/{parent}/zone-list' if level == 'zone' else f'zones/{parent}/area-list')
     async with httpx.AsyncClient(base_url=provider.BASE_URLS[env], timeout=httpx.Timeout(5, connect=3),
-                                 follow_redirects=False, trust_env=False, transport=provider.transport()) as client:
+                                 follow_redirects=False, trust_env=False, transport=provider.transport(),
+                                 headers={'Accept': 'application/json'}) as client:
         token = provider.Token.model_validate(await provider.request_json(
             client, 'POST', '/aladdin/api/v1/issue-token', payload={
                 **{name: value.get_secret_value() for name, value in credentials}, 'grant_type': 'password'}))
-        result = await provider.request_json(client, 'GET', path, headers={'Authorization': f'Bearer {token.access_token}'})
+        yield partial(_read, client, token.access_token)
+
+
+async def _read(client: httpx.AsyncClient, token: str, level: Level, parent: int | None) -> list[LocationChoice]:
+    path = '/aladdin/api/v1/' + (
+        'city-list' if level == 'city' else f'cities/{parent}/zone-list' if level == 'zone' else f'zones/{parent}/area-list')
+    result = await provider.request_json(client, 'GET', path, headers={'Authorization': f'Bearer {token}'})
     # Owning SDK accepts nested data.data or direct data lists. Never infer absent lists.
     if isinstance(result, dict):
         result = result.get('data')

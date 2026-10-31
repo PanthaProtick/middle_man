@@ -7,6 +7,7 @@ export const courierBengali = {
   "Locations are not ready. Buyers can submit a written address.": "এলাকার তালিকা প্রস্তুত নয়। ক্রেতারা লেখা ঠিকানা জমা দিতে পারবেন।",
   "Updating delivery locations…": "ডেলিভারির এলাকার তালিকা হালনাগাদ হচ্ছে…",
   "Location refresh failed. Previously saved locations remain available.": "এলাকার তালিকা হালনাগাদ হয়নি। আগের সংরক্ষিত তালিকা ব্যবহার করা যাবে।",
+  "Location refresh failed. No saved locations are available yet.": "এলাকার তালিকা হালনাগাদ হয়নি। এখনো কোনো সংরক্ষিত তালিকা নেই।",
   "Refresh locations": "এলাকার তালিকা হালনাগাদ করুন",
   "Check location status": "এলাকার তালিকার অবস্থা দেখুন",
   "Disconnect Pathao": "Pathao সংযোগ বিচ্ছিন্ন করুন",

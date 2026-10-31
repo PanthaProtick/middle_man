@@ -74,3 +74,61 @@ browser launcher and PostgreSQL use only synthetic data and disposable storage.
   pytest temporary directory. `git diff --check` also passed.
 - Browser, PostgreSQL integration, live Pathao and hosted checks were not repeated
   during this review; prior implementation evidence above is historical.
+
+## 2026-10-31 — catalogue refresh authentication rate limit
+
+- Local buyer endpoint returned production `unavailable`, with no saved catalogue.
+  Read-only database status confirmed the first manual refresh failed.
+- Live read probes loaded cities/zones/areas successfully, then failed at token
+  issuance. A subsequent token request confirmed HTTP 429. The crawl previously
+  authenticated for every hierarchy list; a complete crawl amplifies auth traffic.
+- `pathao_catalog.reader` now owns one HTTP client and token per crawl, scoped to
+  one connection revision. Single-list callers retain their existing interface;
+  offline fixtures remain supported. Failures still prevent partial publication.
+- Changed `pathao_snapshot_sync.py`, `pathao_catalog.py`, added
+  `backend/tests/test_pathao_catalog_session.py`; corrected the seller catalogue
+  failure message and Bengali copy in `PathaoCatalogStatus.tsx`, its test, and
+  `courierCopy.ts` so first-sync failures do not claim saved locations exist.
+- Regression tests were observed failing before each fix. Focused backend:
+  `npm run test:backend -- tests/test_pathao_catalog_session.py tests/test_pathao_snapshots.py tests/test_pathao_locations.py`
+  passed 19 tests. Focused frontend catalogue status passed 2 tests.
+- Final `npm run check` PASS: `.cache/checks/check-hk0cVE/result.json` (repository-local
+  pytest basetemp); tooling, conventions, lint, types, tests, build and HTTP smoke.
+  `git diff --check` passed.
+- Live end-to-end refresh remains unverified: the last live authentication probe
+  was rate-limited. Next action: retry seller Refresh locations once Pathao's
+  cooldown clears, then verify buyer city choices. No booking requests were made.
+
+## 2026-10-31 — on-demand source reconsideration
+
+- Owner reports that fetching the complete city/zone/area hierarchy triggers
+  Pathao's too-many-requests response and wants to return to on-demand fetching.
+- Confirmed direction: backend-mediated Pathao choices with the current dropdown
+  presentation and preservation of buyer-entered details. This supersedes the
+  desired source direction, but implementation and ADR replacement await the
+  remaining design decisions and final shared-understanding confirmation.
+- Historical flow used a five-minute process-local cache; literal restoration
+  would still authenticate per cache miss. Decide request/token reuse, outage
+  fallback, and retirement of full-catalogue synchronization before implementation.
+- Browsing and submission resolution must change together; retain connection
+  isolation, required-choice checks, stale-response protection and seller review.
+- Existing checkout changes are preserved. No application code changed and no
+  new live Pathao probes or tests were run during this design discussion.
+- Owner accepted valid-token reuse, short-lived list caching, concurrent-request
+  coalescing and rate-limit cooldowns; written-address fallback with mandatory
+  seller resolution; and retirement of full-crawl jobs and seller refresh/status
+  controls while leaving database tables intact.
+- Complete proposal: [ADR-0009](../docs/adr/0009-on-demand-buyer-pathao-locations.md).
+  Next action: obtain final shared-understanding confirmation required by the
+  invoked grilling workflow, then implement and verify the bounded source change.
+- The owner subsequently invoked `to-spec` rather than implementation. Published
+  the agreed scope as [the replacement specification](../.scratch/pathao-on-demand-locations/spec.md)
+  with `Status: ready-for-agent`, existing API/UI test seams and explicit safety,
+  compatibility and crawler-retirement acceptance cases. No application changes.
+  Next action: implement from the replacement specification when requested.
+- Pre-commit verification for all pending files: root `npm run check` PASS,
+  evidence `.cache/checks/check-77njcu/result.json`, with repository-local pytest
+  basetemp. Initial run `.cache/checks/check-IWxpCr/result.json` stopped at a
+  Windows system-temp permission error (618 passed, 177 skipped, one setup error).
+  The successful rerun passed all configured gates; no live-provider, browser or
+  PostgreSQL integration acceptance was added by this commit verification.

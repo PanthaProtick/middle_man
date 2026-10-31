@@ -25,17 +25,18 @@ async def crawl(env: Environment, revision: connections.Revision) -> store.Tree:
     total = 0
     async def load(level: catalog.Level, parent: int = 0) -> list[LocationChoice]:
         nonlocal total
-        items = await catalog.fetch(env, revision, level, parent or None)
+        items = await read(level, parent or None)
         total += len(items)
         if total > 200000 or len(tree) >= 20000:
             raise ValueError('Catalogue exceeds synchronization bounds')
         tree[(level, parent)] = items
         return items
-    for city in await load('city'):
-        for zone in await load('zone', city.id):
-            if ('area', zone.id) in tree:
-                raise ValueError('Zone occurs beneath multiple cities')
-            await load('area', zone.id)
+    async with catalog.reader(env, revision) as read:
+        for city in await load('city'):
+            for zone in await load('zone', city.id):
+                if ('area', zone.id) in tree:
+                    raise ValueError('Zone occurs beneath multiple cities')
+                await load('area', zone.id)
     return tree
 
 

@@ -38,3 +38,19 @@ it('shows saved age and refresh failures, then follows an explicit refresh to co
     await act(async () => root.unmount()); container.remove(); vi.useRealTimers(); vi.resetAllMocks();
   }
 });
+
+it('does not claim saved locations exist when the first refresh fails', async () => {
+  vi.useFakeTimers();
+  vi.mocked(requestJson).mockResolvedValue({catalog_version: null, refreshed_at: null,
+    attempted_at: '2026-10-31T12:00:00Z', refreshing: false, failed: true});
+  const container = document.createElement('div');
+  const root = createRoot(container);
+  try {
+    await act(async () => root.render(<PathaoCatalogStatus token="synthetic" environment="production" />));
+    await act(async () => vi.advanceTimersByTimeAsync(0));
+    expect(container.querySelector('[role="alert"]')?.textContent)
+      .toBe('Location refresh failed. No saved locations are available yet.');
+  } finally {
+    await act(async () => root.unmount()); vi.useRealTimers(); vi.resetAllMocks();
+  }
+});

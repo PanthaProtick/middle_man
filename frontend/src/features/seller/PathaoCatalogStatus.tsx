@@ -51,7 +51,9 @@ export function PathaoCatalogStatus({token, environment}: {token: string; enviro
       ? `${t('Locations last updated')}: ${formatBangladeshDateTime(status.refreshed_at, locale)}`
       : t('Locations are not ready. Buyers can submit a written address.')}</p>
     {status?.refreshing && <p role="status">{t('Updating delivery locations…')}</p>}
-    {(failed || status?.failed) && <p role="alert">{t('Location refresh failed. Previously saved locations remain available.')}</p>}
+    {(failed || status?.failed) && <p role="alert">{status?.catalog_version
+      ? t('Location refresh failed. Previously saved locations remain available.')
+      : t('Location refresh failed. No saved locations are available yet.')}</p>}
     <button type="button" className="btn btn-secondary btn-sm" disabled={starting || status?.refreshing}
       onClick={() => void refresh()}>{t('Refresh locations')}</button>
     <button type="button" className="btn btn-secondary btn-sm" onClick={() => setRequest(value => value + 1)}>{t('Check location status')}</button>
