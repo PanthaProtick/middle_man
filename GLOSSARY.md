@@ -51,6 +51,12 @@ Agreement between a buyer's payment claim and a received-payment record belongin
 **Review assistant**:
 An advisory aid that explains an unresolved order review and suggests a corrective action using the order and directly related records belonging to the same shop. Its advice is not payment verification or a seller decision.
 
+**Seller agent**:
+A conversational aid for preparing seller-confirmed orders and seller transaction records, and finding outstanding order work. It does not independently verify payments or make seller decisions.
+
+**Awaiting delivery preparation**:
+Confirmed orders still needing courier preparation, excluding orders already booked or with a submitting or unknown-outcome booking. Failed courier submissions are a separate attention category.
+
 **Courier draft**:
 _Bengali_: কুরিয়ার অনুরোধের খসড়া
 
