@@ -159,26 +159,26 @@ facts, and blockers always remain backend-owned. Output must be a bounded typed
 object with `explanation` and a subset of permitted `action_ids`; invalid objects,
 links, or excess output fall back to deterministic guidance.
 
-Atomic reservations permit five attempts per Asia/Dhaka day application-wide,
-one attempt per 60 seconds, five per unchanged context across days, and a shop
-daily limit configured with `REVIEW_GEMINI_SHOP_DAILY_LIMIT` (1–5, default 5).
-Failures count. Busy, disabled, unconfigured, limited, and local revalidation
-requests do not dispatch or consume attempts. One review has one in-flight call.
-The provider has a 12-second transport timeout and a 15-second overall deadline;
+There are no application request caps, throttles, or artificial limits in this
+development scope. The former shared daily/minute, per-shop, and per-context
+ceilings are removed. Only an identical concurrent generation for the same
+review, context, and locale returns `busy` without dispatching; that is
+duplicate-request suppression, not a quota, and sequential explicit requests
+always dispatch. A failed attempt does not block or consume anything for a later
+explicit request. Authorization and lifecycle checks remain unchanged. The
+provider has a 12-second transport timeout and a 15-second overall deadline;
 wire responses are bounded at 16 KiB, generated JSON at 8 KiB, and explanations at
 2000 characters. No automatic retries, redirects, alternate model, or provider fallback.
 
-`fallback_status` distinguishes `disabled`, `unconfigured`, `busy`, `limited`,
+`fallback_status` distinguishes `disabled`, `unconfigured`, `busy`,
 `timeout`, `rejected`, `malformed`, and `unavailable`; the panel supplies Bengali
 and English status text alongside useful local guidance. Only current-view output
 with matching authorization, context, and locale is reused. Locale changes never
 generate automatically. Generation completion rechecks shop ownership and the
 entire context; stale results are discarded without regeneration.
 
-Counters are content-free hashes in one process and reset on restart. Daily shop
-metadata has at most five entries; unchanged-context counters retain at most 1024
-entries per process lifetime, rejecting new contexts at capacity rather than
-evicting exhausted counters. These are application controls, not Google's remaining
-quota. Free-provider availability and production readiness are not guaranteed.
-No durable counters, prompts, outputs, conversation history, or provider-body logs
-are added. Automated tests block external networking and intercept the provider.
+The duplicate guard stores only opaque hashes in one process and resets on
+restart. No durable counters, prompts, outputs, conversation history, or
+provider-body logs are added. These are application controls, not Google's
+remaining quota. Free-provider availability and production readiness are not
+guaranteed. Automated tests block external networking and intercept the provider.

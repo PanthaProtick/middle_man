@@ -29,7 +29,6 @@ os.environ["CORS_ORIGINS"] = '["http://localhost:5173"]'
 os.environ["GEMINI_MODEL"] = "gemini-2.5-flash"
 os.environ["REVIEW_GEMINI_ENABLED"] = "false"
 os.environ["PATHAO_PRODUCTION_BOOKING_ENABLED"] = "false"
-os.environ["REVIEW_GEMINI_SHOP_DAILY_LIMIT"] = "5"
 
 from app.api.routes import _in_memory_items  # noqa: E402
 from app.core.auth import SellerIdentity, get_seller_identity  # noqa: E402

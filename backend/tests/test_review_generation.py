@@ -6,13 +6,15 @@ from httpx import AsyncClient
 from test_public_order_routes import _create_test_order
 from test_review_assistance_api import _submit_buyer_claim, clean_stores, seller_identity  # noqa: F401
 
+from app.core.auth import SellerIdentity, get_seller_identity
 from app.core.config import settings
-from app.services import review_generation, review_generation_limits
+from app.main import app
+from app.services import review_generation
 
 
 @pytest.fixture(autouse=True)
-def reset_limits(monkeypatch):
-    monkeypatch.setattr(review_generation, "limits", review_generation_limits.AttemptLimits())
+def reset_inflight(monkeypatch):
+    monkeypatch.setattr(review_generation, "inflight", review_generation.InFlightGuard())
 
 
 @pytest.fixture
@@ -65,7 +67,6 @@ async def test_policy_without_provider(client, pending, monkeypatch, enabled, ke
     response = await client.post(pending, json={"generate": True})
     assert response.json()["fallback_status"] == status
     assert response.json()["source"] == "local"
-    assert review_generation.limits.total == 0
 
 
 @pytest.fixture
@@ -92,7 +93,6 @@ async def test_malformed_output_keeps_controls(client, pending, live, monkeypatc
     assert response["source"] == "local"
     assert response["fallback_status"] == "malformed"
     assert len(response["suggested_actions"]) == 2
-    assert review_generation.limits.total == 1
 
 
 @pytest.mark.parametrize("failure,status", [
@@ -110,8 +110,10 @@ async def test_failed_attempt_counts_without_retry(client, pending, live, monkey
     assert response.json()["fallback_status"] == status
     assert "private" not in response.text and "secret" not in response.text
     assert len(calls) == 1
-    assert (await client.post(pending, json={"generate": True})).json()["fallback_status"] == "limited"
-    assert len(calls) == 1
+    # A later explicit request is allowed; only automatic in-request retries are absent.
+    again = await client.post(pending, json={"generate": True})
+    assert again.json()["fallback_status"] == status
+    assert len(calls) == 2
 
 
 async def test_inflight_duplicate_and_stale_output(client, pending, live, monkeypatch):
@@ -136,28 +138,71 @@ async def test_inflight_duplicate_and_stale_output(client, pending, live, monkey
     response = await task
     assert response.status_code == 409
     assert "Obsolete advice" not in response.text
-    assert review_generation.limits.total == 1
 
 
-async def test_daily_and_context_caps_and_dhaka_rollover(client, pending, live, monkeypatch):
-    from datetime import datetime, timedelta, timezone
+async def test_cross_shop_change_discards_generated_output(client, pending, live, monkeypatch):
+    import asyncio
 
-    clock = [datetime(2026, 10, 30, 17, 54, tzinfo=timezone.utc)]
-    monkeypatch.setattr(review_generation_limits, "now", lambda: clock[0])
+    from app.services.order_service import _memory_orders
+
+    started, finish = asyncio.Event(), asyncio.Event()
     async def generate(context):
+        started.set()
+        await finish.wait()
+        return '{"explanation":"Other shop advice","action_ids":[]}'
+    monkeypatch.setattr(review_generation, "generate", generate)
+    task = asyncio.create_task(client.post(pending, json={"generate": True}))
+    await started.wait()
+    order_id = pending.split("/")[-2]
+    _memory_orders[order_id]["shop_id"] = "foreign-shop"
+    finish.set()
+    response = await task
+    assert response.status_code == 404
+    assert "Other shop advice" not in response.text
+
+
+async def test_sequential_generations_have_no_ceiling(client, pending, live, monkeypatch):
+    calls = []
+    async def generate(context):
+        calls.append(context)
         return '{"explanation":"Review the evidence.","action_ids":[]}'
     monkeypatch.setattr(review_generation, "generate", generate)
-    for _ in range(5):
+    for _ in range(7):
         assert (await client.post(pending, json={"generate": True})).json()["source"] == "generated"
-        clock[0] += timedelta(minutes=1)
-    assert (await client.post(pending, json={"generate": True})).json()["fallback_status"] == "limited"
-    clock[0] += timedelta(minutes=1)  # Dhaka midnight resets daily, but not unchanged-context cap.
-    assert (await client.post(pending, json={"generate": True})).json()["fallback_status"] == "limited"
-    from review_assistance_support import create_order
-    original = (await client.post(pending, json={})).json()
-    from app.services.order_service import _memory_orders
-    account = _memory_orders[original["order_id"]]["payment_account_id"]
-    order = await create_order(client, account, key="second-order")
+    # Neither the old shared daily cap nor a per-shop/context cap blocks another shop.
+    app.dependency_overrides[get_seller_identity] = lambda: SellerIdentity("second-shop")
+    order = await _create_test_order(client)
     await _submit_buyer_claim(client, order["portal_token"], trx_id="SECOND")
     other = f"/api/seller/orders/{order['id']}/review-assistance"
     assert (await client.post(other, json={"generate": True})).json()["source"] == "generated"
+    assert len(calls) == 8
+
+
+@pytest.mark.parametrize("explanation", [
+    "The payment has been confirmed.",
+    "Order created and saved successfully.",
+    "The review is resolved.",
+    "The booking was completed.",
+    "পেমেন্ট নিশ্চিত হয়েছে।",
+])
+async def test_unsupported_success_claim_falls_back(client, pending, live, monkeypatch, explanation):
+    async def generate(context):
+        return json.dumps({"explanation": explanation, "action_ids": []}, ensure_ascii=False)
+    monkeypatch.setattr(review_generation, "generate", generate)
+    response = (await client.post(pending, json={"generate": True})).json()
+    assert response["source"] == "local"
+    assert response["fallback_status"] == "malformed"
+    assert response["explanation"].startswith("No matching seller transaction record")
+
+
+@pytest.mark.parametrize("explanation", [
+    "This does not confirm payment; inspect the recorded transactions.",
+    "The payment is not confirmed, so check the records.",
+])
+async def test_negative_success_statement_remains_generated(client, pending, live, monkeypatch, explanation):
+    async def generate(context):
+        return json.dumps({"explanation": explanation, "action_ids": []})
+    monkeypatch.setattr(review_generation, "generate", generate)
+    response = (await client.post(pending, json={"generate": True})).json()
+    assert response["source"] == "generated"
+    assert response["explanation"] == explanation

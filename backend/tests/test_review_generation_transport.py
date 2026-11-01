@@ -4,7 +4,7 @@ import json
 import httpx
 import pytest
 from test_review_assistance_api import clean_stores, seller_identity  # noqa: F401
-from test_review_generation import live, pending, reset_limits  # noqa: F401
+from test_review_generation import live, pending, reset_inflight  # noqa: F401
 
 from app.core.auth import SellerIdentity, get_seller_identity
 from app.main import app
@@ -75,7 +75,6 @@ async def test_ineligible_requests_never_dispatch(client, pending, live, monkeyp
             {"retained_at": datetime.now(timezone.utc)} if case == "retained" else {"lifecycle": "confirmed"},
         )
     assert (await client.post(pending, json=payload)).status_code == expected
-    assert review_generation.limits.total == 0
 
 
 @pytest.mark.parametrize("body", [
@@ -90,7 +89,6 @@ async def test_unusable_wire_response_is_local(client, pending, live, monkeypatc
     result = (await client.post(pending, json={"generate": True})).json()
     assert result["source"] == "local"
     assert result["fallback_status"] in ("malformed", "rejected")
-    assert review_generation.limits.total == 1
 
 
 @pytest.mark.parametrize("part", [
@@ -111,4 +109,3 @@ async def test_invalid_part_metadata_keeps_local_guidance(client, pending, live,
     assert result["source"] == "local"
     assert result["fallback_status"] == "malformed"
     assert len(result["suggested_actions"]) == 2
-    assert review_generation.limits.total == 1

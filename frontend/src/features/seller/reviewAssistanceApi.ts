@@ -67,7 +67,7 @@ export interface ReviewAssistanceResponse {
   buyer_revision: number | null;
   lifecycle: string;
   source: 'local' | 'generated';
-  fallback_status?: 'disabled' | 'unconfigured' | 'busy' | 'limited' | 'timeout' | 'rejected' | 'malformed' | 'unavailable' | null;
+  fallback_status?: 'disabled' | 'unconfigured' | 'busy' | 'timeout' | 'rejected' | 'malformed' | 'unavailable' | null;
   condition: ReviewCondition;
   context_token: string;
   reason_codes: AutomaticReviewReason[];

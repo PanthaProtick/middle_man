@@ -1,14 +1,15 @@
 """Bounded Gemini transport; no retries, tools, history, logging, or content cache."""
 import asyncio
+import hashlib
 import json
 import re
+import threading
 
 import httpx
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from app.core.config import settings
 from app.models.review_assistance import ReviewAction, ReviewAssistanceResponse, ReviewProviderContext
-from app.services.review_generation_limits import limits, opaque_key
 
 
 class GeneratedExplanation(BaseModel):
@@ -19,6 +20,59 @@ class GeneratedExplanation(BaseModel):
 
 class RejectedGeneration(Exception):
     pass
+
+
+def opaque_key(*parts: str) -> str:
+    return hashlib.sha256("\0".join(parts).encode()).hexdigest()
+
+
+class InFlightGuard:
+    """Suppresses duplicate concurrent work; it is not a quota or throttle."""
+
+    def __init__(self) -> None:
+        self._lock = threading.Lock()
+        self._active: set[str] = set()
+
+    def reserve(self, key: str) -> bool:
+        with self._lock:
+            if key in self._active:
+                return False
+            self._active.add(key)
+            return True
+
+    def release(self, key: str) -> None:
+        with self._lock:
+            self._active.discard(key)
+
+
+inflight = InFlightGuard()
+
+# The application has not established these outcomes, so generated wording may
+# not claim them. Negative statements ("payment is not confirmed") do not match.
+_RESULT_SUBJECT = (
+    r"(?:payments?|transactions?|orders?|reviews?|bookings?|claims?|refunds?)"
+)
+_RESULT_VERB = (
+    r"(?:approved|confirmed|verified|completed|resolved|created|saved|placed|booked|accepted)"
+)
+_ENGLISH_SUCCESS_CLAIM = re.compile(
+    rf"\b{_RESULT_SUBJECT}\b"
+    r"(?:\s+(?:is|was|are|were|has|have|had|been|will\s+be|now|already|successfully|fully))*"
+    rf"\s+{_RESULT_VERB}\b",
+    re.IGNORECASE,
+)
+_BENGALI_SUCCESS_CLAIM = re.compile(
+    r"(?:পেমেন্ট|লেনদেন|অর্ডার|রিভিউ|বুকিং|দাবি|রিফান্ড)[^।!?\n]{0,30}?"
+    r"(?:অনুমোদিত|নিশ্চিত|সম্পন্ন|সমাধান\s+হয়েছে|তৈরি\s+হয়েছে|সংরক্ষিত|"
+    r"বুক\s+হয়েছে|যাচাই\s+হয়েছে)"
+    r"(?!\s*(?:করা\s+)?(?:হয়নি|নয়|না|নি|করুন|করো))"
+)
+
+
+def _claims_unsupported_success(text: str) -> bool:
+    return bool(
+        _ENGLISH_SUCCESS_CLAIM.search(text) or _BENGALI_SUCCESS_CLAIM.search(text)
+    )
 
 
 async def generate(context: ReviewProviderContext) -> str:
@@ -70,12 +124,9 @@ async def generate_review(local: ReviewAssistanceResponse, shop_id: str) -> Revi
         return local.model_copy(update={"fallback_status": "disabled"})
     if not settings.is_gemini_configured:
         return local.model_copy(update={"fallback_status": "unconfigured"})
-    review = opaque_key(shop_id, local.order_id)
-    status = limits.reserve(
-        opaque_key(shop_id), review, opaque_key(review, local.context_token), settings.REVIEW_GEMINI_SHOP_DAILY_LIMIT,
-    )
-    if status:
-        return local.model_copy(update={"fallback_status": status})
+    review = opaque_key(shop_id, local.order_id, local.context_token, local.locale)
+    if not inflight.reserve(review):
+        return local.model_copy(update={"fallback_status": "busy"})
     try:
         async with asyncio.timeout(15):
             raw = await generate(local.context)
@@ -87,7 +138,8 @@ async def generate_review(local: ReviewAssistanceResponse, shop_id: str) -> Revi
                           r"\b(?:[\w-]+\.)+[^\W\d_]{2,63}\b|\b(?:\d{1,3}\.){3}\d{1,3}\b|[<>\[\]]",
                           result.explanation, re.IGNORECASE) or
                 len(set(result.action_ids)) != len(result.action_ids) or
-                not set(result.action_ids).issubset(local.context.permitted_actions)):
+                not set(result.action_ids).issubset(local.context.permitted_actions) or
+                _claims_unsupported_success(result.explanation)):
             raise ValueError("Invalid advice")
         # Navigation and blockers always come from the backend, never generated text.
         return local.model_copy(update={"source": "generated", "explanation": result.explanation})
@@ -101,5 +153,5 @@ async def generate_review(local: ReviewAssistanceResponse, shop_id: str) -> Revi
         # Provider exception bodies may contain request content or secrets.
         status = "unavailable"
     finally:
-        limits.release(review)
+        inflight.release(review)
     return local.model_copy(update={"fallback_status": status})

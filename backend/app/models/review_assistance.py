@@ -97,7 +97,7 @@ class ReviewAssistanceResponse(BaseModel):
     lifecycle: Literal["pending"]
     source: Literal["local", "generated"] = "local"
     fallback_status: Optional[Literal[
-        "disabled", "unconfigured", "busy", "limited", "timeout", "rejected", "malformed", "unavailable"
+        "disabled", "unconfigured", "busy", "timeout", "rejected", "malformed", "unavailable"
     ]] = None
     condition: ReviewCondition
     context_token: str

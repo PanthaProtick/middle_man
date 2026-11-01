@@ -56,7 +56,7 @@ it('generates only explicitly, prevents duplicates, reuses current view, and swi
   await act(async () => view.root.unmount());
 });
 
-it.each(['disabled', 'unconfigured', 'busy', 'limited', 'timeout', 'rejected', 'malformed', 'unavailable'])(
+it.each(['disabled', 'unconfigured', 'busy', 'timeout', 'rejected', 'malformed', 'unavailable'])(
   'shows useful local fallback for %s', async fallback_status => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(response({ ...local, fallback_status }));
     const view = await mount();
