@@ -81,3 +81,17 @@ async def test_export_work_query_matches_the_shared_set(client: AsyncClient):
         assert order['id'] in response.text
     assert booked['id'] not in response.text
     assert _memory_orders[preparation['id']]['lifecycle'] == 'confirmed'
+
+
+@pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
+@pytest.mark.parametrize('cursor', ['0:' + '9' * 100 + ':order', '1:-999999999999999999999:order'])
+async def test_out_of_range_cursor_restarts_preview_and_dashboard(client: AsyncClient, cursor: str):
+    base = await _create_test_order(client)
+    pending = await add_pending(client, base, 'invalid-cursor')
+    result = await preview(client, cursor=cursor)
+    assert [item['order']['id'] for item in result['items']] == [pending['id']]
+    response = await client.get('/api/seller/orders', params={
+        'work_query': 'attention', 'cursor': cursor,
+    })
+    assert response.status_code == 200, response.text
+    assert [item['id'] for item in response.json()['items']] == [pending['id']]

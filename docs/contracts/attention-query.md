@@ -38,6 +38,11 @@ last returned item. Because the key carries its own facts, paging remains stable
 when the cursor order later leaves the match set or changes category. A bare order
 ID is also accepted for compatibility when its current facts resolve; an unknown
 or invalid cursor restarts at page one. `next_cursor` is `null` on the last page.
+Out-of-range cursor timestamps are invalid and also restart at page one.
+Pages read live facts rather than a fixed snapshot: an order whose priority or
+outstanding timestamp changes can reappear on a later page. The assistant merges
+pages by order ID, replacing repeated facts while preserving first-seen positions.
+Refresh retrieves the current priority ordering and removes resolved work.
 
 ## Preview endpoint
 

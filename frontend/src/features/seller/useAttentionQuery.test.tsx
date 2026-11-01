@@ -72,6 +72,24 @@ it.each(['new-token', undefined])('invalidates pending results after token chang
   await act(async () => harness.root.unmount());
 });
 
+it('replaces repeated orders with current facts when priority changes between pages', async () => {
+  const order = { id: 'moving-order' } as AttentionQueryPreview['items'][number]['order'];
+  vi.mocked(fetchAttentionPreview)
+    .mockResolvedValueOnce({ ...page, items: [{
+      order, category: 'unknown_outcome', reason_codes: ['UNKNOWN_OUTCOME'],
+    }] })
+    .mockResolvedValueOnce({ ...page, next_cursor: null, items: [{
+      order, category: 'failed_submission', reason_codes: ['FAILED_SUBMISSION'],
+    }] });
+  const harness = await mount();
+  await act(async () => { await harness.current().refresh(); });
+  await act(async () => harness.current().loadMore());
+  expect(harness.current().items).toHaveLength(1);
+  expect(harness.current().items[0].category).toBe('failed_submission');
+  expect(harness.current().nextCursor).toBeNull();
+  await act(async () => harness.root.unmount());
+});
+
 it('clears a completed preview and fetches using the replacement token', async () => {
   vi.mocked(fetchAttentionPreview).mockResolvedValue(page);
   const harness = await mount();

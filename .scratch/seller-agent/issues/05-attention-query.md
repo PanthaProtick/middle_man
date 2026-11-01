@@ -60,3 +60,22 @@ unrun acceptance gates, remaining risks, and the next action in this ticket.
 
 - Optional: run the same contract against a disposable `BUYER_TEST_POSTGRES_URL`
   and perform browser acceptance of the assistant preview and dashboard banner.
+
+### Verification follow-up (2026-11-01)
+
+- Reproduced and fixed out-of-range cursor timestamps raising server exceptions;
+  invalid timestamps now follow the documented page-one fallback. Regression
+  coverage exercises both attention preview and dashboard endpoints.
+- Reproduced and fixed duplicate assistant cards when an order changes priority
+  between live pages. Merge by order ID uses the latest returned facts; refresh
+  restores current ordering and removes resolved work. A fixed dataset snapshot
+  remains outside this query's contract.
+- Focused backend attention suites: 14 passed. Focused frontend hook, preview,
+  assistant, intent, and dashboard-work-query suites: 33 passed.
+- Root `npm run check`: PASS all stages; result
+  `.cache/checks/check-PrFqmZ/result.json`. Set `PYTEST_ADDOPTS` to
+  `--basetemp=E:/middle_man/.cache/pytest-attention-verify` for this run after the
+  first run hit a Windows system-temp permission error (679 passed, 179 skipped,
+  one fixture setup error; `.cache/checks/check-l8FaNw/result.json`).
+- PostgreSQL, browser acceptance, and live providers remain unrun; the existing
+  next action above still applies.

@@ -31,5 +31,8 @@ def decode_cursor(cursor: str) -> CursorKey | None:
         return None
     if not parts[2]:
         return None
-    moment = datetime.datetime.fromtimestamp(micros / 1_000_000, tz=datetime.timezone.utc)
+    try:
+        moment = datetime.datetime.fromtimestamp(micros / 1_000_000, tz=datetime.timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return None
     return CursorKey(int(parts[0]), moment, parts[2])

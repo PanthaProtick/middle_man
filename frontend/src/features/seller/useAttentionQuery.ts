@@ -74,7 +74,12 @@ export function useAttentionQuery(token?: string) {
       if (!Array.isArray(page.items)) throw new Error('Malformed attention preview');
       if (!mounted.current || requestId !== requestRef.current) return;
       setState(current => ({
-        items: cursor ? [...current.items, ...page.items] : page.items,
+        // Live orders can move past the cursor after changing priority. Keep
+        // each identity once and replace its previously retrieved facts.
+        items: [...new Map(
+          (cursor ? [...current.items, ...page.items] : page.items)
+            .map(item => [item.order.id, item]),
+        ).values()],
         total: page.total,
         retrievedAt: page.retrieved_at,
         calendarDate: page.calendar_date,
