@@ -90,3 +90,27 @@ Base commit: `e2ee90f` on `main`. Working tree contained only these changes.
 
 Commit the change to `main`. Manual live-provider verification can be run later by
 the user with `REVIEW_GEMINI_ENABLED=true` and a real key on synthetic data.
+
+## Verification follow-up — 2026-11-01
+
+- Reviewed committed implementation `2a3f7c6` from a clean working tree,
+  including provider transport, context allowlisting, API authorization/freshness,
+  and frontend generation/language handling.
+- Fixed active-voice unsupported success claims: statements such as "I have
+  confirmed the payment" and "We already saved your order" now fall back to local
+  guidance. Added three rejection cases and two negative-statement controls.
+- This remains a phrase-based check, not semantic proof of arbitrary model prose;
+  novel claims or invented instructions can still evade it. Model text cannot
+  authorize actions, and backend-owned controls and blockers remain authoritative.
+- Focused backend verification: 69 passed across generation, transport, privacy,
+  and assistance API tests. Focused frontend generation verification: 10 passed.
+- No live provider calls or manual browser acceptance performed.
+- Final gate: `npm run check` PASS with `PYTEST_DEBUG_TEMPROOT` pointing to
+  `.cache/pytest-ticket06`; result `.cache/checks/check-Lp557C/result.json`.
+  Tooling, conventions, backend lint/types/tests, frontend lint/tests/build, and
+  HTTP smoke all passed. PostgreSQL integration cases remain skipped locally.
+- Initial gate `.cache/checks/check-8O3AmH/result.json` stopped on an unrelated
+  pytest temp-directory permission error (692 passed, 179 skipped, 1 setup error);
+  the repository-local temporary root resolved it without changing test code.
+- Next action: commit this verification follow-up; live-provider and browser
+  acceptance remain manual and unrun.

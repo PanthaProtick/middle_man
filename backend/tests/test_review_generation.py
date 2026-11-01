@@ -183,6 +183,9 @@ async def test_sequential_generations_have_no_ceiling(client, pending, live, mon
     "Order created and saved successfully.",
     "The review is resolved.",
     "The booking was completed.",
+    "I have confirmed the payment.",
+    "We already saved your order.",
+    "The system has successfully approved this refund.",
     "পেমেন্ট নিশ্চিত হয়েছে।",
 ])
 async def test_unsupported_success_claim_falls_back(client, pending, live, monkeypatch, explanation):
@@ -198,6 +201,8 @@ async def test_unsupported_success_claim_falls_back(client, pending, live, monke
 @pytest.mark.parametrize("explanation", [
     "This does not confirm payment; inspect the recorded transactions.",
     "The payment is not confirmed, so check the records.",
+    "I have not confirmed the payment; inspect the records.",
+    "We cannot approve this payment; check the records.",
 ])
 async def test_negative_success_statement_remains_generated(client, pending, live, monkeypatch, explanation):
     async def generate(context):

@@ -61,6 +61,13 @@ _ENGLISH_SUCCESS_CLAIM = re.compile(
     rf"\s+{_RESULT_VERB}\b",
     re.IGNORECASE,
 )
+_ENGLISH_ACTIVE_SUCCESS_CLAIM = re.compile(
+    rf"\b(?:i|we|the\s+(?:system|assistant|application))"
+    r"(?:\s+(?:have|has|had|now|already|successfully|fully))*"
+    rf"\s+{_RESULT_VERB}\s+(?:(?:the|your|this|these|all)\s+)*"
+    rf"{_RESULT_SUBJECT}\b",
+    re.IGNORECASE,
+)
 _BENGALI_SUCCESS_CLAIM = re.compile(
     r"(?:পেমেন্ট|লেনদেন|অর্ডার|রিভিউ|বুকিং|দাবি|রিফান্ড)[^।!?\n]{0,30}?"
     r"(?:অনুমোদিত|নিশ্চিত|সম্পন্ন|সমাধান\s+হয়েছে|তৈরি\s+হয়েছে|সংরক্ষিত|"
@@ -71,7 +78,9 @@ _BENGALI_SUCCESS_CLAIM = re.compile(
 
 def _claims_unsupported_success(text: str) -> bool:
     return bool(
-        _ENGLISH_SUCCESS_CLAIM.search(text) or _BENGALI_SUCCESS_CLAIM.search(text)
+        _ENGLISH_SUCCESS_CLAIM.search(text) or
+        _ENGLISH_ACTIVE_SUCCESS_CLAIM.search(text) or
+        _BENGALI_SUCCESS_CLAIM.search(text)
     )
 
 
