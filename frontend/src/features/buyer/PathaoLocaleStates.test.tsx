@@ -27,14 +27,19 @@ it('translates an in-flight catalog without repeating the request and preserves 
   let finish: (response: Response) => void = () => undefined;
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() => new Promise<Response>(resolve => {finish = resolve;}));
   await render();
-  expect(container.querySelector('section [role="status"]')?.textContent).toBe('Pathao-এর এলাকার তালিকা লোড হচ্ছে…');
+  expect(container.querySelector('section [role="status"] strong')?.textContent).toBe('Pathao-এর এলাকার তালিকা লোড হচ্ছে…');
+  expect(container.querySelector('.pathao-location-spinner')).toBeNull();
+  expect(container.querySelector('section')?.getAttribute('aria-busy')).toBe('true');
+  expect(container.querySelector('section [role="status"]')?.previousElementSibling?.querySelector('select')?.name).toBe('pathao_city');
   expect(container.querySelector('section')?.getAttribute('aria-label')).toBe('Pathao-এর ডেলিভারির এলাকা');
   await act(async () => findLanguageButton(container, 'English').click());
-  expect(container.querySelector('section [role="status"]')?.textContent).toBe('Loading Pathao locations…');
+  expect(container.querySelector('section [role="status"] strong')?.textContent).toBe('Loading Pathao locations…');
   expect(fetchMock).toHaveBeenCalledTimes(1);
   await act(async () => finish(new Response(JSON.stringify({condition: 'resolved', simulated: true,
     choices: [{id: 42, name: 'ঢাকা / Dhaka', home_delivery_available: false}]}))));
   const option = container.querySelector<HTMLOptionElement>('option[value="42"]')!;
+  expect(container.querySelector('section [role="status"]')).toBeNull();
+  expect(container.querySelector('section')?.getAttribute('aria-busy')).toBe('false');
   expect(option.textContent).toBe('ঢাকা / Dhaka — unsupported delivery');
   await act(async () => findLanguageButton(container, 'বাংলা').click());
   expect(option.textContent).toBe('ঢাকা / Dhaka — এখানে ডেলিভারি নেই');

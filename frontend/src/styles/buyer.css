@@ -90,6 +90,15 @@
 /* Native searchable courier choices retain labels, touch targets and wrapping actions. */
 .pathao-locations { display: grid; gap: 12px; margin-bottom: 16px; }
 .pathao-locations p { margin: 0; }
+.pathao-location-loading {
+  padding: 8px 12px;
+  border: 1px solid var(--primary-accent);
+  border-inline-start-width: 3px;
+  border-radius: 8px;
+  background: #e3eee8;
+  color: var(--primary-accent);
+}
+.pathao-location-loading strong { font-size: .875rem; }
 .pathao-location-choice { display: grid; gap: 6px; min-width: 0; }
 .pathao-location-choice label { display: grid; gap: 4px; }
 .pathao-location-choice input, .pathao-location-choice select { width: 100%; min-width: 0; }

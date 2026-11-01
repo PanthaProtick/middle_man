@@ -6,10 +6,8 @@ import type { PathaoSelection } from './pathaoTypes';
 import { LOCALE_STORAGE_KEY, LocaleProvider, LocaleSwitch } from '../locale';
 import { findLanguageButton } from './buyerLocaleFixtures';
 
-it('shows choices, resets children and retains the selection during a catalog retry', async () => {
-  let fail = false;
+it('shows choices and clears child selections when the city changes', async () => {
   vi.spyOn(globalThis, 'fetch').mockImplementation(async url => {
-    if (fail) throw new TypeError('outage');
     const path = String(url);
     const choices = path.includes('zone_id=10') ? [{id: 100, name: 'Area'}]
       : path.includes('city_id=1') ? [{id: 10, name: 'Zone'}]
@@ -36,13 +34,7 @@ it('shows choices, resets children and retains the selection during a catalog re
     await select('pathao_zone', '10');
     await select('pathao_area', '100');
     expect(container.querySelector('output')?.textContent).toContain('"area_id":100');
-    fail = true;
-    await act(async () => container.querySelector<HTMLButtonElement>('button')!.click());
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain('written address');
-    expect(container.querySelector<HTMLSelectElement>('select[name="pathao_area"]')?.value).toBe('100');
-    expect(container.querySelector('output')?.textContent).toContain('"area_id":100');
-    fail = false;
-    await act(async () => container.querySelector<HTMLButtonElement>('button')!.click());
+    expect(container.textContent).not.toContain('Retry location lookup');
     await select('pathao_city', '2');
     expect(container.querySelector('output')?.textContent).not.toContain('area_id');
     expect(container.querySelector('output')?.textContent).not.toContain('zone_id');
@@ -51,12 +43,10 @@ it('shows choices, resets children and retains the selection during a catalog re
   }
 });
 
-it('switches catalog failures and selected locations without another read or lost focus, then recovers', async () => {
+it('switches catalog failures and selected locations without another read or lost focus, preserves fallback', async () => {
   window.localStorage.setItem(LOCALE_STORAGE_KEY, 'bn');
-  let fail = true;
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
-    if (fail) throw new TypeError('Private provider detail');
-    return new Response(JSON.stringify({condition: 'resolved', simulated: false, choices: [{id: 1, name: 'Dhaka'}]}));
+    throw new TypeError('Private provider detail');
   });
   const onChange = vi.fn();
   const container = document.createElement('div');
@@ -77,12 +67,7 @@ it('switches catalog failures and selected locations without another read or los
     expect(document.activeElement).toBe(city);
     expect(container.textContent).toContain('Pathao locations are unavailable.');
     expect(onChange).not.toHaveBeenCalled();
-    fail = false;
-    const retry = Array.from(container.querySelectorAll('button')).find(button => button.textContent === 'Retry location lookup')!;
-    await act(async () => retry.click());
-    expect(container.querySelector('select[name="pathao_city"]')?.textContent).toContain('Dhaka');
-    expect(container.querySelector<HTMLSelectElement>('select[name="pathao_city"]')?.value).toBe('1');
-    expect(onChange).not.toHaveBeenCalled();
+    expect(container.textContent).not.toContain('Retry location lookup');
   } finally {
     await act(async () => root.unmount()); container.remove(); window.localStorage.clear(); vi.restoreAllMocks();
   }

@@ -127,15 +127,11 @@ it('blocks in-flight lookups, then allows established unavailability while prese
   expect(bodies[0].payment_claim).toMatchObject({trx_id: 'SYNTHETIC', sender_number: '01822222222'});
 });
 
-it('recovers from established unavailability on retry without losing entered details', async () => {
-  let unavailable = true;
+it('submits written fallback after unavailability without losing entered details', async () => {
   const fetchMock = routedFetch(async (url, init) => {
     if (init?.method === 'POST') return new Response(JSON.stringify({...awaitingOrder, lifecycle: 'pending'}));
     if (url === '/api/public/orders/token') return new Response(JSON.stringify(awaitingOrder));
-    if (unavailable) return new Response(JSON.stringify({error: {code: 'PATHAO_UNAVAILABLE'}}), {status: 503});
-    const choices = url.includes('zone_id=10') ? [{id: 100, name: 'Area'}]
-      : url.includes('city_id=1') ? [{id: 10, name: 'Zone'}] : [{id: 1, name: 'Dhaka'}];
-    return catalog(choices);
+    return new Response(JSON.stringify({error: {code: 'PATHAO_UNAVAILABLE'}}), {status: 503});
   });
   await renderPortal(fetchMock);
   await fill();
@@ -144,18 +140,11 @@ it('recovers from established unavailability on retry without losing entered det
     .toBe('House 12, Road 5, gate code 1234');
   expect(container.querySelector<HTMLInputElement>('[name="payment_trx_id"]')?.value).toBe('SYNTHETIC');
 
-  unavailable = false;
-  const retry = [...container.querySelectorAll<HTMLButtonElement>('button')]
-    .find(button => button.textContent === 'Retry location lookup')!;
-  await act(async () => retry.dispatchEvent(new MouseEvent('click', {bubbles: true})));
-  expect(container.textContent).toContain('Dhaka');
-  await act(async () => select('pathao_city', '1'));
-  await act(async () => select('pathao_zone', '10'));
-  await act(async () => select('pathao_area', '100'));
+  expect(container.textContent).not.toContain('Retry location lookup');
   await submit();
   const bodies = postBodies(fetchMock);
   expect(bodies).toHaveLength(1);
-  expect(bodies[0].address.pathao).toEqual({city_id: 1, zone_id: 10, area_id: 100});
+  expect(bodies[0].address).toEqual({raw_text: 'House 12, Road 5, gate code 1234'});
   expect(bodies[0].payment_claim).toMatchObject({trx_id: 'SYNTHETIC', sender_number: '01822222222'});
 });
 

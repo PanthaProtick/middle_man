@@ -1,5 +1,5 @@
 export const enBuyerLocations = {
-  "buyer.location.expired": "Location choices changed. Retry location lookup and recheck your city, zone, and area. Your other details are preserved.",
+  "buyer.location.expired": "Location choices changed. Clear location choices and submit your written address for seller resolution.",
   "buyer.location.label": "Pathao delivery location",
   "buyer.location.help": "Choose the Pathao city, zone, and area when they are listed. Write house, road and delivery directions in the full address below.",
   "buyer.location.simulated": "Simulated Pathao locations — offline demonstration only.",
@@ -16,20 +16,19 @@ export const enBuyerLocations = {
   "buyer.location.search": "Search Pathao {name}",
   "buyer.location.choice": "Pathao {name}",
   "buyer.location.choose": "Choose {name}",
-  "buyer.location.saved": "Saved choice (ID {id}); retry to load label",
+  "buyer.location.saved": "Saved choice (ID {id})",
   "buyer.location.unsupportedOption": " — unsupported delivery",
   "buyer.location.unsupported": "My destination is not supported / needs seller help",
-  "buyer.location.retry": "Retry location lookup",
   "buyer.location.clear": "Clear location choices",
   "buyer.location.noMatches": "No matching locations.",
   "buyer.location.emptyCities": "No cities are listed. Submit your written address for seller resolution.",
   "buyer.location.emptyZones": "No zones are listed. Submit your written address for seller resolution.",
   "buyer.location.emptyAreas": "No area choices are listed. Submit your written address; the seller must verify delivery coverage.",
-  "buyer.location.unavailable": "Pathao locations are unavailable. You can submit your written address and payment claim for seller resolution. Retry keeps your inputs."
+  "buyer.location.unavailable": "Pathao locations are unavailable. You can submit your written address and payment claim for seller resolution."
 } as const;
 
 export const bnBuyerLocations = {
-  "buyer.location.expired": "এলাকার তালিকা বদলেছে। আবার তালিকা লোড করে শহর, জোন ও এলাকা যাচাই করুন। আপনার অন্য তথ্য সংরক্ষিত আছে।",
+  "buyer.location.expired": "এলাকার তালিকা বদলেছে। এলাকার নির্বাচন মুছে বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা জমা দিন।",
   "buyer.location.label": "Pathao-এর ডেলিভারির এলাকা",
   "buyer.location.help": "তালিকায় থাকলে Pathao-এর শহর, জোন ও এলাকা বেছে নিন। নিচের সম্পূর্ণ ঠিকানায় বাড়ি, রাস্তা ও পৌঁছানোর নির্দেশনা লিখুন।",
   "buyer.location.simulated": "Pathao-এর নমুনা এলাকার তালিকা — শুধু অফলাইন প্রদর্শনীর জন্য।",
@@ -46,15 +45,14 @@ export const bnBuyerLocations = {
   "buyer.location.search": "Pathao-এর {name} খুঁজুন",
   "buyer.location.choice": "Pathao-এর {name}",
   "buyer.location.choose": "{name} বেছে নিন",
-  "buyer.location.saved": "সংরক্ষিত এলাকা (ID {id}); নাম দেখতে আবার চেষ্টা করুন",
+  "buyer.location.saved": "সংরক্ষিত এলাকা (ID {id})",
   "buyer.location.unsupportedOption": " — এখানে ডেলিভারি নেই",
   "buyer.location.unsupported": "আমার গন্তব্যে ডেলিভারি নেই / বিক্রেতার সাহায্য দরকার",
-  "buyer.location.retry": "আবার এলাকার তালিকা খুঁজুন",
   "buyer.location.clear": "এলাকার নির্বাচন মুছুন",
   "buyer.location.noMatches": "মিলে যাওয়া এলাকা নেই।",
   "buyer.location.emptyCities": "শহরের তালিকা খালি। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা জমা দিন।",
   "buyer.location.emptyZones": "জোনের তালিকা খালি। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা জমা দিন।",
   "buyer.location.emptyAreas": "এলাকার তালিকা খালি। লেখা ঠিকানা জমা দিন; ডেলিভারি দেওয়া যাবে কি না বিক্রেতা যাচাই করবেন।",
-  "buyer.location.unavailable": "Pathao-এর এলাকার তালিকা পাওয়া যাচ্ছে না। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা ও পেমেন্টের তথ্য জমা দিতে পারেন। আবার চেষ্টা করলে আপনার তথ্য থাকবে।"
+  "buyer.location.unavailable": "Pathao-এর এলাকার তালিকা পাওয়া যাচ্ছে না। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা ও পেমেন্টের তথ্য জমা দিতে পারেন।"
 } as const;
 

@@ -35,7 +35,7 @@ it('keeps parents interactive during slow child reads, ignores late responses an
     const query = new URL(String(url), 'http://test').searchParams;
     const city = query.get('city_id');
     if (!city) return response([{id: 1, name: 'Dhaka'}, {id: 2, name: 'Chattogram'}]);
-    return new Promise<Response>(resolve => pending.set(city, resolve));
+    return new Promise<Response>(resolve => pending.set(query.has('zone_id') ? `area-${city}` : city, resolve));
   });
   function Harness() {
     const [value, onChange] = useState<PathaoSelection>({});
@@ -56,6 +56,8 @@ it('keeps parents interactive during slow child reads, ignores late responses an
     expect(city().selectedOptions[0].textContent).toBe('Dhaka');
     expect(city().disabled).toBe(false);
     expect(zone().disabled).toBe(true);
+    expect(container.querySelector('[role="status"]')?.parentElement?.querySelector('select')?.name).toBe('pathao_city');
+    expect(container.querySelector('.pathao-location-spinner')).toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(2);
     await choose('2');
     await act(async () => pending.get('2')!(response([{id: 20, name: 'Current zone'}])));
@@ -63,17 +65,25 @@ it('keeps parents interactive during slow child reads, ignores late responses an
     expect(zone().textContent).toContain('Current zone');
     expect(zone().textContent).not.toContain('Late zone');
     expect(city().value).toBe('2');
+    expect(container.querySelector('[role="status"]')).toBeNull();
+    await act(async () => {
+      zone().value = '20';
+      zone().dispatchEvent(new Event('change', {bubbles: true}));
+    });
+    expect(container.querySelector('[role="status"]')?.parentElement?.querySelector('select')?.name).toBe('pathao_zone');
+    await act(async () => pending.get('area-2')!(response([{id: 200, name: 'Current area'}])));
+    expect(container.querySelector('[role="status"]')).toBeNull();
     await choose('');
     await choose('2');
     expect(zone().disabled).toBe(false);
-    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock).toHaveBeenCalledTimes(4);
     expect(String(fetchMock.mock.calls[2][0])).toContain('catalog_version=snapshot-1');
   } finally {
     await act(async () => root.unmount()); container.remove(); vi.restoreAllMocks();
   }
 });
 
-it('recovers from an expired pinned version on explicit retry without clearing other details', async () => {
+it('reports an expired pinned version without clearing other details', async () => {
   const availability = vi.fn();
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async url => {
     const query = new URL(String(url), 'http://test').searchParams;
@@ -91,13 +101,11 @@ it('recovers from an expired pinned version on explicit retry without clearing o
     await act(async () => root.render(<><input aria-label="Written address" defaultValue="Keep my written address" />
       <PathaoLocations portalToken="token" value={{city_id: 1, zone_id: 10, area_id: 100, catalog_version: 'expired-version'}}
         onChange={vi.fn()} onAvailabilityChange={availability} /></>));
-    expect(container.querySelector('[role="alert"]')?.textContent).toContain('recheck');
-    await act(async () => container.querySelector<HTMLButtonElement>('button')!.click());
-    expect(container.querySelector('[role="alert"]')).toBeNull();
-    expect(container.textContent).toContain('Current area');
+    expect(container.querySelector('[role="alert"]')?.textContent).toContain('Clear location choices');
+    expect(container.textContent).not.toContain('Retry location lookup');
     expect(container.querySelector<HTMLInputElement>('input')?.value).toBe('Keep my written address');
-    expect(availability).toHaveBeenLastCalledWith({state: 'ready', city: true, zone: true, area: true, catalog_version: 'current-version'});
-    expect(new URL(String(fetchMock.mock.calls[1][0]), 'http://test').searchParams.has('catalog_version')).toBe(false);
+    expect(availability).toHaveBeenLastCalledWith({state: 'unavailable', city: false, zone: false, area: false});
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   } finally {
     await act(async () => root.unmount()); container.remove(); vi.restoreAllMocks();
   }
