@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { fetchPreparationPreview } from './workQueryApi';
 import type { PreparationPreviewItem } from './types';
 
@@ -25,8 +25,19 @@ const EMPTY: PreparationState = {
 /** Server-authoritative preview of confirmed orders with no courier attempt. */
 export function usePreparationQuery(token?: string) {
   const [state, setState] = useState<PreparationState>(EMPTY);
+  const [authorization, setAuthorization] = useState(token);
   const requestRef = useRef(0);
   const mounted = useRef(true);
+
+  if (authorization !== token) {
+    setAuthorization(token);
+    setState(EMPTY);
+  }
+
+  // Invalidate the previous authorization context before displaying its results.
+  useLayoutEffect(() => {
+    requestRef.current += 1;
+  }, [token]);
 
   useEffect(() => {
     mounted.current = true;

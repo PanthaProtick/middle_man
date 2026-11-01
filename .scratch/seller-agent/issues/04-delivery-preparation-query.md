@@ -70,4 +70,31 @@ pages on a live dataset by design. Next action: run PostgreSQL and browser accep
 in ticket 07, then review ticket 05 attention query against the same shared-service
 pattern.
 
+## Verification follow-up — 2026-11-01
+
+Reviewed implementation commit `c48f312` from a clean working tree. The shared
+predicate, preview/dashboard/export reuse, and existing focused acceptance tests
+remain intact. Found and fixed a preview freshness gap: changing or removing the
+authorization token left completed results visible and allowed pending responses
+from the previous token to restore obsolete results. `usePreparationQuery.ts` now
+clears scoped state on a token change and invalidates pending requests before
+paint. Token renewal also clears the preview; the seller can refresh it explicitly.
+
+Added `usePreparationQuery.test.tsx`: three regression cases failed before the fix
+and passed afterward, covering token replacement, token removal, completed-result
+clearing, and subsequent requests using the replacement token. Focused backend:
+16 passed; focused frontend: 11 passed across five files.
+
+Final root `npm run check` passed every stage: backend 666 passed / 179 skipped;
+frontend 559 passed across 106 files; lint, types, build, and HTTP smoke passed.
+Evidence: `.cache/checks/check-GK2iQ5/result.json`. The first run hit a Windows
+pytest system-temp permission error; the passing run used
+`PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-ticket04-final`.
+An intermediate run caught React lint issues in the initial fix/test harness;
+both were corrected before the final gate.
+
+Browser/mobile, PostgreSQL execution/concurrency, hosted Clerk, and live providers
+remain NOT RUN. No live Gemini or courier calls were made. Next action remains
+the ticket 07 browser/PostgreSQL acceptance described above.
+
 
