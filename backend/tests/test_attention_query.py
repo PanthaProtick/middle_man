@@ -156,8 +156,9 @@ async def test_oldest_outstanding_and_id_tie_breaker(client: AsyncClient):
     set_completed(older['id'], minutes=30)
     set_completed(newer['id'], minutes=5)
     tied = [await add_confirmed(client, base, f'tied-{index}') for index in range(3)]
+    tied_completed_at = ago(minutes=10)
     for order in tied:
-        set_completed(order['id'], minutes=10)
+        _memory_orders[order['id']]['completed_at'] = tied_completed_at
 
     body = await preview(client)
     ids = [item['order']['id'] for item in body['items']]

@@ -79,3 +79,17 @@ unrun acceptance gates, remaining risks, and the next action in this ticket.
   one fixture setup error; `.cache/checks/check-l8FaNw/result.json`).
 - PostgreSQL, browser acceptance, and live providers remain unrun; the existing
   next action above still applies.
+
+### CI timestamp fixture follow-up (2026-11-01)
+
+- GitHub run `41296866896` failed only the Ubuntu timestamp/ID ordering test.
+  Its supposed ties used separate wall-clock reads, allowing distinct instants.
+- `backend/tests/test_attention_query.py` now assigns one shared completion
+  timestamp to tied orders. Production ordering and existing assertions remain.
+- Focused attention suites: 14 passed. Root `npm run check`: PASS all stages,
+  `.cache/checks/check-sWlImH/result.json`, with `PYTEST_ADDOPTS` set to
+  `--basetemp=E:/middle_man/.cache/pytest-ci-timestamp`. Initial gate hit the
+  Windows system-temp permission error (692 passed, 179 skipped, one setup
+  error; `.cache/checks/check-4EkDgu/result.json`).
+- Next action: push the fix and verify the Ubuntu Actions job; remote rerun
+  remains unrun. PostgreSQL and live-provider acceptance remain outside this fix.
