@@ -16,6 +16,9 @@ current route/service/model split; update the owning annex when behavior changes
   current demo boundaries that are not readiness claims.
 - [Orders, search, and export](contracts/orders-search-and-export.md): seller order
   search, Bangladesh date bounds, pagination, and the English CSV export contract.
+- [Delivery-preparation work query](contracts/delivery-preparation-query.md):
+  shared predicate, preview, dashboard, and export behavior for confirmed orders
+  with no courier submission attempt.
 - [Payments and reconciliation](contracts/payments-and-reconciliation.md): received
   payment search, receipt comparison/resolution, unallocated corrections, and
   seller payment exception acceptance.

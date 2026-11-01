@@ -6,6 +6,8 @@ import { useLocale } from '../locale/context';
 import { orderCopy, lifecycleLabel } from '../locale/orderCopy';
 import { OrderDetailModal } from './OrderDetailModal';
 import { OrderExport } from './OrderExport';
+import { OrderWorkQueryBanner } from './OrderWorkQueryBanner';
+import { deliveryPreparationCopy } from '../locale/deliveryPreparationCopy';
 import { OrderDateControls } from './OrderDateControls';
 import { OrderCard } from './OrderCard';
 import type { OrderDateError, OrderDateMode, OrderDateRange } from './orderDateFilter';
@@ -18,6 +20,8 @@ interface OrderListProps {
   orders: SellerOrder[];
   statusFilter: string;
   onFilterChange: (status: string) => void;
+  workQuery?: 'preparation' | '';
+  onClearWorkQuery?: () => void;
   nextCursor: string | null;
   onLoadMore: () => void;
   search?: string;
@@ -43,6 +47,8 @@ export function OrderList({
   orders,
   statusFilter,
   onFilterChange,
+  workQuery = '',
+  onClearWorkQuery = () => undefined,
   nextCursor,
   onLoadMore,
   search = '',
@@ -67,7 +73,7 @@ export function OrderList({
   const [selectedOrder, setSelectedOrder] = useState<SellerOrder | null>(null);
   const [initialTab, setInitialTab] = useState(0);
   const [expandedReviewIds, setExpandedReviewIds] = useState<Record<string, boolean>>({});
-  const resetKey = `${statusFilter}|${search}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`;
+  const resetKey = `${statusFilter}|${search}|${workQuery}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`;
   const { viewportRef, handleScroll } = useScrollRetention(orders, resetKey);
 
   const toggleReviewCodes = (id: string) => {
@@ -159,6 +165,8 @@ export function OrderList({
         </div>
       </div>
 
+      {workQuery === 'preparation' && <OrderWorkQueryBanner onClear={onClearWorkQuery} />}
+
       <OrderDateControls
         mode={dateMode}
         from={dateFrom}
@@ -175,9 +183,10 @@ export function OrderList({
         onApplyLastDays={onApplyLastDays}
       />
       <OrderExport
-        key={`${statusFilter}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`}
+        key={`${statusFilter}|${search}|${workQuery}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`}
         status={statusFilter}
         search={search}
+        workQuery={workQuery || undefined}
         fromDate={appliedDateRange?.from}
         toDate={appliedDateRange?.to}
         token={token}
@@ -197,7 +206,8 @@ export function OrderList({
         ) : orders.length === 0 ? (
           <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-              {search.trim() ? text.noMatches : appliedDateRange ? text.noDateMatches : text.empty}
+              {workQuery === 'preparation' ? deliveryPreparationCopy[locale].dashboardEmpty
+                : search.trim() ? text.noMatches : appliedDateRange ? text.noDateMatches : text.empty}
             </p>
           </div>
         ) : (

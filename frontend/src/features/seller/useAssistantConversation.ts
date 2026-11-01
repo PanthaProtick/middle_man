@@ -7,8 +7,9 @@ import {
 } from './guidedPayment';
 import { useGuidedOrderSubmission } from './useGuidedOrderSubmission';
 import { useGuidedPaymentSubmission } from './useGuidedPaymentSubmission';
+import { usePreparationQuery } from './usePreparationQuery';
 import { fetchPaymentAccounts } from './api';
-import type { PaymentAccount, RecordedTransactionResult, SellerOrder } from './types';
+import type { PaymentAccount, RecordedTransactionResult, SellerOrder, WorkQuery } from './types';
 
 export interface ConversationOptions {
   accounts?: PaymentAccount[]; token?: string;
@@ -16,6 +17,7 @@ export interface ConversationOptions {
   onOpenOrder?: (order: SellerOrder) => void;
   onPaymentRecorded?: (result: RecordedTransactionResult) => void;
   onOpenPayment?: (receiptId: string) => void;
+  onShowInDashboard?: (query: WorkQuery) => void;
 }
 
 type Message = { user: string } | { reply: 'clarify' | 'multiple' | AssistantWorkflow };
@@ -38,6 +40,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
   const paymentSubmission = useGuidedPaymentSubmission(options.token, result => {
     setCompletedPayment(result); setDraft(null); options.onPaymentRecorded?.(result);
   });
+  const preparation = usePreparationQuery(options.token);
   const locked = orderSubmission.locked || paymentSubmission.locked;
   const frozen = orderSubmission.frozen || paymentSubmission.frozen;
   const updateOrder = (patch: Partial<OrderFields & { value: string }>) => {
@@ -66,9 +69,11 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
       });
     }
     setWorkflow(next);
+    if (next === 'preparation') void preparation.refresh();
   };
   const reset = () => {
     orderSubmission.reset(); paymentSubmission.reset();
+    preparation.reset();
     setCompletedOrder(null); setCompletedPayment(null);
     setMessages([]); setInput(''); setWorkflow(null); setDraft(null); setPending(null);
   };
@@ -77,6 +82,8 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     submission: orderSubmission, paymentSubmission, locked, frozen, token: options.token,
     openOrder: (order: SellerOrder) => options.onOpenOrder?.(order),
     openPayment: (receiptId: string) => options.onOpenPayment?.(receiptId),
+    preparation,
+    showInDashboard: () => options.onShowInDashboard?.('preparation'),
     updateOrder, updatePayment,
     orderSummary: orderSummary(draft?.value ?? '', draft?.order ?? emptyOrderFields(), accounts),
     paymentSummary: paymentSummary(draft?.payment ?? emptyPaymentFields(), accounts),

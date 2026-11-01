@@ -6,6 +6,7 @@ import { GuidedOrderFields } from './GuidedOrderFields';
 import { GuidedOrderResult } from './GuidedOrderResult';
 import { GuidedPaymentFields } from './GuidedPaymentFields';
 import { GuidedPaymentResult } from './GuidedPaymentResult';
+import { PreparationPreview } from './PreparationPreview';
 
 export function AssistantConversation({ conversation }: { conversation: Conversation }): React.JSX.Element {
   const c = conversation;
@@ -31,6 +32,10 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
       : c.completedOrder && c.workflow === 'order' ? <GuidedOrderResult order={c.completedOrder} locale={c.locale} token={c.token} onOpenOrder={c.openOrder} />
       : c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
       : c.draft?.workflow === 'payment' && c.workflow === 'payment' ? <GuidedPaymentFields conversation={c} />
+      : c.workflow === 'preparation' ? <PreparationPreview
+        locale={c.locale} state={c.preparation}
+        onRefresh={c.preparation.refresh} onLoadMore={c.preparation.loadMore}
+        onOpenOrder={c.openOrder} onShowInDashboard={c.showInDashboard} />
       : c.draft?.workflow === c.workflow ? <>
         <p>{text.draftHelp}</p>
         <label>{c.workflow === 'order' ? text.orderField : text.paymentField}

@@ -197,3 +197,28 @@ it('retains scroll position on order list data updates and resets on filter chan
 
   expect(viewport.scrollTop).toBe(0);
 });
+
+it('shows the shared work-query banner and a work-query-specific empty state', async () => {
+  const onClear = vi.fn();
+  const { host } = await mount(
+    <LocaleProvider>
+      <OrderList
+        token="test-token"
+        orders={[]}
+        statusFilter=""
+        onFilterChange={() => undefined}
+        workQuery="preparation"
+        onClearWorkQuery={onClear}
+        nextCursor={null}
+        onLoadMore={() => undefined}
+      />
+    </LocaleProvider>,
+  );
+
+  const banner = host.querySelector('[role="status"]');
+  expect(banner?.textContent).toContain('shared delivery-preparation query');
+  expect(host.textContent).toContain('No confirmed orders are awaiting delivery preparation.');
+  const clear = Array.from(host.querySelectorAll('button')).find(item => item.textContent === 'Clear work filter')!;
+  await act(async () => clear.click());
+  expect(onClear).toHaveBeenCalledOnce();
+});

@@ -4,18 +4,70 @@
 
 **Blocked by:** 01: Unify the floating seller assistant and contextual review.
 
-**Status:** ready-for-agent
+**Status:** implemented; local verification passed; browser/PostgreSQL acceptance not run
 
-- [ ] Use a shared backend-defined predicate over the full authorized shop dataset, not loaded-page filtering or simple negation of delivery_staged.
-- [ ] Include confirmed orders awaiting courier preparation across older backlog. Exclude booked, submitting, unknown-outcome, terminal lifecycle, and separately categorized failed-submission cases; current attempt state and booking success override historical failures.
-- [ ] Use Bangladesh calendar context without silently applying a created-today restriction. Support equivalent Bengali, English, Banglish, and mixed requests locally.
-- [ ] Return a stable paginated preview, full matching total, retrieval time, useful reason labels, and application-generated open/copy-order-reference actions.
-- [ ] Show in dashboard replaces conflicting search/date/status filters transparently and retrieves current data using exactly the same query; preserve the unfinished creation draft.
-- [ ] Cover multi-page datasets, prior-day backlog, no matches, cross-shop exclusion, current/historical booking states, dashboard parity, freshness, and loading/error behavior.
+- [x] Use a shared backend-defined predicate over the full authorized shop dataset, not loaded-page filtering or simple negation of delivery_staged.
+- [x] Include confirmed orders awaiting courier preparation across older backlog. Exclude booked, submitting, unknown-outcome, terminal lifecycle, and separately categorized failed-submission cases; current attempt state and booking success override historical failures.
+- [x] Use Bangladesh calendar context without silently applying a created-today restriction. Support equivalent Bengali, English, Banglish, and mixed requests locally.
+- [x] Return a stable paginated preview, full matching total, retrieval time, useful reason labels, and application-generated open/copy-order-reference actions.
+- [x] Show in dashboard replaces conflicting search/date/status filters transparently and retrieves current data using exactly the same query; preserve the unfinished creation draft.
+- [x] Cover multi-page datasets, prior-day backlog, no matches, cross-shop exclusion, current/historical booking states, dashboard parity, freshness, and loading/error behavior.
 
 ## Verification and handoff
 
 Use focused checks while implementing and the root verification gate before completion.
 Automated tests use fake providers with zero live Gemini calls. Record actual results,
 unrun acceptance gates, remaining risks, and the next action in this ticket.
+
+## Implementation and handoff — 2026-11-01
+
+Base: `041d444`; current branch: `main`; working tree contains this implementation.
+
+- Membership is one shared predicate: authorized shop, `retained_at IS NULL`,
+  `lifecycle = 'confirmed'`, and **no** `courier_attempts` row in any state.
+  It is intentionally independent of `delivery_staged`: failed submissions remain
+  staged but are excluded here; any success/submitting/unknown attempt also excludes,
+  so current booking state overrides historical failures.
+- `services/delivery_preparation.py` owns the SQL and memory implementations,
+  oldest-first ordering (`coalesce(completed_at, updated_at), id`), cursor resolution
+  outside the predicate, full-set total, and Dhaka reason codes. The preview route,
+  `GET /api/seller/orders?work_query=preparation`, and CSV export reuse it.
+- `GET /api/seller/work-queries/preparation` returns `query`, items with reason
+  codes, `total`, `next_cursor`, `retrieved_at`, and `calendar_date` (Asia/Dhaka).
+  No shop returns a valid empty page; missing auth is `401`; responses are no-store.
+  `PRIOR_DAY_BACKLOG` is based on the order's Dhaka creation date versus retrieval
+  date; there is no created-today restriction.
+- The assistant broadens local Bengali/English/Banglish/mixed intent detection and
+  renders a bilingual preview with total, retrieval time, stable reason labels,
+  open/copy actions, paging, refresh, and show-in-dashboard. Order identities and
+  actions come from the server response, never model text.
+- Show in dashboard clears status/search/applied dates, resets date controls, applies
+  `work_query=preparation`, reloads page 1, and displays a banner explaining the
+  cleared filters. The unfinished creation draft and conversation are preserved.
+- Export sends only `work_query` while active, so the CSV matches the visible set.
+
+Changed paths: new `backend/app/{api/work_queries,models/work_query,
+services/delivery_preparation}.py`, `backend/tests/test_delivery_preparation.py`;
+modified `backend/app/{api/orders,main,models/order_export,services/order_export}.py`;
+new frontend `usePreparationQuery.ts`, `workQueryApi.ts`, `PreparationPreview.tsx`,
+`OrderWorkQueryBanner.tsx`, `deliveryPreparationCopy.ts`, and five test files;
+modified assistant/order-list/export/query/workspace paths, copy audit, `types.ts`;
+new `docs/contracts/delivery-preparation-query.md` plus contract/architecture indexes.
+
+Verification: focused backend `tests/test_delivery_preparation.py` 16 passed. Focused
+frontend intent/preview/assistant/hook/order-list/export/copy suites 79 passed, plus
+the workspace draft-preservation test 1 passed. Root `npm run check` passed all
+stages: backend tests 666 passed / 179 skipped; frontend tests 556 passed across 105
+files; build and HTTP smoke passed. Evidence:
+`.cache/checks/check-HubYKh/result.json` (earlier runs correctly failed on import
+ordering and an unused test variable, then passed). No live Gemini/courier calls.
+
+Remaining acceptance: real browser/mobile, hosted Clerk, and live providers were not
+run. The SQL predicate is type/lint checked but the automated suite exercises the
+memory path; no disposable PostgreSQL URL was available, so database execution and
+concurrency between pages remain unproven. Total and membership can change between
+pages on a live dataset by design. Next action: run PostgreSQL and browser acceptance
+in ticket 07, then review ticket 05 attention query against the same shared-service
+pattern.
+
 

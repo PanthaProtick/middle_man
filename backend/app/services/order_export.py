@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.tokens import get_utc_now
 from app.models.entities import AllocationTable, AuditEventTable, BuyerRevisionTable, OrderTable, ShopTable
 from app.models.order_export import ExportFilters, OrderStatus, OrderSummary
+from app.services.delivery_preparation import memory_awaiting_preparation, preparation_clause
 from app.services.order_dates import order_created_bounds, within_order_dates
 from app.services.order_search import (
     matches_order_search,
@@ -57,21 +58,24 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
         ).outerjoin(AllocationTable, (AllocationTable.order_id == OrderTable.id)
                     & (AllocationTable.shop_id == OrderTable.shop_id)).where(
                         OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None))
-        if filters.status:
-            query = query.where(lifecycle == filters.status)
-        if created_from is not None:
-            query = query.where(OrderTable.created_at >= created_from)
-        if created_to is not None:
-            query = query.where(OrderTable.created_at < created_to)
-        search_clause = order_search_clause(
-            filters.search,
-            order_id=OrderTable.id,
-            product_name=OrderTable.product_name,
-            buyer_name=BuyerRevisionTable.buyer_name,
-            contact_number=BuyerRevisionTable.contact_number_canonical,
-        )
-        if search_clause is not None:
-            query = query.where(search_clause)
+        if filters.work_query == 'preparation':
+            query = query.where(preparation_clause())
+        else:
+            if filters.status:
+                query = query.where(lifecycle == filters.status)
+            if created_from is not None:
+                query = query.where(OrderTable.created_at >= created_from)
+            if created_to is not None:
+                query = query.where(OrderTable.created_at < created_to)
+            search_clause = order_search_clause(
+                filters.search,
+                order_id=OrderTable.id,
+                product_name=OrderTable.product_name,
+                buyer_name=BuyerRevisionTable.buyer_name,
+                contact_number=BuyerRevisionTable.contact_number_canonical,
+            )
+            if search_clause is not None:
+                query = query.where(search_clause)
         if order_id:
             query = query.where(OrderTable.id == order_id)
         rows = (await db.execute(query.order_by(OrderTable.created_at.desc(), OrderTable.id.desc())
@@ -100,7 +104,10 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                 continue
             _check_and_apply_expiry(raw, now)
             memory_buyer = memory_buyer_revision(str(raw['id']), raw.get('buyer_revision'))
-            if (
+            matches = (
+                (not order_id or raw['id'] == order_id)
+                and memory_awaiting_preparation(str(raw['id']), raw)
+            ) if filters.work_query == 'preparation' else (
                 (not filters.status or raw['lifecycle'] == filters.status)
                 and (not order_id or raw['id'] == order_id)
                 and within_order_dates(raw['created_at'], created_from, created_to)
@@ -111,7 +118,8 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                     buyer_name=str(memory_buyer.get('buyer_name', '')),
                     contact_number_canonical=memory_buyer.get('contact_number_canonical'),
                 )
-            ):
+            )
+            if matches:
                 selected.append(raw)
                 if len(selected) > filters.limit:
                     raise SellerDomainException(

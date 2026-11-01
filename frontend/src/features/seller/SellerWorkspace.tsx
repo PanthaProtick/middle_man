@@ -71,6 +71,7 @@ export function SellerWorkspace({
     orders,
     statusFilter: ordersFilter,
     search: ordersSearch,
+    workQuery: ordersWorkQuery,
     dateMode: ordersDateMode,
     dateFrom: ordersDateFrom,
     dateTo: ordersDateTo,
@@ -91,6 +92,8 @@ export function SellerWorkspace({
     applyLastDays: handleApplyLastDays,
     loadMore: loadMoreOrders,
     addOrder,
+    applyWorkQuery,
+    clearWorkQuery,
   } = useSellerOrders(token, captureWorkspaceError);
   const reloadWorkspaceLists = useCallback(async () => {
     await reloadOrders();
@@ -129,6 +132,10 @@ export function SellerWorkspace({
       onOpenPayment={(receiptId) => {
         handleSectionSelect('payments');
         handleTransactionsSearchChange(receiptId);
+      }}
+      onShowInDashboard={() => {
+        handleSectionSelect('orders');
+        applyWorkQuery('preparation');
       }}>
     {state ? <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn} onRetry={retry} /> : <div className="card">
       <WorkspaceHeader
@@ -187,6 +194,8 @@ export function SellerWorkspace({
                 onFilterChange={handleFilterChange}
                 search={ordersSearch}
                 onSearchChange={handleSearchChange}
+                workQuery={ordersWorkQuery}
+                onClearWorkQuery={clearWorkQuery}
                 dateMode={ordersDateMode}
                 dateFrom={ordersDateFrom}
                 dateTo={ordersDateTo}

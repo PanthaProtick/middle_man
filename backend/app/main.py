@@ -23,6 +23,7 @@ from app.api.sms import router as sms_router
 from app.api.structured_retention import router as structured_retention_router
 from app.api.transaction_submissions import router as transaction_submissions_router
 from app.api.transactions import router as transactions_router
+from app.api.work_queries import router as work_queries_router
 from app.core.auth import get_request_id
 from app.core.auth_diagnostics import rejection_reason
 from app.core.config import settings
@@ -162,6 +163,7 @@ app.include_router(link_access_router, prefix=settings.API_PREFIX)
 # Literal SMS paths must precede the receipt-ID route.
 app.include_router(sms_router, prefix=settings.API_PREFIX)
 app.include_router(transactions_router, prefix=settings.API_PREFIX)
+app.include_router(work_queries_router, prefix=settings.API_PREFIX)
 app.include_router(public_orders_router, prefix=settings.API_PREFIX)
 
 

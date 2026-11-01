@@ -186,6 +186,7 @@ export async function fetchOrders(
     search?: string;
     fromDate?: string;
     toDate?: string;
+    workQuery?: 'preparation';
   } = {},
   token?: string,
 ): Promise<SellerOrderListResponse> {
@@ -197,6 +198,7 @@ export async function fetchOrders(
   if (search) query.set('search', search);
   if (params.fromDate) query.set('from_date', params.fromDate);
   if (params.toDate) query.set('to_date', params.toDate);
+  if (params.workQuery) query.set('work_query', params.workQuery);
   const qStr = query.toString();
   const url = `/api/seller/orders${qStr ? `?${qStr}` : ''}`;
   return requestJson<SellerOrderListResponse>(url, { method: 'GET' }, token);

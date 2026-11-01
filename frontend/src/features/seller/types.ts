@@ -198,3 +198,22 @@ export interface RetentionCleanupResponse {
   status: 'clean' | 'partial_failure' | 'failed';
   failures: CleanupFailureItem[];
 }
+
+export type WorkQuery = 'preparation';
+
+export type PreparationReason = 'AWAITING_COURIER_PREPARATION' | 'PRIOR_DAY_BACKLOG';
+
+export interface PreparationPreviewItem {
+  order: SellerOrder;
+  reason_codes: PreparationReason[];
+}
+
+export interface PreparationQueryPreview {
+  query: 'preparation';
+  items: PreparationPreviewItem[];
+  total: number;
+  next_cursor: string | null;
+  retrieved_at: string;
+  calendar_date: string;
+  timezone: 'Asia/Dhaka';
+}

@@ -26,3 +26,9 @@ The CSV preserves English columns, escaping, private/no-store headers,
 rate limiting, and returns `EXPORT_TOO_LARGE` instead of truncating above 500
 matches. Search text and date values are request-only and are not logged or
 persisted in URLs.
+
+An optional `work_query=preparation` makes either route use the shared
+delivery-preparation predicate instead of search/status/date filters. The
+dashboard clears conflicting controls and displays the active work query; export
+sends only `work_query` so the file matches the visible set. See
+[delivery-preparation-query.md](delivery-preparation-query.md).

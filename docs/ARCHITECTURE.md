@@ -61,6 +61,7 @@ Routers are split by workflow rather than one central routes module:
 | `api/routes.py` | `/api` health, Gemini demos, in-memory items, team sample |
 | `api/seller.py` | `/api/seller` shop/account/session/bootstrap endpoints |
 | `api/orders.py` | `/api/seller` order creation, decisions, buyer details, history |
+| `api/work_queries.py` | `/api/seller/work-queries` shared delivery-preparation preview |
 | `api/order_export.py` | `/api/seller/orders` search, date filtering, CSV export |
 | `api/link_access.py` | `/api/seller/orders` buyer-link revoke/reissue |
 | `api/public_orders.py` | `/api/public/orders` public reads, submission, Pathao locations |
@@ -71,7 +72,9 @@ Routers are split by workflow rather than one central routes module:
 | `api/structured_retention.py` | `/api/seller/retention/structured` retention status/cleanup |
 
 Service modules keep separate responsibilities: order creation/search/mapping,
-buyer revisions and projections, payment matching/allocation/decisions,
+delivery preparation (confirmed orders with no courier attempt, shared by
+preview, list, and export), buyer revisions and projections, payment
+matching/allocation/decisions,
 reconciliation (memory and SQL), courier drafts/review/reservation/attempts/
 outcomes, Pathao connections/catalog/locations/transport, and raw/structured
 retention. Shared auth, idempotency, public admission, database, and token logic

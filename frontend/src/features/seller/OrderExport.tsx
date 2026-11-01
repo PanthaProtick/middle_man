@@ -12,9 +12,9 @@ import {
 } from './orderExportSupport';
 import { sellerFetch } from './sessionRequest';
 
-export function OrderExport({ orderId, status, search, fromDate, toDate, token }: {
+export function OrderExport({ orderId, status, search, fromDate, toDate, workQuery, token }: {
   orderId?: string; status?: string; search?: string;
-  fromDate?: string; toDate?: string; token?: string;
+  fromDate?: string; toDate?: string; workQuery?: 'preparation'; token?: string;
 }): React.JSX.Element {
   const { locale } = useLocale();
   const text = exportCopy[locale];
@@ -36,7 +36,7 @@ export function OrderExport({ orderId, status, search, fromDate, toDate, token }
     return () => { active.current = false; };
   }, []);
 
-  const criteria = `${status ?? ''}\u0000${search ?? ''}\u0000${fromDate ?? ''}\u0000${toDate ?? ''}`;
+  const criteria = `${status ?? ''}\u0000${search ?? ''}\u0000${fromDate ?? ''}\u0000${toDate ?? ''}\u0000${workQuery ?? ''}`;
   const criteriaRef = useRef(criteria);
   useEffect(() => {
     if (criteriaRef.current === criteria) return;
@@ -74,11 +74,15 @@ export function OrderExport({ orderId, status, search, fromDate, toDate, token }
 
   async function downloadCsv() {
     const params = new URLSearchParams();
-    if (status) params.set('status', status);
-    const trimmedSearch = search?.trim();
-    if (trimmedSearch) params.set('search', trimmedSearch);
-    if (fromDate) params.set('from_date', fromDate);
-    if (toDate) params.set('to_date', toDate);
+    if (workQuery) {
+      params.set('work_query', workQuery);
+    } else {
+      if (status) params.set('status', status);
+      const trimmedSearch = search?.trim();
+      if (trimmedSearch) params.set('search', trimmedSearch);
+      if (fromDate) params.set('from_date', fromDate);
+      if (toDate) params.set('to_date', toDate);
+    }
     const query = params.toString();
     const runCriteria = criteriaRef.current;
     const response = await sellerFetch(`/api/seller/orders/export${query ? `?${query}` : ''}`, {
@@ -137,7 +141,7 @@ export function OrderExport({ orderId, status, search, fromDate, toDate, token }
   const message = feedback ? exportFeedbackMessage(feedback, locale) : null;
   const label = busy ? text.preparing
     : orderId ? text.copyDeliverySummary
-      : status || search?.trim() || fromDate || toDate ? text.downloadFilteredEnglishCsv
+      : workQuery || status || search?.trim() || fromDate || toDate ? text.downloadFilteredEnglishCsv
         : text.downloadEnglishCsv;
 
   return (

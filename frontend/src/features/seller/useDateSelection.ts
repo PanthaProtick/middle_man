@@ -79,6 +79,15 @@ export function useDateSelection(onApply: (range: OrderDateRange | null) => void
     applyRange(lastDaysRange(days), 'relative');
   }, [applyRange, lastDays]);
 
+  const reset = useCallback(() => {
+    setDateMode('any');
+    setDateFrom('');
+    setDateTo('');
+    setLastDays('');
+    setAppliedDateRange(null);
+    setDateError(null);
+  }, []);
+
   return {
     dateMode,
     dateFrom,
@@ -93,5 +102,6 @@ export function useDateSelection(onApply: (range: OrderDateRange | null) => void
     applyCustomDates,
     applyRelativePreset,
     applyLastDays,
+    reset,
   };
 }

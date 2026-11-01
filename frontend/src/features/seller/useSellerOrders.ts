@@ -8,6 +8,7 @@ interface OrderQuery {
   status: string;
   search: string;
   dateRange: OrderDateRange | null;
+  workQuery: '' | 'preparation';
 }
 
 /**
@@ -18,9 +19,10 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   const [orders, setOrders] = useState<SellerOrder[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
+  const [workQuery, setWorkQuery] = useState<'' | 'preparation'>('');
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const queryRef = useRef<OrderQuery>({ status: '', search: '', dateRange: null });
+  const queryRef = useRef<OrderQuery>({ status: '', search: '', dateRange: null, workQuery: '' });
   const requestRef = useRef(0);
 
   const load = useCallback(
@@ -42,6 +44,7 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
           search: query.search,
           fromDate: query.dateRange?.from,
           toDate: query.dateRange?.to,
+          workQuery: query.workQuery || undefined,
           cursor,
         }, token);
         if (requestId !== requestRef.current) return;
@@ -59,12 +62,14 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
 
   const reload = useCallback(() => load(undefined, false), [load]);
   const changeStatus = useCallback((status: string) => {
-    queryRef.current = { ...queryRef.current, status };
+    queryRef.current = { ...queryRef.current, status, workQuery: '' };
+    setWorkQuery('');
     setStatusFilter(status);
     void load();
   }, [load]);
   const changeSearch = useCallback((term: string) => {
-    queryRef.current = { ...queryRef.current, search: term };
+    queryRef.current = { ...queryRef.current, search: term, workQuery: '' };
+    setWorkQuery('');
     setSearch(term);
     void load();
   }, [load]);
@@ -73,10 +78,25 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   }, [load, nextCursor]);
 
   const applyDates = useCallback((dateRange: OrderDateRange | null) => {
-    queryRef.current = { ...queryRef.current, dateRange };
+    queryRef.current = { ...queryRef.current, dateRange, workQuery: '' };
+    setWorkQuery('');
     void load();
   }, [load]);
   const dates = useDateSelection(applyDates);
+  const resetDates = dates.reset;
+  const applyWorkQuery = useCallback((next: 'preparation') => {
+    queryRef.current = { status: '', search: '', dateRange: null, workQuery: next };
+    setStatusFilter('');
+    setSearch('');
+    setWorkQuery(next);
+    resetDates();
+    void load();
+  }, [load, resetDates]);
+  const clearWorkQuery = useCallback(() => {
+    queryRef.current = { ...queryRef.current, workQuery: '' };
+    setWorkQuery('');
+    void load();
+  }, [load]);
   const addOrder = useCallback((order: SellerOrder) => {
     setOrders((previous) => [order, ...previous]);
   }, []);
@@ -85,6 +105,7 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
     orders,
     statusFilter,
     search,
+    workQuery,
     ...dates,
     nextCursor,
     loading,
@@ -93,5 +114,7 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
     changeSearch,
     loadMore,
     addOrder,
+    applyWorkQuery,
+    clearWorkQuery,
   };
 }

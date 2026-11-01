@@ -205,3 +205,17 @@ it('sends the applied date range in the filtered CSV export URL', async () => {
   expect(statusText(host)).toBe('No orders match this filter.');
   await act(async () => root.unmount());
 });
+
+it('exports the shared preparation query without intersecting cleared filters', async () => {
+  const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response('header\r\n', {
+    headers: { 'X-Export-Count': '0' },
+  }));
+  const { host, root } = await mount(
+    <OrderExport status="pending" search="Rahim" fromDate="2026-10-01" workQuery="preparation" token="seller-token" />,
+  );
+  const filtered = 'Download filtered English CSV';
+  await click(host, filtered);
+  expect(fetcher.mock.calls[0][0]).toBe('/api/seller/orders/export?work_query=preparation');
+  expect(statusText(host)).toBe('No orders match this filter.');
+  await act(async () => root.unmount());
+});

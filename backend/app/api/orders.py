@@ -1,5 +1,5 @@
 import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from fastapi import APIRouter, Depends, Header, Query, Response
 from sqlalchemy.exc import SQLAlchemyError
@@ -18,6 +18,7 @@ from app.models.order import (
 from app.models.payment_decision import PaymentDecision, PaymentDecisionEvent, PaymentPreview, PaymentSummary
 from app.models.replacement import OrderReplacementInput
 from app.services.buyer_correction import correct, history
+from app.services.delivery_preparation import PREPARATION_QUERY, preparation_preview
 from app.services.delivery_staging import label_orders
 from app.services.order_replacement import replace_order
 from app.services.order_service import OrderService
@@ -76,6 +77,7 @@ async def list_orders(
     search: Optional[str] = Query(None, max_length=200),
     from_date: Optional[datetime.date] = Query(None),
     to_date: Optional[datetime.date] = Query(None),
+    work_query: Optional[Literal["preparation"]] = Query(None),
     seller: SellerIdentity = Depends(get_seller_identity),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> SellerOrderListResponse:
@@ -84,6 +86,14 @@ async def list_orders(
     shop = await seller_svc.get_shop_by_owner(seller.owner_id)
     if not shop:
         return SellerOrderListResponse(items=[], next_cursor=None)
+
+    if work_query == PREPARATION_QUERY:
+        preview = await preparation_preview(db, shop.id, cursor=cursor, limit=limit)
+        await label_orders(db, shop.id, [item.order for item in preview.items])
+        return SellerOrderListResponse(
+            items=[item.order for item in preview.items],
+            next_cursor=preview.next_cursor,
+        )
 
     order_svc = OrderService(db)
     items, next_cursor = await order_svc.list_orders(
