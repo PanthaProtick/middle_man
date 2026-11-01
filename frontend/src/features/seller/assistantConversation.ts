@@ -1,8 +1,9 @@
 import type { Locale } from '../locale/storage';
+import type { OrderFields } from './guidedOrder';
 
 export type AssistantWorkflow = 'order' | 'payment' | 'attention' | 'preparation';
 export type CreationWorkflow = Extract<AssistantWorkflow, 'order' | 'payment'>;
-export interface AssistantDraft { workflow: CreationWorkflow; value: string }
+export interface AssistantDraft { workflow: CreationWorkflow; value: string; order?: OrderFields }
 export const workflows: AssistantWorkflow[] = ['order', 'payment', 'attention', 'preparation'];
 export const isCreation = (workflow: AssistantWorkflow): workflow is CreationWorkflow =>
   workflow === 'order' || workflow === 'payment';

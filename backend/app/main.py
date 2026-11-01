@@ -12,6 +12,7 @@ from starlette.middleware.base import RequestResponseEndpoint
 from app.api.courier import router as courier_router
 from app.api.link_access import router as link_access_router
 from app.api.order_export import router as order_export_router
+from app.api.order_submissions import router as order_submissions_router
 from app.api.orders import router as orders_router
 from app.api.pathao import router as pathao_router
 from app.api.public_orders import router as public_orders_router
@@ -150,6 +151,7 @@ app.include_router(api_router, prefix=settings.API_PREFIX)
 app.include_router(seller_router, prefix=settings.API_PREFIX)
 app.include_router(structured_retention_router, prefix=settings.API_PREFIX)
 app.include_router(order_export_router, prefix=settings.API_PREFIX)
+app.include_router(order_submissions_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
 app.include_router(review_assistance_router, prefix=settings.API_PREFIX)
 app.include_router(courier_router, prefix=settings.API_PREFIX)

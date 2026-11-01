@@ -123,7 +123,8 @@ export function SellerWorkspace({
   const state = loading ? 'loading' : errorText && !shop && !setupNeeded ? 'error' : null;
 
   return (
-    <AssistantWorkspace key={JSON.stringify([token, shop?.id])} floating>
+    <AssistantWorkspace key={JSON.stringify([token, shop?.id])} floating accounts={accounts} token={token}
+      onOrderCreated={() => { void reloadOrders(); }}>
     {state ? <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn} onRetry={retry} /> : <div className="card">
       <WorkspaceHeader
         displayTitle={setupNeeded ? text.setup : (shop?.display_name || text.workspace)}

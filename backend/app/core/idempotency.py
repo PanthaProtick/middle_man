@@ -27,7 +27,7 @@ async def check_idempotency_record(
     key: Optional[str],
     scope: str,
     operation: str,
-    payload_hash: str,
+    payload_hash: str | None,
     *,
     for_update: bool = False,
 ) -> Optional[Tuple[int, Any]]:
@@ -44,7 +44,7 @@ async def check_idempotency_record(
             if json.loads(record.response_json) == {'record_unavailable': True}:
                 from app.services.retention_access import unavailable_record
                 raise unavailable_record()
-            if record.payload_hash != payload_hash:
+            if payload_hash is not None and record.payload_hash != payload_hash:
                 from app.services.seller_service import IdempotencyConflictError
                 raise IdempotencyConflictError()
             return int(record.status_code), json.loads(str(record.response_json))
@@ -55,7 +55,7 @@ async def check_idempotency_record(
             if rec['data'] == {'record_unavailable': True}:
                 from app.services.retention_access import unavailable_record
                 raise unavailable_record()
-            if rec["payload_hash"] != payload_hash:
+            if payload_hash is not None and rec["payload_hash"] != payload_hash:
                 from app.services.seller_service import IdempotencyConflictError
                 raise IdempotencyConflictError()
             return int(rec["status_code"]), rec["data"]

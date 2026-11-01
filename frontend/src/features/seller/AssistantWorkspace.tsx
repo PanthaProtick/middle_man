@@ -3,14 +3,16 @@ import './ReviewAssistantSidePanel.css';
 import { AssistantWorkspaceContext as Context } from './useAssistantWorkspace';
 import { useLocale } from '../locale';
 import './SellerAssistant.css';
-import { useAssistantConversation } from './useAssistantConversation';
+import { useAssistantConversation, type ConversationOptions } from './useAssistantConversation';
 import { AssistantWindow } from './AssistantWindow';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import { createPortal } from 'react-dom';
+import { OrderDetailModal } from './OrderDetailModal';
+import type { SellerOrder } from './types';
 
-interface Props { children: React.ReactNode; eligibleOrderIds?: string[]; floating?: boolean }
+interface Props extends ConversationOptions { children: React.ReactNode; eligibleOrderIds?: string[]; floating?: boolean }
 
-export function AssistantWorkspace({ children, eligibleOrderIds = [], floating = false }: Props): React.JSX.Element {
+export function AssistantWorkspace({ children, eligibleOrderIds = [], floating = false, ...options }: Props): React.JSX.Element {
   const parent = useContext(Context);
   const setEligible = parent?.setEligible;
   const eligibilityKey = JSON.stringify(eligibleOrderIds);
@@ -19,12 +21,13 @@ export function AssistantWorkspace({ children, eligibleOrderIds = [], floating =
     setEligible(JSON.parse(eligibilityKey) as string[]);
     return () => setEligible([]);
   }, [setEligible, eligibilityKey]);
-  return parent ? <>{children}</> : <OwnedWorkspace floating={floating} eligibleOrderIds={eligibleOrderIds}>{children}</OwnedWorkspace>;
+  return parent ? <>{children}</> : <OwnedWorkspace {...options} floating={floating} eligibleOrderIds={eligibleOrderIds}>{children}</OwnedWorkspace>;
 }
 
-function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false }: Props): React.JSX.Element {
+function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...options }: Props): React.JSX.Element {
   const { locale } = useLocale();
-  const conversation = useAssistantConversation(locale);
+  const [openedOrder, setOpenedOrder] = useState<SellerOrder | null>(null);
+  const conversation = useAssistantConversation(locale, { ...options, onOpenOrder: setOpenedOrder });
   const [registeredIds, setEligible] = useState<string[] | null>(null);
   const [generalOpen, setGeneralOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -74,6 +77,7 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false }: P
   }}>
     <div ref={rootRef} className={`assistant-workspace${floating ? ' seller-assistant-workspace' : ''}${activeId || generalOpen ? ' assistant-workspace-open' : ''}`}>
       <div className="assistant-orders">{children}</div>
+      {openedOrder && <OrderDetailModal order={openedOrder} token={options.token} onClose={() => setOpenedOrder(null)} />}
       {!modalId && <div className="assistant-slot" ref={setListTarget} />}
       {floating && (modalId ? target && createPortal(launcher, target) : launcher)}
       {floating && (activeId || generalOpen) && <AssistantWindow target={target} conversation={conversation}

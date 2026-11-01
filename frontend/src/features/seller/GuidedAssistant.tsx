@@ -2,6 +2,8 @@ import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import { workflows } from './assistantConversation';
 import type { AssistantConversation as Conversation } from './useAssistantConversation';
 import { AssistantDiscardPrompt } from './AssistantDiscardPrompt';
+import { GuidedOrderFields } from './GuidedOrderFields';
+import { GuidedOrderResult } from './GuidedOrderResult';
 
 export function AssistantConversation({ conversation }: { conversation: Conversation }): React.JSX.Element {
   const c = conversation;
@@ -16,11 +18,14 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
     </div>
     <div className="assistant-workflow-choices">
       {workflows.map(workflow => <button key={workflow} type="button" className="btn btn-secondary btn-sm"
-        disabled={Boolean(c.pending)} onClick={() => c.select(workflow)}>{text[workflow]}</button>)}
+        disabled={Boolean(c.pending) || (c.submission.locked && (workflow === 'order' || workflow === 'payment'))}
+        onClick={() => c.select(workflow)}>{text[workflow]}</button>)}
     </div>
     {c.workflow && <section data-testid="assistant-workflow" aria-label={text[c.workflow]}>
       <h4>{text[c.workflow]}</h4>
-      {c.draft?.workflow === c.workflow ? <>
+      {c.completedOrder && c.workflow === 'order' ? <GuidedOrderResult order={c.completedOrder} locale={c.locale} token={c.token} onOpenOrder={c.openOrder} />
+      : c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
+      : c.draft?.workflow === c.workflow ? <>
         <p>{text.draftHelp}</p>
         <label>{c.workflow === 'order' ? text.orderField : text.paymentField}
           <input name="assistant-draft" value={c.draft.value} maxLength={500} disabled={Boolean(c.pending)}
@@ -31,7 +36,7 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
     {c.draft && <div className="assistant-draft-status">
       <p>{text.draft}: {text[c.draft.workflow]}</p>
       <button type="button" className="btn btn-secondary btn-sm" onClick={c.resume} disabled={Boolean(c.pending)}>{text.resume}</button>
-      <button type="button" className="btn btn-secondary btn-sm" onClick={c.requestDiscard} disabled={Boolean(c.pending)}>{text.discard}</button>
+      <button type="button" className="btn btn-secondary btn-sm" onClick={c.requestDiscard} disabled={Boolean(c.pending) || c.submission.locked}>{text.discard}</button>
     </div>}
     {c.pending && <AssistantDiscardPrompt conversation={c} />}
     <form onSubmit={event => {

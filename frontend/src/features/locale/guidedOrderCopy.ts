@@ -1,0 +1,31 @@
+const en = {
+  help: 'Use product: Shirt; total: BDT 1,250; advance: 200; account: Main. Or edit the fields below. Nothing is saved until you click Create order.',
+  missing: 'Please supply or correct all highlighted fields. Amounts must be positive and unambiguous; advance cannot exceed total.',
+  value: 'Product name', total: 'Order total (BDT)', advance: 'Required advance (BDT)', account: 'Receiving account',
+  weight: 'Weight in kg (optional)', quantity: 'Quantity (optional)', choose: 'Choose an active account',
+  summary: 'Ready to create', create: 'Create order', processing: 'Still processing. Keep this action open.',
+  unknown: 'Outcome unknown. Check this submission before changing fields or creating another order.',
+  check: 'Check submission', retry: 'No saved result found. You can retry the same confirmed submission.',
+  retryButton: 'Retry confirmed submission', failed: 'Could not save. Your fields are preserved. Correct them or try again.',
+  reset: 'Submission storage changed after a server restart. Review your orders before discarding this action and starting again.',
+  unavailable: 'This saved result was removed by retention. This identity cannot create another order. Discard this action to start a new one.',
+  conflict: 'This identity belongs to a different confirmed payload. Check the original submission.',
+  succeeded: 'Awaiting buyer', copy: 'Copy link', copied: 'Copied', copyFailed: 'Copy failed. Select the link to copy it.',
+  open: 'Open order', refresh: 'Refresh accounts', refreshing: 'Refreshing accounts…', refreshFailed: 'Could not refresh accounts. Try again.',
+};
+const bn: typeof en = {
+  help: 'এভাবে লিখুন: পণ্য: শার্ট; মোট: ৳১,২৫০; অগ্রিম: ২০০; অ্যাকাউন্ট: Main। নিচের ঘরগুলোও সম্পাদনা করতে পারেন। অর্ডার তৈরি বোতাম চাপার আগে কিছু সংরক্ষিত হবে না।',
+  missing: 'চিহ্নিত সব ঘর পূরণ বা সংশোধন করুন। টাকার পরিমাণ স্পষ্ট ও শূন্যের বেশি হতে হবে; অগ্রিম মোটের বেশি হবে না।',
+  value: 'পণ্যের নাম', total: 'অর্ডারের মোট (BDT)', advance: 'প্রয়োজনীয় অগ্রিম (BDT)', account: 'টাকা গ্রহণের অ্যাকাউন্ট',
+  weight: 'ওজন কেজিতে (ঐচ্ছিক)', quantity: 'পরিমাণ (ঐচ্ছিক)', choose: 'সক্রিয় অ্যাকাউন্ট বেছে নিন',
+  summary: 'তৈরির জন্য প্রস্তুত', create: 'অর্ডার তৈরি করুন', processing: 'এখনও প্রক্রিয়াধীন। এই কাজটি খোলা রাখুন।',
+  unknown: 'ফলাফল নিশ্চিত নয়। তথ্য বদলানো বা আরেকটি অর্ডারের আগে এই অনুরোধের ফল দেখুন।',
+  check: 'অনুরোধের ফল দেখুন', retry: 'সংরক্ষিত ফল পাওয়া যায়নি। একই নিশ্চিত অনুরোধ আবার পাঠাতে পারেন।',
+  retryButton: 'নিশ্চিত অনুরোধ আবার পাঠান', failed: 'সংরক্ষণ হয়নি। তথ্য রাখা আছে। সংশোধন করুন বা আবার চেষ্টা করুন।',
+  reset: 'সার্ভার পুনরায় চালু হওয়ায় অনুরোধের সংরক্ষণ বদলেছে। এই কাজ বাদ দিয়ে নতুন করে শুরুর আগে অর্ডারের তালিকা দেখুন।',
+  unavailable: 'সংরক্ষণ নীতি অনুযায়ী এই ফল মুছে গেছে। একই পরিচয়ে আর অর্ডার তৈরি হবে না। নতুন করে শুরু করতে এই কাজ বাদ দিন।',
+  conflict: 'এই পরিচয়ে অন্য তথ্য নিশ্চিত করা হয়েছে। আগের অনুরোধের ফল দেখুন।',
+  succeeded: 'ক্রেতার অপেক্ষায়', copy: 'লিংক কপি', copied: 'কপি হয়েছে', copyFailed: 'কপি হয়নি। লিংক নির্বাচন করে কপি করুন।',
+  open: 'অর্ডার খুলুন', refresh: 'অ্যাকাউন্ট হালনাগাদ করুন', refreshing: 'অ্যাকাউন্ট হালনাগাদ হচ্ছে…', refreshFailed: 'অ্যাকাউন্ট হালনাগাদ হয়নি। আবার চেষ্টা করুন।',
+};
+export const guidedOrderCopy = { en, bn };
