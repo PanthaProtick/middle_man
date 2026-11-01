@@ -1,0 +1,106 @@
+.seller-assistant-launcher {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+}
+.seller-assistant-workspace .assistant-slot:has(.seller-assistant-window, .review-assistant-side-panel) {
+  position: fixed;
+  right: 20px;
+  bottom: 80px;
+  width: min(400px, calc(100vw - 40px));
+  max-height: 70dvh;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 16px;
+  z-index: 45;
+  box-shadow: 0 12px 40px #0003;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  display: flex;
+  flex-direction: column;
+}
+.seller-assistant-workspace:has(> .assistant-slot .review-assistant-side-panel) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.seller-assistant-window:focus-visible {
+  outline: 2px solid var(--primary-accent);
+  outline-offset: -2px;
+}
+.seller-assistant-workspace .assistant-slot .review-assistant-side-panel {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  padding: 12px 0 0;
+  border: 0;
+}
+.assistant-window-header, .assistant-context-controls,
+.assistant-workflow-choices, .assistant-draft-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.assistant-window-header {
+  justify-content: space-between;
+}
+.assistant-window-header h3 { margin: 0; }
+.seller-assistant-window label {
+  display: grid;
+  gap: 6px;
+  margin-block: 12px;
+}
+.seller-assistant-window :is(input, textarea, select) {
+  width: 100%;
+  box-sizing: border-box;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 10px;
+  font: inherit;
+}
+.seller-assistant-window textarea { min-height: 72px; resize: vertical; }
+.assistant-conversation [role="log"] { overflow-wrap: anywhere; }
+.assistant-user-message {
+  padding: 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle);
+  white-space: pre-wrap;
+}
+.assistant-context-label { color: var(--text-secondary); font-size: .85rem; }
+.assistant-conversation [role="alertdialog"] {
+  border: 2px solid var(--primary-accent);
+  border-radius: 10px;
+  padding: 12px;
+}
+.seller-assistant-workspace .order-detail-layout:has(.seller-assistant-window) {
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (max-width: 800px) {
+  .seller-assistant-workspace .assistant-slot:has(.seller-assistant-window, .review-assistant-side-panel) {
+    inset: auto 0 0;
+    width: auto;
+    max-height: calc(100dvh - 72px);
+    border-radius: 16px 16px 0 0;
+    padding-bottom: max(16px, env(safe-area-inset-bottom));
+  }
+  .seller-assistant-workspace:has(> .assistant-slot .review-assistant-side-panel) > .assistant-orders,
+  .seller-assistant-workspace .order-detail-layout:has(.review-assistant-side-panel) > .order-detail-main {
+    display: block;
+  }
+  .seller-assistant-workspace .order-detail-dialog:has(.seller-assistant-window) {
+    height: auto;
+    max-height: calc(100dvh - 16px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seller-assistant-workspace .assistant-slot *, .seller-assistant-launcher {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}

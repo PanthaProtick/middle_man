@@ -30,9 +30,10 @@ export function ReviewAssistant(props: ReviewAssistantProps): React.JSX.Element 
 }
 
 function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, onAction, withinModal = false, selectionUnavailable }: ReviewAssistantProps): React.JSX.Element {
-  const { locale } = useLocale();
-  const text = reviewAssistanceCopy[locale];
+  const { locale: appLocale } = useLocale();
   const workspace = useAssistantWorkspace();
+  const locale = workspace?.conversationLocale ?? appLocale;
+  const text = reviewAssistanceCopy[locale];
   const [localOpen, setLocalOpen] = useState(false);
   const triggerRef = useRef<HTMLButtonElement>(null);
   const panelRef = useRef<HTMLElement>(null);
@@ -112,10 +113,12 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
   useEffect(() => {
     if (!isOpen) return;
     void refresh();
-    panelRef.current?.focus();
     // Context remounts revalidate local guidance; never generate automatically.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
+  useEffect(() => {
+    if (isOpen) panelRef.current?.focus();
+  }, [isOpen, workspace?.target]);
   useEffect(() => {
     if (!isOpen) return;
     const escape = (event: KeyboardEvent) => {
@@ -127,7 +130,7 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
   });
 
   const panel = isOpen && <aside ref={panelRef} tabIndex={-1} className="review-assistant-side-panel"
-    aria-label={text.askAi}>
+    aria-label={text.askAi} lang={locale}>
     <h3>{order.product_name}</h3><p>{order.id}</p>
     <button type="button" className={`btn btn-secondary assistant-back${selectionUnavailable ? ' assistant-back-required' : ''}`} onClick={() => close()}>{text.backToOrder}</button>
     {selectionUnavailable ? <div data-testid="review-assistant-panel" role="region" aria-label={text.askAi}>

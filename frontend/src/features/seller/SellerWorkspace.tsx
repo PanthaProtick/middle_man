@@ -22,6 +22,7 @@ import { useSellerOrders } from './useSellerOrders';
 import { useTransactionInbox } from './useTransactionInbox';
 import { useTodayMetrics } from './useTodayMetrics';
 import { useUnseenEntries } from './useUnseenEntries';
+import { AssistantWorkspace } from './AssistantWorkspace';
 
 export type WorkspaceSection = 'orders' | 'payments' | 'accounts' | 'retention';
 
@@ -120,10 +121,10 @@ export function SellerWorkspace({
     !loading && !setupNeeded);
   if (!token) return <WorkspaceState state="signedOut" onSignIn={onSignIn} onRetry={() => undefined} />;
   const state = loading ? 'loading' : errorText && !shop && !setupNeeded ? 'error' : null;
-  if (state) return <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn} onRetry={retry} />;
 
   return (
-    <div className="card">
+    <AssistantWorkspace key={JSON.stringify([token, shop?.id])} floating>
+    {state ? <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn} onRetry={retry} /> : <div className="card">
       <WorkspaceHeader
         displayTitle={setupNeeded ? text.setup : (shop?.display_name || text.workspace)}
         setupNeeded={setupNeeded}
@@ -271,6 +272,7 @@ export function SellerWorkspace({
           onError={setError}
         />
       )}
-    </div>
+    </div>}
+    </AssistantWorkspace>
   );
 }

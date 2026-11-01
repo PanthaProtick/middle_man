@@ -68,7 +68,7 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
     followModal?.(order.id);
     return () => followModal?.(null);
   }, [order.id, followModal]);
-  const requestClose = () => { if (assistant?.activeId) assistant.close(); else onClose(); };
+  const requestClose = () => { if (assistant?.isOpen) assistant.close(); else onClose(); };
   const isConfirmed = order.lifecycle === 'confirmed';
   const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
 
