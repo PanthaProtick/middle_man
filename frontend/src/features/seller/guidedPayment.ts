@@ -62,8 +62,12 @@ export function paymentMessage(message: string, accounts: PaymentAccount[]): Par
   for (const [index, match] of matches.entries()) {
     const key = keys[match.groups!.label.toLowerCase()];
     if (!key) continue;
-    const value = message.slice(match.index! + match[0].length, matches[index + 1]?.index)
-      .trim().replace(/[;,]+$/, '').trim();
+    const next = matches[index + 1];
+    const raw = message.slice(match.index! + match[0].length, next?.index).trim();
+    // The next label may consume its separator; otherwise remove only that separator.
+    const value = key === 'trxId'
+      ? (next && /^\s/.test(next[0]) ? raw.replace(/[;,]$/, '').trim() : raw)
+      : raw.replace(/[;,]+$/, '').trim();
     patch[key] = key === 'account' ? resolvePaymentAccount(value, accounts) : value;
   }
   return patch;

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { hasMultiplePaymentFields, paymentMessage, paymentSummary, resolvePaymentAccount } from './guidedPayment';
+import { emptyPaymentFields, hasMultiplePaymentFields, paymentMessage, paymentSummary, resolvePaymentAccount } from './guidedPayment';
 import type { PaymentAccount } from './types';
 
 const account = (overrides: Partial<PaymentAccount> = {}): PaymentAccount => ({
@@ -58,4 +58,16 @@ it('reports every missing or invalid field together without dropping valid input
 it('flags repeated field labels so an ambiguous message is clarified instead of overwritten', () => {
   expect(hasMultiplePaymentFields('account: Main; account: Nagad')).toBe(true);
   expect(hasMultiplePaymentFields('account: Main; trx id: A; amount: 5')).toBe(false);
+});
+
+it.each(['AbC;', 'AbC,', 'ExAct  ID;,'])('preserves terminal identifier punctuation: %s', trxId => {
+  expect(paymentMessage(`trx id:  ${trxId}  `, accounts)).toEqual({ trxId });
+  expect(paymentMessage(`trx id: ${trxId}; amount: 100`, accounts)).toEqual({ trxId, amount: '100' });
+  expect(paymentMessage(`trx id: ${trxId};amount: 100`, accounts)).toEqual({ trxId, amount: '100' });
+});
+
+it('keeps a Bengali conversational identifier intact through payload construction', () => {
+  const patch = paymentMessage('অ্যাকাউন্ট: Main; টাকা: ১০০; আইডি: ExAct  ID;,', accounts);
+  expect(paymentSummary({ ...emptyPaymentFields(), ...patch }, accounts).payload)
+    .toMatchObject({ trx_id: 'ExAct  ID;,', amount_minor: 10000 });
 });

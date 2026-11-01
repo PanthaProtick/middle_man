@@ -74,3 +74,19 @@ concurrency/rollback, and live payment-provider behavior are not run. Mock DOM a
 offline-memory tests do not prove those. Automated verification made zero live Gemini
 or payment-provider calls. Next: commit this change on `main`, then ticket 04 when
 requested.
+
+## Review fixes — 2026-11-01
+
+- Fixed conversational transaction-ID parsing to preserve terminal commas and
+  semicolons, exact case, and internal spacing. Only a field separator before a
+  following recognized label is removed. Added English punctuation cases and a
+  Bengali parser-to-payload regression.
+- Extracted `useConfirmedSubmission` to own the shared order/payment identity,
+  in-flight guard, frozen states, submission, lookup, and retry transitions.
+  Workflow adapters retain endpoint, response shape, and error-message policy.
+- Focused checks: payment parser 9 passed; guided payment entry/outcomes and order
+  creation 16 passed. Root `npm run check` passed with repository-local pytest
+  temp storage (`PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-ticket03-fix`).
+  Evidence: `.cache/checks/check-AYhPld/result.json`.
+- Browser/mobile, hosted authentication, PostgreSQL concurrency/rollback, and live
+  provider acceptance remain unrun. Next: those acceptance gates when available.
