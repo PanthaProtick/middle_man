@@ -133,9 +133,9 @@ export function SellerWorkspace({
         handleSectionSelect('payments');
         handleTransactionsSearchChange(receiptId);
       }}
-      onShowInDashboard={() => {
+      onShowInDashboard={(query) => {
         handleSectionSelect('orders');
-        applyWorkQuery('preparation');
+        applyWorkQuery(query);
       }}>
     {state ? <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn} onRetry={retry} /> : <div className="card">
       <WorkspaceHeader

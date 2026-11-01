@@ -17,6 +17,7 @@ from app.models.order import (
 )
 from app.models.payment_decision import PaymentDecision, PaymentDecisionEvent, PaymentPreview, PaymentSummary
 from app.models.replacement import OrderReplacementInput
+from app.services.attention import ATTENTION_QUERY, attention_preview
 from app.services.buyer_correction import correct, history
 from app.services.delivery_preparation import PREPARATION_QUERY, preparation_preview
 from app.services.delivery_staging import label_orders
@@ -77,7 +78,7 @@ async def list_orders(
     search: Optional[str] = Query(None, max_length=200),
     from_date: Optional[datetime.date] = Query(None),
     to_date: Optional[datetime.date] = Query(None),
-    work_query: Optional[Literal["preparation"]] = Query(None),
+    work_query: Optional[Literal["preparation", "attention"]] = Query(None),
     seller: SellerIdentity = Depends(get_seller_identity),
     db: Optional[AsyncSession] = Depends(get_db),
 ) -> SellerOrderListResponse:
@@ -87,8 +88,12 @@ async def list_orders(
     if not shop:
         return SellerOrderListResponse(items=[], next_cursor=None)
 
-    if work_query == PREPARATION_QUERY:
-        preview = await preparation_preview(db, shop.id, cursor=cursor, limit=limit)
+    if work_query in (PREPARATION_QUERY, ATTENTION_QUERY):
+        preview = (
+            await attention_preview(db, shop.id, cursor=cursor, limit=limit)
+            if work_query == ATTENTION_QUERY
+            else await preparation_preview(db, shop.id, cursor=cursor, limit=limit)
+        )
         await label_orders(db, shop.id, [item.order for item in preview.items])
         return SellerOrderListResponse(
             items=[item.order for item in preview.items],

@@ -12,7 +12,7 @@ class ExportFilters(BaseModel):
     search: str | None = Field(None, max_length=200)
     from_date: datetime.date | None = None
     to_date: datetime.date | None = None
-    work_query: Literal['preparation'] | None = None
+    work_query: Literal['preparation', 'attention'] | None = None
     limit: int = Field(500, ge=1, le=500)
 
 

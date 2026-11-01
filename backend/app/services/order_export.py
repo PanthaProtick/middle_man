@@ -12,6 +12,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.tokens import get_utc_now
 from app.models.entities import AllocationTable, AuditEventTable, BuyerRevisionTable, OrderTable, ShopTable
 from app.models.order_export import ExportFilters, OrderStatus, OrderSummary
+from app.services.attention import attention_clause
+from app.services.attention_memory import memory_attention_facts
 from app.services.delivery_preparation import memory_awaiting_preparation, preparation_clause
 from app.services.order_dates import order_created_bounds, within_order_dates
 from app.services.order_search import (
@@ -60,6 +62,8 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                         OrderTable.shop_id == shop_id, OrderTable.retained_at.is_(None))
         if filters.work_query == 'preparation':
             query = query.where(preparation_clause())
+        elif filters.work_query == 'attention':
+            query = query.where(attention_clause())
         else:
             if filters.status:
                 query = query.where(lifecycle == filters.status)
@@ -104,21 +108,29 @@ async def summaries(db: AsyncSession | None, shop_id: str, actor: str,
                 continue
             _check_and_apply_expiry(raw, now)
             memory_buyer = memory_buyer_revision(str(raw['id']), raw.get('buyer_revision'))
-            matches = (
-                (not order_id or raw['id'] == order_id)
-                and memory_awaiting_preparation(str(raw['id']), raw)
-            ) if filters.work_query == 'preparation' else (
-                (not filters.status or raw['lifecycle'] == filters.status)
-                and (not order_id or raw['id'] == order_id)
-                and within_order_dates(raw['created_at'], created_from, created_to)
-                and matches_order_search(
-                    filters.search,
-                    order_id=str(raw['id']),
-                    product_name=str(raw.get('product_name', '')),
-                    buyer_name=str(memory_buyer.get('buyer_name', '')),
-                    contact_number_canonical=memory_buyer.get('contact_number_canonical'),
+            if filters.work_query == 'preparation':
+                matches = (
+                    (not order_id or raw['id'] == order_id)
+                    and memory_awaiting_preparation(str(raw['id']), raw)
                 )
-            )
+            elif filters.work_query == 'attention':
+                matches = (
+                    (not order_id or raw['id'] == order_id)
+                    and memory_attention_facts(str(raw['id']), raw) is not None
+                )
+            else:
+                matches = (
+                    (not filters.status or raw['lifecycle'] == filters.status)
+                    and (not order_id or raw['id'] == order_id)
+                    and within_order_dates(raw['created_at'], created_from, created_to)
+                    and matches_order_search(
+                        filters.search,
+                        order_id=str(raw['id']),
+                        product_name=str(raw.get('product_name', '')),
+                        buyer_name=str(memory_buyer.get('buyer_name', '')),
+                        contact_number_canonical=memory_buyer.get('contact_number_canonical'),
+                    )
+                )
             if matches:
                 selected.append(raw)
                 if len(selected) > filters.limit:

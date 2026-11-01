@@ -186,7 +186,7 @@ export async function fetchOrders(
     search?: string;
     fromDate?: string;
     toDate?: string;
-    workQuery?: 'preparation';
+    workQuery?: 'preparation' | 'attention';
   } = {},
   token?: string,
 ): Promise<SellerOrderListResponse> {

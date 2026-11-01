@@ -7,6 +7,7 @@ import { GuidedOrderResult } from './GuidedOrderResult';
 import { GuidedPaymentFields } from './GuidedPaymentFields';
 import { GuidedPaymentResult } from './GuidedPaymentResult';
 import { PreparationPreview } from './PreparationPreview';
+import { AttentionPreview } from './AttentionPreview';
 
 export function AssistantConversation({ conversation }: { conversation: Conversation }): React.JSX.Element {
   const c = conversation;
@@ -32,10 +33,14 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
       : c.completedOrder && c.workflow === 'order' ? <GuidedOrderResult order={c.completedOrder} locale={c.locale} token={c.token} onOpenOrder={c.openOrder} />
       : c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
       : c.draft?.workflow === 'payment' && c.workflow === 'payment' ? <GuidedPaymentFields conversation={c} />
+      : c.workflow === 'attention' ? <AttentionPreview
+        locale={c.locale} state={c.attention}
+        onRefresh={c.attention.refresh} onLoadMore={c.attention.loadMore}
+        onOpenOrder={c.openOrder} onShowInDashboard={() => c.showInDashboard('attention')} />
       : c.workflow === 'preparation' ? <PreparationPreview
         locale={c.locale} state={c.preparation}
         onRefresh={c.preparation.refresh} onLoadMore={c.preparation.loadMore}
-        onOpenOrder={c.openOrder} onShowInDashboard={c.showInDashboard} />
+        onOpenOrder={c.openOrder} onShowInDashboard={() => c.showInDashboard('preparation')} />
       : c.draft?.workflow === c.workflow ? <>
         <p>{text.draftHelp}</p>
         <label>{c.workflow === 'order' ? text.orderField : text.paymentField}

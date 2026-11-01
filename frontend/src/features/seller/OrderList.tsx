@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { AssistantWorkspace } from './AssistantWorkspace';
 import { ShoppingBag } from 'lucide-react';
-import type { SellerOrder } from './types';
+import type { SellerOrder, WorkQuery } from './types';
 import { useLocale } from '../locale/context';
 import { orderCopy, lifecycleLabel } from '../locale/orderCopy';
 import { OrderDetailModal } from './OrderDetailModal';
 import { OrderExport } from './OrderExport';
 import { OrderWorkQueryBanner } from './OrderWorkQueryBanner';
 import { deliveryPreparationCopy } from '../locale/deliveryPreparationCopy';
+import { attentionCopy } from '../locale/attentionCopy';
 import { OrderDateControls } from './OrderDateControls';
 import { OrderCard } from './OrderCard';
 import type { OrderDateError, OrderDateMode, OrderDateRange } from './orderDateFilter';
@@ -20,7 +21,7 @@ interface OrderListProps {
   orders: SellerOrder[];
   statusFilter: string;
   onFilterChange: (status: string) => void;
-  workQuery?: 'preparation' | '';
+  workQuery?: WorkQuery | '';
   onClearWorkQuery?: () => void;
   nextCursor: string | null;
   onLoadMore: () => void;
@@ -165,7 +166,7 @@ export function OrderList({
         </div>
       </div>
 
-      {workQuery === 'preparation' && <OrderWorkQueryBanner onClear={onClearWorkQuery} />}
+      {workQuery && <OrderWorkQueryBanner query={workQuery} onClear={onClearWorkQuery} />}
 
       <OrderDateControls
         mode={dateMode}
@@ -206,7 +207,8 @@ export function OrderList({
         ) : orders.length === 0 ? (
           <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
             <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-              {workQuery === 'preparation' ? deliveryPreparationCopy[locale].dashboardEmpty
+              {workQuery ? (workQuery === 'attention'
+                ? attentionCopy[locale].dashboardEmpty : deliveryPreparationCopy[locale].dashboardEmpty)
                 : search.trim() ? text.noMatches : appliedDateRange ? text.noDateMatches : text.empty}
             </p>
           </div>

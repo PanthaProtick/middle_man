@@ -61,7 +61,7 @@ Routers are split by workflow rather than one central routes module:
 | `api/routes.py` | `/api` health, Gemini demos, in-memory items, team sample |
 | `api/seller.py` | `/api/seller` shop/account/session/bootstrap endpoints |
 | `api/orders.py` | `/api/seller` order creation, decisions, buyer details, history |
-| `api/work_queries.py` | `/api/seller/work-queries` shared delivery-preparation preview |
+| `api/work_queries.py` | `/api/seller/work-queries` shared preparation and attention previews |
 | `api/order_export.py` | `/api/seller/orders` search, date filtering, CSV export |
 | `api/link_access.py` | `/api/seller/orders` buyer-link revoke/reissue |
 | `api/public_orders.py` | `/api/public/orders` public reads, submission, Pathao locations |

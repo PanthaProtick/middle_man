@@ -222,3 +222,27 @@ it('shows the shared work-query banner and a work-query-specific empty state', a
   await act(async () => clear.click());
   expect(onClear).toHaveBeenCalledOnce();
 });
+
+it('shows the attention banner and attention-specific empty state', async () => {
+  const onClear = vi.fn();
+  const { host } = await mount(
+    <LocaleProvider>
+      <OrderList
+        token="test-token"
+        orders={[]}
+        statusFilter=""
+        onFilterChange={() => undefined}
+        workQuery="attention"
+        onClearWorkQuery={onClear}
+        nextCursor={null}
+        onLoadMore={() => undefined}
+      />
+    </LocaleProvider>,
+  );
+
+  expect(host.querySelector('[role="status"]')?.textContent).toContain('shared attention query');
+  expect(host.textContent).toContain('No orders currently need attention.');
+  const clear = Array.from(host.querySelectorAll('button')).find(item => item.textContent === 'Clear work filter')!;
+  await act(async () => clear.click());
+  expect(onClear).toHaveBeenCalledOnce();
+});

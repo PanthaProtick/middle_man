@@ -7,6 +7,7 @@ import {
 } from './guidedPayment';
 import { useGuidedOrderSubmission } from './useGuidedOrderSubmission';
 import { useGuidedPaymentSubmission } from './useGuidedPaymentSubmission';
+import { useAttentionQuery } from './useAttentionQuery';
 import { usePreparationQuery } from './usePreparationQuery';
 import { fetchPaymentAccounts } from './api';
 import type { PaymentAccount, RecordedTransactionResult, SellerOrder, WorkQuery } from './types';
@@ -41,6 +42,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     setCompletedPayment(result); setDraft(null); options.onPaymentRecorded?.(result);
   });
   const preparation = usePreparationQuery(options.token);
+  const attention = useAttentionQuery(options.token);
   const locked = orderSubmission.locked || paymentSubmission.locked;
   const frozen = orderSubmission.frozen || paymentSubmission.frozen;
   const updateOrder = (patch: Partial<OrderFields & { value: string }>) => {
@@ -70,10 +72,12 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     }
     setWorkflow(next);
     if (next === 'preparation') void preparation.refresh();
+    if (next === 'attention') void attention.refresh();
   };
   const reset = () => {
     orderSubmission.reset(); paymentSubmission.reset();
     preparation.reset();
+    attention.reset();
     setCompletedOrder(null); setCompletedPayment(null);
     setMessages([]); setInput(''); setWorkflow(null); setDraft(null); setPending(null);
   };
@@ -83,7 +87,8 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     openOrder: (order: SellerOrder) => options.onOpenOrder?.(order),
     openPayment: (receiptId: string) => options.onOpenPayment?.(receiptId),
     preparation,
-    showInDashboard: () => options.onShowInDashboard?.('preparation'),
+    attention,
+    showInDashboard: (query: WorkQuery) => options.onShowInDashboard?.(query),
     updateOrder, updatePayment,
     orderSummary: orderSummary(draft?.value ?? '', draft?.order ?? emptyOrderFields(), accounts),
     paymentSummary: paymentSummary(draft?.payment ?? emptyPaymentFields(), accounts),

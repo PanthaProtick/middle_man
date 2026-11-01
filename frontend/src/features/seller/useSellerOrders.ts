@@ -2,13 +2,13 @@ import { useCallback, useRef, useState } from 'react';
 import { fetchOrders } from './api';
 import type { OrderDateRange } from './orderDateFilter';
 import { useDateSelection } from './useDateSelection';
-import type { SellerOrder } from './types';
+import type { SellerOrder, WorkQuery } from './types';
 
 interface OrderQuery {
   status: string;
   search: string;
   dateRange: OrderDateRange | null;
-  workQuery: '' | 'preparation';
+  workQuery: WorkQuery | '';
 }
 
 /**
@@ -19,7 +19,7 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   const [orders, setOrders] = useState<SellerOrder[]>([]);
   const [statusFilter, setStatusFilter] = useState('');
   const [search, setSearch] = useState('');
-  const [workQuery, setWorkQuery] = useState<'' | 'preparation'>('');
+  const [workQuery, setWorkQuery] = useState<WorkQuery | ''>('');
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const queryRef = useRef<OrderQuery>({ status: '', search: '', dateRange: null, workQuery: '' });
@@ -84,7 +84,7 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   }, [load]);
   const dates = useDateSelection(applyDates);
   const resetDates = dates.reset;
-  const applyWorkQuery = useCallback((next: 'preparation') => {
+  const applyWorkQuery = useCallback((next: WorkQuery) => {
     queryRef.current = { status: '', search: '', dateRange: null, workQuery: next };
     setStatusFilter('');
     setSearch('');

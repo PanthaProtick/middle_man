@@ -14,7 +14,7 @@ import { sellerFetch } from './sessionRequest';
 
 export function OrderExport({ orderId, status, search, fromDate, toDate, workQuery, token }: {
   orderId?: string; status?: string; search?: string;
-  fromDate?: string; toDate?: string; workQuery?: 'preparation'; token?: string;
+  fromDate?: string; toDate?: string; workQuery?: 'preparation' | 'attention'; token?: string;
 }): React.JSX.Element {
   const { locale } = useLocale();
   const text = exportCopy[locale];

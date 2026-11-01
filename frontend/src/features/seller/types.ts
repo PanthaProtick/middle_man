@@ -199,7 +199,7 @@ export interface RetentionCleanupResponse {
   failures: CleanupFailureItem[];
 }
 
-export type WorkQuery = 'preparation';
+export type WorkQuery = 'preparation' | 'attention';
 
 export type PreparationReason = 'AWAITING_COURIER_PREPARATION' | 'PRIOR_DAY_BACKLOG';
 
@@ -211,6 +211,35 @@ export interface PreparationPreviewItem {
 export interface PreparationQueryPreview {
   query: 'preparation';
   items: PreparationPreviewItem[];
+  total: number;
+  next_cursor: string | null;
+  retrieved_at: string;
+  calendar_date: string;
+  timezone: 'Asia/Dhaka';
+}
+
+export type AttentionCategory =
+  | 'unknown_outcome'
+  | 'failed_submission'
+  | 'pending_review'
+  | 'preparation';
+
+export type AttentionReason =
+  | 'UNKNOWN_OUTCOME'
+  | 'FAILED_SUBMISSION'
+  | 'PENDING_REVIEW'
+  | 'AWAITING_COURIER_PREPARATION'
+  | 'PRIOR_DAY_BACKLOG';
+
+export interface AttentionPreviewItem {
+  order: SellerOrder;
+  category: AttentionCategory;
+  reason_codes: AttentionReason[];
+}
+
+export interface AttentionQueryPreview {
+  query: 'attention';
+  items: AttentionPreviewItem[];
   total: number;
   next_cursor: string | null;
   retrieved_at: string;

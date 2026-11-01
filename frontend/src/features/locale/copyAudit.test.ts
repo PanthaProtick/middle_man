@@ -5,6 +5,7 @@ import { bnBuyerMessages, enBuyerMessages } from './buyerMessages';
 import { buyerLinkCopy } from './buyerLinkCopy';
 import { catalogs } from './catalog';
 import { correctionOutcomeCopy } from './correctionOutcomeCopy';
+import { attentionCopy } from './attentionCopy';
 import { deliveryPreparationCopy } from './deliveryPreparationCopy';
 import { courierBengali } from './courierCopy';
 import { exportCopy } from './exportCopy';
@@ -34,6 +35,7 @@ const pairedCopies: Record<string, PairedCopy> = {
   orderCreationCopy,
   orderDiagnosticCopy,
   correctionOutcomeCopy,
+  attentionCopy,
   deliveryPreparationCopy,
   exportCopy,
   sellerCopy,

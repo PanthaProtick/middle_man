@@ -19,6 +19,8 @@ current route/service/model split; update the owning annex when behavior changes
 - [Delivery-preparation work query](contracts/delivery-preparation-query.md):
   shared predicate, preview, dashboard, and export behavior for confirmed orders
   with no courier submission attempt.
+- [Attention work query](contracts/attention-query.md): shared priority, preview,
+  dashboard, and export behavior for orders needing seller action.
 - [Payments and reconciliation](contracts/payments-and-reconciliation.md): received
   payment search, receipt comparison/resolution, unallocated corrections, and
   seller payment exception acceptance.

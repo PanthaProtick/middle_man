@@ -11,6 +11,7 @@ function Harness({ token }: { token: string }): React.JSX.Element {
     <span data-testid="search">{api.search}</span>
     <span data-testid="mode">{api.dateMode}</span>
     <button onClick={() => api.applyWorkQuery('preparation')}>apply</button>
+    <button onClick={() => api.applyWorkQuery('attention')}>apply-attention</button>
     <button onClick={() => api.changeSearch('bag')}>search</button>
     <button onClick={() => api.changeStatus('confirmed')}>status</button>
     <button onClick={() => api.applyRelativePreset(7)}>dates</button>
@@ -65,8 +66,7 @@ it('applies the shared preparation query and clears status, search, and dates', 
   expect(host.querySelector('[data-testid="search"]')?.textContent).toBe('');
 });
 
-it('keeps the work query on reload and clears it when a manual filter is applied', async () => {
-  const { host, urls } = await mountHarness();
+it('keeps the work query on reload and clears it when a manual filter is applied', async () => {  const { host, urls } = await mountHarness();
   await click(host, 'apply');
   await click(host, 'reload');
   expect(params(last(urls)).get('work_query')).toBe('preparation');
@@ -84,4 +84,27 @@ it('keeps the work query on reload and clears it when a manual filter is applied
   await click(host, 'dates');
   expect(params(last(urls)).get('work_query')).toBeNull();
   expect(params(last(urls)).get('from_date')).not.toBeNull();
+});
+
+it('applies the attention query, survives reload, and clears on manual filters', async () => {
+  const { host, urls } = await mountHarness();
+  await click(host, 'status');
+  await click(host, 'search');
+  await click(host, 'dates');
+
+  await click(host, 'apply-attention');
+
+  const applied = params(last(urls));
+  expect(applied.get('work_query')).toBe('attention');
+  expect(applied.get('status')).toBeNull();
+  expect(applied.get('search')).toBeNull();
+  expect(applied.get('from_date')).toBeNull();
+  expect(host.querySelector('[data-testid="work"]')?.textContent).toBe('attention');
+
+  await click(host, 'reload');
+  expect(params(last(urls)).get('work_query')).toBe('attention');
+
+  await click(host, 'search');
+  expect(params(last(urls)).get('work_query')).toBeNull();
+  expect(params(last(urls)).get('search')).toBe('bag');
 });
