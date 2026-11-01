@@ -162,7 +162,8 @@ class TransactionService:
 
             if idempotency_key:
                 await save_idempotency_record(
-                    self.db, idempotency_key, scope, operation, payload_hash, status_code, receipt_view.model_dump_json()
+                    self.db, idempotency_key, scope, operation, payload_hash, status_code, receipt_view.model_dump_json(),
+                    commit=commit,
                 )
             return receipt_view, status_code
 

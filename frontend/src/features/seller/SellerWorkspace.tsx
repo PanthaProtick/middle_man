@@ -124,7 +124,12 @@ export function SellerWorkspace({
 
   return (
     <AssistantWorkspace key={JSON.stringify([token, shop?.id])} floating accounts={accounts} token={token}
-      onOrderCreated={() => { void reloadOrders(); }}>
+      onOrderCreated={() => { void reloadOrders(); }}
+      onPaymentRecorded={() => { void reloadOrders(); void reloadTransactions(); }}
+      onOpenPayment={(receiptId) => {
+        handleSectionSelect('payments');
+        handleTransactionsSearchChange(receiptId);
+      }}>
     {state ? <WorkspaceState state={state} errorText={errorText} onSignIn={onSignIn} onRetry={retry} /> : <div className="card">
       <WorkspaceHeader
         displayTitle={setupNeeded ? text.setup : (shop?.display_name || text.workspace)}

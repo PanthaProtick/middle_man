@@ -21,6 +21,7 @@ from app.api.routes import router as api_router
 from app.api.seller import router as seller_router
 from app.api.sms import router as sms_router
 from app.api.structured_retention import router as structured_retention_router
+from app.api.transaction_submissions import router as transaction_submissions_router
 from app.api.transactions import router as transactions_router
 from app.core.auth import get_request_id
 from app.core.auth_diagnostics import rejection_reason
@@ -152,6 +153,7 @@ app.include_router(seller_router, prefix=settings.API_PREFIX)
 app.include_router(structured_retention_router, prefix=settings.API_PREFIX)
 app.include_router(order_export_router, prefix=settings.API_PREFIX)
 app.include_router(order_submissions_router, prefix=settings.API_PREFIX)
+app.include_router(transaction_submissions_router, prefix=settings.API_PREFIX)
 app.include_router(orders_router, prefix=settings.API_PREFIX)
 app.include_router(review_assistance_router, prefix=settings.API_PREFIX)
 app.include_router(courier_router, prefix=settings.API_PREFIX)

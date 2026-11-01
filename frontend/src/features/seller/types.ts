@@ -149,6 +149,20 @@ export interface ManualReceiptInput {
   occurred_at?: string | null;
 }
 
+export interface RecordedTransactionResult {
+  receipt: ReceiptView;
+  allocated_order_ids: string[];
+}
+
+export interface TransactionSubmissionLookup {
+  state: 'not_found' | 'succeeded';
+  result: RecordedTransactionResult | null;
+}
+
+export interface TransactionSubmissionContext {
+  storage_epoch: string;
+}
+
 export interface ReceiptListResponse {
   items: ReceiptView[];
   next_cursor?: string | null;

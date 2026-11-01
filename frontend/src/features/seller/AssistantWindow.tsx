@@ -41,7 +41,7 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
     </label>
     <nav aria-label={text.title} className="assistant-context-controls">
       <button type="button" className="btn btn-secondary btn-sm" aria-pressed={!reviewing} onClick={showGeneral}>{text.general}</button>
-      <button type="button" className="btn btn-secondary btn-sm" disabled={conversation.submission.locked}
+      <button type="button" className="btn btn-secondary btn-sm" disabled={conversation.locked}
         onClick={() => { conversation.newConversation(); showGeneral(); }}>{text.newChat}</button>
     </nav>
     <p className="assistant-context-label" role="status">{reviewing ? text.review : text.general}</p>

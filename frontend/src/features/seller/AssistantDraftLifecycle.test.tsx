@@ -61,7 +61,7 @@ it('keeps one draft through close, searches, and review, and confirms switching 
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের কাজ Shirt');
   await click('Record a payment');
   await act(async () => host.querySelector<HTMLButtonElement>('[role="alertdialog"] .btn-danger')!.click());
-  expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('');
+  expect(host.querySelector<HTMLInputElement>('[name="assistant-payment-trx"]')?.value).toBe('');
   expect(host.querySelector('[data-testid="assistant-workflow"]')?.textContent).toContain('Transaction ID');
 });
 
