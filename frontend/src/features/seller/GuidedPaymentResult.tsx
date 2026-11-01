@@ -4,6 +4,7 @@ import type { Locale } from '../locale/storage';
 import { fetchOrder } from './api';
 import { formatOrderAmount } from './orderNumbers';
 import type { RecordedTransactionResult, SellerOrder } from './types';
+import { AssistantResult } from './AssistantResult';
 
 interface Props {
   result: RecordedTransactionResult;
@@ -20,7 +21,7 @@ export function GuidedPaymentResult({ result, locale, token, onOpenOrder, onOpen
   const duplicate = !receipt.has_conflict && latest?.conflict_state === 'identical';
   const [opening, setOpening] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
-  return <section aria-label={text.recorded}>
+  return <AssistantResult label={text.recorded}>
     <h4>{text.recorded}</h4>
     <p>{text.receiptId}: {receipt.id}</p>
     <p>{text.receipt}: {receipt.trx_id}</p>
@@ -42,5 +43,5 @@ export function GuidedPaymentResult({ result, locale, token, onOpenOrder, onOpen
     <button type="button" className="btn btn-secondary"
       onClick={() => onOpenPayment(receipt.id)}>{text.openPayment}</button>
     {failed && <p role="alert">{text.openFailed}</p>}
-  </section>;
+  </AssistantResult>;
 }

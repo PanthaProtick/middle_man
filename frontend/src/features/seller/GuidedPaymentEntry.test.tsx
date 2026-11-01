@@ -82,6 +82,7 @@ it('collects bilingual payment details locally and only records after explicit c
     sender_number: '01811223344', occurred_at: null,
   });
   expect(host.textContent).toContain('Payment recorded');
+  expect(document.activeElement?.getAttribute('aria-label')).toBe('Payment recorded');
   expect(host.textContent).toContain('No matching buyer claim');
   expect(host.textContent).toContain('does not mean the payment provider verified');
   await click('Open payment');

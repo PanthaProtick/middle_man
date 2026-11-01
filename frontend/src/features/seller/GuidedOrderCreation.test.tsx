@@ -58,6 +58,7 @@ it('collects locally, interprets bilingual amounts, and only creates after the e
   expect(JSON.parse(String(write.options?.body))).toMatchObject({ product_name: 'হাতের Shirt', total_minor: 150000,
     required_advance_minor: 20000, payment_account_id: 'account-1' });
   expect(host.textContent).toContain('Awaiting buyer');
+  expect(document.activeElement?.getAttribute('aria-label')).toBe('Awaiting buyer');
   expect(host.textContent).toContain('Copy link');
   expect(host.textContent).toContain('Open order');
   expect(host.querySelector('a')?.href).toContain(created.portal_url);

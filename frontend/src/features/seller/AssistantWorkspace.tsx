@@ -66,6 +66,7 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
   if (activeId && !(registeredIds ?? eligibleOrderIds).includes(activeId)) setActiveId(null);
   const showGeneral = () => { setActiveId(null); setGeneralOpen(true); };
   const launcher = <button type="button" className="btn btn-primary seller-assistant-launcher"
+    hidden={Boolean(activeId || generalOpen)}
     data-testid="seller-assistant-launcher" aria-expanded={Boolean(activeId || generalOpen)}
     onClick={event => { opener.current = event.currentTarget; showGeneral(); }}>
     {sellerAssistantCopy[conversation.locale].title}

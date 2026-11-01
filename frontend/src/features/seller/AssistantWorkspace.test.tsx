@@ -8,6 +8,18 @@ import { baseOrder } from './reviewAssistanceTestSupport';
 import App from '../../App';
 
 let root: Root;
+
+it('removes the redundant launcher from navigation while open and restores it on keyboard dismissal', async () => {
+  const host = document.createElement('div'); document.body.append(host); root = createRoot(host);
+  await act(async () => root.render(<AssistantWorkspace floating><p>Orders</p></AssistantWorkspace>));
+  const launcher = host.querySelector<HTMLButtonElement>('[data-testid="seller-assistant-launcher"]')!;
+  await act(async () => launcher.click());
+  expect(launcher.hidden).toBe(true);
+  expect(host.querySelector('.seller-assistant-window')).toBe(document.activeElement);
+  await act(async () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
+  expect(launcher.hidden).toBe(false);
+  expect(host.querySelector('.seller-assistant-window')).toBeNull();
+});
 afterEach(async () => {
   if (root) await act(async () => root.unmount());
   vi.restoreAllMocks();

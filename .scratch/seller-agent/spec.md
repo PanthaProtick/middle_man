@@ -173,3 +173,14 @@ tests run. `npm run conventions` passed on 2026-11-01 (941 tracked files; 29 at
 the 250-line review trigger). New design/ADR records remain untracked, so that
 tracked-file check does not establish full validation of those records. Root
 `npm run check`, browser/mobile acceptance, and live Gemini testing have not run.
+
+## Ticket 07 integrated verification — 2026-11-01
+
+The four guided workflows and contextual review have local automated and synthetic
+browser evidence, recorded in [ticket 07](issues/07-integrated-acceptance.md).
+Refinements hide the launcher while open, keep the close header visible on scroll,
+style result cards consistently, and focus confirmed saved results. Full field
+preservation across both searches and review now has an integrated UI regression.
+No application request limits or live Gemini calls were introduced. Physical-device,
+actual screen-reader/reduced-motion, PostgreSQL, and live-provider acceptance remain
+separate unrun gates; this does not establish production readiness.

@@ -3,6 +3,7 @@ import { guidedOrderCopy } from '../locale/guidedOrderCopy';
 import type { Locale } from '../locale/storage';
 import type { SellerOrder } from './types';
 import { fetchOrder } from './api';
+import { AssistantResult } from './AssistantResult';
 
 interface Props { order: SellerOrder; locale: Locale; token?: string; onOpenOrder: (order: SellerOrder) => void }
 export function GuidedOrderResult({ order, locale, token, onOpenOrder }: Props): React.JSX.Element {
@@ -11,7 +12,7 @@ export function GuidedOrderResult({ order, locale, token, onOpenOrder }: Props):
   const [opening, setOpening] = useState(false);
   const [failed, setFailed] = useState(false);
   const link = new URL(order.portal_url, window.location.origin).href;
-  return <section aria-label={text.succeeded}>
+  return <AssistantResult label={text.succeeded}>
     <h4>{text.succeeded}</h4><p>{order.product_name} · {order.id}</p>
     <a href={link} target="_blank" rel="noreferrer">{link}</a>
     <button type="button" className="btn btn-secondary" onClick={() => {
@@ -26,5 +27,5 @@ export function GuidedOrderResult({ order, locale, token, onOpenOrder }: Props):
       void fetchOrder(order.id, token).then(onOpenOrder, () => setFailed(true)).finally(() => setOpening(false));
     }}>{text.open}</button>
     {failed && <p role="alert">{text.failed}</p>}
-  </section>;
+  </AssistantResult>;
 }
