@@ -1,7 +1,7 @@
 import { CourierError } from './CourierError';
 import type { CourierMessage } from '../locale/courierCopy';
 import { useCourierText } from '../locale/courierCopy';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { requestJson } from './api';
 import type { CourierAttemptStatus, ParcelRevision, Review, ReviewChoices } from './courierReviewTypes';
 import { CourierCopyField } from './CourierCopyField';
@@ -10,22 +10,14 @@ import { CourierReviewChoices } from './CourierReviewChoices';
 import { DeliverySummary } from './DeliverySummary';
 import './DeliveryDetails.css';
 import './CourierResults.css';
+import { CourierDeliveryStages } from './CourierDeliveryStages';
+import { courierBlockerMessage } from './courierBlockerMessage';
 
-const blockerLabels: Record<string, CourierMessage> = {
-  PARCEL_DETAILS_REQUIRED: 'Save explicit parcel weight and quantity above.',
-  COURIER_CONNECTION_REQUIRED: 'Connect your merchant account in Pathao settings.',
-  PICKUP_STORE_REQUIRED: 'Choose an active pickup store for this connection.',
-  SERVICE_REQUIRED: 'Choose a supported delivery service.',
-  LOCATION_METADATA_REQUIRED: 'Resolve the destination and supported delivery coverage.',
-  LOCATION_CHOICES_INVALID: 'Choose destination IDs from their current city and zone.',
-  METADATA_UNAVAILABLE: 'Metadata could not be validated. Retry after restoring the connection.',
-  ORDER_NOT_CONFIRMED: 'This order is no longer confirmed.',
-} as const;
-
-export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onReviewLoaded, onAttemptStatusChanged }: {
+export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onReviewLoaded, onAttemptStatusChanged, parcelDetails }: {
   orderId: string; token: string; refresh?: number; onChoicesSaved?: (parcel: ParcelRevision) => void;
   onReviewLoaded?: (review: Review) => void;
   onAttemptStatusChanged?: (status: CourierAttemptStatus | null) => void;
+  parcelDetails?: ReactNode;
 }) {
   const t = useCourierText();
   const identity = `${orderId}:${token}:${refresh}`;
@@ -129,7 +121,12 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
     `COD: BDT ${(review.draft.remaining_cod_minor / 100).toFixed(2)}`,
   ].join('\n') : '';
 
-  return <section className="buyer-correction delivery-details courier-review" aria-label={t("Booking draft review")} aria-busy={busy}>
+  const reviewError = state?.identity === identity ? state.error : undefined;
+  return <>
+    {parcelDetails && <CourierDeliveryStages review={review} dirty={Boolean(dirty)}
+      pending={busy} error={Boolean(reviewError)} />}
+    {parcelDetails}
+    <section className="buyer-correction delivery-details courier-review" aria-label={t("Booking draft review")} aria-busy={busy}>
     <h4>{t("Review current delivery draft")}</h4>
     {!review?.submission_enabled && !review?.latest_attempt && (
       <p className="delivery-note">{t("External booking is unavailable until the review is complete.")}</p>
@@ -157,7 +154,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
       </div>
       <div className="courier-stage" data-stage="review">
         <h5 className="courier-stage-title"><span aria-hidden="true">3</span> {t('Current review')}</h5>
-        <ul>{review.blockers.map(code => <li key={code}>{t(blockerLabels[code as keyof typeof blockerLabels] ?? 'Courier response could not be interpreted. Reload current details and check Pathao before taking further action.')}</li>)}</ul>
+        <ul>{review.blockers.map(code => <li key={code}>{t(courierBlockerMessage(code))}</li>)}</ul>
         {dirty && <p>{t("Save changes before reviewing.")}</p>}
         <button className="btn btn-primary" type="button" data-review disabled={busy || dirty || review.blockers.length > 0 || review.reviewed}
           onClick={() => void mutate('POST')}>{t("Confirm current review")}</button>
@@ -187,5 +184,5 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
         }} />
       </div>
     </>}
-  </section>;
+  </section></>;
 }

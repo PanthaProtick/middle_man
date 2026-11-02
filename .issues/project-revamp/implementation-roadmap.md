@@ -194,6 +194,21 @@ suites (53 tests), typecheck, conventions, and root `npm run check` pass. Browse
 captures were not run because this checkout has no Playwright/Postgres harness;
 evidence is mocked/local only and does not exercise live Pathao booking.
 
+Review follow-up 2026-11-02 (base `37544dc`, reviewed `9dd9c16`): fixed one
+standards finding (duplicate blocker guidance) and three spec findings (stale
+sequence readiness, unknown recovery masked by preparation blockers, and confirmed
+noncreation mislabeled as rejection). The sequence now renders from `CourierReview`'s
+current identity, edit, request, and error state; `CourierWorkspace` no longer owns a
+second review snapshot. Shared blocker messages live in `courierBlockerMessage.ts`.
+Six regression cases in `CourierWorkspaceValidity.test.tsx` cover edit/save/error,
+identity change, refresh, pending submission, recovery priority, and noncreation.
+All 13 focused courier suites pass (59 tests). Browser and live-provider acceptance
+were not run for this follow-up. Root `npm run check` passed with repository-local
+pytest temp storage (`PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-package09-review`):
+`.cache/checks/check-5PnuVf/result.json`. The initial run
+(`.cache/checks/check-g5L5dF/result.json`) stopped on Windows temp-directory access
+in a backend fixture; no application change was required for that environment error.
+
 - **Owners:** `CourierWorkspace.tsx`, parcel fields, `CourierDraft.tsx`, review/location,
   outcomes/reconciliation components, `DeliverySummary.tsx`, Pathao contracts.
 - Use a visible sequence: parcel details → local draft → current review → explicit

@@ -208,7 +208,8 @@ export const courierBengali = {
   "Booking target:": "বুকিংয়ের লক্ষ্য:",
   "Booking outcome unknown": "বুকিংয়ের ফলাফল অনিশ্চিত",
   "Resolve the unknown booking outcome before any new booking.": "নতুন বুকিংয়ের আগে অনিশ্চিত বুকিংয়ের ফলাফল সমাধান করুন।",
-  "Local delivery draft": "স্থানীয় ডেলিভারি খসড়া"
+  "Local delivery draft": "স্থানীয় ডেলিভারি খসড়া",
+  "Delivery operation in progress. Wait for the current result.": "ডেলিভারির কাজ চলছে। বর্তমান ফলাফলের জন্য অপেক্ষা করুন।"
 } as const;
 
 export type CourierMessage = keyof typeof courierBengali;
