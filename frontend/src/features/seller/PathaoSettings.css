@@ -1,41 +1,84 @@
-.pathao-settings-panel label.pathao-environment-field {
-  display: grid;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.pathao-settings-panel .pathao-environment-field select {
-  width: 100%;
+.pathao-settings-panel .pathao-environment-field {
   max-width: 360px;
-  margin-top: 0;
+  margin-bottom: var(--space-lg);
 }
 
 .pathao-connection-card {
-  --connection-color: var(--text-secondary);
+  --connection-color: var(--color-text-secondary);
   display: flex;
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: var(--space-lg);
   padding: 20px;
-  margin: 16px 0;
-  border: 1px solid var(--border-subtle);
+  margin: var(--space-lg) 0;
+  border: 1px solid var(--color-border);
   border-left: 4px solid var(--connection-color);
   border-radius: var(--radius-sm);
-  background: var(--bg-card);
+  background: var(--color-surface-card);
 }
 .pathao-connection-card--connected {
-  --connection-color: var(--emerald-accent);
-  background: #eef8f2;
+  --connection-color: var(--color-status-emerald);
+  background: var(--color-status-emerald-bg);
 }
 .pathao-connection-card--disconnected,
 .pathao-connection-card--unavailable {
-  --connection-color: var(--amber-accent);
-  background: #fff8eb;
+  --connection-color: var(--color-status-amber);
+  background: var(--color-status-amber-bg);
 }
-.pathao-connection-copy { flex: 1 1 220px; min-width: 0; overflow-wrap: anywhere; }
-.pathao-connection-label { display: block; color: var(--text-secondary); font-size: .8rem; font-weight: 600; }
-.pathao-connection-state { display: flex; align-items: center; gap: 10px; margin-top: 6px; color: var(--connection-color); font-size: 1.2rem; }
-.pathao-connection-dot { width: 10px; height: 10px; flex-shrink: 0; border-radius: 50%; background: currentColor; }
-.pathao-connection-copy p { margin: 8px 0; color: var(--text-secondary); font-size: .85rem; }
-.pathao-connection-meta { color: var(--text-muted); font-size: .75rem; }
-.pathao-connection-card button { min-height: 44px; white-space: normal; }
+
+.pathao-connection-copy {
+  flex: 1 1 220px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.pathao-connection-label {
+  display: block;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+.pathao-connection-state {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  color: var(--connection-color);
+  font-size: 1.2rem;
+}
+.pathao-connection-dot {
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: currentColor;
+}
+.pathao-connection-copy p {
+  margin: 8px 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+.pathao-connection-meta {
+  color: var(--color-text-muted);
+  font-size: var(--font-size-xs);
+}
+
+.pathao-settings-disclosure {
+  margin: var(--space-md) 0;
+}
+.pathao-settings-disclosure summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--space-sm);
+}
+
+.pathao-error-notice {
+  margin: var(--space-md) 0;
+}
+.pathao-form-submit {
+  margin-top: var(--space-md);
+}
+.pathao-disconnect-btn {
+  margin-top: var(--space-md);
+}

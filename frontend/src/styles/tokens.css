@@ -1,0 +1,128 @@
+/**
+ * Modern Dhaka Shop Desk Design Tokens (v1.1.0)
+ * Authoritative design token dictionary and legacy backwards-compatibility mapping.
+ */
+
+:root {
+  color-scheme: light;
+
+  /* Brand / Action Colors */
+  --color-primary: #146653;
+  --color-primary-hover: #0e5141;
+  --color-primary-active: #0a3d31;
+
+  /* Surfaces & Canvas */
+  --color-bg-canvas: #f5f6f2;
+  --color-surface: #f3f6f4;
+  --color-surface-card: #ffffff;
+  --color-surface-hover: #f5faf8;
+
+  /* Text & Ink */
+  --color-text-primary: #192f29;
+  --color-text-secondary: #4e655c;
+  --color-text-muted: #596f65;
+
+  /* Tactile Borders */
+  --color-border: #d8e2dd;
+  --color-border-hover: #9bb4a9;
+  --color-border-focus: #146653;
+
+  /* Semantic Status — High Contrast Boarding Pass Palette */
+  --color-status-emerald: #197047;
+  --color-status-emerald-bg: #eaf4ee;
+  --color-status-cyan: #166b78;
+  --color-status-cyan-bg: #e7f4f6;
+  --color-status-amber: #8a570b;
+  --color-status-amber-bg: #fdf6ea;
+  --color-status-rose: #b33448;
+  --color-status-rose-bg: #fbebee;
+
+  /* Typography Stacks */
+  --font-heading: 'Manrope', 'Noto Sans Bengali', 'Nirmala UI', system-ui, sans-serif;
+  --font-body: 'Manrope', 'Noto Sans Bengali', 'Nirmala UI', system-ui, sans-serif;
+  --font-mono: 'DM Mono', monospace;
+
+  /* Typographic Scale (1.125-1.2 ratio) */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.85rem;
+  --font-size-base: 0.9375rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-size-3xl: 2.25rem;
+
+  /* Spacing Scale */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 24px;
+  --space-2xl: 32px;
+
+  /* Border Radii */
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Touch & Interactive Geometry */
+  --touch-target-min: 44px;
+  --input-height-min: 46px;
+  --input-font-size-min: 16px;
+  --focus-outline-width: 3px;
+  --focus-outline-offset: 3px;
+  --focus-outline: 3px solid var(--color-primary);
+
+  /* Legacy variable aliases for full backwards compatibility */
+  --primary-accent: var(--color-primary);
+  --primary-gradient: var(--color-primary);
+  --bg-main: var(--color-bg-canvas);
+  --bg-card: var(--color-surface-card);
+  --bg-card-hover: var(--color-surface-hover);
+  --bg-surface: var(--color-surface);
+  --bg-input: var(--color-surface-card);
+  --border-subtle: var(--color-border);
+  --border-hover: var(--color-border-hover);
+  --border-focus: var(--color-border-focus);
+  --text-primary: var(--color-text-primary);
+  --text-secondary: var(--color-text-secondary);
+  --text-muted: var(--color-text-muted);
+  --cyan-accent: var(--color-status-cyan);
+  --emerald-accent: var(--color-status-emerald);
+  --amber-accent: var(--color-status-amber);
+  --rose-accent: var(--color-status-rose);
+
+  /* Dark mode / glow suppression */
+  --glow-indigo: none;
+  --glow-cyan: none;
+  --glow-amber: none;
+  --pill-gap: 4px;
+  --section-gap: 12px;
+}
+
+/* Bengali Script Clearance: 1.7 line-height accommodates ascenders, descenders, and conjuncts */
+:lang(bn),
+[lang="bn"],
+body:lang(bn) {
+  line-height: 1.7;
+}
+
+/* Tabular figures for financial amounts, phone numbers, and transaction IDs */
+.tabular-nums,
+[data-tabular-nums="true"] {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* Reduced Motion Safety */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
