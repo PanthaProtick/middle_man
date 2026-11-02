@@ -40,8 +40,8 @@ export function GuidedPaymentFields({ conversation: c }: { conversation: Assista
     {summary.payload && <section aria-label={text.summary}>
       <h5>{text.summary}</h5>
       <p>{text.account}: {c.accounts.find(account => account.id === summary.payload!.payment_account_id)?.label} · {summary.payload.provider.toUpperCase()}</p>
-      <p>{text.trxId}: {summary.payload.trx_id}</p>
-      <p>{text.amount}: BDT {formatOrderAmount(summary.payload.amount_minor)}</p>
+      <p>{text.trxId}: <span className="assistant-numeric">{summary.payload.trx_id}</span></p>
+      <p>{text.amount}: <span className="assistant-numeric">BDT {formatOrderAmount(summary.payload.amount_minor)}</span></p>
       <p>{text.preview}</p>
       <p role="note">{text.previewWarning}</p>
       <button type="button" className="btn btn-primary" disabled={disabled} onClick={() => {

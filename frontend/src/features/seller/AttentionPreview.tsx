@@ -60,7 +60,7 @@ export function AttentionPreview({
           data-category={item.category}>
           <h5>{text[categoryLabelKeys[item.category]]}</h5>
           <p>{item.order.product_name}</p>
-          <p>{item.order.id}</p>
+          <p className="assistant-numeric">{item.order.id}</p>
           <ul>{item.reason_codes.map(code => <li key={code}>{reasonLabel(code)}</li>)}</ul>
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => onOpenOrder(item.order)}>
             {text.openOrder}

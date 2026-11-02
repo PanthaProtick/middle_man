@@ -77,7 +77,7 @@ export function ReviewFactsList({ facts, locale }: ReviewFactsListProps): React.
             className="review-fact-row"
           >
             <dt className="review-fact-dt">{row.label}</dt>
-            <dd className="review-fact-dd">{row.value}</dd>
+            <dd className={`review-fact-dd${['required-advance', 'claimed-amount', 'received-amount', 'active-claim-count'].includes(row.key) ? ' is-numeric' : ''}`}>{row.value}</dd>
           </div>
         ))}
       </dl>

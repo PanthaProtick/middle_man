@@ -38,6 +38,7 @@ export function ReviewAssistantPanel({
     <div
       role="region"
       aria-label={text.askAi}
+      lang={locale}
       className="review-assistant-panel"
       data-testid="review-assistant-panel"
     >

@@ -17,15 +17,14 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
 }
 .seller-assistant-launcher:hover {
   background: #0f4f40;
-  transform: translateY(-1px);
   box-shadow: 0 6px 20px rgba(20, 102, 83, 0.32), 0 3px 8px rgba(0, 0, 0, 0.1);
 }
 .seller-assistant-launcher:focus-visible {
-  outline: 2px solid var(--primary-accent, #146653);
+  outline: 3px solid var(--primary-accent, #146653);
   outline-offset: 3px;
 }
 .seller-assistant-launcher[hidden] { display: none; }
@@ -168,9 +167,9 @@
 }
 .seller-assistant-window textarea { min-height: 80px; resize: vertical; }
 .seller-assistant-window :is(input, textarea, select):focus-visible {
-  outline: none;
+  outline: 3px solid var(--primary-accent, #146653);
+  outline-offset: 3px;
   border-color: var(--primary-accent, #146653);
-  box-shadow: 0 0 0 3px rgba(20, 102, 83, 0.15);
 }
 .seller-assistant-window button { min-height: 44px; }
 .seller-assistant-window .btn-sm {
@@ -181,10 +180,8 @@
   justify-content: center;
 }
 .seller-assistant-window :is([name*="amount"], [name*="total"], [name*="advance"], [name*="trx"], [name*="quantity"], [name*="weight"], [name*="sender"], [name*="time"]),
-.assistant-order-fields section p,
-.assistant-payment-fields section p,
-.attention-preview p,
-.preparation-preview p {
+.assistant-numeric {
+  font-family: var(--font-mono);
   font-variant-numeric: tabular-nums;
 }
 

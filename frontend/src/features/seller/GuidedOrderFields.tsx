@@ -34,8 +34,9 @@ export function GuidedOrderFields({ conversation: c }: { conversation: Assistant
     {summary.payload && <section aria-label={text.summary}>
       <h5>{text.summary}</h5>
       <p>{summary.payload.product_name}</p>
-      <p>{text.total}: BDT {formatOrderAmount(summary.payload.total_minor)}</p>
-      <p>{text.advance}: BDT {formatOrderAmount(summary.payload.required_advance_minor)}</p>
+      <p>{text.total}: <span className="assistant-numeric">BDT {formatOrderAmount(summary.payload.total_minor)}</span></p>
+      <p>{text.advance}: <span className="assistant-numeric">BDT {formatOrderAmount(summary.payload.required_advance_minor)}</span></p>
+      <p>{text.remainingCod}: <span className="assistant-numeric">BDT {formatOrderAmount(summary.payload.total_minor - summary.payload.required_advance_minor)}</span></p>
       <p>{text.account}: {c.accounts.find(account => account.id === summary.payload!.payment_account_id)?.label}</p>
       <button type="button" className="btn btn-primary" disabled={disabled} onClick={() => {
         if (summary.payload) void c.submission.submit(summary.payload);

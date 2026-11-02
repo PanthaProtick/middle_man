@@ -141,3 +141,29 @@ Package 10 recomposes both the **General Assistant** (`AssistantWindow`, `Guided
    - `npm run conventions` (file size, documentation, rules)
    - `npm run typecheck` (strict TypeScript, zero any)
    - `npm run check` (full pre-commit root gate)
+
+## 2026-11-03 — Last-commit review corrections
+
+Reviewed `1066225` against parent `1a0d496` on separate Standards and Spec axes.
+Standards: three findings (shadow-only input focus, missing numeric typeface,
+moving launcher hover). Spec: three findings (missing Remaining COD tally,
+Bengali text clearance overrides, missing numeric typeface).
+
+Restored explicit focus outlines, removed the hover movement, applied the existing
+mono token to numeric inputs and values, and preserved body type for prose.
+Added a localized Remaining COD row derived from validated minor-unit amounts,
+plus regression assertions for recalculation and a Bengali zero balance.
+Review explanation/advisory text now receives Bengali clearance directly, with
+the panel's language explicitly set from its locale.
+
+Focused frontend verification: four suites, 27 tests passed (guided order/payment,
+review facts and side panel). Initial root check stopped at an inaccessible Windows
+pytest temp directory (692 passed, 179 skipped, one fixture error). Rerun:
+`PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-assistant-review-20261103`
+with `npm run check`: all stages passed. Evidence:
+`.cache/checks/check-1orE7W/result.json`.
+
+Browser visual acceptance, physical-device keyboards, PostgreSQL integration,
+and live providers were not run. Local gate results do not establish those gates.
+Next action: verify assistant focus, Bengali clearance and numeric presentation in
+the browser at the package's mobile/desktop viewport matrix.

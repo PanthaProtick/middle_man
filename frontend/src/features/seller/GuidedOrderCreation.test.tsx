@@ -47,12 +47,14 @@ it('collects locally, interprets bilingual amounts, and only creates after the e
   await mount();
   await send('Create order; product: হাতের Shirt; total: ৳১,২৫০.৫০; advance: ২০০ টাকা; account: Main');
   expect(host.textContent).toContain('BDT 1,250.50');
+  expect(host.textContent).toContain('Remaining COD (BDT): BDT 1,050.50');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের Shirt');
   expect(requests).toHaveLength(0);
   await send('yes');
   expect(requests).toHaveLength(0);
   await change('assistant-total', '1500');
   expect(host.textContent).toContain('BDT 1,500.00');
+  expect(host.textContent).toContain('Remaining COD (BDT): BDT 1,300.00');
   await click('Create order');
   const write = requests.find(request => request.options?.method === 'POST')!;
   expect(JSON.parse(String(write.options?.body))).toMatchObject({ product_name: 'হাতের Shirt', total_minor: 150000,
@@ -79,6 +81,16 @@ it('preserves all valid answers and requests missing or ambiguous fields togethe
   await send('Create two orders; product: Other; total: 500');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('Shirt');
   expect(host.querySelector('[role="log"]')?.textContent).toContain('one workflow');
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
+it('shows a localized zero remaining COD when the advance covers the total', async () => {
+  const fetcher = vi.spyOn(globalThis, 'fetch');
+  await mount();
+  await send('Create order; product: Shirt; total: 200; advance: 200; account: Main');
+  const language = host.querySelector<HTMLSelectElement>('[name="assistant-language"]')!;
+  await act(async () => { language.value = 'bn'; language.dispatchEvent(new Event('change', { bubbles: true })); });
+  expect(host.textContent).toContain('বাকি ক্যাশ অন ডেলিভারি (BDT): BDT 0.00');
   expect(fetcher).not.toHaveBeenCalled();
 });
 
