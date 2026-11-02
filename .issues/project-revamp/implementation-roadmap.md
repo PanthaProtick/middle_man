@@ -125,6 +125,8 @@ Progress 2026-11-02: **complete**. Recomposed order creation, detail modal, buye
 
 ### 07 — Buyer confirmation and status portal
 
+Progress 2026-11-02: **complete**. Recomposed the standalone public buyer confirmation and status portal (`/orders/:token`) into the Modern Dhaka Shop Desk design system. Implemented mobile-first centered shell (max-width 560px) with 44px min touch targets, 46px min input height, and 16px font size to eliminate iOS auto-zoom. Modernized `BuyerOrderDetails` with boarding-pass header, 3-column commercial tally (Total Bill, Advance, COD) in `tabular-nums`, and highlighted `#eaf4ee` factual receiving account card with 44px copy trigger. Structured `BuyerSubmissionForm` into 3 numbered sections (Recipient, Delivery & Courier, Advance Payment) with automatic `focusFirstError` and top error banner. Refined `PathaoLocations` with quiet cascading indicator, manual fallback, and strict preservation of retired address-AI guardrails. Polished `BuyerStatusView` across pending (amber), confirmed (emerald), expired (rose), and rejected/cancelled states with boarding-pass COD tally and 44px refresh polling button. All 13 test files (90 tests) and root `npm run check` passed cleanly.
+
 - **Owners:** `BuyerPortal.tsx`, `BuyerOrderDetails.tsx`, `BuyerSubmissionForm.tsx`,
   contact/payment fields, `BuyerStatusView.tsx`, Pathao locations and buyer hooks.
 - Lead with order terms and amounts; group contact, address/location, and payment
