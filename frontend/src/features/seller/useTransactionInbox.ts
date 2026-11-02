@@ -36,18 +36,6 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   const requestRef = useRef(0);
   const previousTokenRef = useRef<string | undefined>(token);
 
-  useEffect(() => {
-    if (previousTokenRef.current !== token) {
-      previousTokenRef.current = token;
-      setTransactions([]);
-      setFilter('');
-      setSearch('');
-      setNextCursor(null);
-      setLoading(false);
-      queryRef.current = { filter: '', search: '', dateRange: null };
-    }
-  }, [token]);
-
   const load = useCallback(
     async (cursor?: string, clear: boolean = true) => {
       if (!token) return;
@@ -93,6 +81,21 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
     void load();
   }, [load]);
   const dates = useDateSelection(applyDates);
+  const resetDates = dates.reset;
+
+  useEffect(() => {
+    if (previousTokenRef.current !== token) {
+      previousTokenRef.current = token;
+      resetDates();
+      setTransactions([]);
+      setFilter('');
+      setSearch('');
+      setNextCursor(null);
+      setLoading(false);
+      queryRef.current = { filter: '', search: '', dateRange: null };
+    }
+    return () => { requestRef.current += 1; };
+  }, [token, resetDates]);
   const changeFilter = useCallback((value: string) => {
     queryRef.current = { ...queryRef.current, filter: value };
     setFilter(value);

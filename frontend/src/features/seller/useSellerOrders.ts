@@ -26,19 +26,6 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   const requestRef = useRef(0);
   const previousTokenRef = useRef<string | undefined>(token);
 
-  useEffect(() => {
-    if (previousTokenRef.current !== token) {
-      previousTokenRef.current = token;
-      setOrders([]);
-      setStatusFilter('');
-      setSearch('');
-      setWorkQuery('');
-      setNextCursor(null);
-      setLoading(false);
-      queryRef.current = { status: '', search: '', dateRange: null, workQuery: '' };
-    }
-  }, [token]);
-
   const load = useCallback(
     async (cursor?: string, clear: boolean = true) => {
       if (!token) return;
@@ -103,6 +90,21 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   }, [load]);
   const dates = useDateSelection(applyDates);
   const resetDates = dates.reset;
+
+  useEffect(() => {
+    if (previousTokenRef.current !== token) {
+      previousTokenRef.current = token;
+      resetDates();
+      setOrders([]);
+      setStatusFilter('');
+      setSearch('');
+      setWorkQuery('');
+      setNextCursor(null);
+      setLoading(false);
+      queryRef.current = { status: '', search: '', dateRange: null, workQuery: '' };
+    }
+    return () => { requestRef.current += 1; };
+  }, [token, resetDates]);
   const applyWorkQuery = useCallback((next: WorkQuery) => {
     queryRef.current = { status: '', search: '', dateRange: null, workQuery: next };
     setStatusFilter('');

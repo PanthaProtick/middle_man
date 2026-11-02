@@ -40,3 +40,24 @@ Package 12 focused on request generation, pagination merges, refresh bursts, ses
 - `npm run typecheck`: Passed.
 - `npm run build`: Passed (all chunks under 500 kB, 0 warnings).
 - `npm run check`: Final pre-commit gate.
+
+## Review corrections — 2026-11-03
+
+- Invalidated pending list requests on token changes and unmount so old successes
+  and errors cannot restore cleared state or report a stale session failure.
+- Reset date selection mode, applied range, drafts, and validation errors together
+  with query state. Production session changes also remount the workspace; these
+  fixes make the hooks' own transition contract consistent.
+- Added deferred success/failure tests for sign-out and token replacement in both
+  hooks, plus date-state and outgoing request assertions. Focused verification:
+  2 files, 14 tests passed.
+- Package performance acceptance remains **pending**: no constrained-phone queue
+  and overlay profile, request counts, rendering costs, or layout-shift measurements
+  were recorded. Existing bundle sizes alone do not satisfy that requirement.
+- Final `npm run check`: PASS, `.cache/checks/check-d2pTqU/result.json`
+  (tooling, conventions, backend lint/types/tests, frontend lint/tests/build, HTTP
+  smoke). Used repository-local pytest `--basetemp` after the first run hit a
+  Windows temp-directory permission error; fixed test-harness lint before final pass.
+- Browser/device, live-provider, and PostgreSQL integration acceptance: not run;
+  the repository gate does not establish these. Next action: complete the pending
+  constrained-phone profiling before marking Package 12 accepted.
