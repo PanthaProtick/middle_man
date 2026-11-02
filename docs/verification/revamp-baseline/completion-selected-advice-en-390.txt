@@ -1,0 +1,24 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=stale".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~		12 button (expanded) Description: Ask AI for explanation and suggested actions, Secondary Actions: Collapse
++		79 container Ask AI
++			80 heading হাতে তৈরি নকশিকাঁথা — special gift package, Value: 3
++				81 text হাতে তৈরি নকশিকাঁথা — special gift package
++			82 text baseline-order-1
++			83 button Back to order
++			84 container Ask AI
++				85 text Local guidance
++				86 button Close guidance
++				87 button Generate with Gemini
++				88 text Synthetic advice: review the amount difference.
++				89 container Selected receipt preview
++					90 text Selected receipt acceptance preview.
++					91 content list
++						92 container
++							93 AXListMarker •
++							94 text Amount does not match
++					95 container
++						96 text Order total :  ৳2,500.00
++					97 text Acceptance requires a separate seller decision and existing validation.
++				98 text Local explanation is an advisory aid, not an independent verification result.
+The focused UI element is 79 container Ask AI

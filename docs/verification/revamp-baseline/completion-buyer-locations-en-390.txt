@@ -1,0 +1,77 @@
+Browser tab: 5, Title: "Order confirmation · middleman", URL: "http://127.0.0.1:5186/orders/synthetic?case=buyer-locations&lang=en".
+1 AXWebArea Order confirmation · middleman, URL: 127.0.0.1:5186/orders/synthetic?case=buyer-locations&lang=en
+	2 container root
+		3 container
+			4 text Order confirmation
+			5 container Language
+				6 checkbox বাংলা, Value: 0
+				7 checkbox English, Value: 1
+				8 text Language: English
+			9 link Description: Back to Home, Value: 127.0.0.1:5186/
+		10 container
+			11 heading Synthetic shop / পরীক্ষামূলক দোকান, Value: 3
+				12 text Synthetic shop / পরীক্ষামূলক দোকান
+			13 text Your order Item Cotton panjabi / সুতি পাঞ্জাবি Total ৳2,500.00 Delivery advance ৳500.00 Pay this before delivery. Expected remaining COD ৳2,000.00 Estimated from the required advance. The seller confirms the final amount. Send the advance to the seller’s account BKASH 01700000000 Synthetic receiving account  ( BKASH )
+			14 button Copy
+			15 text Valid until :  02 Dec 2026, 12:00 pm (Bangladesh time)
+			16 heading Delivery and payment details, Value: 3
+				17 text Delivery and payment details
+			18 text Enter your details and payment claim for seller review.
+			19 container
+				20 text 1
+				21 heading Recipient information, Value: 4
+					22 text Recipient information
+				23 text Name and phone number for delivery confirmation Your full name *
+				24 text field (settable) Your full name *, ID: buyer_name
+				25 text Your contact number *
+				26 text field (settable) Your contact number *
+				27 text For courier calls and delivery updates
+				28 text 2
+				29 heading Delivery location, Value: 4
+					30 text Delivery location
+				31 text Full destination address for courier dispatch
+				32 container Pathao delivery location
+					33 text Choose the Pathao city, zone, and area when they are listed. Write house, road and delivery directions in the full address below.
+					34 text Simulated Pathao locations — offline demonstration only.
+					35 container
+						36 text Pathao city
+						37 pop up button (collapsed, settable) Pathao city, Value: Synthetic destination / পরীক্ষামূলক গন্তব্য, Secondary Actions: Expand
+							38 menu
+								39 (disabled) Choose city
+								40 (disabled) Synthetic destination / পরীক্ষামূলক গন্তব্য
+					41 container
+						42 text Pathao zone
+						43 pop up button (collapsed, settable) Pathao zone, Value: Synthetic destination / পরীক্ষামূলক গন্তব্য, Secondary Actions: Expand
+							44 menu
+								45 (disabled) Choose zone
+								46 (disabled) Synthetic destination / পরীক্ষামূলক গন্তব্য
+					47 container
+						48 text Pathao area
+						49 pop up button (collapsed, settable) Pathao area, Value: Synthetic destination / পরীক্ষামূলক গন্তব্য, Secondary Actions: Expand
+							50 menu
+								51 (disabled) Choose area
+								52 (disabled) Synthetic destination / পরীক্ষামূলক গন্তব্য
+					53 checkbox (settable, integer) Description: My destination is not supported / needs seller help, Value: 0
+					54 button Clear location choices
+				55 text Full delivery address *
+				56 text entry area (settable) Full delivery address *, ID: address_raw
+				57 text 3
+				58 heading Advance payment claim, Value: 4
+					59 text Advance payment claim
+				60 text Record the advance you sent to the seller’s receiving account. Method
+				61 pop up button (collapsed, settable) Method, Value: bKash, ID: payment_provider, Secondary Actions: Expand
+					62 menu
+						63 (selected) bKash
+						64 Nagad
+				65 text Amount (BDT)
+				66 text field (settable) Amount (BDT), Value: 500, ID: claimed_advance_bdt
+				67 text Expected: ৳500.00
+				68 text Payment sender number *
+				69 text field (settable) Payment sender number *
+				70 text This can be different from your contact number if someone paid for you.
+				71 text Transaction ID (TrxID) *
+				72 text field (settable) Transaction ID (TrxID) *, ID: payment_trx_id
+			73 button Submit order details
+		74 text Never share your PIN or OTP. Your seller reviews the order and payment details.
+
+The focused UI element is 1 AXWebArea Order confirmation · middleman, URL: 127.0.0.1:5186/orders/synthetic?case=buyer-locations&lang=en

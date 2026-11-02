@@ -1,0 +1,81 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=stale".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=stale
+	2 container
+		3 container Language
+			4 checkbox বাংলা, Value: 0
+			5 checkbox English, Value: 1
+			6 text Language: English
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 text Review Required
+		10 button (collapsed) Show error codes (for dev), Secondary Actions: Expand
+		11 text Payment amount does not match Fixed Receiving Account Snapshot Synthetic receiving account  —  BKASH  ( 01700000000 ) Immutable destination for this order (deactivating or editing accounts later does not alter this).
+		12 button (collapsed) Description: Ask AI for explanation and suggested actions, Secondary Actions: Expand
+		13 container Accept payment exception
+			14 heading Accept payment exception, Value: 4
+				15 text Accept payment exception
+			16 text This records your acceptance of the payment; it is not independent provider verification.
+			17 container
+				18 text Existing seller receipt
+				19 pop up button (collapsed, settable) Existing seller receipt, Value: bkash · SYNTHETIC01 · BDT 500.00, Secondary Actions: Expand
+					20 menu
+						21  Select a receipt
+						22 (selected) bkash · SYNTHETIC01 · BDT 500.00
+			23 button Refresh payment preview
+			24 container
+				25 text Order total :  BDT 2,500.00  ·  Required advance :  BDT 500.00
+			26 button (collapsed) Show technical IDs (for dev), Secondary Actions: Expand
+			27 table Payment claim compared with seller receipt
+				28 text Payment claim compared with seller receipt
+				29 row
+					30 cell
+						31 text Field
+					32 cell
+						33 text Order / buyer claim
+					34 cell
+						35 text Seller receipt
+				36 row
+					37 cell
+						38 text Provider
+					39 cell
+						40 text bkash  /  bkash
+					41 cell
+						42 text bkash
+				43 row
+					44 cell
+						45 text TrxID
+					46 cell
+						47 text SYNTHETIC01
+					48 cell
+						49 text SYNTHETIC01
+				50 row
+					51 cell
+						52 text Sender
+					53 cell
+						54 text 01900000000
+					55 cell
+						56 text 01900000000
+				57 row
+					58 cell
+						59 text Amount
+					60 cell
+						61 text BDT 450.00
+					62 cell
+						63 text BDT 500.00
+				64 row
+					65 cell
+						66 text Time
+					67 cell
+						68 text 02 Nov 2026, 12:00 pm (Bangladesh time) to 02 Nov 2026, 12:00 pm (Bangladesh time)
+					69 cell
+						70 text 02 Nov 2026, 12:00 pm (Bangladesh time)
+			71 container
+				72 text Exceptions to accept :  Amount does not match
+			73 container
+				74 text Remaining COD after acceptance :  BDT 2,000.00
+			75 container
+				76 text Decision reason
+				77 text entry area (settable) Decision reason
+				78 button (disabled) Accept full receipt and confirm
+
+The focused UI element is 1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=stale

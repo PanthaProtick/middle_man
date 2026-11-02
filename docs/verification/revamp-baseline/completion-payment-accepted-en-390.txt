@@ -1,0 +1,18 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en
+	2 container
+		3 container Language
+			4 checkbox বাংলা, Value: 0
+			5 checkbox English, Value: 1
+			6 text Language: English
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 text Confirmed Payment Allocation Basis: Seller Accepted Accepted Advance: BDT  500.00 Seller confirmation does not imply independent payment-provider verification. Fixed Receiving Account Snapshot Synthetic receiving account  —  BKASH  ( 01700000000 ) Immutable destination for this order (deactivating or editing accounts later does not alter this).
+		10 container Accepted payment history
+			11 heading Accepted payment history, Value: 4
+				12 text Accepted payment history
+			13 container
+				14 text Payment history unavailable
+				15 button Retry history
+
+The focused UI element is 1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en

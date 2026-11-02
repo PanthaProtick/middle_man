@@ -1,0 +1,26 @@
+Browser tab: 4, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 85-129
+~				84 text ম্যানুয়াল ডেলিভারির সহায়তার জন্য; কোনো কুরিয়ার বুকিং, হালনাগাদ বা ডেলিভারি খরচের হিসাব নয়।
++				132 button (collapsed) Cotton panjabi / সুতি পাঞ্জাবি ক্রেতার অপেক্ষায় ডেলিভারির জন্য প্রস্তুত রাখা হয়নি মোট: BDT 2,500.00, Secondary Actions: Expand
++					133 text Cotton panjabi / সুতি পাঞ্জাবি
++					134 text ক্রেতার অপেক্ষায়
++					135 text ডেলিভারির জন্য প্রস্তুত রাখা হয়নি
++					136 text মোট:
++					137 text  BDT
++					138 text 2,500.00
++				139 button (collapsed) হাতে তৈরি নকশিকাঁথা — special gift package পর্যালোচনার অপেক্ষায় ডেলিভারির জন্য প্রস্তুত রাখা হয়নি মোট: BDT 2,500.00, Secondary Actions: Expand
++					140 text হাতে তৈরি নকশিকাঁথা — special gift package
++					141 text পর্যালোচনার অপেক্ষায়
++					142 text ডেলিভারির জন্য প্রস্তুত রাখা হয়নি
++					143 text মোট:
++					144 text  BDT
++					145 text 2,500.00
++				146 button (collapsed) Canvas everyday bag নিশ্চিত করা ডেলিভারির জন্য প্রস্তুত রাখা মোট: BDT 2,500.00, Secondary Actions: Expand
++					147 text Canvas everyday bag
++					148 text নিশ্চিত করা
++					149 text ডেলিভারির জন্য প্রস্তুত রাখা
++					150 text মোট:
++					151 text  BDT
++					152 text 2,500.00
+The focused UI element is 1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en

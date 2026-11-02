@@ -1,0 +1,21 @@
+Browser tab: 5, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&fault=unknown&lang=en".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 130-162, 164-167
+~					119 button New conversation
+~				123 button Create an order
+~				124 button Record a payment
+~					218 container Payment recorded
++						219 heading Payment recorded, Value: 4
++							220 text Payment recorded
++						221 container
++							222 text Receipt ID :  baseline-receipt
++						223 container
++							224 text Saved receipt :  SYNTHETIC01
++						225 container
++							226 text Provider :  BKASH
++						227 container
++							228 text Amount received : BDT  500.00
++						229 text No matching buyer claim was found. The payment is saved as unmatched.
++						230 text This is your recorded evidence. It does not mean the payment provider verified the transaction.
++						231 button Open payment
+The focused UI element is 218 container Payment recorded

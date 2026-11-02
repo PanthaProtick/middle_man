@@ -1,0 +1,38 @@
+Browser tab: 4, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=bn".
+1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=bn
+	2 container root
+		3 link Description: কর্মক্ষেত্রে যান, Value: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=bn#workspace
+		4 container
+			5 heading middleman, Value: 1
+				6 text middleman
+			7 text আপনার প্রতিদিনের অর্ডার ডেস্ক
+			8 container সিস্টেমের অবস্থা
+				9 container ভাষা
+					10 checkbox বাংলা, Value: 1
+					11 checkbox English, Value: 0
+					12 text ভাষা: বাংলা
+				13 text সংযুক্ত
+		14 container আপনার দোকান, গোছানো অর্ডার।
+			15 text অর্ডার গোছান, বারবার যোগাযোগ কমান।
+			16 heading আপনার দোকান, গোছানো অর্ডার।, Value: 2, ID: workspace-heading
+				17 text আপনার দোকান,
+				18 text গোছানো অর্ডার।
+			19 text কথোপকথন থেকে নিশ্চিত করা অর্ডার পর্যন্ত। ক্রেতার তথ্য সংগ্রহ করুন, ডেলিভারির আগে অগ্রিম যাচাই করুন এবং ডেলিভারির প্রস্তুতি নিন।
+			20 content list অর্ডার নিশ্চিত করার ধাপ
+				21 container
+					22 text 01 অর্ডার লিংক পাঠান
+				23 container
+					24 text 02 ক্রেতা তথ্য ও পেমেন্ট দেন
+				25 container
+					26 text 03 পর্যালোচনা করে নিশ্চিত করুন ও ডেলিভারি দিন
+		27 container workspace
+			28 text দোকান সেটআপ
+			29 text প্রথমে দোকানের নাম দিন। এরপর যে অ্যাকাউন্টে ক্রেতারা অগ্রিম পাঠাবেন সেটি যোগ করুন।
+			30 container
+				31 text দোকানের প্রদর্শিত নাম
+				32 text field (settable) দোকানের প্রদর্শিত নাম, ID: shop-display-name
+				33 button (disabled) দোকান সেটআপ করুন
+			34 button (collapsed) বিক্রেতা সহকারী, Secondary Actions: Expand
+		35 text middleman · আপনার বিক্রির জন্য তৈরি। বিক্রেতার নিশ্চিতকরণ মানে পেমেন্ট প্রদানকারী স্বাধীনভাবে যাচাই করেছে এমন নয়।
+
+The focused UI element is 1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=bn

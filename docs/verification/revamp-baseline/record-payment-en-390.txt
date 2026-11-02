@@ -1,0 +1,26 @@
+Browser tab: 4, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 138-182
+~				84 text Manual delivery aid only; no courier booking, update or delivery-price calculation.
++				214 button (collapsed) Cotton panjabi / সুতি পাঞ্জাবি Awaiting Buyer Delivery unstaged Total: BDT 2,500.00, Secondary Actions: Expand
++					215 text Cotton panjabi / সুতি পাঞ্জাবি
++					216 text Awaiting Buyer
++					217 text Delivery unstaged
++					218 text Total:
++					219 text  BDT
++					220 text 2,500.00
++				221 button (collapsed) হাতে তৈরি নকশিকাঁথা — special gift package Pending Review Delivery unstaged Total: BDT 2,500.00, Secondary Actions: Expand
++					222 text হাতে তৈরি নকশিকাঁথা — special gift package
++					223 text Pending Review
++					224 text Delivery unstaged
++					225 text Total:
++					226 text  BDT
++					227 text 2,500.00
++				228 button (collapsed) Canvas everyday bag Confirmed Delivery staged Total: BDT 2,500.00, Secondary Actions: Expand
++					229 text Canvas everyday bag
++					230 text Confirmed
++					231 text Delivery staged
++					232 text Total:
++					233 text  BDT
++					234 text 2,500.00
+The focused UI element is 30 button Record Payment

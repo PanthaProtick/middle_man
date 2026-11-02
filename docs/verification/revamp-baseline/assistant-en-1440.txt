@@ -1,0 +1,50 @@
+Browser tab: 4, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 139-159
+~				138 text Manual delivery aid only; no courier booking, update or delivery-price calculation. Cotton panjabi / সুতি পাঞ্জাবি Awaiting Buyer Delivery unstaged
++				185 button Inspect, Help: Inspect order details and snapshot
++				186 button Copy buyer link to clipboard
++					187 text Copy Link
++				188 container
++					189 text Total: BDT  2,500.00
++				190 container
++					191 text Advance: BDT  500.00
++				192 container
++					193 text Expected remaining COD balance: BDT 2,000.00
++				194 container
++					195 text Account: BKASH  ( 01700000000 )
++				196 container
++					197 text Created: 02 Nov 2026, 12:00 pm (Bangladesh time)
++				198 text Deadline: 02 Dec 2026, 12:00 pm (Bangladesh time) হাতে তৈরি নকশিকাঁথা — special gift package Pending Review Delivery unstaged Review:
++				199 button (collapsed) Show codes, Help: Toggle raw technical review codes, Secondary Actions: Expand
++				200 text Payment amount does not match
++				201 button Inspect, Help: Inspect order details and snapshot
++				202 button Copy buyer link to clipboard
++					203 text Copy Link
++				204 button (collapsed) Description: Ask AI for explanation and suggested actions, Secondary Actions: Expand
++				205 container
++					206 text Total: BDT  2,500.00
++				207 container
++					208 text Advance: BDT  500.00
++				209 container
++					210 text Expected remaining COD balance: BDT 2,000.00
++				211 container
++					212 text Account: BKASH  ( 01700000000 )
++				213 container
++					214 text Created: 02 Nov 2026, 12:00 pm (Bangladesh time)
++				215 text Deadline: 02 Dec 2026, 12:00 pm (Bangladesh time) Canvas everyday bag Confirmed Delivery staged
++				216 button Inspect, Help: Inspect order details and snapshot
++				217 button Copy buyer link to clipboard
++					218 text Copy Link
++				219 container
++					220 text Total: BDT  2,500.00
++				221 container
++					222 text Advance: BDT  500.00
++				223 container
++					224 text Remaining COD balance: BDT 2,000.00
++				225 container
++					226 text Account: BKASH  ( 01700000000 )
++				227 container
++					228 text Created: 02 Nov 2026, 12:00 pm (Bangladesh time)
++				229 text Deadline: 02 Dec 2026, 12:00 pm (Bangladesh time)
+The focused UI element is 160 container Seller assistant
