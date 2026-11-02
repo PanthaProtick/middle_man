@@ -1,14 +1,44 @@
 .metrics-ribbon[role="region"] {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(130px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 10px;
-  overflow-x: auto;
   padding: 12px 14px;
   background: var(--bg-surface, #ffffff);
   border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 12px;
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
   margin-bottom: 12px;
+}
+
+.metrics-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary-accent, #146653);
+}
+
+.metrics-group-title {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(20, 102, 83, 0.08);
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+}
+
+.metrics-group-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+  font-variant-numeric: tabular-nums;
+}
+
+.metrics-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(130px, 1fr));
+  gap: 10px;
+  overflow-x: auto;
 }
 
 .metrics-ribbon .metric-chip {

@@ -211,6 +211,8 @@ it('shows the shared work-query banner and a work-query-specific empty state', a
   const banner = host.querySelector('[role="status"]');
   expect(banner?.textContent).toContain('shared delivery-preparation query');
   expect(host.textContent).toContain('No confirmed orders are awaiting delivery preparation.');
+  expect(host.querySelector('form[role="search"]')).toBeNull();
+  expect(host.querySelector('#order-date-mode')).toBeNull();
   const clear = Array.from(host.querySelectorAll('button')).find((item) => item.textContent === 'Clear work filter')!;
   await act(async () => clear.click());
   expect(onClear).toHaveBeenCalledOnce();
@@ -235,6 +237,8 @@ it('shows the attention banner and attention-specific empty state', async () => 
 
   expect(host.querySelector('[role="status"]')?.textContent).toContain('shared attention query');
   expect(host.textContent).toContain('No orders currently need attention.');
+  expect(host.querySelector('form[role="search"]')).toBeNull();
+  expect(host.querySelector('#order-date-mode')).toBeNull();
   const clear = Array.from(host.querySelectorAll('button')).find((item) => item.textContent === 'Clear work filter')!;
   await act(async () => clear.click());
   expect(onClear).toHaveBeenCalledOnce();

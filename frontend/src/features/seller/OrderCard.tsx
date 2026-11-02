@@ -59,6 +59,10 @@ export function OrderCard({
         </span>
         <span className={stagingClass}>{stagingLabel}</span>
         <span className="order-card-mobile-total">{text.total} BDT {formatOrderAmount(order.total_minor)}</span>
+        <span className="order-card-mobile-inspect-hint">
+          <Eye size={13} />
+          <span>{text.details}</span>
+        </span>
       </button>
 
       <div id={bodyId} className={`order-card-body${mobileOpen ? ' order-card-body-open' : ''}`}>

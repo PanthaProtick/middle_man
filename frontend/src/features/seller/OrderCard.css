@@ -219,6 +219,17 @@
     font-weight: 500;
   }
 
+  .order-card-mobile-inspect-hint {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.775rem;
+    font-weight: 600;
+    color: var(--primary-accent, #146653);
+    margin-top: 2px;
+  }
+
   .order-card-chevron-open { transform: rotate(180deg); }
   .order-card-body { display: none; }
   .order-card-body-open { display: block; margin-top: 10px; }

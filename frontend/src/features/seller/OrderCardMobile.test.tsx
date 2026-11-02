@@ -23,6 +23,7 @@ it('provides independent collapsed mobile summaries with linked details and work
     const body = document.getElementById(summary.getAttribute('aria-controls')!);
     expect(body?.classList.contains('order-card-body-open')).toBe(false);
     expect(body?.querySelector('.order-card-actions')).not.toBeNull();
+    expect(summary.querySelector('.order-card-mobile-inspect-hint')?.textContent).toContain('Details');
   }
   await act(async () => summaries[0].click());
   expect(summaries[0].getAttribute('aria-expanded')).toBe('true');
@@ -31,6 +32,28 @@ it('provides independent collapsed mobile summaries with linked details and work
     ?.classList.contains('order-card-body-open')).toBe(true);
   await act(async () => summaries[0].click());
   expect(summaries[0].getAttribute('aria-expanded')).toBe('false');
+  await act(async () => root.unmount());
+  host.remove();
+});
+
+it('renders long product name with explicit mobile inspection cue and preserves wrapping', async () => {
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const veryLongName = 'প্রিমিয়াম হাতে বোনা বিশেষ ঢাকাই জামদানি শাড়ি - এক্সক্লুসিভ কালেকশন ২০২৬ সিল্ক এবং জরি কাজ সহ';
+  await act(async () => root.render(<OrderList
+    orders={[{ ...baseOrder, product_name: veryLongName }]}
+    statusFilter=""
+    onFilterChange={vi.fn()}
+    nextCursor={null}
+    onLoadMore={vi.fn()}
+  />));
+
+  const summary = host.querySelector<HTMLButtonElement>('.order-card-mobile-summary');
+  expect(summary).not.toBeNull();
+  expect(summary?.textContent).toContain(veryLongName);
+  expect(summary?.querySelector('.order-card-mobile-inspect-hint')?.textContent).toContain('Details');
+
   await act(async () => root.unmount());
   host.remove();
 });
