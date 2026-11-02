@@ -16,6 +16,7 @@ export function OrderOverview({ order }: OrderOverviewProps): React.JSX.Element 
   const text = orderCopy[locale];
   const isExpired = order.lifecycle === 'expired';
   const isConfirmed = order.lifecycle === 'confirmed';
+
   return (
     <>
       <div style={{ marginBottom: '16px' }}>
@@ -28,16 +29,16 @@ export function OrderOverview({ order }: OrderOverviewProps): React.JSX.Element 
         <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)' }}>{order.product_name}</div>
       </div>
 
-      <div className="modal-terms-grid">
+      <div className="modal-terms-grid" style={{ fontVariantNumeric: 'tabular-nums' }}>
         <div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{text.agreed}</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>
             BDT {formatOrderAmount(order.total_minor)}
           </div>
         </div>
         <div>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{text.required}</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--cyan-accent)' }}>
+          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: 'var(--cyan-accent)', fontVariantNumeric: 'tabular-nums' }}>
             BDT {formatOrderAmount(order.required_advance_minor)}
           </div>
         </div>
@@ -45,7 +46,7 @@ export function OrderOverview({ order }: OrderOverviewProps): React.JSX.Element 
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
             {isConfirmed ? text.actualRemaining : text.expectedRemaining}
           </div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: isConfirmed ? 'var(--emerald-accent)' : 'var(--primary-accent)' }}>
+          <div style={{ fontSize: '0.95rem', fontWeight: 600, color: isConfirmed ? 'var(--emerald-accent)' : 'var(--primary-accent)', fontVariantNumeric: 'tabular-nums' }}>
             {formatRemainingCod(order)}
           </div>
         </div>
@@ -66,15 +67,15 @@ export function OrderOverview({ order }: OrderOverviewProps): React.JSX.Element 
           </div>
           <div>
             <span style={{ color: 'var(--text-secondary)' }}>{text.version}</span>
-            <span style={{ color: 'var(--text-primary)' }}>v{order.version}</span>
+            <span style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>v{order.version}</span>
           </div>
           <div>
             <span style={{ color: 'var(--text-secondary)' }}>{text.created}</span>
-            <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshDateTime(order.created_at, locale)}</span>
+            <span style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{formatBangladeshDateTime(order.created_at, locale)}</span>
           </div>
           <div>
             <span style={{ color: 'var(--text-secondary)' }}>{isExpired ? text.expiredShort : text.deadlineShort}</span>
-            <span style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)' }}>
+            <span style={{ color: isExpired ? 'var(--rose-accent)' : 'var(--amber-accent)', fontVariantNumeric: 'tabular-nums' }}>
               {formatBangladeshDateTime(order.expires_at, locale)}
             </span>
           </div>

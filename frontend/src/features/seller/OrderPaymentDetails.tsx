@@ -28,12 +28,13 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
   const selected = selection?.orderId === order.id ? selection : null;
   const isConfirmed = order.lifecycle === 'confirmed';
   const hasReviewReasons = order.lifecycle === 'pending' && order.review_reasons && order.review_reasons.length > 0;
+
   return (
     <>
       {isConfirmed && (
-        <div style={{ marginBottom: '16px', background: 'rgba(16, 185, 129, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--emerald-accent)', marginBottom: '6px' }}>
-            <CheckCircle2 size={14} /> {text.allocation}
+        <div style={{ marginBottom: '16px', background: 'rgba(16, 185, 129, 0.08)', padding: '14px', borderRadius: '10px', border: '1px solid rgba(16, 185, 129, 0.25)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--emerald-accent)', marginBottom: '8px' }}>
+            <CheckCircle2 size={16} /> {text.allocation}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 180px), 1fr))', gap: '8px', fontSize: '0.8rem' }}>
             <div>
@@ -44,49 +45,49 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
             </div>
             <div>
               <span style={{ color: 'var(--text-secondary)' }}>{text.accepted}</span>
-              <span style={{ fontWeight: 600, color: 'var(--cyan-accent)' }}>
+              <span style={{ fontWeight: 600, color: 'var(--cyan-accent)', fontVariantNumeric: 'tabular-nums' }}>
                 BDT {formatOrderAmount(order.total_minor - (order.actual_cod_minor ?? order.expected_cod_minor))}
               </span>
             </div>
             {order.completed_at && (
               <div style={{ gridColumn: '1 / -1' }}>
                 <span style={{ color: 'var(--text-secondary)' }}>{text.confirmedAt}</span>
-                <span style={{ color: 'var(--text-primary)' }}>{formatBangladeshDateTime(order.completed_at, locale)}</span>
+                <span style={{ color: 'var(--text-primary)', fontVariantNumeric: 'tabular-nums' }}>{formatBangladeshDateTime(order.completed_at, locale)}</span>
               </div>
             )}
           </div>
         </div>
       )}
 
-      {isConfirmed && <p>{text.confirmationHelp}</p>}
+      {isConfirmed && <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', margin: '0 0 16px' }}>{text.confirmationHelp}</p>}
 
       {hasReviewReasons && (
         <div style={{ marginBottom: '16px', background: 'rgba(239, 68, 68, 0.1)', padding: '12px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', flexWrap: 'wrap', gap: '6px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.8rem', color: 'var(--rose-accent)' }}>
-              <AlertTriangle size={14} /> {text.reviewRequired}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', flexWrap: 'wrap', gap: '6px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', fontWeight: 600, color: 'var(--rose-accent)' }}>
+              <AlertTriangle size={16} /> {text.reviewRequired}
             </div>
             <button
               type="button"
               className="btn btn-secondary btn-xs"
               onClick={() => setShowReviewCodes((prev) => !prev)}
-              style={{ fontSize: '0.7rem', padding: '2px 8px' }}
+              style={{ fontSize: '0.75rem', padding: '4px 8px', minHeight: '32px' }}
               aria-expanded={showReviewCodes}
             >
               {showReviewCodes ? text.hideErrors : text.showErrors}
             </button>
           </div>
-          <p>{order.review_reasons.map(reason => reviewLabel(reason, text)).join(" · ")}</p>
+          <p style={{ margin: '0 0 8px', fontSize: '0.85rem' }}>{order.review_reasons.map(reason => reviewLabel(reason, text)).join(" · ")}</p>
           <div style={{ display: showReviewCodes ? 'flex' : 'none', flexWrap: 'wrap', gap: '6px' }}>
             {order.review_reasons.map((reason) => (
               <span
                 key={reason}
                 style={{
-                  background: 'rgba(239, 68, 68, 0.2)',
-                  border: '1px solid rgba(239, 68, 68, 0.4)',
+                  background: 'rgba(239, 68, 68, 0.18)',
+                  border: '1px solid rgba(239, 68, 68, 0.35)',
                   color: 'var(--rose-accent)',
                   fontSize: '0.75rem',
-                  padding: '2px 8px',
+                  padding: '3px 8px',
                   borderRadius: '4px',
                   fontFamily: 'monospace',
                 }}
@@ -104,10 +105,10 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
             <ShieldCheck size={14} /> {text.snapshot}
           </div>
         </div>
-        <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 500 }}>
+        <div style={{ fontSize: '0.875rem', color: 'var(--text-primary)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
           {order.account_label} — {order.account_provider.toUpperCase()} ({order.account_receiving_number})
         </div>
-        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
           {text.immutable}
         </div>
       </div>

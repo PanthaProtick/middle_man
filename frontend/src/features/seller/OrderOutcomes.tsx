@@ -165,8 +165,8 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
   };
 
   return (
-    <div className="order-outcomes" lang={locale === 'bn' ? 'bn-BD' : 'en'} style={{ marginTop: '16px', background: 'var(--bg-surface)', padding: '12px', borderRadius: '8px', border: '1px solid var(--border-subtle)' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+    <div className="order-outcomes" lang={locale === 'bn' ? 'bn-BD' : 'en'} style={{ marginTop: '16px', background: 'var(--bg-surface)', padding: '14px', borderRadius: '10px', border: '1px solid var(--border-subtle)' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
         <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)' }}>{text.outcomes}</span>
         {isReplaced && (
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
@@ -185,27 +185,42 @@ export function OrderOutcomes({ order, token = '', onUpdated, onReplaced, courie
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
             {!isTerminal && (
-              <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--rose-accent)' }} onClick={() => { setError(null); setActiveAction('cancel'); }}>
-                <Ban size={14} style={{ marginRight: '4px' }} /> {text.cancel}
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: '0.85rem', padding: '8px 14px', minHeight: '44px', color: 'var(--rose-accent)' }}
+                onClick={() => { setError(null); setActiveAction('cancel'); }}
+              >
+                <Ban size={16} style={{ marginRight: '6px' }} /> {text.cancel}
               </button>
             )}
 
             {order.lifecycle === 'pending' && !isAllocated && (
-              <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--amber-accent)' }} onClick={() => { setError(null); setActiveAction('reject'); }}>
-                <XCircle size={14} style={{ marginRight: '4px' }} /> {text.reject}
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: '0.85rem', padding: '8px 14px', minHeight: '44px', color: 'var(--amber-accent)' }}
+                onClick={() => { setError(null); setActiveAction('reject'); }}
+              >
+                <XCircle size={16} style={{ marginRight: '6px' }} /> {text.reject}
               </button>
             )}
 
             {!isReplaced && !isAllocated && ['awaiting_buyer', 'pending', 'expired'].includes(order.lifecycle) && (
-              <button type="button" className="btn btn-secondary" style={{ fontSize: '0.8rem', padding: '6px 12px', color: 'var(--primary-accent)' }} onClick={() => { setError(null); setActiveAction('replace'); }}>
-                <RefreshCw size={14} style={{ marginRight: '4px' }} /> {text.replace}
+              <button
+                type="button"
+                className="btn btn-secondary"
+                style={{ fontSize: '0.85rem', padding: '8px 14px', minHeight: '44px', color: 'var(--primary-accent)' }}
+                onClick={() => { setError(null); setActiveAction('replace'); }}
+              >
+                <RefreshCw size={16} style={{ marginRight: '6px' }} /> {text.replace}
               </button>
             )}
           </div>
 
           {!isReplaced && isAllocated && (
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-              <AlertTriangle size={12} color="var(--amber-accent)" /> {text.allocated}
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
+              <AlertTriangle size={14} color="var(--amber-accent)" /> {text.allocated}
             </div>
           )}
         </div>

@@ -18,11 +18,15 @@ interface ParcelEarlyFieldsProps {
 
 const inputStyle = {
   width: '100%',
-  padding: '8px 12px',
+  minHeight: '46px',
+  padding: '10px 14px',
   background: 'var(--bg-surface)',
   border: '1px solid var(--border-subtle)',
-  borderRadius: '6px',
+  borderRadius: '8px',
   color: 'var(--text-primary)',
+  fontSize: '1rem',
+  boxSizing: 'border-box' as const,
+  fontVariantNumeric: 'tabular-nums',
 } as const;
 
 export function ParcelEarlyFields({
@@ -51,7 +55,7 @@ export function ParcelEarlyFields({
       </p>
       <div className="form-grid-2">
         <div>
-          <label htmlFor="parcel-weight-kg" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+          <label htmlFor="parcel-weight-kg" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
             {text.weight}
           </label>
           <input
@@ -74,7 +78,7 @@ export function ParcelEarlyFields({
           {errors.weight && <p id="parcel-weight-error" role="alert">{text[errors.weight]}</p>}
         </div>
         <div>
-          <label htmlFor="parcel-quantity" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+          <label htmlFor="parcel-quantity" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
             {text.quantity}
           </label>
           <input

@@ -107,6 +107,8 @@ Progress 2026-11-02: **complete**. Recomposed seller orders desk into Modern Dha
 
 ### 06 — Order creation, details, links, and buyer corrections
 
+Progress 2026-11-02: **complete**. Recomposed order creation, detail modal, buyer corrections, and outcomes into the Modern Dhaka Shop Desk design system. Implemented right-docked drawer topology on desktop (>1024px) and full-screen modal sheet on mobile (<768px) with sticky boarding-pass identity and amount summary header (Agreed Total, Required/Accepted Advance, Remaining COD) in `tabular-nums`. Reorganized into 4 keyboard-navigable tabs (`Overview`, `Payment`, `Delivery`, `Buyer & link`) with focus restoration and alert jump buttons. Enhanced `CreateOrderModal` and `ParcelEarlyFields` with minimum 46px input height, 16px font-size, 44px min touch targets, and high-contrast COD calculation box. Refined `BuyerCorrection` with locked payment fields and courier booking notices on confirmed orders, `BuyerLinkAccess` with 44px touch targets and resilient retry, `BuyerLinkCopy` with fallback manual input, and `OrderOutcomes` with action guardrails. All 19 test files (90 tests) and root `npm run check` passed cleanly.
+
 - **Owners:** `CreateOrderModal.tsx`, `OrderDetailModal.tsx`, `OrderOverview.tsx`,
   `OrderPaymentDetails.tsx`, buyer-link/correction and outcome components.
 - Apply the chosen detail topology; keep contextual identity and amount summary
