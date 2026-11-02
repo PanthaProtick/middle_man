@@ -195,7 +195,6 @@
 .pathao-location-loading {
   padding: 8px 12px;
   border: 1px solid var(--primary-accent);
-  border-inline-start-width: 3px;
   border-radius: 8px;
   background: #e3eee8;
   color: var(--primary-accent);
