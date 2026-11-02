@@ -4,10 +4,12 @@ import { useCourierText } from '../locale/courierCopy';
 import { useEffect, useRef, useState } from 'react';
 import { requestJson } from './api';
 import type { CourierAttemptStatus, ParcelRevision, Review, ReviewChoices } from './courierReviewTypes';
+import { CourierCopyField } from './CourierCopyField';
 import { CourierOutcomes } from './CourierOutcomes';
-import { CourierReviewLocations } from './CourierReviewLocations';
+import { CourierReviewChoices } from './CourierReviewChoices';
 import { DeliverySummary } from './DeliverySummary';
 import './DeliveryDetails.css';
+import './CourierResults.css';
 
 const blockerLabels: Record<string, CourierMessage> = {
   PARCEL_DETAILS_REQUIRED: 'Save explicit parcel weight and quantity above.',
@@ -120,7 +122,14 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
     }
   };
 
-  return <section className="buyer-correction delivery-details" aria-label={t("Booking draft review")} aria-busy={busy}>
+  const deliveryText = review?.draft ? [
+    review.draft.recipient_name,
+    review.draft.contact_number,
+    review.draft.address,
+    `COD: BDT ${(review.draft.remaining_cod_minor / 100).toFixed(2)}`,
+  ].join('\n') : '';
+
+  return <section className="buyer-correction delivery-details courier-review" aria-label={t("Booking draft review")} aria-busy={busy}>
     <h4>{t("Review current delivery draft")}</h4>
     {!review?.submission_enabled && !review?.latest_attempt && (
       <p className="delivery-note">{t("External booking is unavailable until the review is complete.")}</p>
@@ -129,57 +138,54 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
     {state?.identity === identity && state.error && <div role="alert">{typeof state.error === 'string' ? t(state.error) : <CourierError error={state.error} />}</div>}
     {!review && !state?.error && <p role="status">{t("Loading review…")}</p>}
     {review && choices && <>
-      <DeliverySummary {...review.draft} />
-      <p className="delivery-note">{t("Accepted advance deducted. Payment acceptance does not verify receipt with the payment provider.")}</p>
-      <dl className="delivery-summary">
-        <div><dt>{t("Parcel")}</dt><dd>{review.draft.parcel_weight_grams === null ? t('Weight missing') : `${review.draft.parcel_weight_grams} ${t('g')}`}
-          {' · '}{review.draft.parcel_quantity === null ? t('Quantity missing') : `${review.draft.parcel_quantity} ${t(review.draft.parcel_quantity === 1 ? 'item' : 'items')}`}</dd></div>
-        <div><dt>{t("Pathao account")}</dt><dd>{t(review.connection.status)}<span>{review.connection.merchant_hint}</span></dd></div>
-      </dl>
-      {review.connection.simulated && <p className="delivery-note">{t("Simulated account and locations — offline only.")}</p>}
-      <fieldset disabled={busy || review.blockers.includes('ORDER_NOT_CONFIRMED')}>
-        <legend>{t("Pickup and delivery choices")}</legend>
-        <label>{t("Environment")}<select value={choices.environment} onChange={event => {
-          const environment = event.target.value;
-          if (environment === 'offline' || environment === 'sandbox' || environment === 'production') {
-            setEditing({ identity, choices: { environment, store_id: null, delivery_type: null, location: {} } });
-          }
-        }}>{(['offline', 'sandbox', 'production'] as const).map(env => <option key={env} value={env}>{t(env)}</option>)}</select></label>
-        {choices.environment !== review.choices.environment && <p className="delivery-note">{t("Save the environment change to load its pickup stores and delivery locations.")}</p>}
-        <label>{t("Pickup store")}<select value={choices.store_id ?? ''} disabled={choices.environment !== review.choices.environment}
-          onChange={event => setEditing({ identity, choices: { ...choices, store_id: Number(event.target.value) || null } })}>
-          <option value="">{t("Choose pickup store")}</option>
-          {review.stores.map(store => <option key={store.id} value={store.id}>{store.name}</option>)}
-        </select></label>
-        <label>{t("Delivery service")}<select value={choices.delivery_type ?? ''} onChange={event => {
-          const service = Number(event.target.value);
-          setEditing({ identity, choices: { ...choices, delivery_type: service === 48 || service === 12 ? service : null } });
-        }}><option value="">{t("Choose service")}</option><option value="48">{t("Normal delivery")}</option><option value="12">{t("On-demand delivery")}</option></select></label>
-        <p>{t("Destination:")} {[review.location.city_name, review.location.zone_name, review.location.area_name].filter(Boolean).join(' / ') || t('Unresolved')}</p>
-        {review.connection.version > 0 && choices.environment === review.choices.environment &&
-          <CourierReviewLocations key={`${identity}:${review.token}`} path={path} token={token} review={review} value={choices.location}
-            onChange={location => setEditing({ identity, choices: { ...choices, location } })} />}
-        <button className="btn btn-secondary" type="button" disabled={!dirty} onClick={() => void mutate('PUT')}>{t("Save delivery choices")}</button>
-      </fieldset>
-      <ul>{review.blockers.map(code => <li key={code}>{t(blockerLabels[code as keyof typeof blockerLabels] ?? 'Courier response could not be interpreted. Reload current details and check Pathao before taking further action.')}</li>)}</ul>
-      {dirty && <p>{t("Save changes before reviewing.")}</p>}
-      <button className="btn btn-primary" type="button" data-review disabled={busy || dirty || review.blockers.length > 0 || review.reviewed}
-        onClick={() => void mutate('POST')}>{t("Confirm current review")}</button>
-      {review.reviewed && !dirty && !review.latest_attempt && <p role="status">{t("Review complete. This remains a local draft; no Pathao booking exists.")}</p>}
-      {review.reviewed && !dirty && review.submission_enabled && (
-        <button type="button" data-submit disabled={busy} onClick={() => void submitBooking()}>
-          {t('Submit booking to')} {t(target)}
-        </button>
-      )}
-      {busy && <p role="status">{operation.kind === 'submit'
-        ? <>{t('Submitting booking to')} {t(target)}…</>
-        : t(operation.kind === 'PUT' ? 'Saving delivery choices…' : 'Confirming current review…')}</p>}
-      <CourierOutcomes review={review} orderId={orderId} token={token} onResolved={updated => {
-              setState({ identity, review: updated });
-              setEditing({ identity, choices: updated.choices });
-              onReviewLoadedRef.current?.(updated);
-              statusCallback.current?.(updated.latest_attempt?.status ?? 'unsubmitted');
-            }} />
+      <div className="courier-stage" data-stage="local-draft">
+        <h5 className="courier-stage-title"><span aria-hidden="true">2</span> {t('Local delivery draft')}</h5>
+        <DeliverySummary {...review.draft} />
+        <CourierCopyField label="Copy delivery details" fallbackLabel="Manual delivery details"
+          value={deliveryText} copiedLabel="Delivery details copied." />
+        <p className="delivery-note">{t("Accepted advance deducted. Payment acceptance does not verify receipt with the payment provider.")}</p>
+        <dl className="delivery-summary">
+          <div><dt>{t("Parcel")}</dt><dd>{review.draft.parcel_weight_grams === null ? t('Weight missing') : `${review.draft.parcel_weight_grams} ${t('g')}`}
+            {' · '}{review.draft.parcel_quantity === null ? t('Quantity missing') : `${review.draft.parcel_quantity} ${t(review.draft.parcel_quantity === 1 ? 'item' : 'items')}`}</dd></div>
+          <div><dt>{t("Pathao account")}</dt><dd>{t(review.connection.status)}<span>{review.connection.merchant_hint}</span></dd></div>
+        </dl>
+        {review.connection.simulated && <p className="delivery-note">{t("Simulated account and locations — offline only.")}</p>}
+        <CourierReviewChoices review={review} choices={choices} busy={Boolean(busy)} dirty={Boolean(dirty)}
+          path={path} token={token} identity={identity}
+          onChange={next => setEditing({ identity, choices: next })}
+          onSave={() => void mutate('PUT')} />
+      </div>
+      <div className="courier-stage" data-stage="review">
+        <h5 className="courier-stage-title"><span aria-hidden="true">3</span> {t('Current review')}</h5>
+        <ul>{review.blockers.map(code => <li key={code}>{t(blockerLabels[code as keyof typeof blockerLabels] ?? 'Courier response could not be interpreted. Reload current details and check Pathao before taking further action.')}</li>)}</ul>
+        {dirty && <p>{t("Save changes before reviewing.")}</p>}
+        <button className="btn btn-primary" type="button" data-review disabled={busy || dirty || review.blockers.length > 0 || review.reviewed}
+          onClick={() => void mutate('POST')}>{t("Confirm current review")}</button>
+        {review.reviewed && !dirty && !review.latest_attempt && <p role="status">{t("Review complete. This remains a local draft; no Pathao booking exists.")}</p>}
+      </div>
+      <div className="courier-stage" data-stage="submit">
+        <h5 className="courier-stage-title"><span aria-hidden="true">4</span> {t('Submit booking')}</h5>
+        <p className="delivery-note">{t('Booking target:')} {t(target)}</p>
+        {review.latest_attempt?.status === 'unknown' && <p className="delivery-note">{t('Resolve the unknown booking outcome before any new booking.')}</p>}
+        {review.reviewed && !dirty && review.submission_enabled && (
+          <button type="button" data-submit disabled={busy} onClick={() => void submitBooking()}>
+            {t('Submit booking to')} {t(target)}
+          </button>
+        )}
+        {busy && <p role="status">{operation.kind === 'submit'
+          ? <>{t('Submitting booking to')} {t(target)}…</>
+          : t(operation.kind === 'PUT' ? 'Saving delivery choices…' : 'Confirming current review…')}</p>}
+      </div>
+      <div className="courier-stage courier-result-stage" data-stage="result">
+        <h5 className="courier-stage-title"><span aria-hidden="true">5</span> {t('Booking result')}</h5>
+        {!review.latest_attempt && <p className="delivery-note">{t('No booking submitted. This remains a local draft.')}</p>}
+        <CourierOutcomes review={review} orderId={orderId} token={token} onResolved={updated => {
+          setState({ identity, review: updated });
+          setEditing({ identity, choices: updated.choices });
+          onReviewLoadedRef.current?.(updated);
+          statusCallback.current?.(updated.latest_attempt?.status ?? 'unsubmitted');
+        }} />
+      </div>
     </>}
   </section>;
 }

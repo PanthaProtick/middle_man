@@ -181,6 +181,19 @@ Progress 2026-11-02: **complete**. Recomposed the standalone public buyer confir
 
 ### 09 — Delivery preparation, booking review, and recovery
 
+Progress 2026-11-02: **complete**. Recomposed delivery preparation into a visible
+five-step sequence (parcel details → local draft → current review → submit booking →
+booking result) with a workspace header/status chip, per-step `data-state`, and a
+next-action panel that names every blocker. Extracted `CourierDeliveryStages`,
+`CourierReviewChoices`, and `CourierCopyField`; kept review, submission, idempotency,
+attempt-history, and reconciliation requests unchanged. Unknown outcomes render a
+dedicated amber result card with `Resolve unknown outcome`; submit stays absent and a
+fresh booking is never offered as the remedy. Delivery details and consignment IDs
+have clipboard copy with a readonly manual-copy fallback. Twelve focused courier
+suites (53 tests), typecheck, conventions, and root `npm run check` pass. Browser
+captures were not run because this checkout has no Playwright/Postgres harness;
+evidence is mocked/local only and does not exercise live Pathao booking.
+
 - **Owners:** `CourierWorkspace.tsx`, parcel fields, `CourierDraft.tsx`, review/location,
   outcomes/reconciliation components, `DeliverySummary.tsx`, Pathao contracts.
 - Use a visible sequence: parcel details → local draft → current review → explicit

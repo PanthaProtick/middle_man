@@ -3,6 +3,7 @@ import { useCourierText } from '../locale/courierCopy';
 import { useEffect, useRef, useState } from 'react';
 import { requestJson } from './api';
 import type { CourierAttempt, Review } from './courierReviewTypes';
+import './CourierResults.css';
 
 type ReconciliationAction = NonNullable<CourierAttempt['resolution_action']>;
 
@@ -71,30 +72,32 @@ export function CourierReconciliation({ orderId, token, attempt, onResolved }: {
   };
 
   return <section className="courier-reconciliation" aria-label={t("Reconcile unknown booking outcome")}>
-    <p><strong>{t("Check Pathao before recording a resolution.")}</strong> {t('An empty or reloaded merchant panel, a timeout, or the absence of a local attempt is not proof by itself.')}</p>
+    <p className="courier-reconciliation-warning"><strong>{t("Check Pathao before recording a resolution.")}</strong> {t('An empty or reloaded merchant panel, a timeout, or the absence of a local attempt is not proof by itself.')}</p>
     {error && <div role="alert"><CourierError error={error} /></div>}
-    <fieldset disabled={Boolean(busy)}>
-      <legend>{t("Attach an existing booking")}</legend>
-      <p>{t("Account environment:")} {t(attempt.environment)}</p>
-      <p>{t("Merchant order reference:")} <code>{orderId}</code></p>
-      <label>{t("Consignment ID")}
-        <input name="consignmentId" value={consignmentId}
-          onChange={event => setConsignmentId(event.target.value)} />
-      </label>
-      <button type="button" data-attach
-        disabled={Boolean(busy) || !consignmentId.trim()}
-        onClick={() => void send('attach_existing')}>{t("Attach existing booking")}</button>
-    </fieldset>
-    <fieldset disabled={Boolean(busy)}>
-      <legend>{t("Confirm no booking was created")}</legend>
-      <label>
-        <input type="checkbox" name="confirmedNoncreation" checked={confirmed}
-          onChange={event => setConfirmed(event.target.checked)} />
-        {t("I checked the Pathao merchant panel for this account and confirmed no consignment exists for this order.")}
-      </label>
-      <button type="button" data-noncreation disabled={Boolean(busy) || !confirmed}
-        onClick={() => void send('confirm_noncreation')}>{t("Record confirmed noncreation")}</button>
-    </fieldset>
+    <div className="courier-reconciliation-options">
+      <fieldset className="courier-reconciliation-card" disabled={Boolean(busy)}>
+        <legend>{t("Attach an existing booking")}</legend>
+        <p>{t("Account environment:")} {t(attempt.environment)}</p>
+        <p>{t("Merchant order reference:")} <code>{orderId}</code></p>
+        <label>{t("Consignment ID")}
+          <input name="consignmentId" value={consignmentId}
+            onChange={event => setConsignmentId(event.target.value)} />
+        </label>
+        <button className="btn btn-secondary" type="button" data-attach
+          disabled={Boolean(busy) || !consignmentId.trim()}
+          onClick={() => void send('attach_existing')}>{t("Attach existing booking")}</button>
+      </fieldset>
+      <fieldset className="courier-reconciliation-card" disabled={Boolean(busy)}>
+        <legend>{t("Confirm no booking was created")}</legend>
+        <label>
+          <input type="checkbox" name="confirmedNoncreation" checked={confirmed}
+            onChange={event => setConfirmed(event.target.checked)} />
+          {t("I checked the Pathao merchant panel for this account and confirmed no consignment exists for this order.")}
+        </label>
+        <button className="btn btn-secondary" type="button" data-noncreation disabled={Boolean(busy) || !confirmed}
+          onClick={() => void send('confirm_noncreation')}>{t("Record confirmed noncreation")}</button>
+      </fieldset>
+    </div>
     {busy && <p role="status">{t("Recording reconciliation…")}</p>}
   </section>;
 }

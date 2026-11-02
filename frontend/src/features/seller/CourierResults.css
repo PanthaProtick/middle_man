@@ -1,0 +1,154 @@
+.courier-copy {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-sm);
+  margin: var(--space-sm) 0;
+}
+
+.courier-copy-status {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+}
+
+.courier-copy-fallback {
+  display: grid;
+  gap: var(--space-xs);
+  width: 100%;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.courier-copy-fallback textarea {
+  width: 100%;
+  min-height: calc(var(--input-height-min) * 2);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: var(--input-font-size-min);
+  resize: vertical;
+}
+
+.courier-result-card {
+  margin-top: var(--space-md);
+  padding: var(--space-lg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.booking-result {
+  background: var(--color-status-emerald-bg);
+  border-color: var(--color-status-emerald);
+}
+.booking-unknown {
+  background: var(--color-status-amber-bg);
+  border-color: var(--color-status-amber);
+}
+.booking-failed {
+  background: var(--color-status-rose-bg);
+  border-color: var(--color-status-rose);
+}
+.booking-noncreation {
+  background: var(--color-status-cyan-bg);
+  border-color: var(--color-status-cyan);
+}
+
+.courier-result-title {
+  margin: 0 0 var(--space-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  line-height: 1.35;
+}
+
+.courier-result-subtitle {
+  margin: var(--space-md) 0 var(--space-sm);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.delivery-mismatch-warning {
+  margin: 0 0 var(--space-md);
+  padding: var(--space-md);
+  border: 1px solid var(--color-status-rose);
+  border-radius: var(--radius-sm);
+  background: var(--color-status-rose-bg);
+  color: var(--color-status-rose);
+  font-size: var(--font-size-sm);
+}
+
+.delivery-mismatch-warning .courier-result-title { color: var(--color-status-rose); }
+.delivery-mismatch-body { margin-top: var(--space-xs); }
+.delivery-mismatch-body p { margin: var(--space-xs) 0; }
+.delivery-mismatch-snapshot {
+  margin: var(--space-xs) 0 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.courier-reconciliation {
+  display: grid;
+  gap: var(--space-md);
+  min-width: 0;
+}
+
+.courier-reconciliation-warning {
+  margin: 0;
+  padding: var(--space-md);
+  border-left: 3px solid var(--color-status-amber);
+  border-radius: var(--radius-xs);
+  background: var(--color-surface-card);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+}
+
+.courier-reconciliation-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+}
+
+.courier-reconciliation-card {
+  display: grid;
+  gap: var(--space-sm);
+  align-content: start;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-card);
+}
+
+.courier-reconciliation-card legend {
+  padding-inline: var(--space-xs);
+  color: var(--color-text-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+}
+
+.courier-reconciliation-card p { margin: 0; }
+.courier-reconciliation-card label { display: grid; gap: var(--space-xs); font-size: var(--font-size-sm); }
+.courier-reconciliation-card input:not([type="checkbox"]) {
+  width: 100%;
+  min-height: var(--input-height-min);
+  padding: var(--space-sm) var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface-card);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: var(--input-font-size-min);
+}
+.courier-reconciliation-card input[type="checkbox"] { width: 20px; height: 20px; }
+
+@media (max-width: 480px) {
+  .courier-result-card { padding: var(--space-md); }
+  .courier-reconciliation-options { grid-template-columns: minmax(0, 1fr); }
+}

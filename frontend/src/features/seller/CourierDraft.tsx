@@ -150,8 +150,11 @@ export function CourierDraft({ orderId, token, onSaved, reviewManaged = false, c
     }
   };
 
-  return <section className="buyer-correction delivery-details" aria-label={t("Courier proposal")}>
-    <h4>{t(reviewManaged ? 'Parcel details' : 'Local courier proposal')}</h4>
+  return <section id="courier-parcel" className="buyer-correction delivery-details courier-stage courier-parcel-stage" aria-label={t("Courier proposal")}>
+    <div className="courier-stage-heading">
+      <span className="courier-stage-number" aria-hidden="true">1</span>
+      <h4>{t(reviewManaged ? 'Parcel details' : 'Local courier proposal')}</h4>
+    </div>
     {!reviewManaged && <p className="delivery-note">{t("Draft only. Review and submit to book with Pathao.")}</p>}
     {!current && <p role="status">{t("Loading courier proposal…")}</p>}
     {current?.error && (
