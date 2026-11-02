@@ -3,20 +3,46 @@
   right: 20px;
   bottom: 20px;
   z-index: 40;
+  min-height: 48px;
+  padding: 12px 20px;
+  border-radius: 9999px;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  letter-spacing: 0.01em;
+  background: var(--primary-accent, #146653);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 16px rgba(20, 102, 83, 0.28), 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
 }
+.seller-assistant-launcher:hover {
+  background: #0f4f40;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(20, 102, 83, 0.32), 0 3px 8px rgba(0, 0, 0, 0.1);
+}
+.seller-assistant-launcher:focus-visible {
+  outline: 2px solid var(--primary-accent, #146653);
+  outline-offset: 3px;
+}
+.seller-assistant-launcher[hidden] { display: none; }
+
 .seller-assistant-workspace .assistant-slot:has(.seller-assistant-window, .review-assistant-side-panel) {
   position: fixed;
   right: 20px;
   bottom: 80px;
-  width: min(400px, calc(100vw - 40px));
-  max-height: 70dvh;
+  width: min(420px, calc(100vw - 40px));
+  max-height: 72dvh;
   overflow-y: auto;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 16px;
-  padding: 16px;
+  padding: 16px 20px;
   z-index: 45;
-  box-shadow: 0 12px 40px #0003;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.12), 0 4px 12px rgba(15, 23, 42, 0.06);
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
   display: flex;
@@ -26,8 +52,12 @@
   grid-template-columns: minmax(0, 1fr);
 }
 .seller-assistant-window:focus-visible {
-  outline: 2px solid var(--primary-accent);
+  outline: 2px solid var(--primary-accent, #146653);
   outline-offset: -2px;
+}
+.seller-assistant-window:lang(bn),
+.seller-assistant-workspace:lang(bn) {
+  line-height: 1.7;
 }
 .seller-assistant-workspace .assistant-slot .review-assistant-side-panel {
   position: static;
@@ -35,9 +65,13 @@
   overflow: visible;
   padding: 12px 0 0;
   border: 0;
+  box-shadow: none;
 }
-.assistant-window-header, .assistant-context-controls,
-.assistant-workflow-choices, .assistant-draft-status {
+
+.assistant-window-header,
+.assistant-context-controls,
+.assistant-workflow-choices,
+.assistant-draft-status {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -49,72 +83,146 @@
   position: sticky;
   top: 0;
   z-index: 1;
-  background: var(--bg-card);
+  background: var(--bg-card, #ffffff);
   padding-block: 8px;
+  border-bottom: 1px solid var(--border-subtle, #d8e2dd);
+  margin-bottom: 14px;
 }
-.seller-assistant-launcher[hidden] { display: none; }
+.assistant-window-header h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary, #1f2937);
+}
+.assistant-context-controls button[aria-pressed="true"] {
+  background: var(--primary-accent, #146653);
+  color: #ffffff;
+  border-color: var(--primary-accent, #146653);
+}
+.assistant-context-label {
+  color: var(--text-secondary, #4b5563);
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 4px 0 10px;
+}
+
 .assistant-conversation :is(.attention-preview, .preparation-preview) > ul {
   list-style: none;
   padding: 0;
 }
 .assistant-conversation :is(.attention-preview, .preparation-preview) > ul > li {
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
   margin-block: 12px;
+  background: var(--bg-card, #ffffff);
 }
 .assistant-conversation :is(.attention-preview, .preparation-preview) h5 {
   margin-block: 0 8px;
+  color: var(--text-primary, #1f2937);
 }
-.assistant-window-header h3 { margin: 0; }
-.assistant-order-fields section {
-  border: 1px solid var(--border-subtle);
+
+.assistant-order-fields section,
+.assistant-payment-fields section {
+  border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
   margin-block: 12px;
+  background: #fdfdfd;
 }
-.assistant-order-fields [aria-invalid="true"] { border-color: var(--amber-accent); }
+.assistant-order-fields [aria-invalid="true"],
+.assistant-payment-fields [aria-invalid="true"] {
+  border-color: var(--amber-accent, #d97706);
+}
 .assistant-conversation :is(a, p) { overflow-wrap: anywhere; }
 .assistant-conversation section > button { margin: 4px; }
 .assistant-result {
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 10px;
-  padding: 12px;
+  padding: 14px;
   margin-block: 12px;
+  background: #fdfdfd;
 }
-.assistant-result:focus-visible { outline: 2px solid var(--primary-accent); }
+.assistant-result:focus-visible { outline: 2px solid var(--primary-accent, #146653); }
+
 .seller-assistant-window label {
   display: grid;
   gap: 6px;
   margin-block: 12px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary, #4b5563);
 }
 .seller-assistant-window :is(input, textarea, select) {
   width: 100%;
   box-sizing: border-box;
-  color: var(--text-primary);
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  color: var(--text-primary, #1f2937);
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 8px;
-  padding: 10px;
+  padding: 11px 14px;
   font: inherit;
+  font-size: 16px;
+  min-height: 46px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.seller-assistant-window textarea { min-height: 72px; resize: vertical; }
+.seller-assistant-window textarea { min-height: 80px; resize: vertical; }
+.seller-assistant-window :is(input, textarea, select):focus-visible {
+  outline: none;
+  border-color: var(--primary-accent, #146653);
+  box-shadow: 0 0 0 3px rgba(20, 102, 83, 0.15);
+}
+.seller-assistant-window button { min-height: 44px; }
+.seller-assistant-window .btn-sm {
+  min-height: 44px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.seller-assistant-window :is([name*="amount"], [name*="total"], [name*="advance"], [name*="trx"], [name*="quantity"], [name*="weight"], [name*="sender"], [name*="time"]),
+.assistant-order-fields section p,
+.assistant-payment-fields section p,
+.attention-preview p,
+.preparation-preview p {
+  font-variant-numeric: tabular-nums;
+}
+
 .assistant-conversation [role="log"] { overflow-wrap: anywhere; }
 .assistant-user-message {
-  padding: 10px;
+  padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  background: var(--bg-canvas, #f5f6f2);
+  color: var(--text-primary, #1f2937);
   white-space: pre-wrap;
+  margin-block: 8px;
 }
-.assistant-context-label { color: var(--text-secondary); font-size: .85rem; }
-.assistant-conversation [role="alertdialog"] {
-  border: 2px solid var(--primary-accent);
+.assistant-reply {
+  padding: 10px 14px;
   border-radius: 10px;
-  padding: 12px;
+  background: #eaf4ee;
+  color: #146653;
+  margin-block: 8px;
 }
+.assistant-conversation [role="alertdialog"] {
+  border: 2px solid var(--primary-accent, #146653);
+  border-radius: 10px;
+  padding: 14px;
+  background: var(--bg-card, #ffffff);
+}
+.attention-actions,
+.preparation-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
 .seller-assistant-workspace .order-detail-layout:has(.seller-assistant-window) {
   grid-template-columns: minmax(0, 1fr);
 }
+
 @media (max-width: 800px) {
   .seller-assistant-workspace .assistant-slot:has(.seller-assistant-window, .review-assistant-side-panel) {
     inset: auto 0 0;
@@ -132,8 +240,10 @@
     max-height: calc(100dvh - 16px);
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
-  .seller-assistant-workspace .assistant-slot *, .seller-assistant-launcher {
+  .seller-assistant-workspace .assistant-slot *,
+  .seller-assistant-launcher {
     animation: none !important;
     transition: none !important;
     scroll-behavior: auto !important;

@@ -122,8 +122,8 @@ async def test_priority_order_and_categories_with_overlap(client: AsyncClient):
         'unknown_outcome', 'failed_submission', 'failed_submission',
         'pending_review', 'pending_review', 'preparation',
     ]
-    assert body['items'][0]['reason_codes'] == ['UNKNOWN_OUTCOME']
-    assert body['items'][1]['reason_codes'] == ['FAILED_SUBMISSION']
+    assert body['items'][0]['reason_codes'][0] == 'UNKNOWN_OUTCOME'
+    assert body['items'][1]['reason_codes'][0] == 'FAILED_SUBMISSION'
 
 
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')

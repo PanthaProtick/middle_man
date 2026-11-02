@@ -244,6 +244,21 @@ booking, a hosted Clerk session, and Postgres concurrency.
 
 ### 10 — General assistant and contextual review assistance
 
+Progress 2026-11-03: **complete**. Recomposed general assistant and contextual
+review assistance into the Modern Dhaka Shop Desk design system. Unified desktop
+side-panel drawer and mobile sheet geometry across `ReviewAssistantSidePanel.css` and
+`SellerAssistant.css`. Replaced inline styles and hardcoded dark-mode tokens with
+semantic CSS classes (`.review-assistant-panel`, `.review-panel-close`, `.review-guidance-badge`,
+`.review-action-button`, `.review-facts-container`, `.review-advisory-note`). Local guidance
+badge uses pine teal tokens (`#eaf4ee` / `#146653`), while Gemini generated advice uses warm
+amber tokens (`#fdf6ea` / `#8a570b`). Enforced minimum 44px accessible touch targets on all
+panel buttons and close controls, 46px input heights with 16px font size to prevent iOS zoom,
+tabular numerals on amounts/TrxIDs/counts, and 1.7 line height for Bengali text. Preserved
+all safety invariants: explicit confirmation for creations/records, idempotency key
+preservation across retry/check, in-memory transient chat/draft lifetime, and keyboard Escape
+dismissal with focus restoration. All 19 assistant frontend suites (110 tests), backend review
+assistance tests, conventions, typecheck, and root `npm run check` passed.
+
 - **Owners:** `AssistantWorkspace.tsx`, `AssistantWindow.tsx`, conversation hooks,
   guided order/payment components, review panels, `useConfirmedSubmission.ts`.
 - Unify panel geometry and typography while retaining separate general conversation

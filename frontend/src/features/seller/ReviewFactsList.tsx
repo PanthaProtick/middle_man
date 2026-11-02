@@ -65,28 +65,19 @@ export function ReviewFactsList({ facts, locale }: ReviewFactsListProps): React.
   if (rows.length === 0) return null;
 
   return (
-    <div data-testid="review-facts" style={{ marginTop: '10px' }}>
-      <div
-        style={{
-          fontSize: '0.75rem',
-          color: 'var(--text-secondary, #94a3b8)',
-          marginBottom: '6px',
-          fontWeight: 600,
-          textTransform: 'uppercase',
-          letterSpacing: '0.05em',
-        }}
-      >
+    <div data-testid="review-facts" className="review-facts-container">
+      <div className="review-facts-title">
         {copy.factsTitle}
       </div>
-      <dl style={{ margin: 0, display: 'grid', gap: '4px' }}>
+      <dl className="review-facts-dl">
         {rows.map(row => (
           <div
             key={row.key}
             data-testid={`review-fact-${row.key}`}
-            style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', fontSize: '0.8rem' }}
+            className="review-fact-row"
           >
-            <dt style={{ color: 'var(--text-secondary, #94a3b8)' }}>{row.label}</dt>
-            <dd style={{ margin: 0, color: 'var(--text-primary, #f8fafc)', textAlign: 'right' }}>{row.value}</dd>
+            <dt className="review-fact-dt">{row.label}</dt>
+            <dd className="review-fact-dd">{row.value}</dd>
           </div>
         ))}
       </dl>
