@@ -208,6 +208,10 @@ pytest temp storage (`PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-pack
 `.cache/checks/check-5PnuVf/result.json`. The initial run
 (`.cache/checks/check-g5L5dF/result.json`) stopped on Windows temp-directory access
 in a backend fixture; no application change was required for that environment error.
+Design-hook follow-up: replaced Package 09's thick reconciliation-warning side
+accent with a thin neutral border; the surrounding unknown-result card retains
+its amber status treatment. No hook suppression was added. Verification runs
+through the required root check in the follow-up commit hook.
 
 - **Owners:** `CourierWorkspace.tsx`, parcel fields, `CourierDraft.tsx`, review/location,
   outcomes/reconciliation components, `DeliverySummary.tsx`, Pathao contracts.
