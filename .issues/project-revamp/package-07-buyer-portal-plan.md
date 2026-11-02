@@ -137,3 +137,16 @@ The buyer portal is the single high-trust bridge between buyer and seller after 
 8. **Step 8: Update Roadmap & Git Commit**
    - Update `implementation-roadmap.md` marking 07 complete.
    - Commit changes with conventional message: `feat(buyer): complete package 07 buyer confirmation and status portal`.
+
+## Review follow-up — 2026-11-02
+
+- Removed inline line-height overrides from status and access/error guidance;
+  address text now retains 1.7 script clearance.
+- Corrected text-control focus outline offset to 3px. Buttons and checkboxes
+  already receive the required 3px outline from the later theme stylesheet.
+- Removed the competing 720px theme width so buyer.css owns the 560px shell.
+- Focused buyer tests: 13 files, 90 tests passed.
+- Root check initially failed on Windows pytest system-temp permissions;
+  rerun with repository-local PYTEST_ADDOPTS --basetemp passed all gates.
+  Evidence: `.cache/checks/check-ZwIl7i/result.json`.
+- Browser visual acceptance and live-provider checks were not run.

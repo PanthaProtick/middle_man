@@ -57,7 +57,7 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
           <h2 style={{ margin: '0 0 4px', color: 'var(--amber-accent)', fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
             {t('buyer.gate.title')}
           </h2>
-          <p style={{ margin: 0, lineHeight: 1.5 }}>{t('buyer.gate.body')}</p>
+          <p style={{ margin: 0 }}>{t('buyer.gate.body')}</p>
         </div>
       </div>
     );
@@ -71,7 +71,7 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
           <h2 style={{ margin: '0 0 4px', color: 'var(--rose-accent)', fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
             {t('buyer.loadError.title')}
           </h2>
-          <p style={{ margin: '0 0 14px', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 14px' }}>
             {t(error ? PROBLEM_MESSAGES[error] : 'buyer.errors.loadFailed')}
           </p>
           <button

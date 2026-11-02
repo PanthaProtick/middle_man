@@ -111,7 +111,7 @@ input::placeholder, textarea::placeholder { color: #687d73; opacity: 1; }
 .btn-secondary:hover:not(:disabled) { background: #edf4ef; transform: none; }
 .btn:active:not(:disabled) { transform: none; }
 .btn:disabled { opacity: .6; }
-.portal-shell { max-width: 720px; padding: 24px 20px 48px; }
+.portal-shell { padding: 24px 20px 48px; }
 .portal-header { gap: 16px; padding-bottom: 20px; border-bottom: 1px solid var(--border-subtle); flex-wrap: wrap; }
 .portal-brand { color: var(--primary-accent); font-family: var(--font-body); font-size: .95rem; }
 .portal-main { gap: var(--section-gap); }

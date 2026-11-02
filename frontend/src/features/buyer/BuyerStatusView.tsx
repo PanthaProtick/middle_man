@@ -24,7 +24,6 @@ const bodyStyle = {
   margin: '6px 0 0 0',
   fontSize: '0.875rem',
   color: 'var(--text-secondary)',
-  lineHeight: 1.5,
 } as const;
 
 export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusViewProps): React.JSX.Element {
