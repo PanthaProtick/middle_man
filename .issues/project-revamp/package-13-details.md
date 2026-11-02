@@ -1,250 +1,130 @@
-# Package 13: Cross-Product Acceptance and Staged Rollout
+# Package 13: Cross-product acceptance and staged rollout
 
-## 1. Overview & Purpose
-Package 13 is the capstone package of Wave E ("Consolidate engineering and prove the complete product") in the Middleman Project Revamp. It validates the complete end-to-end seller and buyer workflows across the Modern Dhaka Shop Desk design system, executes the cross-product device/language/state matrix, benchmarks the revamped system against the recorded Package 01 baseline, documents test verification across all feature clusters, and defines the staged rollout strategy, rollback guarantees, and external readiness boundaries.
+Status 2026-11-03: **acceptance pending; rollout proposal only**.
 
----
+## Review correction
 
-## 2. Cross-Product Acceptance Matrix
+Review of `86de3d0` against `e2c57a9` found that the original completion note
+confused acceptance targets with executed evidence. This record supersedes its
+claims of completed matrix/journeys, measured baseline improvements, and available
+shop-ID canaries. No application behavior is changed by this correction.
 
-### 2.1 Viewport Matrix
-| Viewport | Device / Form Factor | Target Layout & Validation Requirements |
-|---|---|---|
-| **320px** | Ultra-compact phone (iPhone SE 1st gen / KaiOS / extreme zoom) | No horizontal viewport overflow; 44px min touch targets; form text >= 16px; 1.6-1.7 line height for Bengali conjuncts without clipping; action buttons stack vertically if needed. |
-| **390px** | Standard modern phone (iPhone 12/13/14/15/16) | Compact header; boarding-pass order card anatomy; modal sheets dock as full-screen overlays with sticky bottom actions; 3-column commercial tally cleanly stacked or wrapped. |
-| **768px** | Tablet portrait / foldable unfolded | Multi-column metric bar reflow; responsive grid for order queues; balanced 2-column or drawer overlay presentations. |
-| **1024px** | Small laptop / tablet landscape | Right-docked side drawers (>1024px); two-step payment evidence split; persistent navigation bar with accessible status badges. |
-| **1440px** | Desktop workstation | High-density operational shop desk; constrained max-widths on reading/form surfaces (e.g. buyer portal max 560px, drawer max 540px); clear typographic hierarchy and tabular figures. |
+The owning requirements are [parent plan sections 7–8](revamp-plan.md#7-cross-product-acceptance-matrix)
+and [roadmap Package 13](implementation-roadmap.md#13--cross-product-acceptance-and-staged-rollout).
+Package 12 performance acceptance is also still pending.
 
-### 2.2 Locale & Script Matrix
-- **English (`en`)**:
-  - Latin typographic hierarchy using system sans / Inter.
-  - Tabular numerals (`tabular-nums`) for currency amounts, phone numbers, dates, and transaction IDs.
-  - Standard operational vocabulary: Total Bill, Required Advance, Remaining COD, Pending, Confirmed, Booked.
-- **Bengali (`bn`)**:
-  - Bengali script clearance with `line-height: 1.6 - 1.7` to prevent clipping of complex ascenders, descenders, and conjuncts (্র, ্ক, ক্ষ, ্তু, ্য).
-  - Authentic Bangladesh commercial terms: মোট বিল, আবশ্যক অগ্রিম, বাকি ক্যাশ অন ডেলিভারি, অপেক্ষমাণ, নিশ্চিত, বুকিং সম্পন্ন.
-  - Currency representation using `৳` symbol alongside exact integer minor unit formatting.
+## Evidence and current disposition
 
-### 2.3 State Coverage Matrix
-For every migrated feature surface (Orders, Creation, Detail, Buyer Portal, Payments, Delivery, Assistant, Settings):
-1. **First-run / Empty State**: Clean, quiet guidance without obstructive banners or blocking overlays; action triggers discoverable.
-2. **Initial Loading State**: Accessible loading indicators / skeletons without layout-shifting jumps (`layout-shift` minimized).
-3. **Validation Error State**: Form submit triggers inline field-level errors, top summary alert, and auto-focuses first invalid input (`focusFirstError`).
-4. **Successful Mutation State**: Immediate status update, local context preserved, mutation feedback factual without over-promising.
-5. **Unknown Mutation Outcome / Recovery State**: Amber recovery alert; payload and idempotency key locked and preserved; dedicated lookup/retry/recovery action (e.g. "Resolve unknown outcome"); fresh duplicate submission prohibited.
-6. **Stale Data / 409 Conflict State**: Explicit refresh prompt; no silent overwrite of updated server records.
-7. **Session Loss / Auth Failure (401/403)**: Factual session recovery prompt; retry diagnostics available; no unhandled exceptions or loss of in-flight draft context.
-8. **Network Disconnect / Third-Party Outage**: Graceful fallback (e.g. written address input when Pathao location catalog is unavailable).
+| Gate | Status | Evidence / remaining work |
+| --- | --- | --- |
+| Historical local root check | PASS, with skips | `.cache/checks/check-aOPgDQ/result.json`; 693 backend passed, 179 skipped; 119 frontend files, 635 tests passed. This local artifact does not prove browser acceptance. |
+| Review verification | PASS, with skips | `npm run check` with repository-local pytest temp; `.cache/checks/check-A3ZSKN/result.json`. All nine stages passed; 693 backend passed, 179 skipped; 119 frontend files, 635 tests passed. |
+| Rendered device/locale/state matrix | NOT RUN in this review | No Package 13 per-case captures or fixture/revision manifest supplied. |
+| Integrated seller → buyer → payment → delivery journey | NOT RUN in this review | Independent test cases and baseline fixtures do not prove one persisted journey. |
+| Baseline task comparison / pilot comprehension | NOT RUN | Package 01 findings are expert hypotheses, not measured user baselines. |
+| Performance budgets | Pending | Measure representative low-end-device behavior; chunk warnings are not a performance acceptance gate. |
+| Hosted auth, PostgreSQL, providers, physical devices | NOT RUN | Separate authorized environment and operator required. |
+| Deployment / rollback rehearsal | NOT RUN | No release tags, hosting target, or deployment operator recorded. |
 
-### 2.4 Accessibility & Ergonomics Matrix
-- **Touch Geometry**: Minimum `44px` height on all interactive elements (`button`, `a`, `select`, `input`, `tab`).
-- **Input Geometry**: Form controls have `min-height: 46px` and minimum `16px` font size to eliminate iOS auto-zoom.
-- **Focus Rings**: High-contrast, non-obscured focus indicators (`outline: 3px solid var(--primary-accent); outline-offset: 3px;`).
-- **Motion**: Strict `prefers-reduced-motion` compliance reducing animation and transition times to `.01ms`.
-- **Contrast**: WCAG AA compliant contrast (>= 4.5:1 for body copy, >= 3:1 for large text and interactive borders).
+Local cache paths are disposable operator evidence, not portable tracked artifacts.
+Retain selected reusable acceptance evidence under `docs/verification/` before
+claiming completion; include fixtures, source revision, viewport, locale, theme,
+case outcome, capture path, and real-service paths exercised or excluded.
 
----
+## Remaining acceptance cases
 
-## 3. End-to-End User Journey Proofs
+Execute the full parent matrix for Orders, Creation, Detail, Buyer Portal,
+Payments, Delivery, Assistant, and Settings. Record PASS/FAIL/NOT RUN per applicable
+case; justify non-applicable cases rather than treating them as passes.
 
-### Journey 1: Seller Order Creation & Link Sharing
-- **Flow**: Seller enters workspace → clicks "+ Create Order Link" → completes modal (Product name, agreed price, required advance, customer phone) → clicks "Generate Buyer Link" → receives generated public link.
-- **Safety & Domain Invariants**:
-  - Enforces positive integer minor units for total amount and required advance.
-  - Automatically calculates remaining COD (`Total - Advance`).
-  - Locks active designated payment account snapshot to the order at generation time.
-  - Provides clipboard copy button with resilient fallback to manual copy text input.
-  - Supports link revocation and reissue with version increment and idempotency protection.
+- Widths 320, 390, 768, 1024, 1440px; 200% zoom/reflow; English and Bengali;
+  mixed-script long text, unbroken IDs, zero/maximum-valid amounts, one/many pages.
+- First visit, empty/no matches, initial loading, refresh with data, field errors,
+  session/forbidden, transport failure, success, stale/slow responses, large content,
+  unknown mutation outcomes, duplicate clicks, and lost mutation responses.
+- Primary targets at least 44px, form text at least 16px, actual token contrast,
+  semantic labels/headings/errors, status announcements, visible focus, keyboard
+  dialogs/tabs and focus return, reduced motion, and text alongside status colors.
+- Software keyboards/safe areas, assistant/detail overlap, long dialog scrolling,
+  back/scroll restoration, query reset versus refresh context preservation.
+- Bangladesh midnight, retained records, account deactivation, ownership changes,
+  stale versions, pagination scope/deduplication, offline/manual paths without
+  live credentials or external fonts.
 
-### Journey 2: Buyer Review & Claim Submission
-- **Flow**: Buyer arrives via `/orders/:token` → reviews commercial terms (Agreed Total, Advance Due, Remaining COD) → copies seller receiving bKash/Nagad number → submits recipient info, address (Pathao dropdown or manual), and payment claim (TrxID / sender number) → views status portal.
-- **Safety & Domain Invariants**:
-  - Clear commercial separation: advance is required for confirmation; COD is paid upon physical delivery.
-  - Receiving account card prominently displayed with 1-tap copy trigger.
-  - Submitting payment claim places order into "Pending Seller Review"; clearly informs buyer that claim entry does NOT constitute automated verification.
-  - Status view polls safely and preserves isolation if another link token is accessed.
+Repeat [all eight baseline walkthrough tasks](baseline-walkthroughs.md) using
+recorded fixtures: create/share, buyer claim, find work, review evidence, record
+payment, correct buyer/link, delivery recovery, and session recovery. Record
+observations rather than asserting all controls or flows now pass. Recruit pilot
+sellers/buyers for task time, errors, navigation reversals, and comprehension;
+set numeric improvement targets only after collecting comparable baselines.
 
-### Journey 3: Payment Evidence Recording & Reconciliation
-- **Flow**: Seller navigates to "Payments" → selects "Add evidence" (paste SMS text or "Record payment manually") → system parses/validates receipt (Sender, TrxID, Amount, Account) → transitions to "Review reconciliation" ledger.
-- **Safety & Domain Invariants**:
-  - Clear distinction between buyer claim, seller-recorded receipt, and actual provider verification.
-  - Recording a payment matching an eligible pending order can automatically link/confirm, with disclosure before confirmation.
-  - Multi-receipt conflict detection: duplicate TrxIDs or conflicting claims flag immediate reconciliation warnings.
-  - Exception resolution allows manual seller acceptance with mandatory recorded rationale.
+Exercise an integrated synthetic order through creation/sharing, buyer claim,
+receipt recording/reconciliation, seller acceptance, and delivery preparation /
+unknown-outcome recovery. Preserve the distinction between claim, receipt,
+acceptance, staged, ready, and booked. Keep live booking default-off; any real
+provider operation requires the separately authorized environment. Include
+assistant advisory boundaries and settings/account snapshot/retention cases.
+Domain expectations come from the maintained [API contracts](../../docs/API_CONTRACTS.md),
+not inferred UI narratives or hardcoded monetary/retention assumptions.
 
-### Journey 4: Delivery Preparation & Booking Review
-- **Flow**: Seller opens confirmed order → navigates to "Delivery" tab → reviews parcel parameters (weight, instruction, delivery type) → creates local draft → reviews booking details → submits to Pathao courier → views booking confirmation & tracking code.
-- **Safety & Domain Invariants**:
-  - Enforces visible 5-step sequence (Parcel details → Local draft → Current review → Submit booking → Booking result).
-  - Staged is not ready, and ready is not booked.
-  - If a booking request times out or returns an indeterminate 504 status, UI transitions to a dedicated amber "Unknown Outcome" card.
-  - Prohibits repeat submission button; requires explicit "Resolve unknown outcome" / manual tracking attachment.
+## Verification commands and guarantees
 
-### Journey 5: Assisted Review & Exception Resolution
-- **Flow**: Seller encounters discrepancy between buyer claimed advance and received receipt → opens Assistant / Review Assistance panel → views server facts & advisory Gemini analysis → decides whether to accept with exception or request correction.
-- **Safety & Domain Invariants**:
-  - Local rule-based guidance rendered in calm pine teal; Gemini LLM advisory notes rendered in warm amber.
-  - Assistant advice is strictly advisory; never automatically mutates order state or acts as transactional authority.
-  - Panel operates with 44px min touch targets, Escape dismissal, and focus restoration to the trigger element.
+- Use focused `npm run test:frontend -- <test-path>` and
+  `npm run test:backend -- tests/<file>.py` for changed behavior clusters.
+  This review changes documentation only; no application regression test added.
+- `npm run conventions` checks tracked non-Markdown scratch files, source/test
+  size limits, and maintained-document links/commands within its documented scope.
+  Documentation at 250 lines triggers review, not a universal 300-line ceiling.
+- `npm run typecheck` checks TypeScript and Mypy. `npm run build` builds the client;
+  Vite's chunk-size warning is not an enforced runtime performance budget.
+- Final `npm run check` runs all nine local stages and writes a unique result JSON.
+  Record actual failures/skips and adjacent logs; it does not execute browser React
+  or prove live auth, database, SMS/device, or provider behavior.
 
-### Journey 6: Settings, Configuration & Retention
-- **Flow**: Seller configures receiving accounts (bKash/Nagad/Rocket/Bank), connects Pathao courier sandbox/production credentials, and inspects data retention status.
-- **Safety & Domain Invariants**:
-  - Historical account snapshots on existing orders remain unaffected when settings accounts are edited or deactivated.
-  - Pathao API secrets are write-only (never echoed back in API responses).
-  - Retention policies enforce strict separation: raw SMS evidence cleaned up after 30 days; structured commercial records retained for 12 months.
+## Proposed rollout and recovery
 
----
+The six dependency groups are shell/access, seller queues, order/buyer lifecycle,
+payments/delivery, assistant/settings, and final acceptance. These are review and
+release sequencing proposals, not implemented cohort flags. Shop-ID canaries and
+dual legacy/modern response compatibility must not be assumed available.
 
-## 4. Baseline Revisit & Walkthrough Comparison
+Before deployment, the release operator must select and record a compatible full
+release artifact and previous known-good artifact/revision, hosting target,
+asset/cache procedure, API compatibility assessment, and rollback rehearsal.
+Packages can include backend changes; blindly reverting an entire package is not
+a safe UI rollback. No schema change is introduced here. Any future schema change
+requires its own forward-compatibility and recovery plan.
 
-Comparison of Package 01 baseline expert walkthrough hypotheses against the revamped Package 13 implementation:
+On a UI regression, restore the previous compatible frontend artifact using the
+host's verified procedure, then recheck existing buyer links, seller access,
+payment reconciliation, delivery recovery, and ingestion paths actually deployed.
+Never erase or rewrite payment allocations, order facts, courier attempts,
+idempotency records, or audit history. Do not claim zero downtime until rehearsed.
 
-| Task / Area | Package 01 Baseline Finding | Package 13 Revamped Resolution |
-|---|---|---|
-| **1. Order Creation & Sharing** | Creation form mixed within chat/assistant; unclear error recovery on 503; clipboard reachability unhandled. | Dedicated `CreateOrderModal` with 46px inputs, 16px font size, high-contrast COD box; `BuyerLinkAccess` with resilient retry; `BuyerLinkCopy` with clipboard API and manual text fallback. |
-| **2. Buyer Portal & Claims** | Mixed terms; risk of buyer assuming TrxID claim equals verified confirmation; address lookup errors blocked completion. | Standalone `/orders/:token` shell (max 560px); 3-column commercial tally; highlighted receiving account card; Pathao cascading location with quiet indicator and seamless written-address fallback. |
-| **3. Work Discovery & Queues** | Bulky masthead pushed order list down to y=1258 on 390px phone; controls were 36px high with 12.8px text. | Compact Modern Dhaka Shop Desk header starts work immediately; first-class Work Query Switcher (`Needs Attention`, `Ready for Delivery`, `All Orders`); `ShopMetricsBar` with Asia/Dhaka grouping and tabular numerals; all controls >= 44px. |
-| **4. Payment Reconciliation** | Cluttered table rows; unclear distinction between evidence recording, allocation, and provider verification. | Two-step workspace: "Add evidence" and "Review reconciliation"; boarding-pass transaction cards; exception comparison sheet; factual seller acceptance without false claims of provider verification. |
-| **5. Manual Payment Recording** | Basic modal; lacked clear disclosure on auto-reconciliation implications. | Focused manual entry sheet with 46px inputs, 16px font, clear auto-reconciliation disclosure, stable key, immutable payload preservation during processing/unknown/retry. |
-| **6. Buyer Correction & Links** | Isolated controls; danger of updated delivery address overwriting existing courier booking snapshot. | Integrated `BuyerCorrection` with locked payment fields and courier booking notices on confirmed orders; version conflict handling; immutable account snapshots. |
-| **7. Courier Preparation & Recovery** | Duplicate booking risk on network timeouts; failure lumped together with unknown outcome. | Structured 5-step delivery sequence; dedicated amber result card for unknown outcomes with "Resolve unknown outcome" action; duplicate submission permanently prevented. |
-| **8. Shell, Session & Recovery** | Long masthead; generic workspace errors on 401 token expiration. | Compact Dhaka Shop Desk header; streamlined session recovery with temporary-token timing diagnostics, manual retry, setup idempotency, and public Clerk-free routing. |
+## Outstanding gate ownership
 
----
+Assignments below identify required roles; no named operator has accepted them.
+They block promotion until an operator and evidence are recorded.
 
-## 5. Test Suite Verification Clusters & Command Mapping
+| Gate | Required owner | Evidence needed |
+| --- | --- | --- |
+| Browser matrix and baseline tasks | Frontend acceptance owner, unassigned | Case manifest, captures, outcomes, pilot observations |
+| Performance | Frontend performance owner, unassigned | Representative device/network measurements and budgets |
+| Hosted authentication | Auth/deployment operator, unassigned | Session rotation, recovery, domain/cookie behavior |
+| PostgreSQL | Database operator, unassigned | Disposable integration/concurrency results and skip resolution |
+| Pathao | Courier integration operator, unassigned | Authorized trial and unknown-outcome recovery evidence |
+| SMS ingestion | Device/integration operator, unassigned | Physical forwarding and malformed input cases |
+| Hardware keyboards/safe areas | Device acceptance owner, unassigned | iOS/Android device results |
+| Release and rollback | Release operator, unassigned | Artifact IDs, compatibility review, rehearsal and post-deploy checks |
 
-### 5.1 Verification Clusters
-1. **Cluster 1: Shell, Session, Setup & Navigation (Wave B, P03-P04)**
-   - Frontend: `SellerSession.test.tsx`, `SellerWorkspace.test.tsx`, `SellerWorkspaceError.test.tsx`, `AppShell.test.tsx`, `Root.test.tsx`, `useSellerBootstrap.test.ts`, `useUnseenEntries.test.tsx`
-   - Backend: `test_seller_auth_integration.py`, `test_seller_shop.py`, `test_seller_bootstrap.py`, `test_unseen_entries.py`
-2. **Cluster 2: Orders, Work Queues, Metrics & Export (Wave C, P05)**
-   - Frontend: `OrderList.test.tsx`, `OrderCard.test.tsx`, `OrderSearch.test.tsx`, `OrderExport.test.tsx`, `OrderDateRequests.test.tsx`, `ShopMetricsBar.test.tsx`, `useTodayMetrics.test.tsx`, `useSellerOrdersWorkQuery.test.tsx`, `useScrollRetention.test.tsx`
-   - Backend: `test_order_listing_routes.py`, `test_order_search.py`, `test_order_dates.py`, `test_attention_query.py`, `test_delivery_preparation.py`, `test_shop_metrics.py`, `test_order_export.py`
-3. **Cluster 3: Order Creation, Details, Link Access & Buyer Corrections (Wave C, P06)**
-   - Frontend: `CreateOrderModal.test.tsx`, `CreateOrderParcelValidation.test.tsx`, `OrderDetailModal.test.tsx`, `OrderOverview.test.tsx`, `OrderPaymentDetails.test.tsx`, `BuyerLinkAccess.test.tsx`, `BuyerLinkCopy.test.tsx`, `BuyerCorrection.test.tsx`, `OrderOutcomes.test.tsx`
-   - Backend: `test_order_routes.py`, `test_order_link_routes.py`, `test_order_link_recovery.py`, `test_buyer_corrections.py`, `test_order_outcomes.py`, `test_order_replacement_guards.py`
-4. **Cluster 4: Buyer Confirmation Portal (Wave C, P07)**
-   - Frontend: `BuyerPortal.test.tsx`, `BuyerOrderDetails.test.tsx`, `BuyerSubmissionForm.test.tsx`, `BuyerStatusView.test.tsx`, `PathaoLocations.test.tsx`, `BuyerRefresh.test.tsx`, `BuyerRetry.test.tsx`, `BuyerReplacementIsolation.test.tsx`, `BuyerLocaleSubmission.test.tsx`, `BuyerLocaleSummary.test.tsx`
-   - Backend: `test_public_order_routes.py`, `test_public_admission.py`, `test_buyer_models.py`, `test_buyer_boundaries.py`, `test_pathao_location_requirements.py`
-5. **Cluster 5: Received Payments, SMS & Reconciliation (Wave C, P08)**
-   - Frontend: `PaymentsSection.test.tsx`, `SmsImportPanel.test.tsx`, `SmsImportLocale.test.tsx`, `TransactionInbox.test.tsx`, `TransactionCard.test.tsx`, `ManualTransactionLocale.test.tsx`, `EvidenceResolution.test.tsx`, `PaymentException.test.tsx`
-   - Backend: `test_sms_import.py`, `test_transaction_submissions.py`, `test_payment_exceptions.py`, `test_order_decision_guards.py`, `test_transaction_boundaries.py`
-6. **Cluster 6: Delivery Preparation, Review & Recovery (Wave D, P09)**
-   - Frontend: `CourierWorkspace.test.tsx`, `CourierDraft.test.tsx`, `CourierReview.test.tsx`, `CourierReviewLocations.test.tsx`, `CourierReconciliation.test.tsx`, `CourierWorkflow.test.tsx`, `CourierStatusPropagation.test.tsx`, `CourierWorkspaceValidity.test.tsx`
-   - Backend: `test_courier_drafts.py`, `test_courier_review.py`, `test_courier_submission_failures.py`, `test_courier_in_flight_changes.py`, `test_courier_reconciliation.py`, `test_courier_post_submission_changes.py`
-7. **Cluster 7: Assistant & Contextual Review (Wave D, P10)**
-   - Frontend: `AssistantWorkspace.test.tsx`, `AssistantWindow.test.tsx`, `AssistantAttention.test.tsx`, `AssistantPreparation.test.tsx`, `ReviewAssistant.test.tsx`, `ReviewAssistantActions.test.tsx`, `ReviewAssistantFacts.test.tsx`, `GuidedOrderCreation.test.tsx`, `GuidedPaymentOutcomes.test.tsx`
-   - Backend: `test_order_submissions.py`, `test_transaction_submissions.py`, `test_review_assistance.py`
-8. **Cluster 8: Accounts, Pathao Settings & Retention (Wave D, P11)**
-   - Frontend: `PaymentAccountList.test.tsx`, `PaymentAccountsLocale.test.tsx`, `PathaoSettings.test.tsx`, `EvidenceRetentionPanel.test.tsx`, `StructuredRetentionPanel.test.tsx`
-   - Backend: `test_payment_accounts.py`, `test_pathao_connections.py`, `test_structured_retention.py`, `test_retention_status.py`
-9. **Cluster 9: Seams, Performance & Production Build (Wave E, P12-P13)**
-   - Frontend: `usePaginationSeams.test.tsx`
-   - Vite chunking: manual chunk split keeping all bundles under 500 kB (`index.js`, `clerk.js`, `icons.js`).
+Package 13 remains pending until its roadmap done criteria have bounded evidence.
 
----
+## Review verification notes (2026-11-03)
 
-## 6. Pre-Commit & Pre-Release Verification Protocol
-
-1. `npm run conventions`:
-   - Enforces physical line limit (review at 250, hard ceiling at 300).
-   - Validates no uncommitted scratch markdown files in tracked Git.
-   - Verifies root command wrappers and documentation links.
-2. `npm run typecheck`:
-   - Runs strict TypeScript checks on frontend (`tsc -b`).
-   - Runs strict Mypy checks on backend.
-3. `npm run test:backend`:
-   - Runs all 147 backend test suites (690+ tests passed, 0 failures).
-4. `npm run test:frontend`:
-   - Runs all 119 Vitest test suites (625+ tests passed, 0 failures).
-5. `npm run build`:
-   - Builds production Vite client; validates chunk budgets (<500 kB per chunk, 0 warnings).
-6. `npm run check`:
-   - Full 9-stage root gate (tooling, conventions, backend lint/types/tests, frontend lint/tests/build, HTTP smoke).
-   - Generates unique `.cache/checks/<run>/result.json` artifact.
-
----
-
-## 7. Staged Rollout Architecture & Cluster Sequencing
-
-```
-┌────────────────────────────────────────────────────────┐
-│ Stage 1: Core Shell & Access (Wave B)                  │
-│ Tokens, CSS variables, AppShell, Clerk-free routing    │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Stage 2: Daily Seller Desk (Wave C)                    │
-│ Order lists, work queries, ShopMetricsBar, Export CSV  │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Stage 3: Order Lifecycle & Buyer Portal (Wave C)       │
-│ Order creation, link sharing, buyer confirmation       │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Stage 4: Payments & Delivery Workspaces (Waves C & D)  │
-│ SMS / manual payments, reconciliation, Pathao booking  │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Stage 5: Assistance, Settings & Retention (Wave D)     │
-│ Contextual assistant, account snapshots, retention     │
-└───────────────────────────┬────────────────────────────┘
-                            │
-┌───────────────────────────▼────────────────────────────┐
-│ Stage 6: Full System Acceptance & Promotion (Wave E)   │
-│ Cross-product matrix, performance budgets, monitoring  │
-└────────────────────────────────────────────────────────┘
-```
-
-### Staged Rollout Guardrails:
-- **Zero Downtime Database Migrations**: Schema migrations expand before contract cuts. No table or column drops during UI rollout.
-- **Backwards Compatibility**: Client gracefully handles both legacy and modern response shapes during progressive deployment.
-- **Canary / Feature Flags**: Seller desk and buyer portal can be served to pilot shops via shop ID enablements.
-
----
-
-## 8. Rollback Procedures & Data Integrity Invariants
-
-1. **Reversible UI Commits**:
-   - Every revamp package is isolated in clean, reversible Git commits.
-   - If an unexpected browser or mobile-specific regression occurs, reverting the frontend assets restores prior visual components without affecting backend data.
-2. **Preservation of Mutation Facts**:
-   - In the event of a frontend UI rollback, transaction ledgers, order records, buyer submission payloads, and courier idempotency logs are NEVER purged or rewritten.
-   - Financial allocations, exception acceptance decisions, and audit history remain immutable.
-3. **Rollback Execution Steps**:
-   - Step A: Revert frontend build bundle to previous release tag.
-   - Step B: Invalidate CDN / edge cache for `index.html` and assets.
-   - Step C: Verify existing active buyer links remain functional with previous portal build.
-   - Step D: Confirm webhook listeners and polling endpoints continue ingesting without error.
-
----
-
-## 9. External Boundaries & Readiness Gates
-
-Local mock tests and HTTP smoke verify application logic, but do NOT prove third-party or production infrastructure readiness. The following external gates must be validated in an authorized staging environment before production claims:
-
-1. **Gate 1: Live Clerk Hosted Authentication**
-   - Live session rotation, production domain cookies, multi-session tab synchronization, and webhook secret verification.
-2. **Gate 2: Live PostgreSQL Concurrency & Persistence**
-   - High-concurrency row locking on simultaneous payment allocations; database failover recovery; standby replica lag.
-3. **Gate 3: Live Pathao Courier Production Dispatch**
-   - Valid production merchant credentials; live consignment creation; physical webhook delivery updates; rate-limit tolerance.
-4. **Gate 4: Live Mobile Network SMS Ingestion**
-   - Physical SIM / Android SMS forwarding app connectivity; cellular gateway latency; unparseable telecom spam handling.
-5. **Gate 5: Physical Device Hardware & Keyboard Viewport**
-   - Real iOS Safari software keyboard popover behavior (viewport resize vs scroll displacement); Android Chrome top address bar hide/show behavior.
-
----
-
-## 10. Execution Checklist for Coding Phase
-
-- [ ] Update `.issues/project-revamp/implementation-roadmap.md` marking Package 13 as **complete** with exhaustive progress notes detailing cross-product acceptance, matrix execution, baseline comparison, test verification, and rollout plans.
-- [ ] Run focused test verification across frontend and backend clusters.
-- [ ] Run final root `npm run check` and record the generated `.cache/checks/<run>/result.json` path.
-- [ ] Confirm clean git status and commit with an appropriate, conventional message.
+Initial `npm run check` failed: 692 backend passed, 179 skipped, one setup error
+from inaccessible system pytest temp. Result finalization also failed with EPERM;
+`.cache/checks/check-1hzgEu/result.json` remains RUNNING and is not a pass.
+Retry command: `($env:PYTEST_ADDOPTS = '--basetemp=E:/middle_man/.cache/pytest-review-86de3d0')`
+then `npm run check`. The retry passed all nine stages. Backend environment-dependent
+cases remain skipped; browser/live-service/deployment gates remain NOT RUN.
+The only subsequent changes record these verification results.
