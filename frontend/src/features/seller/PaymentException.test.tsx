@@ -78,7 +78,16 @@ it('translates a loaded blocked preview on language change without fetching agai
   await act(async () => root.render(<LocaleProvider><LocaleSwitch /><PaymentException orderId="order" token="seller" onAccepted={vi.fn()} /></LocaleProvider>));
   await act(async () => { const select = host.querySelector('select')!; select.value = 'receipt'; select.dispatchEvent(new Event('change', {bubbles:true})); });
   expect(host.textContent).toContain('Payment exceeds the order total');
+  const comparison = host.querySelector('table')!;
+  const sourceLabels = () => Array.from(comparison.querySelectorAll('td > span'));
+  expect(sourceLabels().map(label => label.textContent)).toEqual(
+    Array.from({length: 5}, () => ['Order / buyer claim', 'Seller receipt']).flat(),
+  );
+  expect(sourceLabels().every(label => label.getAttribute('aria-hidden') === 'true')).toBe(true);
   await act(async () => Array.from(host.querySelectorAll('button')).find(button => button.textContent === 'বাংলা')!.click());
+  expect(sourceLabels().map(label => label.textContent)).toEqual(
+    Array.from({length: 5}, () => ['অর্ডার / ক্রেতার তথ্য', 'বিক্রেতার রেকর্ড']).flat(),
+  );
   expect(host.textContent).toContain('পেমেন্ট অর্ডারের মোট টাকার বেশি');
   expect(host.textContent).toContain('PAY১২');
   expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')!.disabled).toBe(true);

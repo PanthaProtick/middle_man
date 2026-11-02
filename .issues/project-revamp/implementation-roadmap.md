@@ -168,6 +168,14 @@ Progress 2026-11-02: **complete**. Recomposed the standalone public buyer confir
   the new step and observation language. Focused payment suites and root
   `npm run check` passed; rendered 1440/390/320px browser verification remains
   unrun.
+- Review follow-up 2026-11-02: removed the exception comparison's fixed minimum
+  width and stacked each field's labeled claim/receipt values on phones, preserving
+  the desktop table and accessible headers. Focused exception tests passed (4),
+  including translated source labels. Isolated synthetic browser checks found no
+  comparison overflow at 320/390/1440px in English/Bengali with long transaction
+  IDs and technical IDs expanded; blocked and unavailable previews also checked.
+  This verifies the exception surface only, not all Package 08 browser journeys.
+  The full root check runs through the commit hook.
 
 ## Wave D: complete delivery, assistance, and administration
 

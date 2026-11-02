@@ -2,11 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import { fetchTransactions, SellerApiError } from './api';
 import { useLocale } from '../locale/context';
-import { formatBangladeshDateTime } from '../locale/format';
 import { paymentExceptionCopy, paymentReason } from '../locale/paymentExceptionCopy';
 import { acceptPayment, previewPayment } from './paymentDecisions';
 import type { PaymentDecision, PaymentPreview } from './paymentDecisions';
 import type { ReceiptView, SellerOrder } from './types';
+import { PaymentComparison } from './PaymentComparison';
 import './PaymentReview.css';
 import './PaymentException.css';
 
@@ -18,7 +18,6 @@ export function PaymentException({orderId, token, onAccepted, onPreviewChange}: 
 }) {
   const { locale } = useLocale();
   const text = paymentExceptionCopy[locale];
-  const date = (value: string) => formatBangladeshDateTime(value, locale);
   const message = (error: unknown) => error instanceof SellerApiError && error.code === 'UNAUTHORIZED' ? 'unauthorized' : error instanceof SellerApiError && error.code === 'STALE_VERSION' ? 'stale' : 'unavailable';
   const [receipts,setReceipts] = useState<ReceiptView[]>([]);
   const [cursor,setCursor] = useState<string | null>(null);
@@ -112,21 +111,7 @@ export function PaymentException({orderId, token, onAccepted, onPreviewChange}: 
         </button>
       </div>
 
-      <div className="payment-table-wrap">
-        <table className="payment-comparison-table">
-          <caption>{text.caption}</caption>
-          <thead><tr><th scope="col">{text.field}</th><th scope="col">{text.claim}</th><th scope="col">{text.seller}</th></tr></thead>
-          <tbody>
-            <tr><th scope="row">{text.provider}</th><td>{preview.account_provider} / {preview.claim_provider}</td><td>{preview.receipt.provider}</td></tr>
-            {showTechnical && <tr><th scope="row">{text.account}</th><td>{preview.payment_account_id}</td><td>{preview.receipt.payment_account_id}</td></tr>}
-            <tr><th scope="row">TrxID</th><td>{preview.claim_trx_id}</td><td>{preview.receipt.trx_id}</td></tr>
-            <tr><th scope="row">{text.sender}</th><td>{preview.claim_sender}</td><td>{preview.receipt.sender_number_canonical ?? text.unknown}</td></tr>
-            <tr><th scope="row">{text.amount}</th><td>{money(preview.claim_amount_minor)}</td><td>{money(preview.accepted_amount_minor)}</td></tr>
-            <tr><th scope="row">{text.time}</th><td>{date(preview.order_created_at)} {text.to} {date(preview.claim_submitted_at)}</td>
-              <td>{preview.receipt.occurred_at ? date(preview.receipt.occurred_at) : text.unknown}</td></tr>
-          </tbody>
-        </table>
-      </div>
+      <PaymentComparison preview={preview} showTechnical={showTechnical} />
 
       <div className="payment-exception-block">
         <h5 className="payment-exception-title">{text.exceptions}</h5>
