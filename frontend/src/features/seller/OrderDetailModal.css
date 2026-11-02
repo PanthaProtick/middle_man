@@ -1,5 +1,21 @@
 .order-detail-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.75);
+  background: rgba(25, 47, 41, 0.45);
+  backdrop-filter: blur(2px);
+  animation: modal-backdrop-fade var(--duration-normal, 200ms) var(--ease-out-calm, ease);
+}
+
+.order-detail-dialog[open] {
+  animation: order-drawer-slide-in var(--duration-smooth, 280ms) var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1));
+}
+
+@keyframes order-drawer-slide-in {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes modal-backdrop-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .order-detail-dialog {

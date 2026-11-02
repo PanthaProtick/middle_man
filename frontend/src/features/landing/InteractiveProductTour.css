@@ -51,12 +51,20 @@
   color: var(--text-secondary, #4a5d58);
   cursor: pointer;
   text-align: left;
-  transition: all 150ms ease;
+  transition: background-color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              border-color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              transform var(--duration-instant, 120ms) var(--ease-out-calm, ease);
 }
 
 .step-tab:hover {
   background: #ebf1ee;
   border-color: #c4d3cb;
+}
+
+.step-tab:active {
+  transform: translateY(1px);
 }
 
 .step-tab.active {
@@ -82,6 +90,8 @@
   color: var(--text-primary, #1b2e2b);
   font-size: 0.8rem;
   font-weight: 700;
+  transition: background-color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              color var(--duration-normal, 200ms) var(--ease-out-calm, ease);
 }
 
 .step-tab.active .step-number {
@@ -100,6 +110,22 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
+  animation: tour-narrative-in var(--duration-smooth, 280ms) var(--ease-out-calm, ease) both;
+}
+
+.mock-phone-shell,
+.mock-desk-shell {
+  animation: tour-shell-in var(--duration-smooth, 300ms) var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
+@keyframes tour-narrative-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tour-shell-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 .tour-step-tag {

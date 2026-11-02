@@ -40,6 +40,7 @@
   background: var(--bg-card);
   color: var(--text-secondary);
   font-size: 0.9rem;
+  animation: mm-notice-in var(--duration-smooth, 280ms) var(--ease-out-calm, ease) forwards;
 }
 .portal-notice--warning { border-color: rgba(138, 87, 11, 0.4); background: #fdfaf3; color: var(--amber-accent); }
 .portal-notice--error { border-color: rgba(179, 52, 72, 0.4); background: #fdf4f5; color: var(--rose-accent); }
@@ -139,6 +140,8 @@
   color: var(--text-primary);
   width: 100%;
   box-sizing: border-box;
+  transition: border-color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease);
 }
 
 .portal-main textarea.form-control { min-height: 84px; line-height: 1.7; }
@@ -177,6 +180,10 @@
   gap: 8px;
   border-radius: var(--radius-xs);
   touch-action: manipulation;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              border-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              transform var(--duration-instant, 120ms) var(--ease-out-calm, ease);
 }
 
 .portal-main form .btn-primary {
@@ -186,6 +193,10 @@
   background: var(--primary-accent);
   color: #ffffff;
   border: none;
+}
+.portal-main form .btn:active,
+.portal-main .btn:active {
+  transform: translateY(1px);
 }
 
 /* Native searchable courier choices retain labels, touch targets and wrapping actions */
@@ -198,6 +209,7 @@
   border-radius: 8px;
   background: #e3eee8;
   color: var(--primary-accent);
+  animation: mm-fade-in var(--duration-normal, 200ms) var(--ease-out-calm, ease) forwards;
 }
 .pathao-location-loading strong { font-size: 0.85rem; }
 

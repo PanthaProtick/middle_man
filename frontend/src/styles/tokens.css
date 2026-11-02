@@ -99,6 +99,15 @@
   --glow-amber: none;
   --pill-gap: 4px;
   --section-gap: 12px;
+
+  /* Motion & Easing Tokens */
+  --ease-out-calm: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-calm: cubic-bezier(0.4, 0, 0.2, 1);
+  --duration-instant: 120ms;
+  --duration-fast: 150ms;
+  --duration-normal: 200ms;
+  --duration-smooth: 280ms;
+  --duration-focal: 480ms;
 }
 
 /* Bengali Script Clearance: 1.7 line-height accommodates ascenders, descenders, and conjuncts */
@@ -122,7 +131,14 @@ body:lang(bn) {
   *::after {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  :root {
+    --duration-instant: 0.01ms;
+    --duration-fast: 0.01ms;
+    --duration-normal: 80ms;
+    --duration-smooth: 80ms;
+    --duration-focal: 80ms;
   }
 }

@@ -68,6 +68,7 @@ export function InteractiveProductTour({ locale }: InteractiveProductTourProps):
 
       <div className="tour-stage">
         <div
+          key={currentStep.id}
           id={`step-panel-${currentStep.id}`}
           className="tour-narrative"
         >

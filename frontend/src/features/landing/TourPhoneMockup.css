@@ -93,6 +93,7 @@
   color: #1b2e2b;
   align-self: flex-start;
   border-bottom-left-radius: 4px;
+  animation: mock-bubble-in 240ms var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) both;
 }
 
 .chat-bubble.outgoing {
@@ -100,6 +101,7 @@
   color: #ffffff;
   align-self: flex-end;
   border-bottom-right-radius: 4px;
+  animation: mock-bubble-in 240ms var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) 90ms both;
 }
 
 .chat-order-card {
@@ -108,6 +110,12 @@
   border-radius: 10px;
   padding: 12px;
   margin-top: 4px;
+  animation: mock-bubble-in 240ms var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) 180ms both;
+}
+
+@keyframes mock-bubble-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .chat-card-top {
@@ -147,7 +155,13 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              border-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              transform var(--duration-instant, 120ms) var(--ease-out-calm, ease);
 }
+.chat-copy-btn:hover { background: #eaf4ee; }
+.chat-copy-btn:active { transform: translateY(1px); }
 
 /* Mock Portal Body */
 .mock-portal-header {

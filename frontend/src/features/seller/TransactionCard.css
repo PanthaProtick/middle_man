@@ -5,6 +5,11 @@
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--bg-card);
+  transition: border-color var(--duration-normal, 200ms) var(--ease-out-calm, ease), box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease);
+}
+.transaction-card:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 2px 8px rgba(20, 102, 83, 0.05);
 }
 
 .transaction-card[data-tone="rose"] {
