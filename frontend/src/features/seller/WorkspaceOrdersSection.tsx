@@ -37,6 +37,7 @@ export function WorkspaceOrdersSection({
     reload,
     changeStatus,
     changeSearch,
+    applyWorkQuery,
     clearWorkQuery,
     changeDateMode,
     changeDateFrom,
@@ -73,6 +74,10 @@ export function WorkspaceOrdersSection({
         search={search}
         onSearchChange={changeSearch}
         workQuery={workQuery}
+        onSelectWorkQuery={(q) => {
+          if (q) applyWorkQuery(q);
+          else clearWorkQuery();
+        }}
         onClearWorkQuery={clearWorkQuery}
         dateMode={dateMode}
         dateFrom={dateFrom}

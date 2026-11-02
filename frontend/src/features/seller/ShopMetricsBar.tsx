@@ -15,7 +15,7 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
   return (
     <div className="metrics-ribbon" role="region" aria-label={text.overview}>
       <div className="metric-chip">
-        <div className="metric-icon-wrap" style={{ background: 'rgba(99, 102, 241, 0.15)', color: 'var(--primary-accent)' }}>
+        <div className="metric-icon-wrap" style={{ background: 'rgba(20, 102, 83, 0.12)', color: 'var(--primary-accent)' }}>
           <ShoppingBag size={18} />
         </div>
         <div>
@@ -25,7 +25,7 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
       </div>
 
       <div className="metric-chip">
-        <div className="metric-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-accent)' }}>
+        <div className="metric-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--emerald-accent)' }}>
           <CheckCircle2 size={18} />
         </div>
         <div>
@@ -35,7 +35,7 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
       </div>
 
       <div className="metric-chip">
-        <div className="metric-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: 'var(--amber-accent)' }}>
+        <div className="metric-icon-wrap" style={{ background: 'rgba(217, 119, 6, 0.12)', color: 'var(--amber-accent)' }}>
           <Clock size={18} />
         </div>
         <div>
@@ -45,7 +45,7 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
       </div>
 
       <div className="metric-chip">
-        <div className="metric-icon-wrap" style={{ background: 'rgba(244, 63, 94, 0.15)', color: 'var(--rose-accent)' }}>
+        <div className="metric-icon-wrap" style={{ background: 'rgba(225, 29, 72, 0.12)', color: 'var(--rose-accent)' }}>
           <AlertTriangle size={18} />
         </div>
         <div>
@@ -55,7 +55,7 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
       </div>
 
       <div className="metric-chip">
-        <div className="metric-icon-wrap" style={{ background: 'rgba(6, 182, 212, 0.15)', color: 'var(--primary-accent)' }}>
+        <div className="metric-icon-wrap" style={{ background: 'rgba(20, 102, 83, 0.12)', color: 'var(--primary-accent)' }}>
           <Smartphone size={18} />
         </div>
         <div>
@@ -63,8 +63,9 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
           <div className="metric-lbl">{text.loadedPayments}</div>
         </div>
       </div>
+
       <div className="metric-chip" title={text.stagedHelp}>
-        <div className="metric-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-accent)' }}>
+        <div className="metric-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.12)', color: 'var(--emerald-accent)' }}>
           <Truck size={18} />
         </div>
         <div>
@@ -72,6 +73,7 @@ export function ShopMetricsBar({ metrics }: ShopMetricsBarProps): React.JSX.Elem
           <div className="metric-lbl">{text.staged}</div>
         </div>
       </div>
+
       <p className="metric-lbl metrics-explanation">{text.stagedHelp}</p>
       <p className="metric-lbl metrics-explanation">{text.metricsHelp}</p>
     </div>

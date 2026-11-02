@@ -88,6 +88,8 @@ Progress 2026-11-02: **complete**. Compact Modern Dhaka Shop Desk header and app
 
 ### 05 — Orders, work queues, metrics, search, and export
 
+Progress 2026-11-02: **complete**. Recomposed seller orders desk into Modern Dhaka Shop Desk design system. Added first-class Work Query Switcher (`Needs Attention`, `Ready for Delivery`, `All Orders`) connecting to server predicates with clear banner explanation. Refactored `ShopMetricsBar` with distinct "Today in Bangladesh (Asia/Dhaka)" grouping and tabular figures (`tabular-nums`). Recomposed `OrderCard` with boarding-pass anatomy, advance/COD breakdown box, 44px touch targets, Bengali conjunct clearance (`line-height: 1.6`), and preserved mobile summary expansion. Maintained strict list/export parity across search, status, Bangladesh dates, pagination cursors, and CSV export. All 14 focused test suites (62 tests) and root checks pass.
+
 - **Owners:** `OrderList.tsx`, `OrderCard.tsx`, `ShopMetricsBar.tsx`, date controls,
   `useSellerOrders.ts`, work-query clients, export, metrics/unseen hooks.
 - Recompose the queue around identity, lifecycle, next action, advance/COD, and

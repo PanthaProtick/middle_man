@@ -19,10 +19,7 @@ async function mount(element: React.JSX.Element) {
   return { host, root };
 }
 
-const sampleOrder: SellerOrder = {
-  ...mockOrder,
-  id: 'ord-test-1',
-};
+const sampleOrder: SellerOrder = { ...mockOrder, id: 'ord-test-1' };
 
 it('keeps section header, search form, date controls, and export pinned outside the scroll viewport', async () => {
   const { host } = await mount(
@@ -56,6 +53,10 @@ it('keeps section header, search form, date controls, and export pinned outside 
   const exportBtn = host.querySelector('button[aria-busy]');
   expect(exportBtn).not.toBeNull();
   expect(viewport?.contains(exportBtn)).toBe(false);
+
+  const workNav = host.querySelector('.order-work-query-nav');
+  expect(workNav).not.toBeNull();
+  expect(viewport?.contains(workNav)).toBe(false);
 });
 
 it('renders order cards and load more button inside the scroll viewport', async () => {
@@ -131,10 +132,7 @@ it('renders empty state inside the scroll viewport with empty-state styling', as
 });
 
 it('retains scroll position on order list data updates and resets on filter change', async () => {
-  const sampleOrder2: SellerOrder = {
-    ...sampleOrder,
-    id: 'ord-test-2',
-  };
+  const sampleOrder2: SellerOrder = { ...sampleOrder, id: 'ord-test-2' };
 
   const { host, root } = await mount(
     <LocaleProvider>
@@ -157,11 +155,7 @@ it('retains scroll position on order list data updates and resets on filter chan
     viewport.dispatchEvent(new Event('scroll'));
   });
 
-  // Re-render with updated order data (e.g. mutation or in-place refresh)
-  const sampleOrder3: SellerOrder = {
-    ...sampleOrder,
-    id: 'ord-test-3',
-  };
+  const sampleOrder3: SellerOrder = { ...sampleOrder, id: 'ord-test-3' };
   await act(async () => {
     root.render(
       <LocaleProvider>
@@ -179,7 +173,6 @@ it('retains scroll position on order list data updates and resets on filter chan
 
   expect(viewport.scrollTop).toBe(100);
 
-  // Changing statusFilter resets scroll position
   await act(async () => {
     root.render(
       <LocaleProvider>
@@ -218,7 +211,7 @@ it('shows the shared work-query banner and a work-query-specific empty state', a
   const banner = host.querySelector('[role="status"]');
   expect(banner?.textContent).toContain('shared delivery-preparation query');
   expect(host.textContent).toContain('No confirmed orders are awaiting delivery preparation.');
-  const clear = Array.from(host.querySelectorAll('button')).find(item => item.textContent === 'Clear work filter')!;
+  const clear = Array.from(host.querySelectorAll('button')).find((item) => item.textContent === 'Clear work filter')!;
   await act(async () => clear.click());
   expect(onClear).toHaveBeenCalledOnce();
 });
@@ -242,7 +235,7 @@ it('shows the attention banner and attention-specific empty state', async () => 
 
   expect(host.querySelector('[role="status"]')?.textContent).toContain('shared attention query');
   expect(host.textContent).toContain('No orders currently need attention.');
-  const clear = Array.from(host.querySelectorAll('button')).find(item => item.textContent === 'Clear work filter')!;
+  const clear = Array.from(host.querySelectorAll('button')).find((item) => item.textContent === 'Clear work filter')!;
   await act(async () => clear.click());
   expect(onClear).toHaveBeenCalledOnce();
 });

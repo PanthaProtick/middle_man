@@ -154,7 +154,7 @@ export function OrderExport({ orderId, status, search, fromDate, toDate, workQue
           disabled={busy}
           aria-busy={busy}
           aria-describedby={message ? feedbackId : undefined}
-          style={{ minHeight: '36px', wordBreak: 'break-word' }}
+          style={{ minHeight: '44px', padding: '6px 14px', wordBreak: 'break-word' }}
           onClick={() => void run()}
         >
           {label}
