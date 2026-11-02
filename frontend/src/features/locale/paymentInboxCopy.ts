@@ -51,6 +51,7 @@ const bengali: Record<string, string> = {
   "No received payments match this search and filter.": "এই অনুসন্ধান ও ফিল্টারে কোনো প্রাপ্ত পেমেন্ট মেলেনি।",
   "No received payments match this search, date and filter.": "এই অনুসন্ধান, তারিখ ও ফিল্টারে কোনো প্রাপ্ত পেমেন্ট মেলেনি।",
   "Recorded date:": "রেকর্ড করার তারিখ:",
+  "Dates filter by recorded time; each row shows the payment occurrence separately.": "তারিখ ফিল্টার রেকর্ড করার সময় অনুযায়ী; প্রতিটি সারিতে পেমেন্টের সময় আলাদাভাবে দেখানো হয়।",
   "All Transactions": "সব লেনদেন",
   "Conflicted Only": "শুধু বিরোধপূর্ণ",
   "Incomplete Only": "শুধু অসম্পূর্ণ",
@@ -95,7 +96,19 @@ const bengali: Record<string, string> = {
   "Confirmed orders:": "নিশ্চিত করা অর্ডার:",
   "Import": "আমদানি",
   "Message": "বার্তা",
-  "No previous SMS imports.": "আগের কোনো SMS আমদানি নেই।"
+  "No previous SMS imports.": "আগের কোনো SMS আমদানি নেই।",
+  "Payment evidence steps": "পেমেন্ট প্রমাণের ধাপ",
+  "Step 1 · Add evidence": "ধাপ ১ · প্রমাণ যোগ করুন",
+  "Step 2 · Review reconciliation": "ধাপ ২ · মিল যাচাই করুন",
+  "Paste SMS or record a manual payment": "SMS দিন বা হাতে পেমেন্ট রেকর্ড করুন",
+  "Compare evidence and resolve outcomes": "প্রমাণ মিলিয়ে সিদ্ধান্ত নিন",
+  "Seller records and SMS evidence are observations, not provider verification.": "বিক্রেতার রেকর্ড ও SMS প্রমাণ প্রাপ্ত তথ্য, সেবাদাতার যাচাই নয়।",
+  "Received in": "প্রাপ্তি অ্যাকাউন্ট",
+  "Payment occurred": "পেমেন্টের সময়",
+  "Related claims:": "সংশ্লিষ্ট দাবি:",
+  "Payment occurred time is the transfer time. Recorded time is when this evidence was saved.": "পেমেন্টের সময় হলো টাকা পাঠানোর সময়। রেকর্ডের সময় হলো এই প্রমাণ সংরক্ষণের সময়।",
+  "Add evidence": "প্রমাণ যোগ করুন",
+  "Review reconciliation": "মিল যাচাই করুন"
 };
 /** Exposed for the centralized copy audit; runtime lookups go through the hook. */
 export const paymentInboxBengali = bengali;

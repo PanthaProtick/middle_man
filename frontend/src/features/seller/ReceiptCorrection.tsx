@@ -7,6 +7,8 @@ import { canonicalizeBdPhone, SellerApiError } from './api';
 import { correctReceipt } from './resolution';
 import type { ReceiptComparison, ReceiptCorrectionInput } from './resolution';
 import type { PaymentAccount, ReceiptView } from './types';
+import './ReceiptCorrection.css';
+import './EvidenceForms.css';
 
 interface Props {
   receipt: ReceiptView; accounts: PaymentAccount[]; token: string; disabled: boolean;
@@ -67,24 +69,27 @@ export function ReceiptCorrection({receipt, accounts, token, disabled, onPending
     } finally { submitting.current = false; setBusy(false); }
   }
 
-  return <section lang={locale} aria-label={tr("Receipt correction")}>
-    <h5>{tr("Correct unallocated receipt")}</h5>
-    <p>{tr("Before")}: {receipt.provider} / {receipt.trx_id}; {formatBdt(receipt.amount_minor)};
+  return <section className="receipt-correction" lang={locale} aria-label={tr("Receipt correction")}>
+    <h5 className="receipt-correction-title">{tr("Correct unallocated receipt")}</h5>
+    <p className="receipt-correction-before">{tr("Before")}: {receipt.provider} / {receipt.trx_id}; {formatBdt(receipt.amount_minor)};
       {' '}{receipt.sender_number_canonical ?? tr("Unknown sender")}; {receipt.occurred_at ? formatBangladeshDateTime(receipt.occurred_at, locale) : tr("Unknown time")}; {tr("Account")} {receipt.payment_account_id}.</p>
-    <form aria-label={tr("Correct receipt")} aria-describedby={error ? errorId : undefined} onSubmit={e => { e.preventDefault(); void submit(); }}>
-      <fieldset disabled={disabled || busy || Boolean(pending) || blocked}>
-        <label>{tr("Receiving account")}<select aria-label={tr("Correction account")} value={account} onChange={e => setAccount(e.target.value)}>
-          {!accounts.some(a => a.id === account) && <option value={account}>{account} ({receipt.provider})</option>}
-          {accounts.map(a => <option key={a.id} value={a.id}>{a.label} ({a.provider})</option>)}
-        </select></label>
-        <label>TrxID<input aria-label={tr("Correction TrxID")} required maxLength={128} value={trxId} onChange={e => setTrxId(e.target.value)} /></label>
-        <label>{tr("Received amount (BDT)")}<input aria-label={tr("Correction amount")} required inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} /></label>
-        <label>{tr("Payment sender (blank if unknown)")}<input aria-label={tr("Correction sender")} maxLength={32} value={sender} onChange={e => setSender(e.target.value)} /></label>
-        <label>{tr("Receipt time (ISO with timezone, blank if unknown)")}<input aria-label={tr("Correction time")} placeholder="2026-10-24T12:00:00+06:00" value={time} onChange={e => setTime(e.target.value)} /></label>
-        <label>{tr("Correction reason — required")}<textarea aria-label={tr("Correction reason")} required maxLength={1000} value={reason} onChange={e => setReason(e.target.value)} /></label>
+    <form className="receipt-correction-form" aria-label={tr("Correct receipt")} aria-describedby={error ? errorId : undefined} onSubmit={e => { e.preventDefault(); void submit(); }}>
+      <fieldset className="receipt-correction-fieldset" disabled={disabled || busy || Boolean(pending) || blocked}>
+        <legend className="receipt-correction-legend">{tr("Correct receipt")}</legend>
+        <div className="receipt-correction-grid">
+          <label className="receipt-correction-field">{tr("Receiving account")}<select aria-label={tr("Correction account")} value={account} onChange={e => setAccount(e.target.value)}>
+            {!accounts.some(a => a.id === account) && <option value={account}>{account} ({receipt.provider})</option>}
+            {accounts.map(a => <option key={a.id} value={a.id}>{a.label} ({a.provider})</option>)}
+          </select></label>
+          <label className="receipt-correction-field">TrxID<input aria-label={tr("Correction TrxID")} required maxLength={128} value={trxId} onChange={e => setTrxId(e.target.value)} /></label>
+          <label className="receipt-correction-field">{tr("Received amount (BDT)")}<input aria-label={tr("Correction amount")} required inputMode="decimal" value={amount} onChange={e => setAmount(e.target.value)} /></label>
+          <label className="receipt-correction-field">{tr("Payment sender (blank if unknown)")}<input aria-label={tr("Correction sender")} maxLength={32} value={sender} onChange={e => setSender(e.target.value)} /></label>
+          <label className="receipt-correction-field">{tr("Receipt time (ISO with timezone, blank if unknown)")}<input aria-label={tr("Correction time")} placeholder="2026-10-24T12:00:00+06:00" value={time} onChange={e => setTime(e.target.value)} /></label>
+          <label className="receipt-correction-field receipt-correction-reason">{tr("Correction reason — required")}<textarea aria-label={tr("Correction reason")} required maxLength={1000} value={reason} onChange={e => setReason(e.target.value)} /></label>
+        </div>
       </fieldset>
-      {error && <p id={errorId} role="alert">{tr(error)}</p>}
-      <button className="btn btn-secondary btn-sm" type="submit" disabled={disabled || busy || blocked || (!pending && !reason.trim())}>
+      {error && <p id={errorId} role="alert" className="receipt-correction-error">{tr(error)}</p>}
+      <button className="btn btn-secondary btn-sm receipt-correction-submit" type="submit" disabled={disabled || busy || blocked || (!pending && !reason.trim())}>
         {busy ? tr("Saving correction…") : pending ? tr("Retry same correction") : tr("Save correction and check claims")}
       </button>
     </form>

@@ -1,0 +1,89 @@
+.transaction-observation {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+}
+
+.transaction-observation[data-tone="rose"] {
+  border-color: #e4bcc2;
+  background: var(--color-status-rose-bg);
+}
+
+.transaction-observation[data-tone="cyan"] {
+  border-color: #bcd9dd;
+  background: var(--color-status-cyan-bg);
+}
+
+.transaction-observation[data-tone="emerald"] {
+  border-color: #b8d5c5;
+  background: var(--color-status-emerald-bg);
+}
+
+.transaction-observation-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 6px;
+}
+
+.transaction-observation-title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.transaction-observation-state {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.transaction-observation-state[data-tone="rose"] {
+  color: var(--color-status-rose);
+}
+
+.transaction-observation-state[data-tone="emerald"] {
+  color: var(--color-status-emerald);
+}
+
+.transaction-observation-state[data-tone="cyan"] {
+  color: var(--color-status-cyan);
+}
+
+.transaction-observation-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: 4px 12px;
+  margin: 0;
+}
+
+.transaction-observation-facts > div {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.transaction-observation-facts dt {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+}
+
+.transaction-observation-facts dd {
+  margin: 0;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.transaction-observation-actor {
+  margin: 8px 0 0;
+  font-family: var(--font-mono);
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+

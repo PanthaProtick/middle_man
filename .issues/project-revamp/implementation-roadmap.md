@@ -157,6 +157,17 @@ Progress 2026-11-02: **complete**. Recomposed the standalone public buyer confir
 - **Done:** users understand whether evidence was saved, allocated, conflicted, or
   accepted by exception; no screen equates a seller record with provider verification.
 - **Dependencies:** 06.
+- Progress 2026-11-02: **complete**. Recomposed received payments into a two-step
+  workspace: *Add evidence* (SMS intake with per-message state chips) and *Review
+  reconciliation* (ledger with recorded-date hint, filters, and paging). Split the
+  transaction row into boarding-pass identity, account/sender/occurrence/recorded
+  metadata, and extracted observation cards so allocation, incomplete evidence, and
+  conflicts stay distinct from provider verification. Recomposed manual entry as a
+  focused sheet, comparison/correction as in-context cards, and exception acceptance
+  plus accepted history as factual seller decisions. Added English/Bengali copy for
+  the new step and observation language. Focused payment suites and root
+  `npm run check` passed; rendered 1440/390/320px browser verification remains
+  unrun.
 
 ## Wave D: complete delivery, assistance, and administration
 

@@ -7,6 +7,8 @@ import { paymentExceptionCopy, paymentReason } from '../locale/paymentExceptionC
 import { acceptPayment, previewPayment } from './paymentDecisions';
 import type { PaymentDecision, PaymentPreview } from './paymentDecisions';
 import type { ReceiptView, SellerOrder } from './types';
+import './PaymentReview.css';
+import './PaymentException.css';
 
 const money = (minor: number) => `BDT ${(minor / 100).toLocaleString('en-US', {minimumFractionDigits:2,maximumFractionDigits:2})}`;
 
@@ -67,53 +69,79 @@ export function PaymentException({orderId, token, onAccepted, onPreviewChange}: 
     finally{setBusy(false);}
   }
 
-  return <section className="buyer-correction" aria-label={text.title}>
-    <h4>{text.title}</h4>
-    <p>{text.intro}</p>
-    {error && <p role="alert">{text[error as keyof Pick<typeof text, 'unauthorized' | 'stale' | 'unavailable'>]}</p>}
-    <label>{text.receipt}
-      <select value={receiptId} disabled={busy || retry} onChange={e => void loadPreview(e.target.value)}>
-        <option value=""> {text.select}</option>
-        {receipts.map(r => <option key={r.id} value={r.id}>{r.provider} · {r.trx_id} · {money(r.amount_minor)}</option>)}
-      </select>
-    </label>
-    {cursor && <button type="button" disabled={busy || retry} onClick={async () => {
-      setBusy(true);try{const data=await fetchTransactions({cursor},token);setReceipts(old=>[...old,...data.items]);setCursor(data.next_cursor ?? null);}
-      catch(e){setError(message(e));}finally{setBusy(false);}
-    }}> {text.more}</button>}
-    {busy && <p role="status"> {text.loading}</p>}
-    {receiptId && !retry && <button type="button" disabled={busy} onClick={()=>void loadPreview(receiptId)}> {text.refresh}</button>}
+  return <section className="payment-exception" lang={locale} aria-label={text.title}>
+    <div className="payment-review-head">
+      <h4 className="payment-review-title">{text.title}</h4>
+      <span className="payment-review-badge">{text.receipt}</span>
+    </div>
+    <p className="payment-review-intro">{text.intro}</p>
+    {error && <p role="alert" className="payment-review-alert">{text[error as keyof Pick<typeof text, 'unauthorized' | 'stale' | 'unavailable'>]}</p>}
+
+    <div className="payment-receipt-picker">
+      <label className="payment-review-field">{text.receipt}
+        <select value={receiptId} disabled={busy || retry} onChange={e => void loadPreview(e.target.value)}>
+          <option value=""> {text.select}</option>
+          {receipts.map(r => <option key={r.id} value={r.id}>{r.provider} · {r.trx_id} · {money(r.amount_minor)}</option>)}
+        </select>
+      </label>
+      {cursor && <button type="button" className="btn btn-secondary btn-sm" disabled={busy || retry} onClick={async () => {
+        setBusy(true);try{const data=await fetchTransactions({cursor},token);setReceipts(old=>[...old,...data.items]);setCursor(data.next_cursor ?? null);}
+        catch(e){setError(message(e));}finally{setBusy(false);}
+      }}> {text.more}</button>}
+    </div>
+
+    {(busy || (receiptId && !retry)) && <div className="payment-review-actions">
+      {busy && <p role="status" className="payment-review-status"> {text.loading}</p>}
+      {receiptId && !retry && <button type="button" className="btn btn-secondary btn-sm" disabled={busy} onClick={()=>void loadPreview(receiptId)}> {text.refresh}</button>}
+    </div>}
+
     {preview && <>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '10px' }}>
-        <p style={{ margin: 0 }}>{text.total}: {money(preview.total_minor)} · {text.advance}: {money(preview.required_advance_minor)}</p>
+      <div className="payment-preview-summary">
+        <p className="payment-preview-totals">
+          <span>{text.total}</span> <strong>{money(preview.total_minor)}</strong>
+          <span className="payment-preview-separator">·</span>
+          <span>{text.advance}</span> <strong>{money(preview.required_advance_minor)}</strong>
+        </p>
         <button
           type="button"
+          className="payment-technical-toggle"
           onClick={() => setShowTechnical(!showTechnical)}
-          style={{ background: 'none', border: 'none', color: 'var(--primary-accent)', cursor: 'pointer', fontSize: '0.75rem', textDecoration: 'underline' }}
           aria-expanded={showTechnical}
         >
           {showTechnical ? text.hide : text.show}
         </button>
       </div>
-      <table><caption>{text.caption}</caption>
-        <thead><tr><th>{text.field}</th><th>{text.claim}</th><th>{text.seller}</th></tr></thead>
-        <tbody>
-          <tr><th>{text.provider}</th><td>{preview.account_provider} / {preview.claim_provider}</td><td>{preview.receipt.provider}</td></tr>
-          <tr style={{ display: showTechnical ? 'table-row' : 'none' }}><th>{text.account}</th><td>{preview.payment_account_id}</td><td>{preview.receipt.payment_account_id}</td></tr>
-          <tr><th>TrxID</th><td>{preview.claim_trx_id}</td><td>{preview.receipt.trx_id}</td></tr>
-          <tr><th>{text.sender}</th><td>{preview.claim_sender}</td><td>{preview.receipt.sender_number_canonical ?? text.unknown}</td></tr>
-          <tr><th>{text.amount}</th><td>{money(preview.claim_amount_minor)}</td><td>{money(preview.accepted_amount_minor)}</td></tr>
-          <tr><th>{text.time}</th><td>{date(preview.order_created_at)} {text.to} {date(preview.claim_submitted_at)}</td>
-            <td>{preview.receipt.occurred_at ? date(preview.receipt.occurred_at) : text.unknown}</td></tr>
-        </tbody>
-      </table>
-      <p>{text.exceptions}: {preview.exceptions.map(code => paymentReason(code, locale)).join(', ') || text.none}</p>
-      {preview.blockers.length>0 ? <p role="alert">{text.blocked}: {preview.blockers.map(code => paymentReason(code, locale)).join(', ')}. {text.resolve}</p> :
-        <p>{text.cod}: {money(preview.actual_cod_minor!)}</p>}
-      <form onSubmit={submit}>
-        <label>{text.reason}<textarea value={reason} maxLength={2000} required disabled={busy || retry || stale}
+
+      <div className="payment-table-wrap">
+        <table className="payment-comparison-table">
+          <caption>{text.caption}</caption>
+          <thead><tr><th scope="col">{text.field}</th><th scope="col">{text.claim}</th><th scope="col">{text.seller}</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">{text.provider}</th><td>{preview.account_provider} / {preview.claim_provider}</td><td>{preview.receipt.provider}</td></tr>
+            {showTechnical && <tr><th scope="row">{text.account}</th><td>{preview.payment_account_id}</td><td>{preview.receipt.payment_account_id}</td></tr>}
+            <tr><th scope="row">TrxID</th><td>{preview.claim_trx_id}</td><td>{preview.receipt.trx_id}</td></tr>
+            <tr><th scope="row">{text.sender}</th><td>{preview.claim_sender}</td><td>{preview.receipt.sender_number_canonical ?? text.unknown}</td></tr>
+            <tr><th scope="row">{text.amount}</th><td>{money(preview.claim_amount_minor)}</td><td>{money(preview.accepted_amount_minor)}</td></tr>
+            <tr><th scope="row">{text.time}</th><td>{date(preview.order_created_at)} {text.to} {date(preview.claim_submitted_at)}</td>
+              <td>{preview.receipt.occurred_at ? date(preview.receipt.occurred_at) : text.unknown}</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className="payment-exception-block">
+        <h5 className="payment-exception-title">{text.exceptions}</h5>
+        {preview.exceptions.length > 0
+          ? <ul className="payment-chip-list">{preview.exceptions.map(code => <li key={code} className="payment-chip" data-tone="amber">{paymentReason(code, locale)}</li>)}</ul>
+          : <p className="payment-none">{text.none}</p>}
+      </div>
+
+      {preview.blockers.length>0 ? <p role="alert" className="payment-blocked">{text.blocked}: {preview.blockers.map(code => paymentReason(code, locale)).join(', ')}. {text.resolve}</p> :
+        <p className="payment-cod">{text.cod}: {money(preview.actual_cod_minor!)}</p>}
+
+      <form className="payment-decision-form" onSubmit={submit}>
+        <label className="payment-review-field">{text.reason}<textarea value={reason} maxLength={2000} required disabled={busy || retry || stale}
           onChange={e=>setReason(e.target.value)} /></label>
-        <button type="submit" className="btn btn-primary" disabled={busy || stale || !reason.trim() || preview.blockers.length>0}>
+        <button type="submit" className="btn btn-primary payment-accept" disabled={busy || stale || !reason.trim() || preview.blockers.length>0}>
           {retry ? text.retry : text.accept}
         </button>
       </form>
