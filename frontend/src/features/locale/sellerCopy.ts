@@ -76,7 +76,8 @@ const english = {
   firstRunStepOrder: 'Create first order link',
   firstRunStepCourier: 'Connect Pathao courier',
   dismiss: 'Dismiss',
-  expand: 'Expand'
+  expand: 'Expand',
+  collapse: 'Collapse'
 } as const;
 
 const bengali: Record<keyof typeof english, string> = {
@@ -157,7 +158,8 @@ const bengali: Record<keyof typeof english, string> = {
   firstRunStepOrder: 'প্রথম অর্ডার লিংক তৈরি করুন',
   firstRunStepCourier: 'Pathao কুরিয়ার সংযুক্ত করুন',
   dismiss: 'বন্ধ করুন',
-  expand: 'খুলুন'
+  expand: 'খুলুন',
+  collapse: 'সংকুচিত করুন'
 };
 
 export const sellerCopy = { en: english, bn: bengali };

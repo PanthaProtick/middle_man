@@ -83,7 +83,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .workspace-section-tab.active { background: white; color: var(--primary-accent); box-shadow: 0 2px 6px #193b2912; }
 .section-tab-count { border-radius: 6px; padding: 1px 6px; background: #e5eee8; color: var(--primary-accent); font-size: .7rem; }
 .workspace-subnav-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding: 4px 6px; border-bottom: 1px solid var(--border-subtle); }
-.workspace-subnav-tab { min-height: 38px; padding: 6px 14px; background: transparent; border: 0; border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0; color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 180ms; }
+.workspace-subnav-tab { min-height: 44px; padding: 8px 14px; background: transparent; border: 0; border-bottom: 2px solid transparent; border-radius: 4px 4px 0 0; color: var(--text-secondary); font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 180ms; }
+.workspace-subnav-tab:focus-visible { outline: 3px solid var(--primary-accent); outline-offset: 3px; }
 .workspace-subnav-tab:hover { color: var(--primary-accent); background: #eef4f0; }
 .workspace-subnav-tab.active { color: var(--primary-accent); border-bottom-color: var(--primary-accent); font-weight: 700; }
 .workspace-accounts-summary { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border: 1px solid var(--border-subtle); background: #f8faf8; border-radius: 10px; font-size: .8rem; }

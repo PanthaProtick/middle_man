@@ -1,10 +1,10 @@
 import React from 'react';
 import { useLocale } from '../locale';
 import { sellerCopy } from '../locale/sellerCopy';
-import { ShoppingBag, Smartphone, CreditCard, ShieldCheck } from 'lucide-react';
+import { ShoppingBag, Smartphone, CreditCard } from 'lucide-react';
 import type { WorkspaceSection } from './SellerWorkspace';
 
-export type SettingsSubSection = 'accounts' | 'courier' | 'retention';
+export type SettingsSubSection = 'all' | 'accounts' | 'courier' | 'retention';
 
 interface WorkspaceSectionNavProps {
   currentSection: WorkspaceSection;
@@ -26,7 +26,7 @@ export function WorkspaceSectionNav({
   onSelectSettingsSub,
 }: WorkspaceSectionNavProps): React.JSX.Element {
   const text = sellerCopy[useLocale().locale];
-  const isSettingsActive = currentSection === 'accounts' || currentSection === 'retention' || (currentSection as string) === 'settings';
+  const isSettingsActive = currentSection === 'accounts' || currentSection === 'retention';
 
   return (
     <div className="workspace-nav-wrapper">
@@ -74,16 +74,6 @@ export function WorkspaceSectionNav({
               {accountsCount}
             </span>
           )}
-        </button>
-
-        <button
-          type="button"
-          aria-current={currentSection === 'retention' ? 'page' : undefined}
-          className={`workspace-section-tab ${currentSection === 'retention' ? 'active' : ''}`}
-          onClick={() => onSelectSection('retention')}
-        >
-          <ShieldCheck size={14} aria-hidden="true" />
-          <span>{text.retention}</span>
         </button>
       </div>
 

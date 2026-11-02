@@ -86,7 +86,8 @@ export function AppShell({ token, sessionId, sessionNotice, onSignIn, onSignOut 
         onSignOut={onSignOut}
       />
 
-      <section className="app-masthead" aria-labelledby="workspace-heading">
+      {!token && (
+        <section className="app-masthead" aria-labelledby="workspace-heading">
         <div>
           <p className="eyebrow">{text.eyebrow}</p>
           <h2 id="workspace-heading">{text.heading} <em>{text.headingEm}</em></h2>
@@ -100,6 +101,7 @@ export function AppShell({ token, sessionId, sessionNotice, onSignIn, onSignOut 
           <li><span>03</span> {text.step3}</li>
         </ol>
       </section>
+      )}
 
       {/* Main View Area */}
       <main id="workspace" tabIndex={-1}>

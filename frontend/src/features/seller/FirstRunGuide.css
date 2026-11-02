@@ -32,9 +32,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  min-width: 36px;
-  padding: 4px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 8px;
   background: transparent;
   border: 0;
   border-radius: var(--radius-xs, 4px);
@@ -46,6 +46,12 @@
 .first-run-btn:hover {
   background: #eaf1ec;
   color: var(--color-text-primary, #192f29);
+}
+
+.first-run-btn:focus-visible,
+.step-link:focus-visible {
+  outline: 3px solid var(--primary-accent, #146653);
+  outline-offset: 3px;
 }
 
 .first-run-steps {
@@ -90,9 +96,12 @@
 }
 
 .step-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 4px 6px;
   background: none;
   border: none;
-  padding: 0;
   color: var(--color-action-primary, #146653);
   font-size: 0.8rem;
   font-weight: 600;
