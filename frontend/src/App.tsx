@@ -42,11 +42,24 @@ export function AppShell({ token, sessionId, sessionNotice, onSignIn, onSignOut 
 
   useEffect(() => {
     if (isOrderPortal) return;
-    fetchHealth().then(setHealth);
-    const interval = setInterval(() => {
-      fetchHealth().then(setHealth);
-    }, 10000);
-    return () => clearInterval(interval);
+    let active = true;
+    const check = () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      void fetchHealth().then((h) => {
+        if (active) setHealth(h);
+      });
+    };
+    check();
+    const interval = setInterval(check, 10000);
+    const onVisibilityChange = () => {
+      if (typeof document !== 'undefined' && !document.hidden) check();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      active = false;
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [isOrderPortal]);
 
   if (showingPortal) {
