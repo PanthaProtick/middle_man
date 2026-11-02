@@ -5,6 +5,7 @@ import { PaymentAccountList } from './PaymentAccountList';
 import { AddAccountForm } from './AddAccountForm';
 import { PathaoSettings } from './PathaoSettings';
 import type { PaymentAccount } from './types';
+import './PaymentAccounts.css';
 
 interface AccountsSectionProps {
   accounts: PaymentAccount[];
@@ -30,8 +31,12 @@ export function AccountsSection({
   const showCourier = subSection === 'all' || subSection === 'courier';
 
   return (
-    <section aria-labelledby="section-accounts-title">
-      <div className="isolated-section" hidden={!showAccounts} style={{ display: showAccounts ? 'block' : 'none' }}>
+    <section aria-labelledby="section-accounts-title" className="accounts-section-wrapper">
+      <div
+        className="isolated-section"
+        hidden={!showAccounts}
+        style={{ display: showAccounts ? 'block' : 'none' }}
+      >
         <div className="isolated-section-header">
           <div>
             <h4 id="section-accounts-title" className="isolated-section-title">
@@ -61,7 +66,11 @@ export function AccountsSection({
         />
       </div>
 
-      <div className="isolated-section" hidden={!showCourier} style={{ display: showCourier ? 'block' : 'none' }}>
+      <div
+        className="isolated-section"
+        hidden={!showCourier}
+        style={{ display: showCourier ? 'block' : 'none' }}
+      >
         <div className="isolated-section-header" style={{ marginBottom: '12px' }}>
           <div>
             <h4 className="isolated-section-title">

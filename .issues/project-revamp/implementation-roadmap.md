@@ -277,6 +277,20 @@ assistance tests, conventions, typecheck, and root `npm run check` passed.
 
 ### 11 — Receiving accounts, Pathao settings, and retention
 
+Progress 2026-11-03: **complete**. Recomposed designated receiving accounts, Pathao
+logistics settings, and data retention surfaces into the Modern Dhaka Shop Desk design system.
+Created semantic stylesheets `PaymentAccounts.css` and `Retention.css` and polished
+`PathaoSettings.css`. Enforced minimum 44px touch targets on buttons, disclosures, and icon
+triggers, 46px input heights with 16px font sizes to prevent iOS auto-zoom, and tabular figures
+(`font-variant-numeric: tabular-nums`) on phone numbers, revision numbers, and retention
+metrics. Maintained strict <=300 physical line rule on all components (`PathaoConnectionForm.tsx`
+kept under 250 lines). Preserved all domain and security invariants: historical account snapshots
+preserved on existing orders, write-only Pathao credentials never echoed back, environment
+isolation (sandbox vs production), connection resets clearing pickup/delivery defaults, and
+strict separation between 30-day raw SMS evidence retention and 12-month completed structured
+record retention. All 7 focused frontend suites (23 tests), backend connection/retention tests (18 passed,
+5 skipped), conventions, and root `npm run check` passed cleanly.
+
 - **Owners:** account forms/list, `PathaoSettings.tsx`, retention panels and APIs.
 - Group settings by receiving money, delivery connection/defaults, and record
   lifecycle. Keep account activation and existing-order snapshots understandable.

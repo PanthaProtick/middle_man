@@ -1,0 +1,249 @@
+/* Modern Dhaka Shop Desk: Designated Receiving Accounts */
+
+.payment-accounts-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.payment-accounts-empty {
+  padding: var(--space-xl);
+  text-align: center;
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-lg);
+  line-height: 1.6;
+}
+
+.payment-accounts-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-lg);
+}
+
+.payment-account-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.payment-account-card:hover {
+  border-color: var(--color-border-hover);
+}
+
+.payment-account-card--inactive {
+  opacity: 0.72;
+  background: var(--color-surface);
+}
+
+.payment-account-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  flex: 1 1 260px;
+  min-width: 0;
+}
+
+.payment-provider-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.payment-provider-badge--bkash {
+  background: rgba(216, 27, 96, 0.12);
+  color: #b3164f;
+  border: 1px solid rgba(216, 27, 96, 0.28);
+}
+
+.payment-provider-badge--nagad {
+  background: rgba(245, 124, 0, 0.12);
+  color: #b84c00;
+  border: 1px solid rgba(245, 124, 0, 0.28);
+}
+
+.payment-provider-badge--rocket {
+  background: rgba(142, 36, 170, 0.12);
+  color: #7b1fa2;
+  border: 1px solid rgba(142, 36, 170, 0.28);
+}
+
+.payment-account-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.payment-account-label-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.payment-account-label {
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--font-size-base);
+  word-break: break-word;
+}
+
+.payment-account-number {
+  font-family: var(--font-mono);
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.02em;
+}
+
+.payment-account-edit-form {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  flex-wrap: wrap;
+}
+
+.payment-account-edit-input {
+  min-height: var(--touch-target-min);
+  padding: 6px var(--space-sm);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-primary);
+  font-size: var(--input-font-size-min);
+}
+
+.payment-account-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  margin-left: auto;
+}
+
+.payment-account-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.payment-account-status--active {
+  color: var(--color-status-emerald);
+}
+
+.payment-account-status--inactive {
+  color: var(--color-text-muted);
+}
+
+.payment-account-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+.payment-account-btn {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0 var(--space-md);
+  cursor: pointer;
+}
+
+.payment-account-icon-btn {
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* Add Account Form */
+.add-account-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  max-width: 560px;
+}
+
+.add-account-row {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+}
+
+.add-account-select {
+  width: 140px;
+  min-height: var(--input-height-min);
+  font-size: var(--input-font-size-min);
+  padding: 8px var(--space-md);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-primary);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.add-account-input {
+  flex: 1 1 200px;
+  min-width: 180px;
+  min-height: var(--input-height-min);
+  font-size: var(--input-font-size-min);
+  padding: 8px var(--space-md);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-primary);
+}
+
+.add-account-input[type="tel"] {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.add-account-input:focus,
+.add-account-select:focus,
+.payment-account-edit-input:focus {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+  border-color: var(--color-border-focus);
+}
+
+.add-account-submit-btn {
+  min-height: var(--touch-target-min);
+  padding: 0 var(--space-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  font-weight: 600;
+  cursor: pointer;
+}

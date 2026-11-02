@@ -126,6 +126,26 @@ export function PathaoConnectionForm({
     }
   }
 
+  async function disconnect() {
+    if (!connection || busy) return;
+    setBusy(true);
+    try {
+      const result = await requestJson<PathaoConnection>(
+        `${path}?expected_version=${connection.version}`,
+        { method: 'DELETE' },
+        token,
+      );
+      if (alive.current) {
+        setConnection(result);
+        setStores(undefined);
+      }
+    } catch (cause) {
+      fail(cause);
+    } finally {
+      if (alive.current) setBusy(false);
+    }
+  }
+
   async function saveDefaults(event: React.FormEvent) {
     event.preventDefault();
     if (!connection || busy || !pickup) return;
@@ -153,7 +173,7 @@ export function PathaoConnectionForm({
   return (
     <div aria-busy={busy}>
       {connection && (
-        <p>
+        <p className="pathao-info-note">
           {t(
             connection.production_booking_enabled
               ? 'Production booking is enabled. Submit a reviewed order to create a real courier booking.'
@@ -201,7 +221,7 @@ export function PathaoConnectionForm({
       </div>
 
       {environment === 'offline' && (
-        <p>{t('Simulated setup and pickup stores. No credentials or Pathao requests.')}</p>
+        <p className="pathao-info-note">{t('Simulated setup and pickup stores. No credentials or Pathao requests.')}</p>
       )}
       {error && <Notice variant="error" role="alert" className="pathao-error-notice">{t(error)}</Notice>}
 
@@ -219,20 +239,7 @@ export function PathaoConnectionForm({
           size="sm"
           disabled={busy}
           className="pathao-disconnect-btn"
-          onClick={() => {
-            setBusy(true);
-            void requestJson<PathaoConnection>(`${path}?expected_version=${connection.version}`, { method: 'DELETE' }, token)
-              .then(result => {
-                if (alive.current) {
-                  setConnection(result);
-                  setStores(undefined);
-                }
-              })
-              .catch(fail)
-              .finally(() => {
-                if (alive.current) setBusy(false);
-              });
-          }}
+          onClick={() => void disconnect()}
         >
           {t('Disconnect Pathao')}
         </Button>

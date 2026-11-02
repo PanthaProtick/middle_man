@@ -1,0 +1,176 @@
+/* Modern Dhaka Shop Desk: Data Retention & Lifecycle Panels */
+
+.retention-section-header {
+  margin-bottom: var(--space-md);
+}
+
+.retention-title {
+  color: var(--color-primary);
+  font-size: var(--font-size-base);
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  font-weight: 600;
+}
+
+.retention-desc {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  margin: 2px 0 0;
+  line-height: 1.6;
+}
+
+.retention-actions {
+  display: flex;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.retention-btn {
+  min-height: var(--touch-target-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-xs);
+  padding: 0 var(--space-md);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retention-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-md);
+}
+
+.retention-metric-card {
+  padding: var(--space-md);
+  background: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.retention-metric-label {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.retention-metric-val {
+  font-size: var(--font-size-base);
+  color: var(--color-text-primary);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.retention-status-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  font-size: var(--font-size-sm);
+  flex-wrap: wrap;
+  padding: var(--space-xs) 0;
+}
+
+.retention-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-variant-numeric: tabular-nums;
+}
+
+.retention-status-pill--clean {
+  color: var(--color-status-emerald);
+}
+
+.retention-status-pill--overdue {
+  color: var(--color-status-amber);
+}
+
+.retention-timestamp {
+  color: var(--color-text-muted);
+  margin-left: auto;
+  font-size: var(--font-size-xs);
+  font-variant-numeric: tabular-nums;
+}
+
+.retention-alert-box {
+  margin-top: var(--space-md);
+  padding: var(--space-md);
+  background: var(--color-status-amber-bg);
+  border: 1px solid #f2dec0;
+  border-radius: var(--radius-sm);
+}
+
+.retention-alert-heading {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-status-amber);
+  display: block;
+  margin-bottom: var(--space-xs);
+}
+
+.retention-alert-list {
+  margin: 0;
+  padding-left: var(--space-lg);
+  font-size: var(--font-size-xs);
+  color: var(--color-status-amber);
+  line-height: 1.6;
+}
+
+.retention-alert-list li {
+  margin-bottom: 4px;
+}
+
+.retention-alert-list code,
+.retention-alert-list strong {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.retention-structured-status {
+  margin: var(--space-md) 0;
+  padding: var(--space-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.retention-structured-status-text {
+  margin: 0;
+  font-weight: 600;
+  font-size: var(--font-size-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text-primary);
+}
+
+.retention-feedback {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-status-emerald-bg);
+  border: 1px solid #c3e2cd;
+  border-radius: var(--radius-xs);
+  color: var(--color-status-emerald);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-md);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+}
+
+.retention-error {
+  padding: var(--space-sm) var(--space-md);
+  background: var(--color-status-rose-bg);
+  border: 1px solid #f3c2cb;
+  border-radius: var(--radius-xs);
+  color: var(--color-status-rose);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--space-md);
+  line-height: 1.5;
+}
