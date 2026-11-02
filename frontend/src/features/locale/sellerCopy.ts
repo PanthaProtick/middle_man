@@ -68,7 +68,15 @@ const english = {
   checkSetup: 'Check shop setup',
   recoveryFailed: 'Unable to check shop setup. Please try the check again.',
   nameLimit: 'Shop name must be between 1 and 200 characters.',
-  sessionRejected: 'Your seller session was rejected. Please sign in again.'
+  sessionRejected: 'Your seller session was rejected. Please sign in again.',
+  settings: 'Settings',
+  courier: 'Courier Logistics',
+  firstRunTitle: 'Getting Started',
+  firstRunStepAccount: 'Add receiving account',
+  firstRunStepOrder: 'Create first order link',
+  firstRunStepCourier: 'Connect Pathao courier',
+  dismiss: 'Dismiss',
+  expand: 'Expand'
 } as const;
 
 const bengali: Record<keyof typeof english, string> = {
@@ -141,7 +149,15 @@ const bengali: Record<keyof typeof english, string> = {
     checkSetup: 'দোকানের সেটআপ পরীক্ষা করুন',
     recoveryFailed: 'দোকানের সেটআপ পরীক্ষা করা যায়নি। আবার পরীক্ষা করুন।',
     nameLimit: 'দোকানের নাম 1 থেকে 200 অক্ষরের মধ্যে হতে হবে।',
-    sessionRejected: 'বিক্রেতার সেশন গ্রহণ করা যায়নি। আবার সাইন ইন করুন।'
+    sessionRejected: 'বিক্রেতার সেশন গ্রহণ করা যায়নি। আবার সাইন ইন করুন।',
+  settings: 'সেটিংস',
+  courier: 'কুরিয়ার লজিস্টিকস',
+  firstRunTitle: 'প্রাথমিক ধাপ',
+  firstRunStepAccount: 'টাকা গ্রহণের অ্যাকাউন্ট যোগ করুন',
+  firstRunStepOrder: 'প্রথম অর্ডার লিংক তৈরি করুন',
+  firstRunStepCourier: 'Pathao কুরিয়ার সংযুক্ত করুন',
+  dismiss: 'বন্ধ করুন',
+  expand: 'খুলুন'
 };
 
 export const sellerCopy = { en: english, bn: bengali };

@@ -1,0 +1,107 @@
+.first-run-guide {
+  background: var(--color-surface, #ffffff);
+  border: 1px solid var(--color-border, #d1dcd4);
+  border-radius: var(--radius-md, 8px);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(20, 102, 83, 0.04);
+}
+
+.first-run-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.first-run-title {
+  font-family: var(--font-heading);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-action-primary, #146653);
+  letter-spacing: -0.01em;
+}
+
+.first-run-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.first-run-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  min-width: 36px;
+  padding: 4px;
+  background: transparent;
+  border: 0;
+  border-radius: var(--radius-xs, 4px);
+  color: var(--color-text-muted, #526960);
+  cursor: pointer;
+  transition: background 0.18s ease, color 0.18s ease;
+}
+
+.first-run-btn:hover {
+  background: #eaf1ec;
+  color: var(--color-text-primary, #192f29);
+}
+
+.first-run-steps {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+}
+
+.first-run-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--color-text-secondary, #2f453c);
+}
+
+.first-run-step.completed {
+  color: var(--color-action-primary, #146653);
+}
+
+.step-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--color-bg, #f5f6f2);
+  border: 1px solid var(--color-border, #d1dcd4);
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.first-run-step.completed .step-num {
+  background: #eaf3ee;
+  border-color: var(--color-action-primary, #146653);
+  color: var(--color-action-primary, #146653);
+}
+
+.step-link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-action-primary, #146653);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  text-align: left;
+}
+
+.step-link:hover {
+  color: #0e5141;
+}

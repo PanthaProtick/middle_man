@@ -67,6 +67,8 @@ accounts state, and buyer validation fallback) created in `.cache/prototypes/`.
 
 ### 04 — App shell, access, setup, and navigation
 
+Progress 2026-11-02: **complete**. Compact Modern Dhaka Shop Desk header and app shell implemented. Bulky hero masthead streamlined with responsive typography, repeat work prioritized, and compact dismissible/collapsible FirstRunGuide added. Settings subsections (Accounts, Courier, Retention) integrated in WorkspaceSectionNav and AccountsSection with backwards compatibility for unseen entry badges and existing tests. Primitives applied to setup and header actions.
+
 - **Owners:** `App.tsx`, `Root.tsx`, `Header.tsx`, `SellerSession.tsx`, `SellerSignIn.tsx`,
   `ShopSetupForm.tsx`, `WorkspaceHeader.tsx`, `WorkspaceSectionNav.tsx`.
 - Make repeat work the first useful content; provide compact first-run guidance.

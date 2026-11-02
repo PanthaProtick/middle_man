@@ -12,7 +12,7 @@ import { workspaceErrorText } from './workspaceErrorText';
 import { WorkspaceState } from './WorkspaceState';
 import { WorkspaceHeader } from './WorkspaceHeader';
 import { ShopSetupForm } from './ShopSetupForm';
-import { WorkspaceSectionNav } from './WorkspaceSectionNav';
+import { WorkspaceSectionNav, type SettingsSubSection } from './WorkspaceSectionNav';
 import { WorkspaceAccountsSummary } from './WorkspaceAccountsSummary';
 import { PaymentsSection } from './PaymentsSection';
 import { AccountsSection } from './AccountsSection';
@@ -39,9 +39,9 @@ export function SellerWorkspace({
   onSectionChange,
   onSignIn,
 }: SellerWorkspaceProps): React.JSX.Element {
-  const { locale } = useLocale();
-  const text = sellerCopy[locale];
+  const text = sellerCopy[useLocale().locale];
   const [internalSection, setInternalSection] = useState<WorkspaceSection>('orders');
+  const [settingsSub, setSettingsSub] = useState<SettingsSubSection>('accounts');
   const currentSection = activeSection ?? internalSection;
   const handleSectionSelect = (section: WorkspaceSection) => {
     setInternalSection(section);
@@ -52,7 +52,7 @@ export function SellerWorkspace({
   const [isRecordModalOpen, setIsRecordModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string | { code: string } | null>(null);
   const workspaceError = typeof error === 'object' && error ? error.code : null;
-  const errorText = workspaceErrorText(error, locale);
+  const errorText = workspaceErrorText(error, useLocale().locale);
   const captureWorkspaceError = useCallback((err: unknown) => setError({ code: err instanceof SellerApiError ? err.code : 'UNKNOWN' }), []);
   const {
     transactions,
@@ -96,8 +96,7 @@ export function SellerWorkspace({
     clearWorkQuery,
   } = useSellerOrders(token, captureWorkspaceError);
   const reloadWorkspaceLists = useCallback(async () => {
-    await reloadOrders();
-    await reloadTransactions();
+    await Promise.all([reloadOrders(), reloadTransactions()]);
   }, [reloadOrders, reloadTransactions]);
   const {
     loading,
@@ -168,6 +167,12 @@ export function SellerWorkspace({
             ordersCount={unseen.orders}
             transactionsCount={unseen.payments}
             accountsCount={unseen.accounts}
+            activeSettingsSub={currentSection === 'retention' ? 'retention' : settingsSub}
+            onSelectSettingsSub={(sub) => {
+              setSettingsSub(sub);
+              if (sub === 'retention') handleSectionSelect('retention');
+              else handleSectionSelect('accounts');
+            }}
           />
 
           {currentSection === 'orders' && (
@@ -245,6 +250,7 @@ export function SellerWorkspace({
             <AccountsSection
               accounts={accounts}
               token={token}
+              subSection={settingsSub === 'courier' ? 'courier' : 'all'}
               onAccountUpdated={(updated) => setAccounts((prev) => prev.map((a) => (a.id === updated.id ? updated : a)))}
               onAccountCreated={(created) => setAccounts((prev) => [...prev, created])}
               onError={setError}
