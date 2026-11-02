@@ -50,6 +50,13 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
   const review = state?.identity === identity ? state.review : undefined;
   const choices = editing?.identity === identity ? editing.choices : undefined;
   const dirty = review && choices && JSON.stringify(review.choices) !== JSON.stringify(choices);
+  const resultHeading = useRef<HTMLHeadingElement>(null);
+  const focusResult = useRef(false);
+  useEffect(() => {
+    if (!focusResult.current || !review) return;
+    focusResult.current = false;
+    resultHeading.current?.focus();
+  }, [review]);
   const target = review?.choices?.environment === 'production' ? 'Pathao production'
     : review?.choices?.environment === 'sandbox' ? 'Pathao sandbox' : 'Pathao (simulated)';
 
@@ -77,6 +84,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
 
   const submitBooking = async () => {
     if (!review || busy || !review.submission_enabled) return;
+    focusResult.current = true;
     statusCallback.current?.('submitting');
     const requestGeneration = generation.current;
     setBusy({ identity, kind: 'submit' });
@@ -107,7 +115,7 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
             onReviewLoadedRef.current?.(refreshed);
             statusCallback.current?.(refreshed.latest_attempt?.status ?? 'unsubmitted');
           }
-        }).catch(() => {});
+        }).catch(() => { if (currentIdentity.current === identity) focusResult.current = false; });
       }
     } finally {
       if (currentIdentity.current === identity && generation.current === requestGeneration) setBusy(undefined);
@@ -124,14 +132,16 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
   const reviewError = state?.identity === identity ? state.error : undefined;
   return <>
     {parcelDetails && <CourierDeliveryStages review={review} dirty={Boolean(dirty)}
-      pending={busy} error={Boolean(reviewError)} />}
+      pending={busy} error={reviewError} />}
     {parcelDetails}
     <section className="buyer-correction delivery-details courier-review" aria-label={t("Booking draft review")} aria-busy={busy}>
     <h4>{t("Review current delivery draft")}</h4>
     {!review?.submission_enabled && !review?.latest_attempt && (
       <p className="delivery-note">{t("External booking is unavailable until the review is complete.")}</p>
     )}
-    <button className="btn btn-secondary btn-sm" type="button" disabled={busy} onClick={() => { setState(undefined); setAttempt(value => value + 1); }}>{t("Reload current review")}</button>
+    <button className="btn btn-secondary btn-sm" type="button" disabled={busy} onClick={() => {
+      focusResult.current = false; setState(undefined); setAttempt(value => value + 1);
+    }}>{t("Reload current review")}</button>
     {state?.identity === identity && state.error && <div role="alert">{typeof state.error === 'string' ? t(state.error) : <CourierError error={state.error} />}</div>}
     {!review && !state?.error && <p role="status">{t("Loading review…")}</p>}
     {review && choices && <>
@@ -174,9 +184,11 @@ export function CourierReview({ orderId, token, refresh = 0, onChoicesSaved, onR
           : t(operation.kind === 'PUT' ? 'Saving delivery choices…' : 'Confirming current review…')}</p>}
       </div>
       <div className="courier-stage courier-result-stage" data-stage="result">
-        <h5 className="courier-stage-title"><span aria-hidden="true">5</span> {t('Booking result')}</h5>
+        <h5 className="courier-stage-title" ref={resultHeading} tabIndex={-1}
+          data-result-heading><span aria-hidden="true">5</span> {t('Booking result')}</h5>
         {!review.latest_attempt && <p className="delivery-note">{t('No booking submitted. This remains a local draft.')}</p>}
         <CourierOutcomes review={review} orderId={orderId} token={token} onResolved={updated => {
+          focusResult.current = true;
           setState({ identity, review: updated });
           setEditing({ identity, choices: updated.choices });
           onReviewLoadedRef.current?.(updated);

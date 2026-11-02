@@ -21,11 +21,16 @@ function guidance(host: HTMLElement) {
   return host.querySelector('[data-next-action]')!.textContent;
 }
 
-function mockRequests() {
+function stepState(host: HTMLElement, label: string) {
+  return Array.from(host.querySelectorAll<HTMLElement>('[data-courier-sequence] li'))
+    .find(item => item.textContent?.includes(label))!.dataset.state;
+}
+
+function mockRequests(review: Review = ready) {
   return vi.spyOn(globalThis, 'fetch').mockImplementation(async url => new Response(JSON.stringify(
     String(url).endsWith('/courier-draft') ? {
       ...ready.draft, order_id: 'order-1', status: 'local_proposal', blockers: [], missing_parcel_fields: [],
-    } : String(url).includes('/locations?') ? { choices: [] } : ready,
+    } : String(url).includes('/locations?') ? { choices: [] } : review,
   )));
 }
 
@@ -39,6 +44,10 @@ it('invalidates readiness while choices are edited, saved, and rejected as stale
     environment.value = 'production'; environment.dispatchEvent(new Event('change', { bubbles: true }));
   });
   expect(guidance(host)).toContain('Save changes before reviewing.');
+  expect(stepState(host, 'Parcel details')).toBe('complete');
+  expect(stepState(host, 'Local draft')).toBe('current');
+  expect(stepState(host, 'Current review')).toBe('waiting');
+  expect(stepState(host, 'Submit booking')).toBe('waiting');
   expect(host.querySelector('[data-submit]')).toBeNull();
   let rejectSave!: (error: Error) => void;
   fetch.mockImplementationOnce(() => new Promise((_resolve, reject) => { rejectSave = reject; }));
@@ -46,8 +55,24 @@ it('invalidates readiness while choices are edited, saved, and rejected as stale
     .find(button => button.textContent === 'Save delivery choices')!.click());
   expect(guidance(host)).toContain('Wait for the current result.');
   await act(async () => rejectSave(new Error('Stale review')));
-  expect(guidance(host)).toContain('Review unavailable. Reload current details.');
+  expect(guidance(host)).toContain('Details changed or could not be validated. Reload and review current details.');
   expect(host.querySelector('[data-submit]')).toBeNull();
+  await act(async () => root.unmount());
+});
+
+it('keeps the recorded result visible while delivery choices are dirty', async () => {
+  mockRequests({ ...baseReview, blockers: [], delivery_mismatch: null });
+  const { host, root } = hostRoot();
+  await act(async () => root.render(<CourierWorkspace orderId="order-1" token="seller" />));
+  const environment = host.querySelector<HTMLSelectElement>('select')!;
+  await act(async () => {
+    environment.value = 'production'; environment.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  expect(stepState(host, 'Parcel details')).toBe('complete');
+  expect(stepState(host, 'Local draft')).toBe('current');
+  expect(stepState(host, 'Submit booking')).toBe('waiting');
+  expect(stepState(host, 'Booking result')).toBe('complete');
+  expect(host.textContent).toContain('Booked');
   await act(async () => root.unmount());
 });
 
@@ -82,6 +107,40 @@ it('shows pending guidance during submission and recovery after its unknown resu
   }))));
   expect(guidance(host)).toContain('Resolve the unknown booking outcome');
   expect(host.querySelector('[data-submit]')).toBeNull();
+  expect(document.activeElement).toBe(host.querySelector('[data-result-heading]'));
+  await act(async () => root.unmount());
+});
+
+it('moves focus to the result heading after a reconciliation resolution', async () => {
+  const unknown: Review = {
+    ...baseReview, submission_enabled: false, blockers: [], delivery_mismatch: null,
+    latest_attempt: {
+      ...baseReview.latest_attempt!, status: 'unknown', consignment_id: null,
+      error_code: 'COURIER_OUTCOME_UNKNOWN', error_message: 'Timeout',
+    },
+  };
+  const fetch = mockRequests(unknown);
+  const { host, root } = hostRoot();
+  await act(async () => root.render(<CourierWorkspace orderId="order-1" token="seller" />));
+  const resolved: Review = {
+    ...unknown,
+    latest_attempt: {
+      ...unknown.latest_attempt!, status: 'success', consignment_id: 'SIM-PATHAO-12345',
+      error_code: null, error_message: null, resolution_action: 'attach_existing',
+    },
+  };
+  fetch.mockImplementation(async url => new Response(JSON.stringify(
+    String(url).endsWith('/courier-draft') ? {
+      ...ready.draft, order_id: 'order-1', status: 'local_proposal', blockers: [], missing_parcel_fields: [],
+    } : String(url).includes('/locations?') ? { choices: [] } : resolved,
+  )));
+  const consignment = host.querySelector<HTMLInputElement>('input[name="consignmentId"]')!;
+  await act(async () => {
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(consignment, 'SIM-PATHAO-12345');
+    consignment.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+  await act(async () => host.querySelector<HTMLButtonElement>('[data-attach]')!.click());
+  expect(document.activeElement).toBe(host.querySelector('[data-result-heading]'));
   await act(async () => root.unmount());
 });
 

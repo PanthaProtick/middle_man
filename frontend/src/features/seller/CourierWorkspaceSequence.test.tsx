@@ -48,6 +48,7 @@ it('renders the five delivery stages and names the blocking review action', asyn
   expect(host.textContent).toContain('Next action blocked:');
   expect(host.textContent).toContain('Choose an active pickup store for this connection.');
   expect(host.textContent).toContain('Needs review');
+  expect(document.activeElement).not.toBe(host.querySelector('[data-result-heading]'));
   await act(async () => root.unmount());
 });
 

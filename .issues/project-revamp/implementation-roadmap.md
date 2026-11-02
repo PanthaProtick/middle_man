@@ -213,6 +213,20 @@ accent with a thin neutral border; the surrounding unknown-result card retains
 its amber status treatment. No hook suppression was added. Verification runs
 through the required root check in the follow-up commit hook.
 
+Finish pass 2026-11-02 (base `34976ae`): dirty delivery choices now keep the
+parcel step complete and the local-draft step current while the current-review
+and submit steps wait, so only readiness claims reset. A failed save shows one
+specific message in both the header and sequence instead of the generic
+"Review unavailable" copy, which remains reserved for a failed review load.
+Locally initiated submit and reconciliation outcomes move focus to the result
+stage heading, with no focus steal on initial load. Headless Chrome captures at
+540px drawer width and 390/320px phones, in English and Bengali, reviewed ready,
+dirty, unknown, rejected, and confirmed-noncreation states; the sequence grid
+now balances to three-plus-two at drawer width. All 13 focused courier suites
+pass (61 tests). Root `npm run check` passed:
+`.cache/checks/check-34ngqg/result.json`. Still unrun externally: live Pathao
+booking, a hosted Clerk session, and Postgres concurrency.
+
 - **Owners:** `CourierWorkspace.tsx`, parcel fields, `CourierDraft.tsx`, review/location,
   outcomes/reconciliation components, `DeliverySummary.tsx`, Pathao contracts.
 - Use a visible sequence: parcel details → local draft → current review → explicit

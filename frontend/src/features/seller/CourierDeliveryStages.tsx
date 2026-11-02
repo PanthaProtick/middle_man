@@ -4,6 +4,7 @@ import { useCourierText } from '../locale/courierCopy';
 import type { Review } from './courierReviewTypes';
 import './CourierWorkspace.css';
 import { courierBlockerMessage } from './courierBlockerMessage';
+import { CourierError } from './CourierError';
 
 type StepState = 'complete' | 'current' | 'blocked' | 'waiting';
 type StatusTone = 'success' | 'warning' | 'danger' | 'neutral';
@@ -30,22 +31,23 @@ function hasDraftChoices(review: Review): boolean {
     review.choices.delivery_type !== null && Boolean(review.location.city_name && review.location.zone_name);
 }
 
-function stepStates(review: Review | null | undefined): StepState[] {
+function stepStates(review: Review | null | undefined, dirty = false): StepState[] {
   if (!review) return ['waiting', 'waiting', 'waiting', 'waiting', 'waiting'];
   const latest = review.latest_attempt;
   const blockers = review.blockers ?? [];
   const parcelDone = hasParcel(review);
   const draftDone = hasDraftChoices(review);
   const blocks = (codes: string[]) => codes.some(code => blockers.includes(code));
+  // Dirty choices leave the loaded facts intact but make every readiness claim stale.
   const parcel: StepState = parcelDone ? 'complete'
     : blocks(['ORDER_NOT_CONFIRMED', 'PARCEL_DETAILS_REQUIRED']) ? 'blocked' : 'current';
-  const draft: StepState = draftDone ? 'complete'
+  const draft: StepState = dirty ? 'current' : draftDone ? 'complete'
     : blocks(['COURIER_CONNECTION_REQUIRED', 'PICKUP_STORE_REQUIRED', 'SERVICE_REQUIRED',
       'LOCATION_METADATA_REQUIRED', 'LOCATION_CHOICES_INVALID']) ? 'blocked'
       : parcelDone ? 'current' : 'waiting';
-  const reviewStep: StepState = review.reviewed ? 'complete'
+  const reviewStep: StepState = dirty ? 'waiting' : review.reviewed ? 'complete'
     : blockers.length > 0 ? 'blocked' : draftDone ? 'current' : 'waiting';
-  const submit: StepState = latest?.status === 'success' ? 'complete'
+  const submit: StepState = dirty ? 'waiting' : latest?.status === 'success' ? 'complete'
     : latest?.status === 'unknown' ? 'blocked'
       : latest?.status === 'failed' || latest?.status === 'submitting' ? 'current'
         : review.reviewed && review.submission_enabled ? 'current' : 'waiting';
@@ -69,12 +71,12 @@ function statusChip(review: Review | null | undefined): { label: CourierMessage;
   return { label: 'Waiting for details', tone: 'neutral' };
 }
 
-export function CourierDeliveryStages({ review, dirty = false, pending = false, error = false }: {
-  review?: Review | null; dirty?: boolean; pending?: boolean; error?: boolean;
+export function CourierDeliveryStages({ review, dirty = false, pending = false, error }: {
+  review?: Review | null; dirty?: boolean; pending?: boolean; error?: CourierMessage | Error | null;
 }) {
   const t = useCourierText();
-  const actionableReview = dirty || pending || error ? undefined : review;
-  const states = stepStates(actionableReview);
+  const actionableReview = pending || error ? undefined : review;
+  const states = stepStates(actionableReview, dirty);
   const currentIndex = states.findIndex(state => state === 'current' || state === 'blocked');
   const status = pending ? { label: 'In progress' as const, tone: 'neutral' as const }
     : dirty || error ? { label: 'Needs review' as const, tone: 'warning' as const }
@@ -90,7 +92,7 @@ export function CourierDeliveryStages({ review, dirty = false, pending = false, 
   } else if (pending || latest?.status === 'submitting') {
     nextAction = t('Delivery operation in progress. Wait for the current result.');
   } else if (error) {
-    nextAction = t('Review unavailable. Reload current details.');
+    nextAction = typeof error === 'string' ? t(error) : <CourierError error={error} />;
   } else if (dirty) {
     nextAction = t('Save changes before reviewing.');
   } else if (blockers.length) {
