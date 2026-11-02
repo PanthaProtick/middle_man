@@ -1,0 +1,227 @@
+/* Tour Phone & Buyer Portal Mockup */
+
+.tour-screen-canvas {
+  background: var(--page-bg, #f5f6f2);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 420px;
+}
+
+.mock-phone-shell {
+  width: 100%;
+  max-width: 360px;
+  background: #ffffff;
+  border: 2px solid #2d3e38;
+  border-radius: 24px;
+  padding: 16px 14px 20px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08);
+}
+
+.mock-phone-notch {
+  width: 100px;
+  height: 8px;
+  background: #2d3e38;
+  border-radius: 4px;
+  margin: 0 auto 14px;
+}
+
+.mock-chat-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle, #d8e2dd);
+  margin-bottom: 12px;
+}
+
+.chat-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #146653;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.chat-meta strong {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-primary, #1b2e2b);
+}
+
+.chat-meta span {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #4a5d58);
+}
+
+.mock-chat-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.chat-bubble {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  max-width: 88%;
+}
+
+.chat-bubble p {
+  margin: 0;
+}
+
+.bubble-time {
+  display: block;
+  font-size: 0.7rem;
+  margin-top: 4px;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.chat-bubble.incoming {
+  background: #eef1ef;
+  color: #1b2e2b;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+}
+
+.chat-bubble.outgoing {
+  background: #146653;
+  color: #ffffff;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+}
+
+.chat-order-card {
+  background: #f8faf9;
+  border: 1px solid #c8d8cf;
+  border-radius: 10px;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.chat-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  color: #146653;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.chat-card-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0 0 4px;
+  color: #1b2e2b;
+}
+
+.chat-card-amt {
+  font-size: 0.82rem;
+  color: #146653;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+
+.chat-copy-btn {
+  min-height: 32px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #ffffff;
+  border: 1px solid #146653;
+  color: #146653;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Mock Portal Body */
+.mock-portal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #d8e2dd;
+  margin-bottom: 12px;
+}
+
+.portal-badge {
+  background: #146653;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.portal-order-id {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #1b2e2b;
+}
+
+.portal-tally-box {
+  background: #f3f6f4;
+  border: 1px solid #d8e2dd;
+  border-radius: 8px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.tally-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  padding: 3px 0;
+  color: #4a5d58;
+}
+
+.tally-row.highlight {
+  color: #146653;
+  font-weight: 700;
+  border-top: 1px dashed #c0d3c7;
+  border-bottom: 1px dashed #c0d3c7;
+  padding: 5px 0;
+  margin: 4px 0;
+}
+
+.tally-row.cod {
+  color: #1b2e2b;
+  font-weight: 600;
+}
+
+.mock-portal-field {
+  margin-bottom: 10px;
+  font-size: 0.82rem;
+}
+
+.mock-portal-field label {
+  display: block;
+  font-weight: 600;
+  color: #4a5d58;
+  margin-bottom: 4px;
+}
+
+.mock-input {
+  background: #f9fbf9;
+  border: 1px solid #c8d8cf;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 0.85rem;
+  color: #1b2e2b;
+  word-break: break-word;
+}
