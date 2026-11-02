@@ -104,7 +104,7 @@ select option:checked {
   select option:checked { background: Highlight; color: HighlightText; }
 }
 input::placeholder, textarea::placeholder { color: #687d73; opacity: 1; }
-.btn { min-height: 44px; white-space: normal; transition: background 180ms, border-color 180ms; line-height: 1.4; }
+.btn { min-height: 44px; white-space: normal; transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm), border-color var(--duration-fast, 260ms) var(--ease-out-calm), color var(--duration-fast, 260ms) var(--ease-out-calm), box-shadow var(--duration-normal, 360ms) var(--ease-out-calm); line-height: 1.4; }
 .btn-primary { color: white; background: var(--primary-accent); box-shadow: none; }
 .btn-primary:hover:not(:disabled) { background: #0e5141; box-shadow: none; transform: none; opacity: 1; }
 .btn-secondary { background: white; border-color: #b8c9c0; backdrop-filter: none; }

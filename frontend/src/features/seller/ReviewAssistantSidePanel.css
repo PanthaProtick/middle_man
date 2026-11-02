@@ -59,6 +59,7 @@
   background: var(--bg-card, #ffffff);
   border: 1px solid var(--border-subtle, #d8e2dd);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  animation: review-panel-in var(--duration-smooth, 480ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
 }
 .review-assistant-panel:lang(bn),
 .review-assistant-side-panel:lang(bn) {
@@ -88,6 +89,8 @@
   align-items: center;
   gap: 5px;
   letter-spacing: 0.02em;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              border-color var(--duration-fast, 260ms) var(--ease-out-calm);
 }
 .review-guidance-badge.is-generated {
   background: #fdf6ea;
@@ -106,7 +109,9 @@
   min-height: 44px;
   min-width: 44px;
   border-radius: 8px;
-  transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              color var(--duration-fast, 260ms) var(--ease-out-calm),
+              border-color var(--duration-fast, 260ms) var(--ease-out-calm);
 }
 .review-panel-close:hover {
   background: var(--bg-canvas, #f5f6f2);
@@ -121,6 +126,7 @@
   font-size: 0.875rem;
   color: var(--text-secondary, #4b5563);
   padding: 6px 0;
+  animation: review-loading-pulse 2.2s var(--ease-in-out-calm, ease-in-out) infinite;
 }
 .review-error-state {
   font-size: 0.85rem;
@@ -203,6 +209,14 @@
   padding: 0 14px;
   border-radius: 8px;
   font-weight: 500;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              color var(--duration-fast, 260ms) var(--ease-out-calm),
+              border-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              box-shadow var(--duration-normal, 360ms) var(--ease-out-calm),
+              transform var(--duration-fast, 260ms) var(--ease-out-calm);
+}
+.review-action-button:hover {
+  transform: translateX(2px);
 }
 .review-action-button:focus-visible {
   outline: 2px solid var(--primary-accent, #146653);
@@ -220,6 +234,16 @@
 .review-assistance-explanation:lang(bn),
 .review-advisory-note:lang(bn) {
   line-height: 1.7;
+}
+
+@keyframes review-panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes review-loading-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
 }
 
 @media (max-width: 800px) {
@@ -248,5 +272,14 @@
   }
   .review-assistant-side-panel .assistant-back {
     display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-assistant-panel,
+  .review-loading-state,
+  .review-action-button {
+    animation: none !important;
+    transition: none !important;
   }
 }

@@ -1,0 +1,156 @@
+/* Modern Dhaka Shop Desk Hero Showcase Asset */
+
+.hero-showcase {
+  background: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 16px 36px rgba(20, 102, 83, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: hero-showcase-enter var(--duration-focal, 680ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
+  transition: border-color var(--duration-normal, 360ms) var(--ease-out-calm), box-shadow var(--duration-normal, 360ms) var(--ease-out-calm);
+}
+
+@keyframes hero-showcase-enter {
+  from { opacity: 0; transform: translateY(16px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.showcase-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle, #d8e2dd);
+}
+
+.showcase-badge-group { display: flex; align-items: center; gap: 8px; }
+
+.showcase-brand-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--primary-accent, #146653);
+}
+
+.showcase-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #eaf4ee;
+  border: 1px solid #b8d5c5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #146653;
+}
+
+.showcase-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #197047;
+  animation: mm-dot-pulse 3.2s ease-in-out infinite;
+}
+
+.showcase-intro-headline {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-primary, #192f29);
+  line-height: 1.45;
+  margin: 0;
+}
+
+/* Stepper Tabs */
+.showcase-stepper {
+  display: flex;
+  gap: 6px;
+  background: var(--surface, #f3f6f4);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-subtle, #d8e2dd);
+}
+
+.showcase-tab {
+  flex: 1;
+  min-height: 40px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary, #4e655c);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 8px;
+  white-space: nowrap;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              color var(--duration-fast, 260ms) var(--ease-out-calm),
+              border-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              box-shadow var(--duration-normal, 360ms) var(--ease-out-calm);
+}
+
+.showcase-tab:hover { color: var(--text-primary, #192f29); background: rgba(255, 255, 255, 0.5); }
+.showcase-tab.active { background: var(--surface-card, #ffffff); color: var(--primary-accent, #146653); border-color: #b8d5c5; box-shadow: 0 2px 6px rgba(20, 102, 83, 0.08); }
+.showcase-tab:focus-visible { outline: 3px solid var(--primary-accent, #146653); outline-offset: 2px; }
+
+/* Order Micro-Card Canvas */
+.showcase-microcard {
+  background: #fcfdfc;
+  border: 1px solid #d8e2dd;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: showcase-card-fade var(--duration-normal, 360ms) var(--ease-out-calm) both;
+}
+
+@keyframes showcase-card-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.microcard-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.microcard-order-id { font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 700; color: var(--text-primary, #192f29); padding: 2px 8px; border-radius: 4px; background: #eef3f0; }
+.microcard-status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: #eaf4ee; color: #146653; border: 1px solid #b8d5c5; }
+.microcard-step-title { font-size: 0.85rem; font-weight: 700; color: var(--primary-accent, #146653); margin-top: -4px; }
+.microcard-item-row { display: flex; flex-direction: column; gap: 2px; }
+.microcard-item-title { font-size: 0.9rem; font-weight: 600; color: var(--text-primary, #192f29); }
+.microcard-item-detail { font-size: 0.78rem; color: var(--text-secondary, #4e655c); }
+.microcard-metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 10px 12px; background: #ffffff; border: 1px solid #e2ece7; border-radius: 8px; }
+.microcard-metric { display: flex; flex-direction: column; gap: 2px; }
+.metric-label { font-size: 0.72rem; color: var(--text-secondary, #4e655c); text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+.metric-value { font-size: 0.95rem; font-weight: 700; color: var(--text-primary, #192f29); font-variant-numeric: tabular-nums; }
+.metric-value.highlight { color: var(--primary-accent, #146653); }
+.microcard-highlight-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; background: #f4f8f6; border: 1px solid #d4e4dc; font-size: 0.8rem; }
+.highlight-label { color: var(--text-secondary, #4e655c); font-weight: 500; }
+.highlight-value { font-family: var(--font-mono, monospace); font-weight: 600; color: var(--primary-accent, #146653); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.microcard-note { font-size: 0.8rem; color: var(--text-secondary, #4e655c); line-height: 1.5; margin: 0; }
+
+/* Guarantees Bar */
+.showcase-guarantees { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 10px; border-top: 1px solid var(--border-subtle, #d8e2dd); }
+.guarantee-chip { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; font-weight: 600; color: var(--text-secondary, #4e655c); }
+.guarantee-icon { color: var(--primary-accent, #146653); flex-shrink: 0; }
+
+@media (max-width: 480px) {
+  .hero-showcase { padding: 16px; }
+  .showcase-guarantees { grid-template-columns: 1fr; gap: 6px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-showcase,
+  .showcase-microcard,
+  .showcase-tab {
+    animation: none !important;
+    transition: none !important;
+  }
+}

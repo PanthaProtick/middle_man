@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowRight, Sparkles, LayoutDashboard, ShieldAlert } from 'lucide-react';
 import { landingCopy } from './landingCopy';
+import { HeroShowcase } from './HeroShowcase';
 import type { Locale } from '../locale';
 
 interface LandingHeroProps {
@@ -70,6 +71,10 @@ export function LandingHero({
           <ShieldAlert size={16} color="var(--primary-accent)" aria-hidden="true" />
           <span>{copy.badge}</span>
         </div>
+      </div>
+
+      <div className="hero-showcase-wrapper">
+        <HeroShowcase locale={locale} />
       </div>
     </header>
   );

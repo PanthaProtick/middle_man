@@ -17,11 +17,18 @@
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              transform var(--duration-fast, 260ms) var(--ease-out-calm, ease);
+  animation: assistant-launcher-enter var(--duration-smooth, 480ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
 }
 .seller-assistant-launcher:hover {
   background: #0f4f40;
   box-shadow: 0 6px 20px rgba(20, 102, 83, 0.32), 0 3px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+.seller-assistant-launcher:active {
+  transform: translateY(0);
 }
 .seller-assistant-launcher:focus-visible {
   outline: 3px solid var(--primary-accent, #146653);
@@ -46,6 +53,7 @@
   scrollbar-gutter: stable;
   display: flex;
   flex-direction: column;
+  animation: assistant-window-enter var(--duration-smooth, 480ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
 }
 .seller-assistant-workspace:has(> .assistant-slot .review-assistant-side-panel) {
   grid-template-columns: minmax(0, 1fr);
@@ -141,6 +149,7 @@
   padding: 14px;
   margin-block: 12px;
   background: #fdfdfd;
+  animation: assistant-result-in var(--duration-smooth, 480ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
 }
 .assistant-result:focus-visible { outline: 2px solid var(--primary-accent, #146653); }
 
@@ -194,6 +203,7 @@
   color: var(--text-primary, #1f2937);
   white-space: pre-wrap;
   margin-block: 8px;
+  animation: assistant-msg-in var(--duration-normal, 360ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
 }
 .assistant-reply {
   padding: 10px 14px;
@@ -201,6 +211,7 @@
   background: #eaf4ee;
   color: #146653;
   margin-block: 8px;
+  animation: assistant-reply-in var(--duration-smooth, 440ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
 }
 .assistant-conversation [role="alertdialog"] {
   border: 2px solid var(--primary-accent, #146653);
@@ -214,6 +225,31 @@
   flex-wrap: wrap;
   gap: 8px;
   margin-top: 12px;
+}
+
+@keyframes assistant-launcher-enter {
+  from { opacity: 0; transform: translateY(14px) scale(0.95); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes assistant-window-enter {
+  from { opacity: 0; transform: translateY(18px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes assistant-msg-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes assistant-reply-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes assistant-result-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 .seller-assistant-workspace .order-detail-layout:has(.seller-assistant-window) {

@@ -43,7 +43,7 @@
 .mm-button--lg { min-height: 48px; padding: 12px 24px; font-size: var(--font-size-lg); }
 .mm-button__spinner {
   width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent;
-  border-radius: 50%; animation: mm-spin 700ms linear infinite; flex-shrink: 0;
+  border-radius: 50%; animation: mm-spin 900ms linear infinite; flex-shrink: 0;
 }
 
 /* 2. Field Primitive */
@@ -54,29 +54,29 @@
   font-family: var(--font-body); padding: 10px 12px; background-color: var(--color-surface-card);
   border: 1px solid var(--color-border); border-radius: var(--radius-sm);
   color: var(--color-text-primary); box-sizing: border-box;
-  transition: border-color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
-              box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease),
-              background-color var(--duration-normal, 200ms) var(--ease-out-calm, ease);
+  transition: border-color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              background-color var(--duration-normal, 360ms) var(--ease-out-calm, ease);
 }
 .mm-field__control:focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); border-color: var(--color-border-focus); }
 .mm-field__control[aria-invalid="true"] { border-color: var(--color-status-rose); }
 .mm-field__helper { font-size: var(--font-size-xs); color: var(--color-text-secondary); line-height: 1.4; }
 .mm-field__error {
   font-size: var(--font-size-xs); color: var(--color-status-rose); font-weight: 600; line-height: 1.4;
-  animation: mm-error-in var(--duration-fast, 150ms) var(--ease-out-calm, ease) forwards;
+  animation: mm-error-in var(--duration-fast, 260ms) var(--ease-out-calm, ease) forwards;
 }
 
 /* 3. StatusChip Primitive */
 .mm-status-chip {
   display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-full);
   font-size: var(--font-size-xs); font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap;
-  transition: background-color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
-              color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
-              border-color var(--duration-normal, 200ms) var(--ease-out-calm, ease);
+  transition: background-color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              border-color var(--duration-normal, 360ms) var(--ease-out-calm, ease);
 }
 .mm-status-chip__dot { width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; flex-shrink: 0; }
 .mm-status-chip--emerald { background-color: var(--color-status-emerald-bg); color: var(--color-status-emerald); border: 1px solid #c2e2cf; }
-.mm-status-chip--emerald .mm-status-chip__dot { animation: mm-dot-pulse 2.4s ease-in-out infinite; }
+.mm-status-chip--emerald .mm-status-chip__dot { animation: mm-dot-pulse 3.2s ease-in-out infinite; }
 .mm-status-chip--cyan { background-color: var(--color-status-cyan-bg); color: var(--color-status-cyan); border: 1px solid #bce1e6; }
 .mm-status-chip--amber { background-color: var(--color-status-amber-bg); color: var(--color-status-amber); border: 1px solid #f6deb4; }
 .mm-status-chip--rose { background-color: var(--color-status-rose-bg); color: var(--color-status-rose); border: 1px solid #f3c2c9; }
@@ -86,7 +86,7 @@
 .mm-notice {
   display: flex; gap: var(--space-md); padding: 12px 16px; border-radius: var(--radius-md);
   font-size: var(--font-size-sm); line-height: 1.5; border: 1px solid transparent;
-  animation: mm-notice-in var(--duration-smooth, 280ms) var(--ease-out-calm, ease) forwards;
+  animation: mm-notice-in var(--duration-smooth, 480ms) var(--ease-out-calm, ease) forwards;
 }
 .mm-notice--info { background-color: var(--color-status-cyan-bg); color: var(--color-status-cyan); border-color: #bce1e6; }
 .mm-notice--success { background-color: var(--color-status-emerald-bg); color: var(--color-status-emerald); border-color: #c2e2cf; }
@@ -106,7 +106,7 @@
 .mm-empty-state {
   display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
   padding: 32px 16px; background-color: var(--color-surface); border: 1px dashed var(--color-border); border-radius: var(--radius-md);
-  animation: mm-fade-in var(--duration-smooth, 280ms) var(--ease-out-calm, ease) forwards;
+  animation: mm-fade-in var(--duration-smooth, 480ms) var(--ease-out-calm, ease) forwards;
 }
 .mm-empty-state__icon { font-size: 2rem; color: var(--color-text-muted); margin-bottom: var(--space-md); }
 .mm-empty-state__title { font-size: var(--font-size-base); font-weight: 700; color: var(--color-text-primary); margin: 0 0 6px 0; }
@@ -115,11 +115,11 @@
 /* 7. LoadingState Primitive */
 .mm-loading-state {
   display: inline-flex; align-items: center; gap: 10px; padding: 8px 12px; color: var(--color-text-secondary); font-size: var(--font-size-sm);
-  animation: mm-fade-in var(--duration-normal, 200ms) var(--ease-out-calm, ease) forwards;
+  animation: mm-fade-in var(--duration-normal, 360ms) var(--ease-out-calm, ease) forwards;
 }
 .mm-loading-state__spinner {
   width: 20px; height: 20px; border: 2.5px solid var(--color-border); border-top-color: var(--color-primary);
-  border-radius: 50%; animation: mm-spin 700ms linear infinite; flex-shrink: 0;
+  border-radius: 50%; animation: mm-spin 900ms linear infinite; flex-shrink: 0;
 }
 @keyframes mm-spin { to { transform: rotate(360deg); } }
 
@@ -127,14 +127,14 @@
 .mm-dialog-backdrop {
   position: fixed; inset: 0; background-color: rgba(25, 47, 41, 0.45);
   display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000;
-  animation: mm-backdrop-fade var(--duration-normal, 200ms) var(--ease-out-calm, ease) forwards;
+  animation: mm-backdrop-fade var(--duration-normal, 360ms) var(--ease-out-calm, ease) forwards;
   backdrop-filter: blur(2px);
 }
 .mm-dialog-panel {
   background-color: var(--color-surface-card); border-radius: var(--radius-lg); border: 1px solid var(--color-border);
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); max-width: 560px; width: 100%; max-height: calc(100vh - 32px);
   display: flex; flex-direction: column; overflow: hidden;
-  animation: mm-dialog-enter var(--duration-smooth, 280ms) var(--ease-out-calm, ease) forwards;
+  animation: mm-dialog-enter var(--duration-smooth, 480ms) var(--ease-out-calm, ease) forwards;
 }
 .mm-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--color-border); }
 .mm-dialog-title { margin: 0; font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); }

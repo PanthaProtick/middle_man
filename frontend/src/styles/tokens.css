@@ -100,14 +100,14 @@
   --pill-gap: 4px;
   --section-gap: 12px;
 
-  /* Motion & Easing Tokens */
-  --ease-out-calm: cubic-bezier(0.16, 1, 0.3, 1);
+  /* Motion & Easing Tokens — Calmer, slower, smoother deceleration */
+  --ease-out-calm: cubic-bezier(0.2, 0.9, 0.3, 1);
   --ease-in-out-calm: cubic-bezier(0.4, 0, 0.2, 1);
-  --duration-instant: 120ms;
-  --duration-fast: 150ms;
-  --duration-normal: 200ms;
-  --duration-smooth: 280ms;
-  --duration-focal: 480ms;
+  --duration-instant: 160ms;
+  --duration-fast: 260ms;
+  --duration-normal: 360ms;
+  --duration-smooth: 480ms;
+  --duration-focal: 680ms;
 }
 
 /* Bengali Script Clearance: 1.7 line-height accommodates ascenders, descenders, and conjuncts */

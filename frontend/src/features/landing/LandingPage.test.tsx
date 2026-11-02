@@ -75,6 +75,46 @@ describe('LandingPage surface', () => {
     expect(container.textContent).toContain('শপ ডেস্ক শুরু করুন');
     expect(container.textContent).toContain('ধাপ ১');
     expect(container.textContent).toContain('চ্যাটে কথা ও লিংক প্রদান');
+    expect(container.textContent).toContain('মধ্যস্বত্ব শপ ডেস্ক');
+    expect(container.textContent).toContain('ঢাকা শপ অপারেশন সক্রিয়');
+  });
+
+  it('renders hero showcase asset on right side introducing Middleman', async () => {
+    await act(async () => {
+      root.render(<TestWrapper />);
+    });
+
+    const showcase = container.querySelector('[data-testid="hero-showcase"]');
+    expect(showcase).not.toBeNull();
+    expect(showcase?.textContent).toContain('Middleman Shop Desk');
+    expect(showcase?.textContent).toContain('Dhaka Operations Active');
+    expect(showcase?.textContent).toContain('1. Buyer Link');
+    expect(showcase?.textContent).toContain('2. Payment Match');
+    expect(showcase?.textContent).toContain('3. Pathao Dispatch');
+    expect(showcase?.textContent).toContain('Dhaka Handloom Jamdani Saree');
+    expect(showcase?.textContent).toContain('middleman.app/orders/dh-8492');
+
+    // Switch to step 2: Payment Match
+    const tabs = showcase?.querySelectorAll<HTMLButtonElement>('.showcase-tab');
+    expect(tabs?.length).toBe(3);
+
+    await act(async () => {
+      tabs?.[1].click();
+    });
+    expect(showcase?.textContent).toContain('Two-way bKash & Nagad reconciliation');
+    expect(showcase?.textContent).toContain('Claimed TrxID');
+    expect(showcase?.textContent).toContain('BL9X4M291Q');
+    expect(showcase?.textContent).toContain('Advance Verified');
+
+    // Switch to step 3: Pathao Dispatch
+    await act(async () => {
+      tabs?.[2].click();
+    });
+    expect(showcase?.textContent).toContain('1-tap courier dispatch with exact COD');
+    expect(showcase?.textContent).toContain('Consignment #PATHAO-8492');
+    expect(showcase?.textContent).toContain('Remaining COD');
+    expect(showcase?.textContent).toContain('৳3,050');
+    expect(showcase?.textContent).toContain('Ready for Pickup');
   });
 
   it('navigates through interactive product tour steps', async () => {
