@@ -1,0 +1,19 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-link&lang=en".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-link&lang=en
+	2 container
+		3 container Language
+			4 checkbox বাংলা, Value: 0
+			5 checkbox English, Value: 1
+			6 text Language: English
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 container Buyer link access
+			10 heading Buyer link access, Value: 4
+				11 text Buyer link access
+			12 text These actions keep the order and payment unchanged.
+			16 text Block buyer access to the current link.
+			17 button Revoke buyer link
+			14 text Create a new link and permanently disable previous links. The deadline and submission state stay unchanged.
+			15 button Reissue buyer link
+
+The focused UI element is 1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-link&lang=en

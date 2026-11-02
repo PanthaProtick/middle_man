@@ -1,0 +1,55 @@
+Browser tab: 5, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&fault=unknown&lang=en".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~				192 button (collapsed) Description: Ask AI for explanation and suggested actions, Secondary Actions: Expand
+~			106 container Seller assistant
+~					108 heading Seller assistant, Value: 3
+~						109 text Seller assistant
+~					110 button Close assistant
+~					112 text Conversation language
+~					113 pop up button (collapsed, settable) Conversation language, Value: English, Secondary Actions: Expand
+~							115 (selected) English
+~							116 বাংলা
+~				117 container Seller assistant
+~					118 checkbox Guided workflows, Value: 1
+~					119 button (disabled) New conversation
+~				120 text Guided workflows
+~				121 text Choose a workflow or tell me what you need. Your conversation stays in this tab.
+~				122 container Temporary conversation
+~				123 button (disabled) Create an order
+~				124 button (disabled) Record a payment
+~				125 button Orders needing attention
+~				126 button Awaiting delivery preparation
+~				127 container Record a payment
+~					128 heading Record a payment, Value: 4
+~						129 text Record a payment
+~					130 text Enter the received payment below. Receiving account, exact transaction ID and amount are required; sender number and occurrence time are optional. Nothing is saved until you click Record payment.
+~						132 text Receiving account
+~						133 pop up button (disabled, collapsed, settable) Receiving account, Value: Synthetic receiving account · bkash · 01700000000, Secondary Actions: Expand
+~								135 Choose an active account
+~					137 button (disabled) Refresh accounts
+~						139 text Transaction ID
+~						140 text field (disabled) Transaction ID, Value: SYNTHETIC01
+~						142 text Amount received (BDT)
+~						143 text field (disabled) Amount received (BDT), Value: 500
+~						145 text Sender number (optional)
+~						146 text field (disabled) Sender number (optional)
+~						148 text Occurrence time (optional)
+~						149 date field (disabled, settable) Occurrence time (optional)
+~					150 container Ready to record
+~						151 heading Ready to record, Value: 5
+~							152 text Ready to record
+~							154 text Receiving account :  Synthetic receiving account  ·  BKASH
+~							156 text Transaction ID :  SYNTHETIC01
+~							158 text Amount received (BDT) : BDT  500.00
+~						159 text Recording runs reconciliation and may automatically confirm an eligible order.
+~						160 text Recording your evidence does not mean the payment provider verified the transaction.
+~						161 button (disabled) Record payment
+~					162 text Outcome unknown. Check this submission before changing fields or recording another payment.
+~					163 button Check submission
+~					165 text Unfinished draft :  Record a payment
+~				166 button Resume draft
+~				167 button (disabled) Discard draft
+~					169 text What would you like to do?
+~					170 text entry area (settable) What would you like to do?
+~					171 button (disabled) Send
+The focused UI element is 11 checkbox English, Value: 1

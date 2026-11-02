@@ -1,0 +1,63 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-evidence&lang=en".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-evidence&lang=en
+	2 container
+		3 container Language
+			4 checkbox বাংলা, Value: 0
+			5 checkbox English, Value: 1
+			6 text Language: English
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 container Evidence resolution
+			10 heading Compare and resolve, Value: 4
+				11 text Compare and resolve
+			12 text Select received evidence. Choosing a claim explicitly holds the other current claims; exact matching rules still apply.
+			13 content list
+				14 container
+					15 AXListMarker •
+					16 text Synthetic buyer / পরীক্ষামূলক ক্রেতা  —  baseline-order-1 :  pending ;  Sender 01900000000 ;  ৳450.00 . Amount does not match
+			17 container Receipt correction
+				18 heading Correct unallocated receipt, Value: 5
+					19 text Correct unallocated receipt
+				20 container
+					21 text Before :  bkash  /  SYNTHETIC01 ;  ৳500.00 ; 01900000000 ;  02 Nov 2026, 12:00 pm (Bangladesh time) ;  Account baseline-account .
+				22 container Correct receipt
+					23 container
+						24 text Receiving account
+						25 pop up button (collapsed, settable) Description: Correction account, Value: Synthetic receiving account (bkash), Secondary Actions: Expand
+							26 menu
+								27 (selected) Synthetic receiving account (bkash)
+						28 text TrxID
+						29 text field (settable) Description: Correction TrxID, Value: SYNTHETIC01
+						30 text Received amount (BDT)
+						31 text field (settable) Description: Correction amount, Value: 500.00
+						32 text Payment sender (blank if unknown)
+						33 text field (settable) Description: Correction sender, Value: 01900000000
+						34 text Receipt time (ISO with timezone, blank if unknown)
+						35 text field (settable) Description: Correction time, Value: 2026-11-02T06:00:00Z
+						36 text Correction reason — required
+						37 text entry area (settable) Correction reason
+					38 button (disabled) Save correction and check claims
+			39 container Resolve evidence
+				40 container
+					41 text Received observation
+					42 text — select complete evidence to continue.
+					43 pop up button (collapsed, settable) Description: Received observation, Value: Select complete observation, Secondary Actions: Expand
+						44 menu
+							45 (selected) Select complete observation
+							46 manual: ৳500.00, 01900000000, 02 Nov 2026, 12:00 pm (Bangladesh time), Account baseline-account
+					47 text Claim decision
+					48 pop up button (collapsed, settable) Description: Claim decision, Value: Resolve observations only; keep competing claims held, Secondary Actions: Expand
+						49 menu
+							50 (selected) Resolve observations only; keep competing claims held
+							51 Synthetic buyer / পরীক্ষামূলক ক্রেতা — baseline-order-1
+					52 text Decision reason
+					53 text — a nonblank reason is required.
+					54 text entry area (settable) Decision reason
+				55 button (disabled) Record resolution
+			56 button Refresh comparison
+			57 heading Correction history, Value: 5
+				58 text Correction history
+			59 heading Decision history, Value: 5
+				60 text Decision history
+
+The focused UI element is 1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-evidence&lang=en

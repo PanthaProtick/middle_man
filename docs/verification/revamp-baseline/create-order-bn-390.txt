@@ -1,0 +1,26 @@
+Browser tab: 4, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=bn".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+Removed element IDs: 85-129
+~				84 text ম্যানুয়াল ডেলিভারির সহায়তার জন্য; কোনো কুরিয়ার বুকিং, হালনাগাদ বা ডেলিভারি খরচের হিসাব নয়।
++				162 button (collapsed) Cotton panjabi / সুতি পাঞ্জাবি ক্রেতার অপেক্ষায় ডেলিভারির জন্য প্রস্তুত রাখা হয়নি মোট: BDT 2,500.00, Secondary Actions: Expand
++					163 text Cotton panjabi / সুতি পাঞ্জাবি
++					164 text ক্রেতার অপেক্ষায়
++					165 text ডেলিভারির জন্য প্রস্তুত রাখা হয়নি
++					166 text মোট:
++					167 text  BDT
++					168 text 2,500.00
++				169 button (collapsed) হাতে তৈরি নকশিকাঁথা — special gift package পর্যালোচনার অপেক্ষায় ডেলিভারির জন্য প্রস্তুত রাখা হয়নি মোট: BDT 2,500.00, Secondary Actions: Expand
++					170 text হাতে তৈরি নকশিকাঁথা — special gift package
++					171 text পর্যালোচনার অপেক্ষায়
++					172 text ডেলিভারির জন্য প্রস্তুত রাখা হয়নি
++					173 text মোট:
++					174 text  BDT
++					175 text 2,500.00
++				176 button (collapsed) Canvas everyday bag নিশ্চিত করা ডেলিভারির জন্য প্রস্তুত রাখা মোট: BDT 2,500.00, Secondary Actions: Expand
++					177 text Canvas everyday bag
++					178 text নিশ্চিত করা
++					179 text ডেলিভারির জন্য প্রস্তুত রাখা
++					180 text মোট:
++					181 text  BDT
++					182 text 2,500.00
+The focused UI element is 140 text field (settable) Description: পণ্যের নাম / সম্মত পণ্য, ID: create-order-product-name

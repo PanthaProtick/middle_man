@@ -1,0 +1,62 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-correction&lang=en".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-correction&lang=en
+	2 container
+		3 container Language
+			4 checkbox বাংলা, Value: 0
+			5 checkbox English, Value: 1
+			6 text Language: English
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 container Correct buyer information
+			10 heading Correct buyer information, Value: 3
+				11 text Correct buyer information
+			12 container
+				13 text Status: Pending Review
+			14 button (collapsed) Show review details, Secondary Actions: Expand
+			15 container
+				16 container
+					17 text Buyer name
+					18 text field (settable) Buyer name, Value: Synthetic buyer / পরীক্ষামূলক ক্রেতা
+				19 container
+					20 text Contact number
+					21 text field (settable) Contact number, Value: 01900000000
+				22 container
+					23 text Delivery address
+					24 text entry area (settable) Delivery address, Value: Synthetic house, road and landmark / পরীক্ষামূলক ঠিকানা
+				25 container Payment claim
+					26 text Payment claim
+					27 container
+						28 text Provider
+						29 pop up button (collapsed, settable) Provider, Value: bKash, Secondary Actions: Expand
+							30 menu
+								31 (selected) bKash
+								32 Nagad
+					33 container
+						34 text Transaction ID
+						35 text field (settable) Transaction ID, Value: SYNTHETIC01
+					36 container
+						37 text Payment sender
+						38 text field (settable) Payment sender, Value: 01900000000
+					39 container
+						40 text Claimed advance (BDT)
+						41 text field (settable) Claimed advance (BDT), Value: 450.00
+				42 container
+					43 text Correction reason
+					44 text entry area (settable) Correction reason
+				45 button (disabled) Save correction and check again
+			46 container
+				47 button (expanded) Buyer revision history (1), Secondary Actions: Collapse
+					48 text Buyer revision history
+					49 text  (
+					50 text 1
+					51 text )
+				52 container
+					53 text Revision 1 :  Synthetic buyer / পরীক্ষামূলক ক্রেতা ,  01900000000 ,  Synthetic house, road and landmark / পরীক্ষামূলক ঠিকানা
+				54 container
+					55 text bkash  ·  SYNTHETIC01  ·  01900000000  · BDT  450.00
+				56 container
+					57 text buyer  ·  Initial submission  ·  02 Nov 2026, 12:00 pm (Bangladesh time)
+				58 container
+					59 text Payment claim accepted: 02 Nov 2026, 12:00 pm (Bangladesh time)
+
+The focused UI element is 47 button (expanded) Buyer revision history (1), Secondary Actions: Collapse

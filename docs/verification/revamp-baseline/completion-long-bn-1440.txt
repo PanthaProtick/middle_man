@@ -1,0 +1,121 @@
+Browser tab: 5, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=long&lang=bn".
+1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=long&lang=bn
+	2 container root
+		3 link Description: কর্মক্ষেত্রে যান, Value: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=long&lang=bn#workspace
+		4 container
+			5 heading middleman, Value: 1
+				6 text middleman
+			7 text আপনার প্রতিদিনের অর্ডার ডেস্ক
+			8 container সিস্টেমের অবস্থা
+				9 container ভাষা
+					10 checkbox বাংলা, Value: 1
+					11 checkbox English, Value: 0
+					12 text ভাষা: বাংলা
+				13 text সংযুক্ত
+		14 container আপনার দোকান, গোছানো অর্ডার।
+			15 text অর্ডার গোছান, বারবার যোগাযোগ কমান।
+			16 heading আপনার দোকান, গোছানো অর্ডার।, Value: 2, ID: workspace-heading
+				17 text আপনার দোকান,
+				18 text গোছানো অর্ডার।
+			19 text কথোপকথন থেকে নিশ্চিত করা অর্ডার পর্যন্ত। ক্রেতার তথ্য সংগ্রহ করুন, ডেলিভারির আগে অগ্রিম যাচাই করুন এবং ডেলিভারির প্রস্তুতি নিন।
+			20 content list অর্ডার নিশ্চিত করার ধাপ
+				21 container
+					22 text 01 অর্ডার লিংক পাঠান
+				23 container
+					24 text 02 ক্রেতা তথ্য ও পেমেন্ট দেন
+				25 container
+					26 text 03 পর্যালোচনা করে নিশ্চিত করুন ও ডেলিভারি দিন
+		27 container workspace
+			28 text Synthetic shop / পরীক্ষামূলক দোকান
+			29 text আপনার অর্ডার, ক্রেতার তথ্য ও পাওয়া অগ্রিম এক জায়গায়।
+			30 button পেমেন্টের তথ্য লিখুন
+			31 button অর্ডার লিংক তৈরি করুন
+			32 button রিফ্রেশ করুন
+			33 container দোকানের অর্ডার ও পেমেন্ট
+				34 text 3
+				35 text আজকের অর্ডার
+				36 text 1
+				37 text নিশ্চিত করা
+				38 text 1
+				39 text ক্রেতার অপেক্ষায়
+				40 text 1
+				41 text পর্যালোচনার অপেক্ষায়
+				42 text 1
+				43 text আজকের পেমেন্ট
+				44 container বাংলাদেশ সময়ে আজ তৈরি নিশ্চিত অর্ডার, যার স্থানীয় কুরিয়ার খসড়া আছে এবং বুকিং বাকি। পার্সেলের তথ্য বা পর্যালোচনা বাকি থাকতে পারে। বুক করা, বুকিং চলমান ও অনিশ্চিত ফলাফলের অর্ডার বাদ।
+					45 text 1
+					46 text ডেলিভারির জন্য প্রস্তুত রাখা
+				47 text বাংলাদেশ সময়ে আজ তৈরি নিশ্চিত অর্ডার, যার স্থানীয় কুরিয়ার খসড়া আছে এবং বুকিং বাকি। পার্সেলের তথ্য বা পর্যালোচনা বাকি থাকতে পারে। বুক করা, বুকিং চলমান ও অনিশ্চিত ফলাফলের অর্ডার বাদ।
+				48 text বাংলাদেশ সময়ে আজ তৈরি অর্ডার ও রেকর্ড করা পেমেন্ট। স্ট্যাটাস আজকের অর্ডারের বর্তমান অবস্থা। তালিকার ফিল্টার থেকে স্বাধীন।
+			49 container বিক্রেতার কর্মক্ষেত্রের বিভাগ
+				50 button অর্ডার ও লিংক
+				51 button পেমেন্ট ও SMS
+				52 button টাকা গ্রহণের অ্যাকাউন্ট
+				53 button তথ্য সংরক্ষণ
+			54 container
+				55 text সক্রিয় টাকা গ্রহণের অ্যাকাউন্ট: BKASH :  Synthetic receiving account  ( 01700000000 )
+				56 button অ্যাকাউন্ট পরিচালনা করুন →
+					57 text অ্যাকাউন্ট পরিচালনা করুন
+					58 text  →
+				59 heading অর্ডার ও সক্রিয় ক্রেতার লিংক (2), Value: 4
+					60 text অর্ডার ও সক্রিয় ক্রেতার লিংক  ( 2 )
+				61 text ✓  নিশ্চিত করা :  0 ⚠  পর্যালোচনার অসঙ্গতি: 1
+				62 container অর্ডার খুঁজুন
+					63 text অর্ডার খুঁজুন
+					64 search text field (settable) অর্ডার খুঁজুন, ID: order-search
+					65 button খুঁজুন
+				66 text অবস্থা:
+				67 pop up button (collapsed, settable) অবস্থা:, Value: সব অবস্থা, ID: order-status-filter, Secondary Actions: Expand
+					68 menu
+						69 (selected) সব অবস্থা
+						70 ক্রেতার অপেক্ষায়
+						71 পর্যালোচনার অপেক্ষায়
+						72 নিশ্চিত করা
+						73 প্রত্যাখ্যাত
+						74 মেয়াদ শেষ
+						75 বাতিল
+				76 text তৈরির তারিখ:
+				77 pop up button (collapsed, settable) তৈরির তারিখ:, Value: যেকোনো সময়, ID: order-date-mode, Secondary Actions: Expand
+					78 menu
+						79 (selected) যেকোনো সময়
+						80 আজ
+						81 নির্দিষ্ট তারিখ
+						82 শেষ কয়েক দিন
+				83 button ইংরেজি CSV ডাউনলোড করুন
+				84 text ম্যানুয়াল ডেলিভারির সহায়তার জন্য; কোনো কুরিয়ার বুকিং, হালনাগাদ বা ডেলিভারি খরচের হিসাব নয়। দীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNB ক্রেতার অপেক্ষায় ডেলিভারির জন্য প্রস্তুত রাখা হয়নি
+				85 button বিস্তারিত দেখুন, Help: অর্ডারের বিস্তারিত ও সংরক্ষিত তথ্য দেখুন
+				86 button ক্রেতার লিংক কপি করুন
+					87 text লিংক কপি করুন
+				88 container
+					89 text মোট: BDT  2,500.00
+				90 container
+					91 text ডেলিভারির আগে অগ্রিম: BDT  500.00
+				92 container
+					93 text ডেলিভারির সময় সম্ভাব্য বাকি পরিশোধ: BDT 2,000.00
+				94 container
+					95 text অ্যাকাউন্ট: BKASH  ( 01700000000 )
+				96 container
+					97 text তৈরি হয়েছে: 02 নভেম্বর 2026, 12:00 pm (বাংলাদেশ সময়)
+				98 text সময়সীমা: 02 ডিসেম্বর 2026, 12:00 pm (বাংলাদেশ সময়) দীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামদীর্ঘপরীক্ষামূলকপণ্যেরনামUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNBROKENUNB পর্যালোচনার অপেক্ষায় ডেলিভারির জন্য প্রস্তুত রাখা হয়নি পর্যালোচনা:
+				99 button (collapsed) কোড দেখুন, Help: কারিগরি পর্যালোচনার কোড দেখুন বা লুকান, Secondary Actions: Expand
+				100 text পেমেন্টের অঙ্ক মিলছে না
+				101 button বিস্তারিত দেখুন, Help: অর্ডারের বিস্তারিত ও সংরক্ষিত তথ্য দেখুন
+				102 button ক্রেতার লিংক কপি করুন
+					103 text লিংক কপি করুন
+				104 button (collapsed) Description: ব্যাখ্যা ও পরবর্তী পদক্ষেপের জন্য এআই সাহায্য চান, Secondary Actions: Expand
+				105 container
+					106 text মোট: BDT  2,500.00
+				107 container
+					108 text ডেলিভারির আগে অগ্রিম: BDT  500.00
+				109 container
+					110 text ডেলিভারির সময় সম্ভাব্য বাকি পরিশোধ: BDT 2,000.00
+				111 container
+					112 text অ্যাকাউন্ট: BKASH  ( 01700000000 )
+				113 container
+					114 text তৈরি হয়েছে: 02 নভেম্বর 2026, 12:00 pm (বাংলাদেশ সময়)
+				115 text সময়সীমা: 02 ডিসেম্বর 2026, 12:00 pm (বাংলাদেশ সময়)
+				116 button আরও অর্ডার দেখুন
+			117 button (collapsed) বিক্রেতা সহকারী, Secondary Actions: Expand
+		118 text middleman · আপনার বিক্রির জন্য তৈরি। বিক্রেতার নিশ্চিতকরণ মানে পেমেন্ট প্রদানকারী স্বাধীনভাবে যাচাই করেছে এমন নয়।
+
+The focused UI element is 1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=long&lang=bn

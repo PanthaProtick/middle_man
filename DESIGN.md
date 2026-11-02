@@ -70,7 +70,7 @@ The system encompasses two main surfaces:
 ├────────────────────────────────────────────────────────────────────────┤
 │ Compact First-Run Bar (auto-collapses once an order or account exists) │
 ├────────────────────────────────────────────────────────────────────────┤
-│ Segmented Section Rail: [ Orders (3) ]  [ Payments (1) ]  [ Delivery ] │
+│ Segmented Section Rail: [ Orders (3) ]  [ Payments (1) ]  [ Settings ] │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Work Query Switcher: [ Needs Attention ]  [ Ready to Ship ]  [ All ]   │
 ├────────────────────────────────────────────────────────────────────────┤
@@ -80,7 +80,7 @@ The system encompasses two main surfaces:
 
 - **App Shell Header**: Compact height (56px desktop, 52px phone). Contains shop identity, primary "+ New Order" button, segmented `EN` / `বাংলা` toggle, and session menu.
 - **First-Run Help**: Dismissible / auto-collapsing 3-step checklist ("1. Add Account", "2. Create Order", "3. Connect Pathao"). Never displaces repeat work down the viewport.
-- **Section Rail**: Segmented tab rail: `Orders` (with attention badge), `Payments` (with unallocated badge), `Delivery` (staging), `Settings` (accounts, Pathao, retention).
+- **Section Rail**: Segmented tab rail: `Orders` (with attention badge), `Payments` (with unallocated badge), `Settings` (accounts, Pathao, retention). Courier parcel dispatch and delivery reconciliation are integrated within Orders, not a disjoint top-level application.
 - **Work Queues**: Server-predicate queries lead: `Needs Attention` (unconfirmed, pending claims, conflicts), `Ready for Delivery` (confirmed, awaiting consignment), `All Orders` (full search, filters, export).
 - **Detail View Topology**:
   - *Desktop (>1024px)*: Right-docked drawer (540px width) with sticky header (Order #, amounts, status) and 4 tabs (`Overview`, `Payment`, `Delivery`, `Buyer Link`).
