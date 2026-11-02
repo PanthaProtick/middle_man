@@ -62,6 +62,7 @@ tasks/local/
 .mypy_cache/
 .ruff_cache/
 frontend/test-results/
+docs/verification/revamp-baseline/
 
 # Durable Private Evidence Storage
 .evidence/

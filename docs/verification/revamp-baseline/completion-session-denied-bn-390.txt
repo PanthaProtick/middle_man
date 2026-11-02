@@ -1,6 +1,0 @@
-Browser tab: 5, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=bn".
-The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-~1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=bn
-~		3 link Description: কর্মক্ষেত্রে যান, Value: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=bn#workspace
-~			30 text বিক্রেতার সেশন গ্রহণ করা যায়নি। আবার সাইন ইন করুন।
-The focused UI element is 1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=bn

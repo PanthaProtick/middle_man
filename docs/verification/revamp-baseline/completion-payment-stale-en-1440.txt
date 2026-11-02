@@ -1,7 +1,0 @@
-Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=stale".
-The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-Removed element IDs: 12, 80-97
-~		79 button (collapsed) Description: Ask AI for explanation and suggested actions, Secondary Actions: Expand
-+			80 text Payment information changed. Refresh the preview before trying again.
-~				77 text entry area (disabled) Decision reason, Value: Synthetic deliberate acceptance
-The focused UI element is 1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=stale

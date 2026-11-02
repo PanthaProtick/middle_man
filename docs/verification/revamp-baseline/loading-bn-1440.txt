@@ -1,9 +1,0 @@
-Browser tab: 4, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=bn".
-The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-Removed element IDs: 29-34
-~1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=bn
-~		3 link Description: কর্মক্ষেত্রে যান, Value: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=bn#workspace
-~			28 text দোকানের কর্মক্ষেত্র লোড হচ্ছে...
-+			29 button (collapsed) বিক্রেতা সহকারী, Secondary Actions: Expand
-+		30 text middleman · আপনার বিক্রির জন্য তৈরি। বিক্রেতার নিশ্চিতকরণ মানে পেমেন্ট প্রদানকারী স্বাধীনভাবে যাচাই করেছে এমন নয়।
-The focused UI element is 1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=bn

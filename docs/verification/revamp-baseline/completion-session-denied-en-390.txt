@@ -1,6 +1,0 @@
-Browser tab: 5, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=en".
-The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
-~1 AXWebArea Seller workspace · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=en
-~		3 link Description: Skip to workspace, Value: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=en#workspace
-~			30 text Your seller session was rejected. Please sign in again.
-The focused UI element is 1 AXWebArea Seller workspace · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=session-denied&lang=en

@@ -1,3 +1,0 @@
-Browser tab: 4, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en".
-There has been no change in the accessibility tree.
-The focused UI element is 51 button পেমেন্ট ও SMS
