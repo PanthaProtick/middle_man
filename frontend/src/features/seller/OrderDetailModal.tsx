@@ -16,7 +16,7 @@ import { orderCopy, lifecycleLabel } from '../locale/orderCopy';
 import { LocaleSwitch } from '../locale/LocaleSwitch';
 import { useLocale } from '../locale/context';
 import { buyerLinkCopy } from '../locale/buyerLinkCopy';
-import { formatOrderAmount } from './orderNumbers';
+import { formatOrderAmount, acceptedAdvanceMinor } from './orderNumbers';
 import { formatRemainingCod } from './api';
 
 interface OrderDetailModalProps {
@@ -107,7 +107,12 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
             </div>
 
             <div className="order-detail-context">
-              <strong>{order.product_name}</strong>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap' }}>
+                <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                  #{order.id}
+                </span>
+                <strong>{order.product_name}</strong>
+              </div>
               <span style={{ fontWeight: 600, color: isConfirmed ? 'var(--emerald-accent)' : 'var(--text-secondary)' }}>
                 {lifecycleLabel(order.lifecycle, text)}
               </span>
@@ -119,9 +124,9 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
                 <div className="order-detail-metric-value">BDT {formatOrderAmount(order.total_minor)}</div>
               </div>
               <div>
-                <div className="order-detail-metric-label">{text.required}</div>
+                <div className="order-detail-metric-label">{isConfirmed ? text.accepted : text.required}</div>
                 <div className="order-detail-metric-value" style={{ color: 'var(--cyan-accent)' }}>
-                  BDT {formatOrderAmount(order.required_advance_minor)}
+                  BDT {formatOrderAmount(isConfirmed ? acceptedAdvanceMinor(order.total_minor, order.actual_cod_minor, order.expected_cod_minor) : order.required_advance_minor)}
                 </div>
               </div>
               <div>
@@ -189,6 +194,22 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
             )}
           </section>
           <section role="tabpanel" id={`${titleId}-buyer-panel`} aria-labelledby={`${titleId}-buyer-tab`} hidden={activeTab !== 3}>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginBottom: '16px' }}>
+              <BuyerLinkCopy key={order.portal_url} portalUrl={order.portal_url} detail />
+              <a
+                href={order.portal_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: '44px', textDecoration: 'none' }}
+              >
+                <ExternalLink size={14} />
+                <span>{buyerLinkCopy[locale].open}</span>
+              </a>
+            </div>
+            {token && (
+              <BuyerLinkAccess
+                key={`access-${order.id}`} order={order} token={token}
+                onUpdated={fresh => { setOrder(fresh); onCorrected?.(fresh); }}
+              />
+            )}
             {token && order.buyer_revision && (
               <BuyerCorrection
                 key={`${order.id}-${order.version}`} orderId={order.id} token={token}
@@ -203,22 +224,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
                 onReplaced={newOrder => { setOrder(newOrder); onCorrected?.(newOrder); }}
               />
             )}
-            {token && (
-              <BuyerLinkAccess
-                key={`access-${order.id}`} order={order} token={token}
-                onUpdated={fresh => { setOrder(fresh); onCorrected?.(fresh); }}
-              />
-            )}
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', marginTop: '12px' }}>
-              <BuyerLinkCopy key={order.portal_url} portalUrl={order.portal_url} detail />
-              <a
-                href={order.portal_url} target="_blank" rel="noopener noreferrer" className="btn btn-secondary"
-                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', minHeight: '44px', textDecoration: 'none' }}
-              >
-                <ExternalLink size={14} />
-                <span>{buyerLinkCopy[locale].open}</span>
-              </a>
-            </div>
           </section>
           <div className="order-detail-footer">
             <div className="order-detail-navigation">

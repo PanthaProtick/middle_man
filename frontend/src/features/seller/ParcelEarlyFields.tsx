@@ -3,6 +3,7 @@ import { orderCreationCopy } from '../locale/orderCreationCopy';
 import { useEffect, useRef } from 'react';
 import { MAX_PARCEL_QUANTITY, MAX_PARCEL_WEIGHT_GRAMS } from './parcel';
 import type { ParcelErrors } from './useEarlyParcelDetails';
+import { shopDeskInputStyle as inputStyle } from './orderFormStyles';
 
 interface ParcelEarlyFieldsProps {
   weightKg: string;
@@ -15,19 +16,6 @@ interface ParcelEarlyFieldsProps {
   serverField?: string | null;
   serverErrorId?: string;
 }
-
-const inputStyle = {
-  width: '100%',
-  minHeight: '46px',
-  padding: '10px 14px',
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border-subtle)',
-  borderRadius: '8px',
-  color: 'var(--text-primary)',
-  fontSize: '1rem',
-  boxSizing: 'border-box' as const,
-  fontVariantNumeric: 'tabular-nums',
-} as const;
 
 export function ParcelEarlyFields({
   weightKg,

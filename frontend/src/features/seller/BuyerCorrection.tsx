@@ -125,7 +125,7 @@ export function BuyerCorrection({orderId, portalToken, token, onCorrected, couri
         <button
           type="button"
           onClick={() => setShowDevStatus((prev) => !prev)}
-          style={{ background: 'none', border: 'none', color: 'var(--primary-accent)', cursor: 'pointer', fontSize: '0.725rem', textDecoration: 'underline', padding: 0 }}
+          style={{ background: 'none', border: 'none', color: 'var(--primary-accent)', cursor: 'pointer', fontSize: '0.8rem', textDecoration: 'underline', padding: '4px 8px', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
           aria-expanded={showDevStatus}
         >
           {showDevStatus ? text.hideDetails : text.showDetails}

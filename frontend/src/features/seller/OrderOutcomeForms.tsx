@@ -2,6 +2,7 @@ import type { FormEvent } from 'react';
 import type { CourierAttemptStatus } from './courierReviewTypes';
 import type { PaymentAccount, SellerOrder } from './types';
 import type { correctionOutcomeCopy } from '../locale/correctionOutcomeCopy';
+import { shopDeskInputStyle as inputStyle } from './orderFormStyles';
 
 type Action = 'none' | 'cancel' | 'reject' | 'replace';
 type Copy = typeof correctionOutcomeCopy.en | typeof correctionOutcomeCopy.bn;
@@ -18,18 +19,6 @@ interface Props {
   setError: (value: ErrorKey) => void; setActiveAction: (value: Action) => void;
   handleCancel: (event: FormEvent) => void; handleReject: (event: FormEvent) => void; handleReplace: (event: FormEvent) => void;
 }
-
-const inputStyle = {
-  width: '100%',
-  minHeight: '46px',
-  padding: '10px 14px',
-  background: 'var(--bg-input)',
-  border: '1px solid var(--border-subtle)',
-  borderRadius: '8px',
-  color: 'var(--text-primary)',
-  fontSize: '1rem',
-  boxSizing: 'border-box' as const,
-};
 
 export function OrderOutcomeForms({activeAction, order, isAllocated, courierAttemptStatus, reason, setReason,
   productName, setProductName, totalBdt, setTotalBdt, advanceBdt, setAdvanceBdt, accounts,

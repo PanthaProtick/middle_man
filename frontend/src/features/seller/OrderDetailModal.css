@@ -1,7 +1,5 @@
 .order-detail-dialog::backdrop {
   background: rgba(0, 0, 0, 0.75);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
 }
 
 .order-detail-dialog {
@@ -12,7 +10,7 @@
   inset-inline-start: auto;
   margin: 0 0 0 auto;
   width: 100%;
-  max-width: 640px;
+  max-width: 540px;
   height: 100dvh;
   max-height: 100dvh;
   background: var(--bg-card);
@@ -78,6 +76,7 @@
 }
 
 .order-detail-metric-value {
+  font-family: 'DM Mono', monospace;
   font-size: 0.95rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
@@ -170,7 +169,7 @@
   .order-detail-dialog {
     inset-inline-start: 0;
     max-width: 100%;
-    padding: 16px;
+    padding: 16px 16px 80px 16px;
     border-left: 0;
     box-shadow: none;
   }
@@ -184,5 +183,15 @@
   .order-detail-metrics {
     grid-template-columns: 1fr;
     gap: 6px;
+  }
+
+  .order-detail-footer {
+    position: sticky;
+    bottom: -80px;
+    margin: 24px -16px -80px -16px;
+    padding: 12px 16px;
+    background: var(--bg-card);
+    border-top: 1px solid var(--border-subtle);
+    z-index: 10;
   }
 }

@@ -123,9 +123,10 @@
 .order-outcomes select {
   box-sizing: border-box;
   max-width: 100%;
-  min-height: 44px;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 1rem;
 }
 
 .order-outcomes input[inputmode="decimal"] {

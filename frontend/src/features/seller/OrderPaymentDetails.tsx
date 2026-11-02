@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ShieldCheck, CheckCircle2, AlertTriangle } from 'lucide-react';
-import { formatOrderAmount } from './orderNumbers';
+import { formatOrderAmount, acceptedAdvanceMinor } from './orderNumbers';
 import { formatBangladeshDateTime } from '../locale/format';
 import { orderCopy, reviewLabel, allocationLabel } from '../locale/orderCopy';
 import { PaymentHistory } from './PaymentHistory';
@@ -46,7 +46,7 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
             <div>
               <span style={{ color: 'var(--text-secondary)' }}>{text.accepted}</span>
               <span style={{ fontWeight: 600, color: 'var(--cyan-accent)', fontVariantNumeric: 'tabular-nums' }}>
-                BDT {formatOrderAmount(order.total_minor - (order.actual_cod_minor ?? order.expected_cod_minor))}
+                BDT {formatOrderAmount(acceptedAdvanceMinor(order.total_minor, order.actual_cod_minor, order.expected_cod_minor))}
               </span>
             </div>
             {order.completed_at && (
@@ -71,7 +71,7 @@ export function OrderPaymentDetails({ order, token, onCorrected, onNavigateTab, 
               type="button"
               className="btn btn-secondary btn-xs"
               onClick={() => setShowReviewCodes((prev) => !prev)}
-              style={{ fontSize: '0.75rem', padding: '4px 8px', minHeight: '32px' }}
+              style={{ fontSize: '0.8rem', padding: '8px 12px', minHeight: '44px', display: 'inline-flex', alignItems: 'center' }}
               aria-expanded={showReviewCodes}
             >
               {showReviewCodes ? text.hideErrors : text.showErrors}

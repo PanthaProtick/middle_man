@@ -4,31 +4,7 @@ import { X, ShoppingBag, AlertCircle, ArrowRight } from 'lucide-react';
 import { formatOrderAmount } from './orderNumbers';
 import { ParcelEarlyFields } from './ParcelEarlyFields';
 import { useOrderCreation, type CreateOrderModalProps } from './useOrderCreation';
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  minHeight: '46px',
-  padding: '10px 14px',
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border-subtle)',
-  borderRadius: '8px',
-  color: 'var(--text-primary)',
-  fontSize: '1rem',
-  boxSizing: 'border-box',
-  fontVariantNumeric: 'tabular-nums',
-};
-
-const selectStyle: React.CSSProperties = {
-  width: '100%',
-  minHeight: '46px',
-  padding: '10px 14px',
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border-subtle)',
-  borderRadius: '8px',
-  color: 'var(--text-primary)',
-  fontSize: '1rem',
-  boxSizing: 'border-box',
-};
+import { shopDeskInputStyle as inputStyle, shopDeskSelectStyle as selectStyle } from './orderFormStyles';
 
 export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Element {
   const { onClose } = props;
@@ -41,7 +17,6 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
       role="presentation"
       style={{
         position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px',
       }}
     >

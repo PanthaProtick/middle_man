@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { asciiDigits, formatOrderAmount, orderAmountMinor } from './orderNumbers';
+import { acceptedAdvanceMinor, asciiDigits, formatOrderAmount, orderAmountMinor } from './orderNumbers';
 
 describe('seller numeric boundaries', () => {
   it('normalizes Bengali digits for numeric inputs without changing free text', () => {
@@ -18,5 +18,11 @@ describe('seller numeric boundaries', () => {
     expect(orderAmountMinor('90071992547409.91')).toBe(Number.MAX_SAFE_INTEGER);
     expect(orderAmountMinor('১০০.০১')).toBe(10001);
     expect(orderAmountMinor('0.00')).toBeNull();
+  });
+
+  it('calculates accepted advance using actual COD when present, falling back to expected COD', () => {
+    expect(acceptedAdvanceMinor(100000, 70000, 80000)).toBe(30000);
+    expect(acceptedAdvanceMinor(100000, null, 80000)).toBe(20000);
+    expect(acceptedAdvanceMinor(100000, undefined, 80000)).toBe(20000);
   });
 });

@@ -54,7 +54,7 @@ export function BuyerLinkCopy({ portalUrl, detail = false }: BuyerLinkCopyProps)
             readOnly
             value={fullUrl}
             onFocus={event => event.currentTarget.select()}
-            style={{ width: '100%', minWidth: 0, minHeight: '44px', padding: '8px 12px', boxSizing: 'border-box' }}
+            style={{ width: '100%', minWidth: 0, minHeight: '46px', padding: '10px 14px', fontSize: '1rem', boxSizing: 'border-box' }}
           />
         </div>
       )}
