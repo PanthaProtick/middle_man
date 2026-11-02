@@ -44,7 +44,6 @@
 }
 
 .payment-account-card--inactive {
-  opacity: 0.72;
   background: var(--color-surface);
 }
 
