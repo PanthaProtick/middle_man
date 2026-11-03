@@ -115,6 +115,9 @@ it('saves once, retains the returned terms in the timeline, copies the link, and
   expect(host.querySelectorAll('[role="log"] .assistant-result')).toHaveLength(1);
   await click('Open order');
   expect(host.querySelector('dialog[open]')?.textContent).toContain('Current Shirt');
+  expect(host.querySelector('.seller-assistant-window')).toBeNull();
+  await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Close order details"]')!.click());
+  await click('Seller assistant');
   expect(host.querySelector('[role="log"] .assistant-result')?.textContent).toContain('Saved Shirt');
 });
 

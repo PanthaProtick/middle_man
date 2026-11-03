@@ -98,25 +98,27 @@
   border: 1px solid #e8cda2;
 }
 .review-panel-close {
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--text-secondary, #4b5563);
+  background: var(--bg-surface, #f5f6f2);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  color: var(--text-primary, #192f29);
   cursor: pointer;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 44px;
-  min-width: 44px;
+  min-height: 32px;
+  min-width: 32px;
+  width: 32px;
+  height: 32px;
   border-radius: 8px;
   transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
               color var(--duration-fast, 260ms) var(--ease-out-calm),
               border-color var(--duration-fast, 260ms) var(--ease-out-calm);
 }
 .review-panel-close:hover {
-  background: var(--bg-canvas, #f5f6f2);
-  color: var(--text-primary, #1f2937);
-  border-color: var(--border-subtle, #d8e2dd);
+  background: #eaf1eb;
+  color: var(--text-primary, #192f29);
+  border-color: var(--border-hover, #9bb4a9);
 }
 .review-panel-close:focus-visible {
   outline: 2px solid var(--primary-accent, #146653);

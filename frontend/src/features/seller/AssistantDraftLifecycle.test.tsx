@@ -54,7 +54,7 @@ it('keeps one draft through close, searches, and review, and confirms switching 
   expect(review.getAttribute('lang')).toBe('bn');
   await act(async () => { language.value = 'en'; language.dispatchEvent(new Event('change', { bubbles: true })); });
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের কাজ Shirt');
-  await click('Guided workflows');
+  await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Close guidance"]')!.click());
   expect(host.querySelector('[data-testid="review-assistant-panel"]')).toBeNull();
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের কাজ Shirt');
   await click('Record a payment');

@@ -40,7 +40,17 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
   const focusOrderId = useRef<string | null>(null);
   const opener = useRef<HTMLElement | null>(null);
   const minimizedReview = useRef<string | null>(null);
-  const conversation = useAssistantConversation(locale, { ...options, onOpenOrder: setOpenedOrder,
+  const restoreFocus = useRef(false);
+  const onOpenOrder = options.onOpenOrder;
+  const handleOpenOrder = useCallback((order: SellerOrder) => {
+    restoreFocus.current = false;
+    minimizedReview.current = null;
+    setActiveId(null);
+    setGeneralOpen(false);
+    setOpenedOrder(order);
+    onOpenOrder?.(order);
+  }, [onOpenOrder]);
+  const conversation = useAssistantConversation(locale, { ...options, onOpenOrder: handleOpenOrder,
     onConversationReset: () => {
       minimizedReview.current = null; setActiveId(null); setGeneralOpen(true);
       options.onConversationReset?.();
@@ -50,7 +60,7 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
     if (id) focusOrderId.current = id;
     setModalId(id); setActiveId(current => current && id ? id : current);
   }, []);
-  const restoreFocus = useRef(false);
+
   useLayoutEffect(() => {
     if (activeId || generalOpen || !restoreFocus.current) return;
     restoreFocus.current = false;

@@ -77,7 +77,7 @@ it('keeps editable order terms through both searches and contextual review befor
   await act(async () => host.querySelector<HTMLButtonElement>('[data-testid="ask-ai-button"]')!.click());
   expect(host.querySelectorAll('[data-testid="review-assistant-panel"]')).toHaveLength(1);
   expect(host.querySelectorAll('.seller-assistant-window')).toHaveLength(1);
-  await click('Guided workflows'); await click('Resume draft');
+  await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Close guidance"]')!.click()); await click('Resume draft');
   for (const [name, value] of Object.entries({ 'assistant-draft': 'Mixed শার্ট', 'assistant-total': '1250.50',
     'assistant-advance': '200', 'assistant-weight': '0.75', 'assistant-quantity': '2', 'assistant-account': 'acc-1' })) {
     expect(host.querySelector<HTMLInputElement>(`[name="${name}"]`)?.value).toBe(value);

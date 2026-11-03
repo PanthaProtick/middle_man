@@ -10,10 +10,10 @@ interface Props {
   conversation: Conversation;
   reviewing: boolean;
   close: () => void;
-  showGeneral: () => void;
+  showGeneral?: () => void;
   setReviewTarget: (target: HTMLDivElement | null) => void;
 }
-export function AssistantWindow({ target, conversation, reviewing, close, showGeneral, setReviewTarget }: Props): React.JSX.Element | null {
+export function AssistantWindow({ target, conversation, reviewing, close, setReviewTarget }: Props): React.JSX.Element | null {
   const text = sellerAssistantCopy[conversation.locale];
   const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
@@ -58,7 +58,7 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
           </div>
         </div>
         <div className="assistant-header-actions">
-          <button type="button" className="btn btn-secondary btn-sm assistant-close-btn" onClick={close} aria-label={text.close}>
+          <button type="button" className="assistant-close-btn" onClick={close} aria-label={text.close}>
             <X size={16} aria-hidden="true" />
           </button>
           <label className="assistant-language-control" aria-label={text.language}>
@@ -71,9 +71,6 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
         </div>
       </div>
       <nav aria-label={text.title} className="assistant-context-controls">
-        <button type="button" className="btn btn-secondary btn-sm" aria-pressed={!reviewing} onClick={showGeneral}>
-          {text.general}
-        </button>
         <button type="button" className="btn btn-secondary btn-sm" disabled={conversation.locked}
           onClick={conversation.newConversation}>
           <Plus size={14} aria-hidden="true" />
