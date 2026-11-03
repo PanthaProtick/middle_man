@@ -71,13 +71,7 @@ const english = {
   sessionRejected: 'Your seller session was rejected. Please sign in again.',
   settings: 'Settings',
   courier: 'Courier Logistics',
-  firstRunTitle: 'Getting Started',
-  firstRunStepAccount: 'Add receiving account',
-  firstRunStepOrder: 'Create first order link',
-  firstRunStepCourier: 'Connect Pathao courier',
-  dismiss: 'Dismiss',
-  expand: 'Expand',
-  collapse: 'Collapse'
+  dismiss: 'Dismiss'
 } as const;
 
 const bengali: Record<keyof typeof english, string> = {
@@ -153,13 +147,7 @@ const bengali: Record<keyof typeof english, string> = {
     sessionRejected: 'বিক্রেতার সেশন গ্রহণ করা যায়নি। আবার সাইন ইন করুন।',
   settings: 'সেটিংস',
   courier: 'কুরিয়ার লজিস্টিকস',
-  firstRunTitle: 'প্রাথমিক ধাপ',
-  firstRunStepAccount: 'টাকা গ্রহণের অ্যাকাউন্ট যোগ করুন',
-  firstRunStepOrder: 'প্রথম অর্ডার লিংক তৈরি করুন',
-  firstRunStepCourier: 'Pathao কুরিয়ার সংযুক্ত করুন',
-  dismiss: 'বন্ধ করুন',
-  expand: 'খুলুন',
-  collapse: 'সংকুচিত করুন'
+  dismiss: 'বন্ধ করুন'
 };
 
 export const sellerCopy = { en: english, bn: bengali };

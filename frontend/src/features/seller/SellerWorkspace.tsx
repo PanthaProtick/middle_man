@@ -12,7 +12,6 @@ import { WorkspaceSectionNav, type SettingsSubSection } from './WorkspaceSection
 import { PaymentsSection } from './PaymentsSection';
 import { AccountsSection } from './AccountsSection';
 import { RetentionSection } from './RetentionSection';
-import { FirstRunGuide } from './FirstRunGuide';
 import { WorkspaceOrdersSection } from './WorkspaceOrdersSection';
 import { WorkspaceModals } from './WorkspaceModals';
 import { useSellerBootstrap } from './useSellerBootstrap';
@@ -98,14 +97,6 @@ export function SellerWorkspace({
         />
       ) : (
         <div style={{ marginTop: '16px' }}>
-          <FirstRunGuide
-            hasAccounts={accounts.length > 0}
-            hasOrders={sellerOrders.orders.length > 0}
-            hasCourier={false}
-            onNavigateToAccounts={() => { handleSectionSelect('accounts'); setSettingsSub('accounts'); }}
-            onNavigateToCourier={() => { handleSectionSelect('accounts'); setSettingsSub('courier'); }}
-            onOpenCreateOrder={() => setIsCreateModalOpen(true)}
-          />
           <ShopMetricsBar metrics={todayMetrics} />
           <WorkspaceSectionNav
             currentSection={currentSection}
