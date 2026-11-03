@@ -12,6 +12,7 @@
 
 .metrics-group-header {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
@@ -26,12 +27,16 @@
   background: rgba(20, 102, 83, 0.08);
   border-radius: 6px;
   letter-spacing: 0.02em;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .metrics-group-date {
   font-size: 0.75rem;
   color: var(--text-secondary, #64748b);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .metrics-chips-grid {
@@ -110,6 +115,11 @@
 
 /* Phone view: Omit horizontal scrolling, 2 columns if fitting */
 @media (max-width: 640px) {
+  .metrics-group-header {
+    font-size: 0.75rem;
+    gap: 4px 8px;
+  }
+
   .metrics-ribbon[role="region"] {
     padding: 10px 12px;
     gap: 8px;
