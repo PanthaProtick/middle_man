@@ -15,7 +15,7 @@ for name in (
     "GEMINI_API_KEY", "CLERK_SECRET_KEY", "CLERK_PUBLISHABLE_KEY", "CLERK_WEBHOOK_SECRET",
     "CLERK_ISSUER", "CLERK_JWT_KEY", "CLERK_AUTHORIZED_PARTY", "CLERK_AUDIENCE", "ORDER_LINK_ENCRYPTION_KEY",
     "PAYMENT_MARKER_SECRET", "PAYMENT_IDENTITY_SECRET",
-    "PATHAO_CREDENTIAL_ENCRYPTION_KEY",
+    "PATHAO_CREDENTIAL_ENCRYPTION_KEY", "PATHAO_LOCATION_ENVIRONMENT",
 ):
     os.environ[name] = ""
 os.environ["ENV"] = "test"
@@ -29,6 +29,7 @@ os.environ["CORS_ORIGINS"] = '["http://localhost:5173"]'
 os.environ["GEMINI_MODEL"] = "gemini-2.5-flash"
 os.environ["REVIEW_GEMINI_ENABLED"] = "false"
 os.environ["PATHAO_PRODUCTION_BOOKING_ENABLED"] = "false"
+os.environ["PATHAO_LOCATION_ENVIRONMENT"] = "offline"
 
 from app.api.routes import _in_memory_items  # noqa: E402
 from app.core.auth import SellerIdentity, get_seller_identity  # noqa: E402

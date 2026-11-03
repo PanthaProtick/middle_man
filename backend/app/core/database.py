@@ -134,6 +134,14 @@ async def check_database_readiness(
                     diagnostic=f"Database schema incomplete: missing tables {missing}",
                     missing_tables=tuple(missing),
                 )
+            from app.core.readiness import check_schema_compatibility
+
+            compat_ok, compat_diag = await check_schema_compatibility(session)
+            if not compat_ok:
+                return DatabaseReadinessStatus(
+                    is_ready=False,
+                    diagnostic=compat_diag,
+                )
             return DatabaseReadinessStatus(is_ready=True)
     except Exception as e:
         sanitized = sanitize_db_url(str(e))

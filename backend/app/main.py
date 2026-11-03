@@ -26,11 +26,8 @@ from app.api.work_queries import router as work_queries_router
 from app.core.auth import get_request_id
 from app.core.auth_diagnostics import rejection_reason
 from app.core.config import settings
-from app.core.database import DurableStorageUnavailableError, check_database_readiness
 from app.core.public_admission import PublicAdmissionMiddleware
-from app.core.tokens import check_link_encryption_readiness
 from app.models.seller import ErrorBody, ErrorFieldItem, StandardErrorResponse
-from app.services.payment_marker_protection import check_payment_marker_readiness
 
 logging.basicConfig(
     level=logging.INFO if settings.DEBUG else logging.WARNING,
@@ -45,17 +42,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         f"Starting {settings.PROJECT_NAME} in {settings.ENV} mode (durable_storage={settings.is_durable_mode})..."
     )
     if settings.is_durable_mode:
-        readiness = await check_database_readiness()
-        if not readiness.is_ready:
-            logger.error(f"Durable storage startup check failed: {readiness.diagnostic}")
-            raise DurableStorageUnavailableError(
-                message=f"Durable storage initialization failed: {readiness.diagnostic}"
-            )
-        logger.info("Durable storage verified: database connection and schema inventory are ready.")
-        await check_link_encryption_readiness()
-        logger.info("Order link encryption verified: application key and existing record compatibility are ready.")
-        await check_payment_marker_readiness()
-        logger.info("Payment marker protection verified: dedicated secret and marker bindings are ready.")
+        from app.core.readiness import check_production_readiness
+
+        await check_production_readiness(settings, app=app)
+        logger.info("Startup readiness verified: storage, schema, secrets, and auth are ready.")
     yield
     logger.info(f"Shutting down {settings.PROJECT_NAME}...")
 

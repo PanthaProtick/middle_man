@@ -26,6 +26,7 @@ from app.core.migration_types import (
 )
 
 __all__ = [
+    "DEFAULT_MIGRATIONS_DIR",
     "MIGRATION_ADVISORY_LOCK_ID",
     "compute_checksum",
     "extract_database_name",
@@ -42,6 +43,7 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
+DEFAULT_MIGRATIONS_DIR = Path(__file__).parents[2] / "migrations"
 MIGRATION_ADVISORY_LOCK_ID = 5570020120194849345  # 0x4D4944444C454D41 ('MIDDLEMA')
 
 
@@ -174,7 +176,7 @@ async def run_migrations(
 ) -> MigrationResult:
     """Main migration runner with target validation, locking, and ledger tracking."""
     target_db = validate_target_confirmation(url, confirmed_target)
-    m_dir = migrations_dir or (Path(__file__).parents[2] / "migrations")
+    m_dir = migrations_dir or DEFAULT_MIGRATIONS_DIR
     disk_migrations = load_disk_migrations(m_dir)
 
     clean_url = normalize_asyncpg_url(url)

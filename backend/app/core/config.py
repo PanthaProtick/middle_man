@@ -104,13 +104,18 @@ class Settings(BaseSettings):
         return True
 
     @property
+    def is_production(self) -> bool:
+        """Checks if current environment is explicitly configured as production."""
+        return self.ENV.strip().lower() == "production"
+
+    @property
     def is_durable_mode(self) -> bool:
         """Determines whether durable persistence is strictly required.
 
         In offline development, memory fallbacks are allowed.
         Self-test integration, production, and real courier booking require durable persistence.
         """
-        return self.ENV == "production" or self.SELF_TEST_MODE or self.PATHAO_PRODUCTION_BOOKING_ENABLED
+        return self.is_production or self.SELF_TEST_MODE or self.PATHAO_PRODUCTION_BOOKING_ENABLED
 
     @property
     def is_clerk_configured(self) -> bool:

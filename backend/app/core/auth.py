@@ -78,8 +78,10 @@ async def get_seller_identity(
         raise AuthenticationError("Empty authentication token")
 
     # In durable integration mode or production: default mock token never grants access
-    if settings.is_durable_mode and (token == "mock-seller-token" or token.startswith("dev-")):
-        raise AuthenticationError("Development seller tokens are not permitted in durable mode")
+    if (settings.is_durable_mode or settings.is_production) and (
+        token == "mock-seller-token" or token.startswith("dev-")
+    ):
+        raise AuthenticationError("Development seller tokens are not permitted in durable or production mode")
 
     # In production or when live/integration verifier is configured:
     if settings.is_durable_mode or settings.is_clerk_verifier_configured or _clerk_verifier is not None:

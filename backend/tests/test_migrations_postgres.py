@@ -99,7 +99,12 @@ async def test_repeat_execution_idempotency(pg_schema, tmp_path: Path):
     assert third.status == "up_to_date"
 
     # Require clean must reject a target that has pending unapplied migrations (incomplete schema)
-    (tmp_path / "0001_initial_seller_tables.sql").write_text("SELECT 1;", encoding="utf-8")
+    import shutil
+
+    from app.core.migrations import DEFAULT_MIGRATIONS_DIR
+
+    for f in DEFAULT_MIGRATIONS_DIR.glob("*.sql"):
+        shutil.copy(f, tmp_path / f.name)
     (tmp_path / "0099_extra_pending.sql").write_text("SELECT 2;", encoding="utf-8")
     with pytest.raises(DirtyTargetError, match="pending migrations"):
         await run_migrations(
