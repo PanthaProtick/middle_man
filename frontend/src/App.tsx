@@ -1,8 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Store,
-  ArrowLeft,
-} from 'lucide-react';
+import { Store } from 'lucide-react';
 import Header from './components/Header';
 import { SellerWorkspace } from './features/seller';
 import { BuyerPortal } from './features/buyer';
@@ -73,13 +70,6 @@ export function AppShell({ token, sessionId, sessionNotice, onSignIn, onSignOut 
           </div>
           <div className="portal-actions">
             <LocaleSwitch />
-            <a
-              href="/"
-              className="btn btn-secondary btn-sm"
-              style={{ textDecoration: 'none' }}
-            >
-              <ArrowLeft size={13} aria-hidden="true" /> {t('portal.backHome')}
-            </a>
           </div>
         </header>
         <BuyerPortal portalToken={portalToken} />

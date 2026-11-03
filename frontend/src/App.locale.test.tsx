@@ -92,7 +92,7 @@ describe('Both application entry paths expose the language switch', () => {
     await act(async () => root.render(<App />));
 
     expect(container.textContent).toContain('অর্ডার নিশ্চিতকরণ');
-    expect(container.textContent).toContain('হোমে ফিরুন');
+    expect(container.querySelector('.portal-header a[href="/"]')).toBeNull();
     expect(container.textContent).toContain('ডেলিভারির আগে অগ্রিম');
     expect(container.textContent).toContain('01712345678');
     const orderReads = () => fetchMock.mock.calls
@@ -101,7 +101,7 @@ describe('Both application entry paths expose the language switch', () => {
 
     await act(async () => button('English').click());
 
-    expect(container.textContent).toContain('Back to Home');
+    expect(container.querySelector('.portal-header a[href="/"]')).toBeNull();
     expect(container.textContent).toContain('Delivery advance');
     expect(document.documentElement.lang).toBe('en');
     expect(orderReads()).toBe(1);
