@@ -111,7 +111,7 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
       {!modalId && <div className="assistant-slot" ref={setListTarget} />}
       {floating && (modalId ? target && createPortal(launcher, target) : launcher)}
       {floating && (activeId || generalOpen) && <AssistantWindow target={target} conversation={conversation}
-        reviewing={Boolean(activeId)} close={close} showGeneral={showGeneral} setReviewTarget={setReviewTarget} />}
+        reviewing={Boolean(activeId)} close={close} setReviewTarget={setReviewTarget} />}
     </div>
   </Context.Provider>;
 }

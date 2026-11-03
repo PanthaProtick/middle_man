@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import './AssistantChat.css';
+import './AssistantPreview.css';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import { isCreation, workflows } from './assistantConversation';
 import type { AssistantConversation as Conversation } from './useAssistantConversation';

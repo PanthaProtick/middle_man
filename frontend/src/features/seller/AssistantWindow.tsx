@@ -10,7 +10,6 @@ interface Props {
   conversation: Conversation;
   reviewing: boolean;
   close: () => void;
-  showGeneral?: () => void;
   setReviewTarget: (target: HTMLDivElement | null) => void;
 }
 export function AssistantWindow({ target, conversation, reviewing, close, setReviewTarget }: Props): React.JSX.Element | null {

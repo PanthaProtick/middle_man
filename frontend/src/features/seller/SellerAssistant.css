@@ -215,11 +215,11 @@
   border-color: var(--primary-accent, #146653);
 }
 
-.seller-assistant-window button:not(.assistant-close-btn):not(.review-panel-close):not(.review-action-button):not(.preview-order-actions button) {
+.seller-assistant-window button {
   min-height: 44px;
 }
 
-.seller-assistant-window .btn-sm:not(.assistant-close-btn):not(.review-panel-close):not(.review-action-button):not(.preview-order-actions button) {
+.seller-assistant-window .btn-sm {
   min-height: 40px;
   padding: 0 14px;
   display: inline-flex;
