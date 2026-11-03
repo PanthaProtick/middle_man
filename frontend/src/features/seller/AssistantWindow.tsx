@@ -21,6 +21,18 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
   useEffect(() => {
     if (reviewing) return;
     const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' && panelRef.current) {
+        const elements = Array.from(panelRef.current.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), select:not(:disabled), textarea:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]',
+        )).filter(element => !element.closest('[hidden]'));
+        const first = elements[0]; const last = elements[elements.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) {
+          event.preventDefault(); last?.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panelRef.current)) {
+          event.preventDefault(); first?.focus();
+        }
+        return;
+      }
       if (event.key !== 'Escape') return;
       event.preventDefault(); event.stopImmediatePropagation(); close();
     };
@@ -32,7 +44,6 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
     <div className="assistant-window-header">
       <h3>{text.title}</h3>
       <button type="button" className="btn btn-secondary btn-sm" onClick={close} aria-label={text.close}>×</button>
-    </div>
     <label>{text.language}
       <select name="assistant-language" value={conversation.locale}
         onChange={event => conversation.setLanguage(event.target.value === 'bn' ? 'bn' : 'en')}>
@@ -44,6 +55,7 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
       <button type="button" className="btn btn-secondary btn-sm" disabled={conversation.locked}
         onClick={() => { conversation.newConversation(); showGeneral(); }}>{text.newChat}</button>
     </nav>
+    </div>
     <p className="assistant-context-label" role="status">{reviewing ? text.review : text.general}</p>
     <div ref={setReviewTarget} />
     {!reviewing && <AssistantConversation conversation={conversation} />}

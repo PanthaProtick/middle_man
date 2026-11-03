@@ -16,3 +16,26 @@
 - [ ] The chat input field supports auto-resizing multi-line text entry and keyboard submission (Enter to send, Shift+Enter for new line).
 - [ ] The component passes keyboard navigation, focus trap on open, and screen-reader polite log announcements.
 - [ ] Focused tests at the assistant workspace seam verify rendering, message posting, locale switching, and starter chip interactions.
+
+## Implementation — 2026-11-03
+
+Implemented the conversational shell in AssistantWindow, GuidedAssistant, and
+AssistantChat.css. Messages retain send timestamps; the feed scrolls on new
+messages/workflow events. The docked composer supports bounded auto-resizing,
+Enter submission, Shift+Enter, and IME composition. General chat traps Tab and
+retains Escape dismissal and existing opener restoration. Header language and
+reset controls retain draft-discard safeguards. Clarification copy describes
+available capabilities in English and Bengali. Existing workflow cards and
+submission contracts remain intact for subsequent tickets.
+
+Verification:
+- AssistantShell.test.tsx: observed red before implementation, then green.
+- Focused shell + workspace: 6 tests passed.
+- npm run typecheck: passed.
+- First npm run check: Windows pytest temp-directory permission error.
+- Final npm run check with repository-local PYTEST_ADDOPTS basetemp: passed;
+  evidence: .cache/checks/check-hOoZna/result.json.
+- Standards review: no findings. Spec review: clarification wording and docked
+  footer containment findings addressed.
+- Browser visual, scroll geometry, and screen-reader acceptance remain unrun.
+  Validate desktop/mobile and Bengali rendering before claiming visual acceptance.

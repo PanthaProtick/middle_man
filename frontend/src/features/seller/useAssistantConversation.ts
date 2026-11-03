@@ -21,7 +21,7 @@ export interface ConversationOptions {
   onShowInDashboard?: (query: WorkQuery) => void;
 }
 
-type Message = { user: string } | { reply: 'clarify' | 'multiple' | AssistantWorkflow };
+type Message = ({ user: string } | { reply: 'clarify' | 'multiple' | AssistantWorkflow }) & { at: string };
 export function useAssistantConversation(initialLocale: Locale, options: ConversationOptions = {}) {
   const [locale, setLocale] = useState(initialLocale);
   const [manualLanguage, setManualLanguage] = useState(false);
@@ -102,7 +102,8 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     setLanguage: (next: Locale) => { setManualLanguage(true); setLocale(next); },
     select,
     send: (message: string) => {
-      if (pending) return;
+      if (pending || !message.trim()) return;
+      const at = new Date().toISOString();
       if (!manualLanguage) setLocale(messageLocale(message, locale));
       const intents = interpretWorkflow(message);
       const multipleOrders = /\b(?:two|multiple|[2-9])\s+orders?\b|(?:দুই|দুটি|একাধিক|[২-৯])\s*(?:টি|টা)?\s*অর্ডার/i.test(message);
@@ -111,14 +112,14 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
       const repeatedPayments = [...message.matchAll(/\b(?:record|add|log|received)\b[^;.\n]{0,30}\b(?:payment|transaction)\b|(?:পেমেন্ট|লেনদেন)\s*(?:রেকর্ড|যোগ)/gi)].length > 1;
       if (multipleOrders || multiplePayments || repeatedCreations || repeatedPayments ||
         hasMultipleOrderFields(message) || hasMultiplePaymentFields(message) || intents.length > 1) {
-        setMessages(current => [...current, { user: message }, { reply: 'multiple' }]); return;
+        setMessages(current => [...current, { user: message, at }, { reply: 'multiple', at }]); return;
       }
       if (draft?.workflow === 'order' && /\b(?:another|second|next|additional)\s+order\b|আরেক(?:টি|টা)?\s*অর্ডার|arek(?:ta|ti)?\s+order/i.test(message)) {
-        setMessages(current => [...current, { user: message }, { reply: 'multiple' }]);
+        setMessages(current => [...current, { user: message, at }, { reply: 'multiple', at }]);
         if (!locked) setPending('order');
         return;
       }
-      setMessages(current => [...current, { user: message }, { reply: intents.length === 1 ? intents[0] : intents.length ? 'multiple' : 'clarify' }]);
+      setMessages(current => [...current, { user: message, at }, { at, reply: intents.length === 1 ? intents[0] : intents.length ? 'multiple' : 'clarify' }]);
       if (intents.length === 1) select(intents[0]);
       if ((draft?.workflow === 'order' && workflow === 'order' && !intents.length) ||
         (intents[0] === 'order' && (!draft || draft.workflow === 'order'))) {

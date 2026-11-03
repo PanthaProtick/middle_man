@@ -1,3 +1,5 @@
+import { useLayoutEffect, useRef } from 'react';
+import './AssistantChat.css';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import { isCreation, workflows } from './assistantConversation';
 import type { AssistantConversation as Conversation } from './useAssistantConversation';
@@ -13,17 +15,25 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
   const c = conversation;
   const text = sellerAssistantCopy[c.locale];
   const { input, setInput } = c;
+  const feed = useRef<HTMLDivElement>(null);
+  const composer = useRef<HTMLTextAreaElement>(null);
+  useLayoutEffect(() => {
+    if (feed.current) feed.current.scrollTop = feed.current.scrollHeight;
+  }, [c.messages, c.workflow, c.pending]);
+  useLayoutEffect(() => {
+    if (!composer.current) return;
+    composer.current.style.height = 'auto';
+    composer.current.style.height = `${Math.min(composer.current.scrollHeight, 160)}px`;
+  }, [input]);
   return <div className="assistant-conversation" lang={c.locale}>
+    <div className="assistant-chat-feed" ref={feed}>
     <p>{text.welcome}</p>
     <div role="log" aria-label={text.log} aria-live="polite" aria-relevant="additions">
       {c.messages.map((message, index) => <p key={index} className={'user' in message ? 'assistant-user-message' : 'assistant-reply'}>
-        {'user' in message ? message.user : text[message.reply]}
+        {!('user' in message) && <span className="assistant-avatar" aria-hidden="true">M</span>}
+        <span>{'user' in message ? message.user : text[message.reply]}</span>
+        <time dateTime={message.at}>{new Date(message.at).toLocaleTimeString(c.locale, { hour: '2-digit', minute: '2-digit' })}</time>
       </p>)}
-    </div>
-    <div className="assistant-workflow-choices">
-      {workflows.map(workflow => <button key={workflow} type="button" className="btn btn-secondary btn-sm"
-        disabled={Boolean(c.pending) || (c.locked && isCreation(workflow))}
-        onClick={() => c.select(workflow)}>{text[workflow]}</button>)}
     </div>
     {c.workflow && <section data-testid="assistant-workflow" aria-label={text[c.workflow]}>
       <h4>{text[c.workflow]}</h4>
@@ -55,13 +65,26 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
       <button type="button" className="btn btn-secondary btn-sm" onClick={c.requestDiscard} disabled={Boolean(c.pending) || c.locked}>{text.discard}</button>
     </div>}
     {c.pending && <AssistantDiscardPrompt conversation={c} />}
+    </div>
+    <div className="assistant-chat-composer">
+    <div className="assistant-workflow-choices">
+      {workflows.map(workflow => <button key={workflow} type="button" className="btn btn-secondary btn-sm"
+        disabled={Boolean(c.pending) || (c.locked && isCreation(workflow))}
+        onClick={() => c.select(workflow)}>{text[workflow]}</button>)}
+    </div>
     <form onSubmit={event => {
       event.preventDefault();
       if (input.trim() && !c.pending) { c.send(input.trim()); setInput(''); }
     }}>
-      <label>{text.message}<textarea name="assistant-message" value={input} maxLength={2000}
-        disabled={Boolean(c.pending)} onChange={event => setInput(event.target.value)} /></label>
+      <label>{text.message}<textarea ref={composer} rows={1} name="assistant-message" value={input} maxLength={2000}
+        disabled={Boolean(c.pending)} onChange={event => setInput(event.target.value)}
+        onKeyDown={event => {
+          if (event.key === 'Enter' && !event.shiftKey && !event.nativeEvent.isComposing) {
+            event.preventDefault(); event.currentTarget.form?.requestSubmit();
+          }
+        }} /></label>
       <button type="submit" className="btn btn-primary" disabled={!input.trim() || Boolean(c.pending)}>{text.send}</button>
     </form>
+    </div>
   </div>;
 }
