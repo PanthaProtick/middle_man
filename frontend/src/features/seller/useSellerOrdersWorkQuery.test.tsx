@@ -108,3 +108,37 @@ it('applies the attention query, survives reload, and clears on manual filters',
   expect(params(last(urls)).get('work_query')).toBeNull();
   expect(params(last(urls)).get('search')).toBe('bag');
 });
+
+it('discards stale responses when query switches during slow requests', async () => {
+  const resolvers: Array<(res: Response) => void> = [];
+  vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+    new Promise<Response>((resolve) => resolvers.push(resolve)),
+  );
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  await act(async () => root.render(<Harness token="token" />));
+
+  await click(host, 'apply');
+  expect(resolvers).toHaveLength(1);
+
+  await click(host, 'apply-attention');
+  expect(resolvers).toHaveLength(2);
+
+  await act(async () => {
+    resolvers[1](new Response(JSON.stringify({ items: [{ id: 'order-attention' }], next_cursor: null }), {
+      status: 200, headers: { 'Content-Type': 'application/json' },
+    }));
+  });
+  expect(host.querySelector('[data-testid="work"]')?.textContent).toBe('attention');
+
+  await act(async () => {
+    resolvers[0](new Response(JSON.stringify({ items: [{ id: 'order-preparation' }], next_cursor: null }), {
+      status: 200, headers: { 'Content-Type': 'application/json' },
+    }));
+  });
+  expect(host.querySelector('[data-testid="work"]')?.textContent).toBe('attention');
+
+  await act(async () => root.unmount());
+  host.remove();
+});

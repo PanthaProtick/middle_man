@@ -106,6 +106,7 @@ describe('SellerWorkspace Component', () => {
     });
 
     expect(container.textContent).toContain('Active Shop');
+    expect(container.textContent).not.toContain('Getting Started');
     expect(container.textContent).toContain('Personal bKash');
     expect(container.textContent).toContain('Wireless Earbuds');
     expect(container.textContent).toContain('Expected remaining COD balance:');
@@ -249,6 +250,7 @@ describe('SellerWorkspace Component', () => {
       root.render(React.createElement(SellerWorkspace, { token: 'valid-test-token', onSignIn }));
     });
     expect(container.textContent).toContain('Active Shop');
+    expect(container.textContent).not.toContain('Getting Started');
 
     // 3. Sign out (token becomes undefined) -> private data cleared
     await act(async () => {

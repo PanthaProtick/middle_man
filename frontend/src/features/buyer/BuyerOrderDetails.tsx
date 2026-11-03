@@ -42,9 +42,10 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
             fontSize: '0.75rem',
             padding: '4px 10px',
             borderRadius: '12px',
-            background: 'rgba(99, 102, 241, 0.15)',
+            background: 'rgba(20, 102, 83, 0.12)',
             color: 'var(--primary-accent)',
-            border: '1px solid rgba(99, 102, 241, 0.3)',
+            border: '1px solid rgba(20, 102, 83, 0.25)',
+            fontWeight: 600,
           }}
         >
           {t('buyer.order.badge')}
@@ -69,16 +70,16 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
       >
         <div className="buyer-order-item">
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{t('buyer.order.total')}</div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
+          <div className="buyer-tabular" style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-primary)', marginTop: '2px' }}>
             {formatBDT(order.total_minor)}
           </div>
         </div>
 
         <div className="buyer-order-item" style={{ borderLeft: '3px solid var(--primary-accent)' }}>
-          <div style={{ fontSize: '0.75rem', color: 'var(--primary-accent)' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--primary-accent)', fontWeight: 600 }}>
             {actualCod !== null ? t('buyer.order.advanceAccepted') : t('buyer.order.advance')}
           </div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-accent)', marginTop: '2px' }}>
+          <div className="buyer-tabular" style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--primary-accent)', marginTop: '2px' }}>
             {formatBDT(advanceMinor)}
           </div>
           <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -90,7 +91,7 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
             {order.actual_cod_minor !== null ? t('buyer.order.cod') : t('buyer.order.codExpected')}
           </div>
-          <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '2px' }}>
+          <div className="buyer-tabular" style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-secondary)', marginTop: '2px' }}>
             {formatBDT(order.actual_cod_minor ?? order.expected_cod_minor)}
           </div>
           <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
@@ -102,21 +103,21 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
       {/* Receiving Account Box */}
       <div className="buyer-payment-destination" style={{ marginBottom: '14px' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
-          <div style={{ fontSize: '0.8rem', color: 'var(--primary-accent)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--primary-accent)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '6px' }}>
             <ShieldCheck size={16} aria-hidden="true" />
             <span>{t('buyer.order.sendAdvance')}</span>
           </div>
-          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--primary-accent)' }}>
+          <span style={{ fontSize: '0.75rem', textTransform: 'uppercase', fontWeight: 700, color: 'var(--primary-accent)', letterSpacing: '0.5px' }}>
             {order.account_provider}
           </span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px' }}>
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px', color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>
+            <div className="buyer-mono-num" style={{ fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.5px', color: 'var(--text-primary)', overflowWrap: 'anywhere' }}>
               {order.account_receiving_number}
             </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', overflowWrap: 'anywhere', marginTop: '2px' }}>
               {order.account_label} ({order.account_provider.toUpperCase()})
             </div>
           </div>
@@ -127,12 +128,12 @@ export function BuyerOrderDetails({ order }: BuyerOrderDetailsProps): React.JSX.
             onClick={handleCopy}
             aria-describedby={copyFailed ? 'copy-receiving-error' : undefined}
             className="btn btn-secondary"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', fontSize: '0.85rem' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', minHeight: '44px', padding: '8px 14px', fontSize: '0.85rem' }}
           >
             {copied ? (
               <>
                 <Check size={16} color="var(--emerald-accent)" aria-hidden="true" />
-                <span role="status" style={{ color: 'var(--emerald-accent)' }}>{t('buyer.order.copied')}</span>
+                <span role="status" style={{ color: 'var(--emerald-accent)', fontWeight: 600 }}>{t('buyer.order.copied')}</span>
               </>
             ) : (
               <>

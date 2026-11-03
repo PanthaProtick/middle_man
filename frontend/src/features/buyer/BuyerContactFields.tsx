@@ -20,9 +20,9 @@ export function BuyerContactFields({ draft, fieldErrors, onUpdateField }: BuyerC
         </div>
       </div>
 
-      <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label htmlFor="buyer_name" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-          <User size={15} color="var(--primary-accent)" />
+      <div className="form-group">
+        <label htmlFor="buyer_name">
+          <User size={15} color="var(--primary-accent)" aria-hidden="true" />
           <span>{t('buyer.form.name')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
@@ -36,16 +36,18 @@ export function BuyerContactFields({ draft, fieldErrors, onUpdateField }: BuyerC
           aria-describedby={fieldErrors.buyer_name ? "buyer_name-error" : undefined}
           aria-invalid={!!fieldErrors.buyer_name}
           className="form-control"
-          style={{ marginTop: '6px', width: '100%' }}
+          autoComplete="name"
         />
         {fieldErrors.buyer_name && (
-          <div id="buyer_name-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.buyer_name}</div>
+          <div id="buyer_name-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
+            {fieldErrors.buyer_name}
+          </div>
         )}
       </div>
 
       <div className="form-group">
-        <label htmlFor="contact_number" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-          <Phone size={15} color="var(--primary-accent)" />
+        <label htmlFor="contact_number">
+          <Phone size={15} color="var(--primary-accent)" aria-hidden="true" />
           <span>{t('buyer.form.contact')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
@@ -58,14 +60,16 @@ export function BuyerContactFields({ draft, fieldErrors, onUpdateField }: BuyerC
           maxLength={32}
           aria-describedby={`contact_number-help${fieldErrors.contact_number ? ' contact_number-error' : ''}`}
           aria-invalid={!!fieldErrors.contact_number}
-          className="form-control"
-          style={{ marginTop: '6px', width: '100%' }}
+          className="form-control buyer-tabular"
+          autoComplete="tel"
         />
-        <div id="contact_number-help" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+        <div id="contact_number-help" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
           {t('buyer.form.contactHelp')}
         </div>
         {fieldErrors.contact_number && (
-          <div id="contact_number-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.contact_number}</div>
+          <div id="contact_number-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
+            {fieldErrors.contact_number}
+          </div>
         )}
       </div>
     </div>

@@ -1,7 +1,147 @@
 .metrics-ribbon[role="region"] {
-  grid-template-columns: repeat(6, minmax(150px, 1fr));
-  overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 14px;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  margin-bottom: 12px;
 }
 
-.metrics-ribbon .metric-chip { min-width: 0; }
-.metrics-ribbon .metric-lbl { overflow-wrap: anywhere; }
+.metrics-group-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--primary-accent, #146653);
+}
+
+.metrics-group-title {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: rgba(20, 102, 83, 0.08);
+  border-radius: 6px;
+  letter-spacing: 0.02em;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.metrics-group-date {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.metrics-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  overflow-x: visible;
+}
+
+.metrics-ribbon .metric-chip {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 8px 10px;
+  background: var(--bg-canvas, #f5f6f2);
+  border: 1px solid var(--border-subtle, #e2e8e4);
+  border-radius: 8px;
+  transition: background-color 180ms ease,
+              border-color 180ms ease,
+              box-shadow 220ms ease;
+}
+
+.metrics-ribbon .metric-chip:hover {
+  background: #edf4ef;
+  border-color: #b8c9c0;
+  box-shadow: 0 2px 8px rgba(20, 102, 83, 0.08);
+}
+
+.metrics-ribbon .metric-chip:last-child {
+  grid-column: auto;
+}
+
+.metrics-ribbon .metric-icon-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 220ms ease;
+}
+
+.metrics-ribbon .metric-val {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary, #1e293b);
+}
+
+.metrics-ribbon .metric-lbl {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--text-secondary, #64748b);
+  overflow-wrap: anywhere;
+}
+
+.metrics-ribbon .metrics-explanation {
+  grid-column: 1 / -1;
+  margin: 2px 0 0;
+  font-size: 0.75rem;
+  color: var(--text-secondary, #64748b);
+}
+
+/* Tablet view: 3 columns x 2 rows */
+@media (max-width: 960px) {
+  .metrics-chips-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    overflow-x: visible;
+  }
+}
+
+/* Phone view: Omit horizontal scrolling, 2 columns if fitting */
+@media (max-width: 640px) {
+  .metrics-group-header {
+    font-size: 0.75rem;
+    gap: 4px 8px;
+  }
+
+  .metrics-ribbon[role="region"] {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .metrics-chips-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    overflow-x: visible;
+  }
+  .metrics-ribbon .metric-chip {
+    padding: 8px 10px;
+  }
+}
+
+/* Narrow phone view: Vertical stacking when cards cannot fit horizontally */
+@media (max-width: 380px) {
+  .metrics-chips-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    overflow-x: visible;
+  }
+  .metrics-ribbon .metric-chip {
+    padding: 10px 12px;
+  }
+}

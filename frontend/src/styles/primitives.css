@@ -1,0 +1,183 @@
+/**
+ * Shared Control Primitives Styles
+ * Enforces 44px min touch target, 46px input height, 3px focus outline, and zero reflow transforms.
+ */
+
+/* 1. Button Primitive */
+.mm-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  min-height: var(--touch-target-min);
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  box-sizing: border-box;
+  touch-action: manipulation;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              border-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              transform var(--duration-instant, 120ms) var(--ease-out-calm, ease);
+}
+.mm-button:focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); }
+.mm-button:disabled, .mm-button[aria-disabled="true"] { opacity: 0.55; cursor: not-allowed; pointer-events: none; }
+.mm-button:active:not(:disabled) { transform: translateY(1px); }
+.mm-button--primary { background-color: var(--color-primary); color: #ffffff; border-color: var(--color-primary); }
+.mm-button--primary:hover:not(:disabled) { background-color: var(--color-primary-hover); border-color: var(--color-primary-hover); box-shadow: 0 2px 6px rgba(20, 102, 83, 0.12); }
+.mm-button--primary:active:not(:disabled) { background-color: var(--color-primary-active); box-shadow: none; }
+.mm-button--secondary { background-color: var(--color-surface-card); color: var(--color-text-primary); border-color: var(--color-border); }
+.mm-button--secondary:hover:not(:disabled) { background-color: var(--color-surface); border-color: var(--color-border-hover); box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05); }
+.mm-button--ghost { background-color: transparent; color: var(--color-text-secondary); }
+.mm-button--ghost:hover:not(:disabled) { background-color: var(--color-surface); color: var(--color-text-primary); }
+.mm-button--danger { background-color: var(--color-status-rose); color: #ffffff; border-color: var(--color-status-rose); }
+.mm-button--danger:hover:not(:disabled) { background-color: #9c283b; border-color: #9c283b; box-shadow: 0 2px 6px rgba(179, 52, 72, 0.15); }
+.mm-button--sm { min-height: var(--touch-target-min); padding: 6px 12px; font-size: var(--font-size-sm); }
+.mm-button--lg { min-height: 48px; padding: 12px 24px; font-size: var(--font-size-lg); }
+.mm-button__spinner {
+  width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent;
+  border-radius: 50%; animation: mm-spin 900ms linear infinite; flex-shrink: 0;
+}
+
+/* 2. Field Primitive */
+.mm-field { display: flex; flex-direction: column; gap: 6px; width: 100%; }
+.mm-field__label { font-size: var(--font-size-sm); font-weight: 600; color: var(--color-text-primary); }
+.mm-field__control {
+  width: 100%; min-height: var(--input-height-min); font-size: var(--input-font-size-min);
+  font-family: var(--font-body); padding: 10px 12px; background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  color: var(--color-text-primary); box-sizing: border-box;
+  transition: border-color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              background-color var(--duration-normal, 360ms) var(--ease-out-calm, ease);
+}
+.mm-field__control:focus-visible { outline: var(--focus-outline); outline-offset: var(--focus-outline-offset); border-color: var(--color-border-focus); }
+.mm-field__control[aria-invalid="true"] { border-color: var(--color-status-rose); }
+.mm-field__helper { font-size: var(--font-size-xs); color: var(--color-text-secondary); line-height: 1.4; }
+.mm-field__error {
+  font-size: var(--font-size-xs); color: var(--color-status-rose); font-weight: 600; line-height: 1.4;
+  animation: mm-error-in var(--duration-fast, 260ms) var(--ease-out-calm, ease) forwards;
+}
+
+/* 3. StatusChip Primitive */
+.mm-status-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: var(--radius-full);
+  font-size: var(--font-size-xs); font-weight: 700; letter-spacing: 0.02em; text-transform: uppercase; white-space: nowrap;
+  transition: background-color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              border-color var(--duration-normal, 360ms) var(--ease-out-calm, ease);
+}
+.mm-status-chip__dot { width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; flex-shrink: 0; }
+.mm-status-chip--emerald { background-color: var(--color-status-emerald-bg); color: var(--color-status-emerald); border: 1px solid #c2e2cf; }
+.mm-status-chip--emerald .mm-status-chip__dot { animation: mm-dot-pulse 3.2s ease-in-out infinite; }
+.mm-status-chip--cyan { background-color: var(--color-status-cyan-bg); color: var(--color-status-cyan); border: 1px solid #bce1e6; }
+.mm-status-chip--amber { background-color: var(--color-status-amber-bg); color: var(--color-status-amber); border: 1px solid #f6deb4; }
+.mm-status-chip--rose { background-color: var(--color-status-rose-bg); color: var(--color-status-rose); border: 1px solid #f3c2c9; }
+.mm-status-chip--neutral { background-color: var(--color-surface); color: var(--color-text-secondary); border: 1px solid var(--color-border); }
+
+/* 4. Notice Primitive */
+.mm-notice {
+  display: flex; gap: var(--space-md); padding: 12px 16px; border-radius: var(--radius-md);
+  font-size: var(--font-size-sm); line-height: 1.5; border: 1px solid transparent;
+  animation: mm-notice-in var(--duration-smooth, 480ms) var(--ease-out-calm, ease) forwards;
+}
+.mm-notice--info { background-color: var(--color-status-cyan-bg); color: var(--color-status-cyan); border-color: #bce1e6; }
+.mm-notice--success { background-color: var(--color-status-emerald-bg); color: var(--color-status-emerald); border-color: #c2e2cf; }
+.mm-notice--warning { background-color: var(--color-status-amber-bg); color: var(--color-status-amber); border-color: #f6deb4; }
+.mm-notice--error { background-color: var(--color-status-rose-bg); color: var(--color-status-rose); border-color: #f3c2c9; }
+.mm-notice__icon { flex-shrink: 0; }
+.mm-notice__content { flex: 1; min-width: 0; }
+
+/* 5. SectionHeader Primitive */
+.mm-section-header { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-md); flex-wrap: wrap; margin-bottom: var(--space-md); }
+.mm-section-header__title-group { display: flex; align-items: center; gap: var(--space-sm); flex-wrap: wrap; }
+.mm-section-header__title { font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); margin: 0; }
+.mm-section-header__desc { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 4px 0 0 0; }
+.mm-section-header__actions { display: flex; align-items: center; gap: var(--space-sm); }
+
+/* 6. EmptyState Primitive */
+.mm-empty-state {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;
+  padding: 32px 16px; background-color: var(--color-surface); border: 1px dashed var(--color-border); border-radius: var(--radius-md);
+  animation: mm-fade-in var(--duration-smooth, 480ms) var(--ease-out-calm, ease) forwards;
+}
+.mm-empty-state__icon { font-size: 2rem; color: var(--color-text-muted); margin-bottom: var(--space-md); }
+.mm-empty-state__title { font-size: var(--font-size-base); font-weight: 700; color: var(--color-text-primary); margin: 0 0 6px 0; }
+.mm-empty-state__copy { font-size: var(--font-size-sm); color: var(--color-text-secondary); margin: 0 0 var(--space-lg) 0; max-width: 420px; }
+
+/* 7. LoadingState Primitive */
+.mm-loading-state {
+  display: inline-flex; align-items: center; gap: 10px; padding: 8px 12px; color: var(--color-text-secondary); font-size: var(--font-size-sm);
+  animation: mm-fade-in var(--duration-normal, 360ms) var(--ease-out-calm, ease) forwards;
+}
+.mm-loading-state__spinner {
+  width: 20px; height: 20px; border: 2.5px solid var(--color-border); border-top-color: var(--color-primary);
+  border-radius: 50%; animation: mm-spin 900ms linear infinite; flex-shrink: 0;
+}
+@keyframes mm-spin { to { transform: rotate(360deg); } }
+
+/* 8. DialogFrame Primitive */
+.mm-dialog-backdrop {
+  position: fixed; inset: 0; background-color: rgba(25, 47, 41, 0.45);
+  display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 1000;
+  animation: mm-backdrop-fade var(--duration-normal, 360ms) var(--ease-out-calm, ease) forwards;
+  backdrop-filter: blur(2px);
+}
+.mm-dialog-panel {
+  background-color: var(--color-surface-card); border-radius: var(--radius-lg); border: 1px solid var(--color-border);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); max-width: 560px; width: 100%; max-height: calc(100vh - 32px);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: mm-dialog-enter var(--duration-smooth, 480ms) var(--ease-out-calm, ease) forwards;
+}
+.mm-dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px; border-bottom: 1px solid var(--color-border); }
+.mm-dialog-title { margin: 0; font-size: var(--font-size-lg); font-weight: 700; color: var(--color-text-primary); }
+.mm-dialog-body { padding: 20px; overflow-y: auto; flex: 1; }
+.mm-dialog-footer { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-sm); padding: 16px 20px; border-top: 1px solid var(--color-border); }
+@media (max-width: 640px) {
+  .mm-dialog-backdrop--sheet { align-items: flex-end; padding: 0; }
+  .mm-dialog-backdrop--sheet .mm-dialog-panel {
+    border-bottom-left-radius: 0; border-bottom-right-radius: 0; max-height: 85vh;
+    animation-name: mm-sheet-enter;
+  }
+}
+
+/* Micro-animations */
+@keyframes mm-backdrop-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes mm-dialog-enter {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes mm-sheet-enter {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mm-notice-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mm-error-in {
+  from { opacity: 0; transform: translateY(-2px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes mm-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes mm-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+/* 9. AmountDisplay Primitive */
+.mm-amount-display { display: inline-flex; align-items: baseline; gap: 3px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.mm-amount-display--advance { color: var(--color-status-emerald); font-weight: 700; }
+.mm-amount-display--cod { color: var(--color-text-primary); font-weight: 700; }
+.mm-amount-display--due { color: var(--color-status-amber); font-weight: 700; }
+.mm-amount-display__currency { font-size: 0.85em; opacity: 0.85; }

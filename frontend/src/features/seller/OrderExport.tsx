@@ -12,10 +12,21 @@ import {
 } from './orderExportSupport';
 import { sellerFetch } from './sessionRequest';
 
-export function OrderExport({ orderId, status, search, fromDate, toDate, workQuery, token }: {
-  orderId?: string; status?: string; search?: string;
-  fromDate?: string; toDate?: string; workQuery?: 'preparation' | 'attention'; token?: string;
-}): React.JSX.Element {
+export interface OrderExportProps {
+  orderId?: string;
+  status?: string;
+  search?: string;
+  fromDate?: string;
+  toDate?: string;
+  workQuery?: 'preparation' | 'attention';
+  token?: string;
+  actionPrefix?: React.ReactNode;
+  actionSuffix?: React.ReactNode;
+}
+
+export function OrderExport({
+  orderId, status, search, fromDate, toDate, workQuery, token, actionPrefix, actionSuffix,
+}: OrderExportProps): React.JSX.Element {
   const { locale } = useLocale();
   const text = exportCopy[locale];
   const [busy, setBusy] = useState(false);
@@ -145,8 +156,9 @@ export function OrderExport({ orderId, status, search, fromDate, toDate, workQue
         : text.downloadEnglishCsv;
 
   return (
-    <div lang={locale === 'bn' ? 'bn-BD' : 'en'} style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: '14px' }}>
+    <div lang={locale === 'bn' ? 'bn-BD' : 'en'} style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginBottom: orderId ? '0' : '14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+        {actionPrefix}
         <button
           ref={buttonRef}
           type="button"
@@ -154,11 +166,12 @@ export function OrderExport({ orderId, status, search, fromDate, toDate, workQue
           disabled={busy}
           aria-busy={busy}
           aria-describedby={message ? feedbackId : undefined}
-          style={{ minHeight: '36px', wordBreak: 'break-word' }}
+          style={{ minHeight: '44px', padding: '6px 14px', wordBreak: 'break-word' }}
           onClick={() => void run()}
         >
           {label}
         </button>
+        {actionSuffix}
       </div>
       <small style={{ color: 'var(--text-secondary)', fontSize: '0.75rem', lineHeight: 1.4 }}>
         {text.purpose}

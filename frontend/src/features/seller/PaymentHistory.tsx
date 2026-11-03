@@ -4,6 +4,8 @@ import { useLocale } from '../locale/context';
 import { formatCount, formatBangladeshDateTime, formatBdt } from '../locale/format';
 import { historyText, historyError } from '../locale/historyCopy';
 import { paymentReason } from '../locale/paymentExceptionCopy';
+import './PaymentReview.css';
+import './PaymentHistory.css';
 
 interface DecisionEvent {
   transaction_id: string;
@@ -34,11 +36,11 @@ export function PaymentHistory({orderId,token}:{orderId:string;token:string}) {
       .finally(()=>{if(active)setLoading(false);});
     return ()=>{active=false;};
   },[orderId,token,attempt]);
-  return <section className="buyer-correction" lang={locale} aria-label={tr("Accepted payment history")}>
-    <h4>{tr("Accepted payment history")}</h4>
-    {loading && <p role="status">{tr("Loading decision history…")}</p>}
+  return <section className="payment-history" lang={locale} aria-label={tr("Accepted payment history")}>
+    <h4 className="payment-review-title">{tr("Accepted payment history")}</h4>
+    {loading && <p role="status" className="payment-review-status">{tr("Loading decision history…")}</p>}
     {error && (
-      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}>
+      <div role="alert" className="payment-review-alert">
         <span>{tr(error)}</span>
         <button
           type="button"
@@ -49,13 +51,26 @@ export function PaymentHistory({orderId,token}:{orderId:string;token:string}) {
         </button>
       </div>
     )}
-    {!loading && !error && events.length === 0 && <p>{tr("No accepted payment decisions yet.")}</p>}
-    {events.map(event=><article key={event.created_at}>
-      <p>{tr("Accepted advance")}: {formatBdt(event.accepted_amount_minor)} · {tr("Remaining COD")}: {formatBdt(event.actual_cod_minor)}</p>
-      <p>{tr('Accepted exceptions')}: {event.exceptions.map(code => paymentReason(code, locale)).join(', ') || tr('None')}</p>
-      <p>{tr("Reason")}: {event.reason}</p>
-      <p>{tr("Seller")}: {event.actor} · {formatBangladeshDateTime(event.created_at, locale)}</p>
-    </article>)}
-    {summary && <p>{tr("Shop totals")}: {formatCount(summary.confirmed_count)} {tr("confirmed")} · {formatCount(summary.manual_count)} {tr("manual acceptances")} · {formatCount(summary.exception_count)} {tr("accepted exception orders")}</p>}
+    {!loading && !error && events.length === 0 && <p className="payment-history-empty">{tr("No accepted payment decisions yet.")}</p>}
+    {events.length > 0 && <ol className="payment-history-list">{events.map(event => <li key={event.created_at} className="payment-history-item">
+      <div className="payment-history-amounts">
+        <div className="payment-history-amount">
+          <span>{tr("Accepted advance")}</span>
+          <strong>{formatBdt(event.accepted_amount_minor)}</strong>
+        </div>
+        <div className="payment-history-amount">
+          <span>{tr("Remaining COD")}</span>
+          <strong>{formatBdt(event.actual_cod_minor)}</strong>
+        </div>
+      </div>
+      <p className="payment-history-exceptions">
+        {tr('Accepted exceptions')}: {event.exceptions.length > 0
+          ? event.exceptions.map((code, index) => <span key={code}>{index > 0 ? ', ' : ''}{paymentReason(code, locale)}</span>)
+          : tr('None')}
+      </p>
+      <p className="payment-history-reason">{tr("Reason")}: {event.reason}</p>
+      <p className="payment-history-meta">{tr("Seller")}: {event.actor} · {formatBangladeshDateTime(event.created_at, locale)}</p>
+    </li>)}</ol>}
+    {summary && <p className="payment-history-summary">{tr("Shop totals")}: {formatCount(summary.confirmed_count)} {tr("confirmed")} · {formatCount(summary.manual_count)} {tr("manual acceptances")} · {formatCount(summary.exception_count)} {tr("accepted exception orders")}</p>}
   </section>;
 }

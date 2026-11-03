@@ -12,6 +12,7 @@ it('renders daily counts and distinguishes unavailable values from zero', async 
     timezone: 'Asia/Dhaka', staged_for_delivery: 7, orders: 30, confirmed: 12, awaiting: 0, pending: 8, payments: 40 }} />));
   expect(values()).toEqual(['30', '12', '0', '8', '40', '7']);
   expect(host.textContent).toContain("Today's Orders");
+  expect(host.textContent).toContain('Today in Bangladesh (Asia/Dhaka)');
   expect(host.textContent).toContain('Independent of list filters');
   await act(async () => root.render(<ShopMetricsBar metrics={null} />));
   expect(values()).toEqual(['—', '—', '—', '—', '—', '—']);

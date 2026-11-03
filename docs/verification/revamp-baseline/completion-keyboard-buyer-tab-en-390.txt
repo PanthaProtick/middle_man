@@ -1,0 +1,84 @@
+Browser tab: 5, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en".
+1 AXWebArea Seller workspace · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en
+	2 container Order & Link Details
+		3 container Language
+			4 checkbox বাংলা, Value: 0
+			5 checkbox English, Value: 1
+			6 text Language: English
+		7 button Copy delivery summary
+		8 text Manual delivery aid only; no courier booking, update or delivery-price calculation.
+		9 heading Order & Link Details, Value: 3
+			10 text Order & Link Details
+		11 button Close order details
+		12 text হাতে তৈরি নকশিকাঁথা — special gift package
+		13 text Pending Review
+		14 button Review payment
+		15 tab group Order & Link Details
+			16 tab (selectable, settable, boolean) Overview, Value: 0
+			17 tab (selectable, settable, boolean) Payment, Value: 0
+			18 tab (selectable, settable, boolean) Delivery, Value: 0
+			19 tab (selected, settable, boolean) Buyer & link, Value: 1
+		20 container Buyer & link
+			21 container Correct buyer information
+				22 heading Correct buyer information, Value: 3
+					23 text Correct buyer information
+				24 container
+					25 text Status: Pending Review
+				26 button (collapsed) Show review details, Secondary Actions: Expand
+				27 container
+					28 container
+						29 text Buyer name
+						30 text field (settable) Buyer name, Value: Synthetic buyer / পরীক্ষামূলক ক্রেতা
+					31 container
+						32 text Contact number
+						33 text field (settable) Contact number, Value: 01900000000
+					34 container
+						35 text Delivery address
+						36 text entry area (settable) Delivery address, Value: Synthetic house, road and landmark / পরীক্ষামূলক ঠিকানা
+					37 container Payment claim
+						38 text Payment claim
+						39 container
+							40 text Provider
+							41 pop up button (collapsed, settable) Provider, Value: bKash, Secondary Actions: Expand
+								42 menu
+									43 (selected) bKash
+									44 Nagad
+						45 container
+							46 text Transaction ID
+							47 text field (settable) Transaction ID, Value: SYNTHETIC01
+						48 container
+							49 text Payment sender
+							50 text field (settable) Payment sender, Value: 01900000000
+						51 container
+							52 text Claimed advance (BDT)
+							53 text field (settable) Claimed advance (BDT), Value: 450.00
+					54 container
+						55 text Correction reason
+						56 text entry area (settable) Correction reason
+					57 button (disabled) Save correction and check again
+				58 button (collapsed) Buyer revision history (1), Secondary Actions: Expand
+					59 text Buyer revision history
+					60 text  (
+					61 text 1
+					62 text )
+			63 text Order Outcomes
+			64 button Cancel Order
+			65 button Reject Submission
+			66 button Replace Order
+			67 container Buyer link access
+				68 heading Buyer link access, Value: 4
+					69 text Buyer link access
+				70 text These actions keep the order and payment unchanged.
+				71 text Block buyer access to the current link.
+				72 button Revoke buyer link
+				73 text Create a new link and permanently disable previous links. The deadline and submission state stay unchanged.
+				74 button Reissue buyer link
+			75 button Copy buyer link to clipboard
+				76 text Copy Buyer Link
+			77 link Description: Open Portal, Value: 127.0.0.1:5186/orders/synthetic-1
+		78 button Back
+		79 button (disabled) Next
+		80 button Close
+		81 button (collapsed) Seller assistant, Secondary Actions: Expand
+
+The focused UI element is 19 tab (selected, settable, boolean) Buyer & link, Value: 1

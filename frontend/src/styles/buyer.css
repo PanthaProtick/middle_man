@@ -1,4 +1,4 @@
-/* Buyer portal: a focused, mobile-first confirmation flow. */
+/* Buyer portal: a focused, mobile-first confirmation flow for Modern Dhaka Shop Desk. */
 .portal-shell {
   max-width: 560px;
   min-height: 100vh;
@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 0 0 18px;
+  padding: 0 0 16px;
   margin-bottom: 20px;
   border-bottom: 1px solid var(--border-subtle);
 }
@@ -27,85 +27,226 @@
   font-weight: 700;
 }
 
-.portal-main {
-  display: grid;
-  gap: 16px;
-}
-
-.portal-actions {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
+.portal-main { display: grid; gap: 16px; min-width: 0; }
+.portal-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 
 .portal-notice {
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: flex-start;
-  padding: 14px;
+  padding: 14px 16px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
   background: var(--bg-card);
   color: var(--text-secondary);
-  font-size: 0.88rem;
+  font-size: 0.9rem;
+  animation: mm-notice-in var(--duration-smooth, 280ms) var(--ease-out-calm, ease) forwards;
 }
-
-.portal-notice--warning { border-color: rgba(234, 179, 8, 0.45); }
-.portal-notice--error { border-color: rgba(239, 68, 68, 0.45); }
+.portal-notice--warning { border-color: rgba(138, 87, 11, 0.4); background: #fdfaf3; color: var(--amber-accent); }
+.portal-notice--error { border-color: rgba(179, 52, 72, 0.4); background: #fdf4f5; color: var(--rose-accent); }
 
 .portal-loading {
   display: grid;
   justify-items: center;
-  gap: 12px;
-  padding: 48px 24px;
+  gap: 14px;
+  padding: 56px 24px;
   color: var(--text-secondary);
   text-align: center;
+  font-size: 0.95rem;
 }
 
 .portal-footer-action {
   display: flex;
   justify-content: center;
   margin-top: 24px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
+.portal-footer-action p { margin: 0; }
 
+/* Boarding pass cards & items */
 .buyer-order-item {
   padding: 14px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
+  min-width: 0;
 }
 
 .buyer-payment-destination {
   padding: 16px;
-  border: 1px solid rgba(99, 102, 241, 0.35);
+  border: 1px solid #b8d5c5;
   border-radius: var(--radius-md);
-  background: rgba(99, 102, 241, 0.09);
+  background: #eaf4ee;
   min-width: 0;
   overflow-wrap: anywhere;
 }
 
-.buyer-order-item { min-width: 0; }
+/* Numbered Section Layout */
+.buyer-form-section {
+  padding-top: 18px;
+  margin-top: 18px;
+  border-top: 1px solid var(--border-subtle);
+}
+.buyer-form-section:first-of-type { padding-top: 0; margin-top: 0; border-top: none; }
 
-/* Native searchable courier choices retain labels, touch targets and wrapping actions. */
-.pathao-locations { display: grid; gap: 12px; margin-bottom: 16px; }
-.pathao-locations p { margin: 0; }
+.buyer-form-section-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.buyer-form-section-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--primary-accent);
+  color: #ffffff;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.buyer-form-section-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  font-family: var(--font-heading);
+}
+
+.buyer-form-section-subtitle {
+  margin: 2px 0 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* Form input geometry: min 46px height, min 16px font size to prevent iOS zoom */
+.portal-main .form-control {
+  min-height: 46px;
+  font-size: 16px;
+  padding: 10px 14px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease);
+}
+
+.portal-main textarea.form-control { min-height: 84px; line-height: 1.7; }
+.portal-main .form-control:focus {
+  border-color: var(--border-focus);
+  outline: 3px solid var(--primary-accent);
+  outline-offset: 3px;
+}
+
+.portal-main .form-group { margin-bottom: 14px; }
+.portal-main .form-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+}
+
+/* Tabular numeral formatting */
+.buyer-tabular,
+.buyer-mono-num {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono);
+}
+
+/* Touch targets: all buttons at least 44px */
+.portal-main form .btn,
+.portal-main .btn,
+.pathao-location-actions .btn {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-xs);
+  touch-action: manipulation;
+  transition: background-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              border-color var(--duration-fast, 150ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 200ms) var(--ease-out-calm, ease),
+              transform var(--duration-instant, 120ms) var(--ease-out-calm, ease);
+}
+
+.portal-main form .btn-primary {
+  min-height: 48px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: var(--primary-accent);
+  color: #ffffff;
+  border: none;
+}
+.portal-main form .btn:active,
+.portal-main .btn:active {
+  transform: translateY(1px);
+}
+
+/* Native searchable courier choices retain labels, touch targets and wrapping actions */
+.pathao-locations { display: grid; gap: 12px; margin-bottom: 16px; min-width: 0; overflow-wrap: anywhere; }
+.pathao-locations p { margin: 0; font-size: 0.825rem; color: var(--text-secondary); }
+
 .pathao-location-loading {
   padding: 8px 12px;
   border: 1px solid var(--primary-accent);
-  border-inline-start-width: 3px;
   border-radius: 8px;
   background: #e3eee8;
   color: var(--primary-accent);
+  animation: mm-fade-in var(--duration-normal, 200ms) var(--ease-out-calm, ease) forwards;
 }
-.pathao-location-loading strong { font-size: .875rem; }
+.pathao-location-loading strong { font-size: 0.85rem; }
+
 .pathao-location-choice { display: grid; gap: 6px; min-width: 0; }
-.pathao-location-choice label { display: grid; gap: 4px; }
-.pathao-location-choice input, .pathao-location-choice select { width: 100%; min-width: 0; }
-.pathao-location-help { display: flex; align-items: flex-start; gap: 8px; }
-.pathao-location-help input { flex: 0 0 auto; margin-top: 4px; }
+.pathao-location-choice label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.pathao-location-choice input,
+.pathao-location-choice select { width: 100%; min-width: 0; }
+
+.pathao-location-help {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+.pathao-location-help input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-accent);
+  flex: 0 0 auto;
+}
+
 .pathao-location-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .portal-main form { min-width: 0; overflow-wrap: anywhere; }
-.portal-main form label, .pathao-locations { min-width: 0; overflow-wrap: anywhere; }
-.portal-main form .btn, .pathao-location-actions .btn { white-space: normal; min-height: 44px; }
 
+/* Bengali script line-height clearance */
+[lang="bn"] .portal-shell,
+[lang="bn"].portal-shell,
+.portal-shell [lang="bn"],
+[lang="bn"] label,
+[lang="bn"] p { line-height: 1.7; }

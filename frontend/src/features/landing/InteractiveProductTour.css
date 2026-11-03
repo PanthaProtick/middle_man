@@ -1,0 +1,182 @@
+/* Interactive Product Tour Styles */
+@import './TourPhoneMockup.css';
+@import './TourDeskMockup.css';
+
+.tour-section {
+  background-color: var(--surface-card, #ffffff);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  border-radius: 12px;
+  padding: 36px 32px;
+  box-shadow: 0 4px 16px rgba(20, 102, 83, 0.04);
+}
+
+.tour-header {
+  margin-bottom: 28px;
+}
+
+.tour-header h2 {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  line-height: 1.3;
+  color: var(--text-primary, #1b2e2b);
+  margin: 0 0 10px;
+  font-weight: 700;
+}
+
+.tour-description {
+  font-size: 1.05rem;
+  color: var(--text-secondary, #4a5d58);
+  margin: 0;
+  max-width: 65ch;
+  line-height: 1.6;
+}
+
+.tour-stepper {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.step-tab {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  background: var(--surface, #f3f6f4);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary, #4a5d58);
+  cursor: pointer;
+  text-align: left;
+  transition: background-color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              border-color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              box-shadow var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              transform var(--duration-fast, 260ms) var(--ease-out-calm, ease);
+}
+
+.step-tab:hover {
+  background: #ebf1ee;
+  border-color: #c4d3cb;
+  transform: translateY(-1px);
+}
+
+.step-tab:active {
+  transform: translateY(0);
+}
+
+.step-tab.active {
+  background: var(--surface-card, #ffffff);
+  border-color: var(--primary-accent, #146653);
+  color: var(--primary-accent, #146653);
+  box-shadow: 0 2px 8px rgba(20, 102, 83, 0.08);
+}
+
+.step-tab:focus-visible {
+  outline: 3px solid var(--primary-accent, #146653);
+  outline-offset: 3px;
+}
+
+.step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #d8e2dd;
+  color: var(--text-primary, #1b2e2b);
+  font-size: 0.8rem;
+  font-weight: 700;
+  transition: background-color var(--duration-normal, 360ms) var(--ease-out-calm, ease),
+              color var(--duration-normal, 360ms) var(--ease-out-calm, ease);
+}
+
+.step-tab.active .step-number {
+  background: var(--primary-accent, #146653);
+  color: #ffffff;
+}
+
+.tour-stage {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.tour-narrative {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: tour-narrative-in var(--duration-smooth, 480ms) var(--ease-out-calm, ease) both;
+}
+
+.mock-phone-shell,
+.mock-desk-shell {
+  animation: tour-shell-in var(--duration-smooth, 480ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
+}
+
+@keyframes tour-narrative-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes tour-shell-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.tour-step-tag {
+  display: inline-block;
+  align-self: flex-start;
+  padding: 4px 10px;
+  background: var(--pine-light, #eaf4ee);
+  border: 1px solid var(--pine-border, #b8d5c5);
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-accent, #146653);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tour-narrative h3 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-primary, #1b2e2b);
+  margin: 0;
+  line-height: 1.35;
+}
+
+.tour-narrative h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--primary-accent, #146653);
+  margin: 0;
+}
+
+.tour-narrative p {
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: var(--text-secondary, #4a5d58);
+  margin: 0 0 16px;
+}
+
+.tour-navigation {
+  display: flex;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+@media (max-width: 860px) {
+  .tour-stage {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+  .tour-section {
+    padding: 24px 18px;
+  }
+}

@@ -3,6 +3,8 @@ import { paymentReason } from '../locale/paymentExceptionCopy';
 import { useLocale } from '../locale/context';
 import { receiptText, receiptError, receiptCode } from '../locale/receiptCopy';
 import './EvidenceResolution.css';
+import './EvidenceForms.css';
+import './EvidenceHistory.css';
 import { useEffect, useId, useRef, useState } from 'react';
 import { SellerApiError } from './api';
 import { compareReceipt, resolveReceipt } from './resolution';
@@ -64,33 +66,70 @@ export function EvidenceResolution({receiptId, token, onResolved, accounts = []}
     } finally { if (alive.current) setBusy(false); }
   }
 
-  if (!comparison) return <section lang={locale} aria-label={tr("Evidence resolution")}>
+  if (!comparison) return <section className="evidence-resolution evidence-loading" lang={locale} aria-label={tr("Evidence resolution")}>
     {error ? (
-      <div role="alert" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', margin: '8px 0' }}>
+      <div role="alert" className="evidence-alert">
         <span>{tr(error)}</span>
         <button className="btn btn-secondary btn-sm" disabled={busy} onClick={() => void refetch()}>
           {tr("Retry comparison")}
         </button>
       </div>
-    ) : <p role="status">{tr("Loading evidence comparison…")}</p>}
+    ) : <p role="status" className="evidence-loading-text">{tr("Loading evidence comparison…")}</p>}
   </section>;
   const locked = Boolean(comparison.allocated_order_id) || comparison.receipt.reconciliation_state === 'used';
   return <section className="evidence-resolution" lang={locale} aria-label={tr("Evidence resolution")}>
-    <h4>{tr("Compare and resolve")}</h4>
-    <p>{locked ? `${tr('Accepted allocation')}: ${comparison.allocated_order_id ?? tr('locked')}. ${tr('Later evidence cannot change accepted funds.')}`
+    <div className="evidence-head">
+      <h4 className="evidence-title">{tr("Compare and resolve")}</h4>
+      <span className="evidence-state" data-tone={comparison.receipt.has_conflict ? 'rose' : locked ? 'emerald' : 'cyan'}>
+        {comparison.receipt.has_conflict ? tr("conflicted") : receiptCode(locale, comparison.receipt.reconciliation_state)}
+      </span>
+    </div>
+
+    <div className="evidence-receipt-summary" aria-label={tr("Receipt identity")}>
+      <div className="evidence-receipt-identity">
+        <span className="evidence-provider" data-provider={comparison.receipt.provider}>
+          {comparison.receipt.provider ?? '—'}
+        </span>
+        <span className="evidence-trx">{comparison.receipt.trx_id ?? '—'}</span>
+      </div>
+      <dl className="evidence-receipt-facts">
+        <div>
+          <dt>{tr("Amount")}</dt>
+          <dd>{formatBdt(comparison.receipt.amount_minor ?? 0)}</dd>
+        </div>
+        <div>
+          <dt>{tr("Status")}</dt>
+          <dd>{receiptCode(locale, comparison.receipt.reconciliation_state)}</dd>
+        </div>
+      </dl>
+    </div>
+
+    <p className="evidence-guidance">{locked ? `${tr('Accepted allocation')}: ${comparison.allocated_order_id ?? tr('locked')}. ${tr('Later evidence cannot change accepted funds.')}`
       : tr("Select received evidence. Choosing a claim explicitly holds the other current claims; exact matching rules still apply.")}</p>
-    {comparison.receipt.has_conflict && <p role="status">{tr("Conflicting observations require seller review.")}</p>}
-    <ul>{comparison.claims.map(claim => <li key={claim.revision_id}>
-      {claim.buyer_name} — {claim.order_id}: {receiptCode(locale, claim.lifecycle)}; {tr("Sender")} {claim.sender_number}; {formatBdt(claim.amount_minor)}.
-      {' '}{claim.review_reasons.map(code => paymentReason(code, locale)).join(', ')} {claim.held_by_resolution && tr("Held by seller decision.")}
+    {comparison.receipt.has_conflict && <p role="status" className="evidence-conflict-note">{tr("Conflicting observations require seller review.")}</p>}
+
+    <ul className="evidence-claims">{comparison.claims.map(claim => <li key={claim.revision_id} className="evidence-claim">
+      <div className="evidence-claim-head">
+        <span className="evidence-claim-buyer">{claim.buyer_name}</span>
+        <span className="evidence-claim-order">{claim.order_id}</span>
+        <span className="evidence-claim-lifecycle">{receiptCode(locale, claim.lifecycle)}</span>
+      </div>
+      <dl className="evidence-claim-facts">
+        <div><dt>{tr("Sender")}</dt><dd>{claim.sender_number}</dd></div>
+        <div><dt>{tr("Amount")}</dt><dd>{formatBdt(claim.amount_minor)}</dd></div>
+      </dl>
+      {claim.review_reasons.length > 0 && <p className="evidence-claim-reasons">{claim.review_reasons.map(code => paymentReason(code, locale)).join(', ')}</p>}
+      {claim.held_by_resolution && <p className="evidence-claim-held">{tr("Held by seller decision.")}</p>}
     </li>)}</ul>
-    {error && <p id={errorId} role="alert">{tr(error)}</p>}
+
+    {error && <p id={errorId} role="alert" className="evidence-alert">{tr(error)}</p>}
     {!locked && <ReceiptCorrection key={comparison.receipt.version} receipt={comparison.receipt} accounts={accounts}
       token={token} disabled={busy || Boolean(pending)} onPending={setCorrecting} onStale={refetch}
       onCorrected={result => { setComparison(result); setObservation(''); setOrder(''); onResolved(); }} />}
-    {!locked && <form aria-label={tr("Resolve evidence")} aria-describedby={error ? errorId : undefined} onSubmit={event => { event.preventDefault(); void submit(); }}>
+    {!locked && <form className="evidence-form" aria-label={tr("Resolve evidence")} aria-describedby={error ? errorId : undefined} onSubmit={event => { event.preventDefault(); void submit(); }}>
       <fieldset disabled={busy || Boolean(pending) || correcting}>
-        <label>{tr("Received observation")}{!observation && <small>{tr(" — select complete evidence to continue.")}</small>}<select aria-label={tr("Received observation")} value={observation} onChange={e => setObservation(e.target.value)}>
+        <legend className="evidence-form-title">{tr("Resolve evidence")}</legend>
+        <label className="evidence-field">{tr("Received observation")}{!observation && <small>{tr(" — select complete evidence to continue.")}</small>}<select aria-label={tr("Received observation")} value={observation} onChange={e => setObservation(e.target.value)}>
           <option value="">{tr("Select complete observation")}</option>
           {comparison.receipt.observations.map(obs => <option key={obs.id} value={obs.id}
             disabled={obs.parse_state !== 'valid' || !obs.sender_number_canonical || !obs.occurred_at
@@ -99,32 +138,47 @@ export function EvidenceResolution({receiptId, token, onResolved, accounts = []}
             {' '}{obs.occurred_at ? formatBangladeshTime(obs.occurred_at) : tr("Unknown time")}, {tr("Account")} {obs.payment_account_id}
           </option>)}
         </select></label>
-        <label>{tr("Claim decision")}<select aria-label={tr("Claim decision")} value={order} onChange={e => setOrder(e.target.value)}>
+        <label className="evidence-field">{tr("Claim decision")}<select aria-label={tr("Claim decision")} value={order} onChange={e => setOrder(e.target.value)}>
           <option value="">{tr("Resolve observations only; keep competing claims held")}</option>
           {comparison.claims.filter(c => c.lifecycle === 'pending').map(c =>
             <option key={c.revision_id} value={c.order_id}>{c.buyer_name} — {c.order_id}</option>)}
         </select></label>
-        <label>{tr("Decision reason")}{!reason.trim() && <small>{tr(" — a nonblank reason is required.")}</small>}<textarea aria-label={tr("Decision reason")} required maxLength={2000} value={reason} onChange={e => setReason(e.target.value)} /></label>
+        <label className="evidence-field">{tr("Decision reason")}{!reason.trim() && <small>{tr(" — a nonblank reason is required.")}</small>}<textarea aria-label={tr("Decision reason")} required maxLength={2000} value={reason} onChange={e => setReason(e.target.value)} /></label>
       </fieldset>
-      <button className="btn btn-secondary btn-sm" disabled={busy || correcting || (!pending && (!observation || !reason.trim()))} type="submit">
+      <button className="btn btn-secondary btn-sm evidence-submit" disabled={busy || correcting || (!pending && (!observation || !reason.trim()))} type="submit">
         {busy ? tr("Recording…") : pending ? tr("Retry same decision") : tr("Record resolution")}
       </button>
     </form>}
-    <button className="btn btn-secondary btn-sm" disabled={busy || correcting || Boolean(pending)} onClick={() => void refetch()}>{tr("Refresh comparison")}</button>
-    <h5>{tr("Correction history")}</h5>
-    <ul>{comparison.corrections?.map(edit => <li key={edit.observation_id}>
-      {edit.actor}: {edit.reason} — {formatBangladeshTime(edit.created_at)}
-      <p>{tr("Before")}: {edit.before.provider} / {edit.before.trx_id}; {formatBdt(edit.before.amount_minor)};
-        {' '}{edit.before.sender_number ?? tr("Unknown sender")}; {edit.before.occurred_at ? formatBangladeshTime(edit.before.occurred_at) : tr("Unknown time")};
-        {' '}{tr('Account')} {edit.before.payment_account_id}; {edit.before.has_conflict ? tr("conflicted") : tr("consistent")}.</p>
-      <p>{tr("After")}: {edit.after.provider} / {edit.after.trx_id}; {formatBdt(edit.after.amount_minor)};
-        {' '}{edit.after.sender_number ?? tr("Unknown sender")}; {edit.after.occurred_at ? formatBangladeshTime(edit.after.occurred_at) : tr("Unknown time")};
-        {' '}{tr('Account')} {edit.after.payment_account_id}.</p>
-    </li>)}</ul>
-    <h5>{tr("Decision history")}</h5>
-    <ul>{comparison.history.map((decision, index) => <li key={index}>
-      {decision.actor}: {decision.reason} — {tr("Observation")} {decision.selected_observation_id};
-      {' '}{tr('Claim')} {decision.selected_order_id ?? tr("no claim selected")}; {formatBangladeshTime(decision.created_at)}
-    </li>)}</ul>
+    <button className="btn btn-secondary btn-sm evidence-refresh" disabled={busy || correcting || Boolean(pending)} onClick={() => void refetch()}>{tr("Refresh comparison")}</button>
+
+    <section className="evidence-history" aria-label={tr("Correction history")}>
+      <h5 className="evidence-history-title">{tr("Correction history")}</h5>
+      {comparison.corrections?.length ? <ul className="evidence-history-list">{comparison.corrections.map(edit => <li key={edit.observation_id} className="evidence-history-item">
+        <div className="evidence-history-head">
+          <span className="evidence-history-actor">{edit.actor}</span>
+          <span className="evidence-history-time">{formatBangladeshTime(edit.created_at)}</span>
+        </div>
+        <p className="evidence-history-reason">{edit.reason}</p>
+        <p className="evidence-history-before">{tr("Before")}: {edit.before.provider} / {edit.before.trx_id}; {formatBdt(edit.before.amount_minor)};
+          {' '}{edit.before.sender_number ?? tr("Unknown sender")}; {edit.before.occurred_at ? formatBangladeshTime(edit.before.occurred_at) : tr("Unknown time")};
+          {' '}{tr('Account')} {edit.before.payment_account_id}; {edit.before.has_conflict ? tr("conflicted") : tr("consistent")}.</p>
+        <p className="evidence-history-after">{tr("After")}: {edit.after.provider} / {edit.after.trx_id}; {formatBdt(edit.after.amount_minor)};
+          {' '}{edit.after.sender_number ?? tr("Unknown sender")}; {edit.after.occurred_at ? formatBangladeshTime(edit.after.occurred_at) : tr("Unknown time")};
+          {' '}{tr('Account')} {edit.after.payment_account_id}.</p>
+      </li>)}</ul> : <p className="evidence-history-empty">{tr("No corrections recorded.")}</p>}
+    </section>
+
+    <section className="evidence-history" aria-label={tr("Decision history")}>
+      <h5 className="evidence-history-title">{tr("Decision history")}</h5>
+      {comparison.history.length > 0 ? <ul className="evidence-history-list">{comparison.history.map((decision, index) => <li key={index} className="evidence-history-item">
+        <div className="evidence-history-head">
+          <span className="evidence-history-actor">{decision.actor}</span>
+          <span className="evidence-history-time">{formatBangladeshTime(decision.created_at)}</span>
+        </div>
+        <p className="evidence-history-reason">{decision.reason}</p>
+        <p className="evidence-history-decision">{tr("Observation")} {decision.selected_observation_id};
+          {' '}{tr('Claim')} {decision.selected_order_id ?? tr("no claim selected")}</p>
+      </li>)}</ul> : <p className="evidence-history-empty">{tr("No decisions recorded.")}</p>}
+    </section>
   </section>;
 }

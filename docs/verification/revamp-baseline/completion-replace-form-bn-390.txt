@@ -1,0 +1,32 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-outcomes&lang=en".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-outcomes&lang=en
+	2 container
+		3 container ভাষা
+			4 checkbox বাংলা, Value: 1
+			5 checkbox English, Value: 0
+			6 text ভাষা: বাংলা
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 text অর্ডারের সিদ্ধান্ত
+		10 container
+			11 text অর্ডার বদল  # baseline-order-1
+		12 text আগের অর্ডার বাতিল হবে। নতুন লিংক ও শর্তসহ নতুন অর্ডার তৈরি হবে।
+		13 container
+			14 text পণ্যের নাম
+			15 text field (settable) পণ্যের নাম, Value: হাতে তৈরি নকশিকাঁথা — special gift package
+		16 container
+			17 text মোট টাকা
+			18 text field (settable) মোট টাকা, Value: 2500
+		19 container
+			20 text ডেলিভারির আগে অগ্রিম (BDT)
+			21 text field (settable) ডেলিভারির আগে অগ্রিম (BDT), Value: 500
+		22 pop up button (collapsed, settable) Description: সক্রিয় পেমেন্ট অ্যাকাউন্ট, Value: Synthetic receiving account (BKASH - 01700000000), Secondary Actions: Expand
+			23 menu
+				24 (selected) Synthetic receiving account (BKASH - 01700000000)
+		25 container
+			26 text বদলানোর কারণ (আবশ্যক)
+			27 text entry area (settable) বদলানোর কারণ (আবশ্যক)
+		28 button বন্ধ করুন
+		29 button বদলে নতুন অর্ডার তৈরি করুন
+
+The focused UI element is 4 checkbox বাংলা, Value: 1

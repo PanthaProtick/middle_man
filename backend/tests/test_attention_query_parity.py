@@ -47,6 +47,7 @@ async def dashboard_ids(client: AsyncClient) -> list[str]:
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_dashboard_work_query_matches_preview_and_ignores_filters(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     unknown = await add_confirmed(client, base, 'dash-unknown')
     pending = await add_pending(client, base, 'dash-pending')
     excluded = await add_confirmed(client, base, 'dash-excluded')
@@ -62,6 +63,7 @@ async def test_dashboard_work_query_matches_preview_and_ignores_filters(client: 
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_export_work_query_matches_the_shared_set(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     unknown = await add_confirmed(client, base, 'export-unknown')
     preparation = await add_confirmed(client, base, 'export-preparation')
     pending = await add_pending(client, base, 'export-pending')
@@ -87,6 +89,7 @@ async def test_export_work_query_matches_the_shared_set(client: AsyncClient):
 @pytest.mark.parametrize('cursor', ['0:' + '9' * 100 + ':order', '1:-999999999999999999999:order'])
 async def test_out_of_range_cursor_restarts_preview_and_dashboard(client: AsyncClient, cursor: str):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     pending = await add_pending(client, base, 'invalid-cursor')
     result = await preview(client, cursor=cursor)
     assert [item['order']['id'] for item in result['items']] == [pending['id']]

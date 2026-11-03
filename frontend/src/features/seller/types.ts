@@ -222,11 +222,13 @@ export type AttentionCategory =
   | 'unknown_outcome'
   | 'failed_submission'
   | 'pending_review'
-  | 'preparation';
+  | 'preparation'
+  | 'awaiting_buyer';
 
 export type AttentionReason =
   | 'UNKNOWN_OUTCOME'
   | 'FAILED_SUBMISSION'
+  | 'AWAITING_BUYER_SUBMISSION'
   | 'PENDING_REVIEW'
   | 'AWAITING_COURIER_PREPARATION'
   | 'PRIOR_DAY_BACKLOG';

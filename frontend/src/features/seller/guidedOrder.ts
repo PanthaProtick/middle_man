@@ -1,6 +1,7 @@
 import { asciiDigits, orderAmountMinor } from './orderNumbers';
 import { parseParcelQuantity, parseParcelWeightKg } from './parcel';
 import type { OrderInput, PaymentAccount } from './types';
+import { orderMessageCandidates } from './orderMessageCandidates';
 
 export interface OrderFields { total: string; advance: string; account: string; weight: string; quantity: string }
 export const emptyOrderFields = (): OrderFields => ({ total: '', advance: '', account: '', weight: '', quantity: '' });
@@ -29,7 +30,7 @@ export function hasMultipleOrderFields(message: string): boolean {
 }
 export function orderMessage(message: string, accounts: PaymentAccount[]): Partial<OrderFields & { value: string }> {
   const matches = [...message.matchAll(labels)];
-  const patch: Partial<OrderFields & { value: string }> = {};
+  const patch: Partial<OrderFields & { value: string }> = orderMessageCandidates(message);
   for (const [index, match] of matches.entries()) {
     const key = keys[match.groups!.label.toLowerCase()];
     const value = message.slice(match.index! + match[0].length, matches[index + 1]?.index).trim().replace(/[;,]+$/, '').trim();

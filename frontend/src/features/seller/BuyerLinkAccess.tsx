@@ -43,24 +43,42 @@ export function BuyerLinkAccess({ order, token, onUpdated }: Props) {
   }
 
   const reissuable = !['expired', 'cancelled'].includes(order.lifecycle) && !order.replaced_by_order_id;
-  return <section className="buyer-correction delivery-details" aria-label={text.access}>
-    <h4>{text.access}</h4>
-    <p className="delivery-note">{text.unchanged}</p>
-    {order.buyer_link_revoked_at && <p role="status">{text.revoked}</p>}
-    {error && <p role="alert">{text[error]}</p>}
-    <div className="buyer-link-actions">
-      {!order.buyer_link_revoked_at && <div className="buyer-link-action">
-        <p id="revoke-link-description">{text.revokeDescription}</p>
-        <button className="btn btn-secondary" aria-describedby="revoke-link-description"
-        disabled={busy || stale || pendingAction === 'reissue'} onClick={() => void changeAccess('revoke')}>
-        {busy && pendingAction === 'revoke' ? text.revoking : error && pendingAction === 'revoke' ? text.retryRevoke : text.revoke}
-      </button></div>}
-      {reissuable && <div className="buyer-link-action">
-        <p id="reissue-link-description">{text.reissueDescription}</p>
-        <button className="btn btn-secondary" aria-describedby="reissue-link-description"
-        disabled={busy || stale || pendingAction === 'revoke'} onClick={() => void changeAccess('reissue')}>
-        {busy && pendingAction === 'reissue' ? text.reissuing : error && pendingAction === 'reissue' ? text.retryReissue : text.reissue}
-      </button></div>}
-    </div>
-  </section>;
+  return (
+    <section className="buyer-correction delivery-details" aria-label={text.access}>
+      <h4>{text.access}</h4>
+      <p className="delivery-note">{text.unchanged}</p>
+      {order.buyer_link_revoked_at && <p role="status">{text.revoked}</p>}
+      {error && <p role="alert">{text[error]}</p>}
+      <div className="buyer-link-actions">
+        {!order.buyer_link_revoked_at && (
+          <div className="buyer-link-action">
+            <p id="revoke-link-description">{text.revokeDescription}</p>
+            <button
+              className="btn btn-secondary"
+              aria-describedby="revoke-link-description"
+              disabled={busy || stale || pendingAction === 'reissue'}
+              onClick={() => void changeAccess('revoke')}
+              style={{ minHeight: '44px' }}
+            >
+              {busy && pendingAction === 'revoke' ? text.revoking : error && pendingAction === 'revoke' ? text.retryRevoke : text.revoke}
+            </button>
+          </div>
+        )}
+        {reissuable && (
+          <div className="buyer-link-action">
+            <p id="reissue-link-description">{text.reissueDescription}</p>
+            <button
+              className="btn btn-secondary"
+              aria-describedby="reissue-link-description"
+              disabled={busy || stale || pendingAction === 'revoke'}
+              onClick={() => void changeAccess('reissue')}
+              style={{ minHeight: '44px' }}
+            >
+              {busy && pendingAction === 'reissue' ? text.reissuing : error && pendingAction === 'reissue' ? text.retryReissue : text.reissue}
+            </button>
+          </div>
+        )}
+      </div>
+    </section>
+  );
 }

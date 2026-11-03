@@ -45,18 +45,24 @@ it('clarifies locally and recognizes multilingual workflows independently of app
   expect(host.querySelector('[role="log"]')?.textContent).toContain('Choose one of the four workflows');
   for (const message of ['Show orders needing attention', 'যে অর্ডারে নজর দিতে হবে', 'attention dorkar emon order', 'পুরোনো orders needing attention']) {
     await send(message);
-    expect(host.querySelector('[data-testid="assistant-workflow"]')?.textContent).toMatch(/attention|নজর/);
+    expect(Array.from(host.querySelectorAll('[data-testid="assistant-query"]')).at(-1)?.textContent).toMatch(/attention|নজর/);
   }
-  for (const message of ['Create an order', 'নতুন অর্ডার তৈরি', 'ekta notun order chai', 'order toiri korte chai']) {
+  for (const [message, replacesDraft] of [
+    ['Create an order', false], ['নতুন অর্ডার তৈরি', true],
+    ['ekta notun order chai', true], ['order toiri korte chai', false],
+  ] as const) {
     await act(async () => host.querySelectorAll<HTMLButtonElement>('.assistant-workflow-choices button')[2].click());
     await send(message);
+    const prompt = host.querySelector('[role="alertdialog"]');
+    expect(Boolean(prompt)).toBe(replacesDraft);
+    if (replacesDraft) await act(async () => prompt!.querySelector<HTMLButtonElement>('.btn-danger')!.click());
     expect(host.querySelector('[name="assistant-draft"]')).not.toBeNull();
     expect(host.querySelector('[data-testid="assistant-workflow"]')?.textContent).toMatch(/Create an order|অর্ডার তৈরি/);
   }
   const language = host.querySelector<HTMLSelectElement>('[name="assistant-language"]')!;
   await act(async () => { language.value = 'en'; language.dispatchEvent(new Event('change', { bubbles: true })); });
   await send('ডেলিভারির প্রস্তুতি বাকি অর্ডার');
-  expect(host.querySelector('[data-testid="assistant-workflow"]')?.textContent).toContain('Awaiting delivery preparation');
+  expect(Array.from(host.querySelectorAll('[data-testid="assistant-query"]')).at(-1)?.textContent).toContain('Awaiting delivery preparation');
   expect(localStorage.getItem('middleman.locale')).toBeNull();
   expect(fetcher).not.toHaveBeenCalled();
 });

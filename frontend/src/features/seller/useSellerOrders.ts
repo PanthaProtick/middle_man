@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchOrders } from './api';
 import type { OrderDateRange } from './orderDateFilter';
 import { useDateSelection } from './useDateSelection';
@@ -24,6 +24,7 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   const [loading, setLoading] = useState(false);
   const queryRef = useRef<OrderQuery>({ status: '', search: '', dateRange: null, workQuery: '' });
   const requestRef = useRef(0);
+  const previousTokenRef = useRef<string | undefined>(token);
 
   const load = useCallback(
     async (cursor?: string, clear: boolean = true) => {
@@ -35,8 +36,8 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
           setOrders([]);
         }
         setNextCursor(null);
-        setLoading(true);
       }
+      setLoading(true);
       const query = queryRef.current;
       try {
         const res = await fetchOrders({
@@ -48,7 +49,12 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
           cursor,
         }, token);
         if (requestId !== requestRef.current) return;
-        setOrders((previous) => (cursor ? [...previous, ...res.items] : res.items));
+        setOrders((previous) => {
+          if (!cursor) return res.items;
+          const existingIds = new Set(previous.map((item) => item.id));
+          const newItems = res.items.filter((item) => !existingIds.has(item.id));
+          return [...previous, ...newItems];
+        });
         setNextCursor(res.next_cursor);
         setLoading(false);
       } catch (error) {
@@ -84,6 +90,21 @@ export function useSellerOrders(token: string | undefined, onError: (error: unkn
   }, [load]);
   const dates = useDateSelection(applyDates);
   const resetDates = dates.reset;
+
+  useEffect(() => {
+    if (previousTokenRef.current !== token) {
+      previousTokenRef.current = token;
+      resetDates();
+      setOrders([]);
+      setStatusFilter('');
+      setSearch('');
+      setWorkQuery('');
+      setNextCursor(null);
+      setLoading(false);
+      queryRef.current = { status: '', search: '', dateRange: null, workQuery: '' };
+    }
+    return () => { requestRef.current += 1; };
+  }, [token, resetDates]);
   const applyWorkQuery = useCallback((next: WorkQuery) => {
     queryRef.current = { status: '', search: '', dateRange: null, workQuery: next };
     setStatusFilter('');

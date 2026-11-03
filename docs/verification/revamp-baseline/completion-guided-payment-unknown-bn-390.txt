@@ -1,0 +1,54 @@
+Browser tab: 5, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&fault=unknown&lang=en".
+The following is a diff from the previous accessibility tree with ~ and + representing changed and added elements, respectively. Removed elements are summarized by ID range.
+~			106 container বিক্রেতা সহকারী
+~					108 heading বিক্রেতা সহকারী, Value: 3
+~						109 text বিক্রেতা সহকারী
+~					110 button সহকারী বন্ধ করুন
+~					112 text কথোপকথনের ভাষা
+~					113 pop up button (collapsed, settable) কথোপকথনের ভাষা, Value: বাংলা, Secondary Actions: Expand
+~							115 English
+~							116 (selected) বাংলা
+~				117 container বিক্রেতা সহকারী
+~					118 checkbox ধাপে ধাপে কাজ, Value: 1
+~					119 button (disabled) নতুন কথোপকথন
+~				120 text ধাপে ধাপে কাজ
+~				121 text একটি কাজ বেছে নিন বা কী করতে চান বলুন। কথোপকথন শুধু এই ট্যাবে থাকবে।
+~				122 container অস্থায়ী কথোপকথন
+~				123 button (disabled) অর্ডার তৈরি
+~				124 button (disabled) পেমেন্ট রেকর্ড
+~				125 button নজর দেওয়া দরকার এমন অর্ডার
+~				126 button ডেলিভারির প্রস্তুতি বাকি
+~				127 container পেমেন্ট রেকর্ড
+~					128 heading পেমেন্ট রেকর্ড, Value: 4
+~						129 text পেমেন্ট রেকর্ড
+~					130 text নিচে প্রাপ্ত পেমেন্ট লিখুন। টাকা গ্রহণের অ্যাকাউন্ট, সঠিক ট্রানজ্যাকশন আইডি ও পরিমাণ আবশ্যক; প্রেরকের নম্বর ও সময় ঐচ্ছিক। পেমেন্ট রেকর্ড বোতাম চাপার আগে কিছু সংরক্ষিত হবে না।
+~						132 text টাকা গ্রহণের অ্যাকাউন্ট
+~						133 pop up button (disabled, collapsed, settable) টাকা গ্রহণের অ্যাকাউন্ট, Value: Synthetic receiving account · bkash · 01700000000, Secondary Actions: Expand
+~								135 সক্রিয় অ্যাকাউন্ট বেছে নিন
+~					137 button (disabled) অ্যাকাউন্ট হালনাগাদ করুন
+~						139 text ট্রানজ্যাকশন আইডি
+~						140 text field (disabled) ট্রানজ্যাকশন আইডি, Value: SYNTHETIC01
+~						142 text প্রাপ্ত টাকার পরিমাণ (BDT)
+~						143 text field (disabled) প্রাপ্ত টাকার পরিমাণ (BDT), Value: 500
+~						145 text প্রেরকের নম্বর (ঐচ্ছিক)
+~						146 text field (disabled) প্রেরকের নম্বর (ঐচ্ছিক)
+~						148 text পেমেন্টের সময় (ঐচ্ছিক)
+~						149 date field (disabled, settable) পেমেন্টের সময় (ঐচ্ছিক)
+~					150 container রেকর্ড করার জন্য প্রস্তুত
+~						151 heading রেকর্ড করার জন্য প্রস্তুত, Value: 5
+~							152 text রেকর্ড করার জন্য প্রস্তুত
+~							154 text টাকা গ্রহণের অ্যাকাউন্ট :  Synthetic receiving account  ·  BKASH
+~							156 text ট্রানজ্যাকশন আইডি :  SYNTHETIC01
+~							158 text প্রাপ্ত টাকার পরিমাণ (BDT) : BDT  500.00
+~						159 text রেকর্ড করলে মিলকরণ চলবে এবং যোগ্য অর্ডার স্বয়ংক্রিয়ভাবে নিশ্চিত হতে পারে।
+~						160 text আপনার তথ্য রেকর্ড করা মানে এই নয় যে পেমেন্ট সরবরাহকারী লেনদেনটি যাচাই করেছে।
+~						161 button (disabled) পেমেন্ট রেকর্ড করুন
+~					162 text ফলাফল নিশ্চিত নয়। তথ্য বদলানো বা আরেকটি পেমেন্ট রেকর্ড করার আগে এই অনুরোধের ফল দেখুন।
+~					163 button অনুরোধের ফল দেখুন
+~					165 text অসমাপ্ত খসড়া :  পেমেন্ট রেকর্ড
+~				166 button খসড়া চালিয়ে যান
+~				167 button (disabled) খসড়া বাদ দিন
+~					169 text কী করতে চান?
+~					170 text entry area (settable) কী করতে চান?
+~					171 button (disabled) পাঠান
+The focused UI element is 106 container বিক্রেতা সহকারী

@@ -14,7 +14,9 @@ afterEach(async () => {
   vi.restoreAllMocks(); document.body.innerHTML = ''; localStorage.clear();
 });
 async function click(label: string) {
-  const button = Array.from(host.querySelectorAll('button')).find(item => item.textContent === label);
+  const button = Array.from(host.querySelectorAll('button')).find(item =>
+    item.textContent === label || (label === 'Seller assistant' && item.dataset.testid === 'seller-assistant-launcher')
+  );
   expect(button, label).toBeDefined();
   await act(async () => button!.click());
 }
@@ -47,13 +49,15 @@ it('collects locally, interprets bilingual amounts, and only creates after the e
   await mount();
   await send('Create order; product: হাতের Shirt; total: ৳১,২৫০.৫০; advance: ২০০ টাকা; account: Main');
   expect(host.textContent).toContain('BDT 1,250.50');
+  expect(host.textContent).toContain('Remaining COD (BDT): BDT 1,050.50');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের Shirt');
   expect(requests).toHaveLength(0);
   await send('yes');
   expect(requests).toHaveLength(0);
   await change('assistant-total', '1500');
   expect(host.textContent).toContain('BDT 1,500.00');
-  await click('Create order');
+  expect(host.textContent).toContain('Remaining COD (BDT): BDT 1,300.00');
+  await click('Review'); await click('Confirm');
   const write = requests.find(request => request.options?.method === 'POST')!;
   expect(JSON.parse(String(write.options?.body))).toMatchObject({ product_name: 'হাতের Shirt', total_minor: 150000,
     required_advance_minor: 20000, payment_account_id: 'account-1' });
@@ -82,6 +86,16 @@ it('preserves all valid answers and requests missing or ambiguous fields togethe
   expect(fetcher).not.toHaveBeenCalled();
 });
 
+it('shows a localized zero remaining COD when the advance covers the total', async () => {
+  const fetcher = vi.spyOn(globalThis, 'fetch');
+  await mount();
+  await send('Create order; product: Shirt; total: 200; advance: 200; account: Main');
+  const language = host.querySelector<HTMLSelectElement>('[name="assistant-language"]')!;
+  await act(async () => { language.value = 'bn'; language.dispatchEvent(new Event('change', { bubbles: true })); });
+  expect(host.textContent).toContain('বাকি ক্যাশ অন ডেলিভারি (BDT): BDT 0.00');
+  expect(fetcher).not.toHaveBeenCalled();
+});
+
 it('resolves an unknown outcome before retrying, holding fields and one identity through close', async () => {
   const requests: { url: string; options?: RequestInit }[] = [];
   let posts = 0;
@@ -98,9 +112,10 @@ it('resolves an unknown outcome before retrying, holding fields and one identity
   });
   await mount();
   await send('Create order; product: Shirt; total: 1000; advance: 200; account: Main');
-  await click('Create order');
+  await click('Review'); await click('Confirm');
   expect(host.textContent).toContain('Outcome unknown');
-  expect(host.querySelector<HTMLInputElement>('[name="assistant-total"]')?.disabled).toBe(true);
+  expect(host.querySelector('[name="assistant-total"]')).toBeNull();
+  expect(Array.from(host.querySelectorAll('button')).find(item => item.textContent === 'Make Changes')?.disabled).toBe(true);
   await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Close assistant"]')!.click());
   await click('Seller assistant');
   await click('Check submission');
@@ -123,9 +138,10 @@ it('keeps an unknown action locked when recovery itself fails authorization', as
   });
   await mount();
   await send('Create order; product: Shirt; total: 1000; advance: 200; account: Main');
-  await click('Create order'); await click('Check submission');
+  await click('Review'); await click('Confirm'); await click('Check submission');
   expect(host.textContent).toContain('Outcome unknown');
-  expect(host.querySelector<HTMLInputElement>('[name="assistant-total"]')?.disabled).toBe(true);
+  expect(host.querySelector('[name="assistant-total"]')).toBeNull();
+  expect(Array.from(host.querySelectorAll('button')).find(item => item.textContent === 'Make Changes')?.disabled).toBe(true);
   expect(writeCount).toBe(1);
 });
 
@@ -158,12 +174,13 @@ it('preserves fields on stale accounts and resolves a saved unknown result witho
   });
   await mount();
   await send('Create order; product: Shirt; total: 1000; advance: 200; account: Main');
-  await click('Create order');
+  await click('Review'); await click('Confirm');
   expect(host.textContent).toContain('Could not save');
+  await click('Make Changes');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('Shirt');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-total"]')?.disabled).toBe(false);
   await change('assistant-total', '1200');
-  await click('Create order'); await click('Check submission');
+  await click('Review'); await click('Confirm'); await click('Check submission');
   expect(writes).toBe(2);
   expect(host.textContent).toContain('Awaiting buyer');
   expect(host.querySelector('[name="assistant-draft"]')).toBeNull();
@@ -182,7 +199,7 @@ it('opens the actual seller order in a stable dialog and copies its returned buy
   });
   await mount();
   await send('Create order; product: Shirt; total: 1000; advance: 200; account: Main');
-  await click('Create order'); await click('Copy link');
+  await click('Review'); await click('Confirm'); await click('Copy link');
   expect(writeText).toHaveBeenCalledWith(new URL(saved.portal_url, window.location.origin).href);
   await click('Open order');
   expect(host.querySelector('dialog[open]')?.textContent).toContain('Actual saved order');
@@ -199,7 +216,7 @@ it('clarifies repeated same-workflow actions and confirms discard before creatin
   await send('Create another order; product: Bag');
   expect(host.querySelector('[role="alertdialog"]')).not.toBeNull();
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('Shirt');
-  await click('Keep draft');
+  await click('Keep Editing');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-total"]')?.value).toBe('1000');
   expect(fetcher).not.toHaveBeenCalled();
 });

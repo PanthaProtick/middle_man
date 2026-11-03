@@ -1,0 +1,38 @@
+Browser tab: 4, Title: "Seller workspace · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=en".
+1 AXWebArea Seller workspace · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=en
+	2 container root
+		3 link Description: Skip to workspace, Value: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=en#workspace
+		4 container
+			5 heading middleman, Value: 1
+				6 text middleman
+			7 text Your everyday order desk
+			8 container System status
+				9 container Language
+					10 checkbox বাংলা, Value: 0
+					11 checkbox English, Value: 1
+					12 text Language: English
+				13 text Connected
+		14 container Your shop, in good order.
+			15 text A little order. A lot less back-and-forth.
+			16 heading Your shop, in good order., Value: 2, ID: workspace-heading
+				17 text Your shop,
+				18 text in good order.
+			19 text From a conversation to a confirmed order. Collect buyer details, check advances, and get ready to deliver.
+			20 content list How order confirmation works
+				21 container
+					22 text 01 Share an order link
+				23 container
+					24 text 02 Buyer adds details & payment
+				25 container
+					26 text 03 Review, confirm & deliver
+		27 container workspace
+			28 text Shop Setup
+			29 text Start with your shop name. Next, add the account where buyers send their advance.
+			30 container
+				31 text Shop Display Name
+				32 text field (settable) Shop Display Name, ID: shop-display-name
+				33 button (disabled) Set Up Shop
+			34 button (collapsed) Seller assistant, Secondary Actions: Expand
+		35 text middleman · Made for the way you sell. Seller confirmation does not imply payment-provider verification.
+
+The focused UI element is 1 AXWebArea Seller workspace · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=en

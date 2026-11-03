@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { fetchTransactions } from './api';
 import type { ReceiptView } from './types';
 import type { OrderDateRange } from './orderDateFilter';
@@ -34,6 +34,7 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
   const [loading, setLoading] = useState(false);
   const queryRef = useRef<InboxQuery>({ filter: '', search: '', dateRange: null });
   const requestRef = useRef(0);
+  const previousTokenRef = useRef<string | undefined>(token);
 
   const load = useCallback(
     async (cursor?: string, clear: boolean = true) => {
@@ -57,7 +58,12 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
           cursor,
         }, token);
         if (requestId !== requestRef.current) return;
-        setTransactions((previous) => (cursor ? [...previous, ...res.items] : res.items));
+        setTransactions((previous) => {
+          if (!cursor) return res.items;
+          const existingIds = new Set(previous.map((item) => item.id));
+          const newItems = res.items.filter((item) => !existingIds.has(item.id));
+          return [...previous, ...newItems];
+        });
         setNextCursor(res.next_cursor || null);
         setLoading(false);
       } catch (error) {
@@ -75,6 +81,21 @@ export function useTransactionInbox(token: string | undefined, onError: (error: 
     void load();
   }, [load]);
   const dates = useDateSelection(applyDates);
+  const resetDates = dates.reset;
+
+  useEffect(() => {
+    if (previousTokenRef.current !== token) {
+      previousTokenRef.current = token;
+      resetDates();
+      setTransactions([]);
+      setFilter('');
+      setSearch('');
+      setNextCursor(null);
+      setLoading(false);
+      queryRef.current = { filter: '', search: '', dateRange: null };
+    }
+    return () => { requestRef.current += 1; };
+  }, [token, resetDates]);
   const changeFilter = useCallback((value: string) => {
     queryRef.current = { ...queryRef.current, filter: value };
     setFilter(value);

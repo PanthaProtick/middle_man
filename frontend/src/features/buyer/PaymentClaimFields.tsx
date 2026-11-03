@@ -1,5 +1,5 @@
 import React from 'react';
-import { CreditCard, Phone, Hash } from 'lucide-react';
+import { CreditCard, Phone, Hash, Banknote } from 'lucide-react';
 import type { BuyerFormDraft, PublicOrder } from './types';
 import { formatBDT } from './api';
 import { useLocale } from '../locale';
@@ -21,13 +21,10 @@ export function PaymentClaimFields({
   return (
     <>
       {/* Payment Provider & Amount */}
-      <div className="form-grid-2">
+      <div className="form-grid-2" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
         <div className="form-group">
-          <label
-            htmlFor="payment_provider"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
-          >
-            <CreditCard size={15} color="var(--primary-accent)" />
+          <label htmlFor="payment_provider">
+            <CreditCard size={15} color="var(--primary-accent)" aria-hidden="true" />
             <span>{t('buyer.form.method')}</span>
           </label>
           <select
@@ -38,19 +35,20 @@ export function PaymentClaimFields({
             aria-invalid={!!fieldErrors.payment_provider}
             onChange={(e) => onUpdateField('payment_provider', e.target.value as 'bkash' | 'nagad')}
             className="form-control"
-            style={{ marginTop: '6px', width: '100%' }}
           >
             <option value="bkash">bKash</option>
             <option value="nagad">Nagad</option>
           </select>
-          {fieldErrors.payment_provider && <div id="payment_provider-error" role="alert">{fieldErrors.payment_provider}</div>}
+          {fieldErrors.payment_provider && (
+            <div id="payment_provider-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
+              {fieldErrors.payment_provider}
+            </div>
+          )}
         </div>
 
         <div className="form-group">
-          <label
-            htmlFor="claimed_advance_bdt"
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
-          >
+          <label htmlFor="claimed_advance_bdt">
+            <Banknote size={15} color="var(--primary-accent)" aria-hidden="true" />
             <span>{t('buyer.form.amount')}</span>
           </label>
           <input
@@ -62,10 +60,9 @@ export function PaymentClaimFields({
             onChange={(e) => onUpdateField('claimed_advance_bdt', e.target.value)}
             aria-describedby={`claimed_advance_bdt-help${fieldErrors.claimed_advance_bdt ? ' claimed_advance_bdt-error' : ''}`}
             aria-invalid={!!fieldErrors.claimed_advance_bdt}
-            className="form-control"
-            style={{ marginTop: '6px', width: '100%' }}
+            className="form-control buyer-tabular"
           />
-          <div id="claimed_advance_bdt-help" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+          <div id="claimed_advance_bdt-help" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
             {t('buyer.form.expected', { amount: formatBDT(order.required_advance_minor) })}
           </div>
           {fieldErrors.claimed_advance_bdt && (
@@ -77,12 +74,9 @@ export function PaymentClaimFields({
       </div>
 
       {/* Payment Sender Number */}
-      <div className="form-group" style={{ marginBottom: '14px' }}>
-        <label
-          htmlFor="payment_sender"
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
-        >
-          <Phone size={15} color="var(--primary-accent)" />
+      <div className="form-group">
+        <label htmlFor="payment_sender">
+          <Phone size={15} color="var(--primary-accent)" aria-hidden="true" />
           <span>{t('buyer.form.sender')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
@@ -95,10 +89,10 @@ export function PaymentClaimFields({
           placeholder={t('buyer.form.senderPlaceholder')}
           aria-describedby={`payment_sender-help${fieldErrors.payment_sender ? ' payment_sender-error' : ''}`}
           aria-invalid={!!fieldErrors.payment_sender}
-          className="form-control"
-          style={{ marginTop: '6px', width: '100%' }}
+          className="form-control buyer-tabular"
+          autoComplete="tel"
         />
-        <div id="payment_sender-help" style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '2px' }}>
+        <div id="payment_sender-help" style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
           {t('buyer.form.senderHelp')}
         </div>
         {fieldErrors.payment_sender && (
@@ -110,11 +104,8 @@ export function PaymentClaimFields({
 
       {/* Transaction ID */}
       <div className="form-group" style={{ marginBottom: '6px' }}>
-        <label
-          htmlFor="payment_trx_id"
-          style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}
-        >
-          <Hash size={15} color="var(--primary-accent)" />
+        <label htmlFor="payment_trx_id">
+          <Hash size={15} color="var(--primary-accent)" aria-hidden="true" />
           <span>{t('buyer.form.trx')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
         </label>
         <input
@@ -127,8 +118,8 @@ export function PaymentClaimFields({
           placeholder={t('buyer.form.trxPlaceholder')}
           aria-describedby={fieldErrors.payment_trx_id ? "payment_trx_id-error" : undefined}
           aria-invalid={!!fieldErrors.payment_trx_id}
-          className="form-control"
-          style={{ marginTop: '6px', width: '100%' }}
+          className="form-control buyer-mono-num"
+          autoCapitalize="characters"
         />
         {fieldErrors.payment_trx_id && (
           <div id="payment_trx_id-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>

@@ -17,12 +17,12 @@ const circleStyle = {
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  margin: '0 auto 12px auto',
+  margin: '0 auto 14px auto',
 } as const;
 
 const bodyStyle = {
   margin: '6px 0 0 0',
-  fontSize: '0.85rem',
+  fontSize: '0.875rem',
   color: 'var(--text-secondary)',
 } as const;
 
@@ -35,14 +35,14 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
   const isCancelled = order.lifecycle === 'cancelled';
 
   return (
-    <div className="card" style={{ border: '1px solid var(--border-subtle)', textAlign: 'center', padding: '24px 16px' }}>
+    <div className="card" style={{ border: '1px solid var(--border-subtle)', textAlign: 'center', padding: '28px 20px' }}>
       {/* Icon & Status Heading */}
       {isPending && (
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ ...circleStyle, background: 'rgba(234, 179, 8, 0.15)', border: '1px solid rgba(234, 179, 8, 0.3)' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <div style={{ ...circleStyle, background: 'rgba(138, 87, 11, 0.12)', border: '1px solid rgba(138, 87, 11, 0.28)' }}>
             <Clock size={28} color="var(--amber-accent)" aria-hidden="true" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--amber-accent)' }}>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--amber-accent)', fontFamily: 'var(--font-heading)' }}>
             {t('buyer.status.pending.title')}
           </h3>
           <p style={bodyStyle}>{t('buyer.status.pending.body')}</p>
@@ -50,11 +50,11 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
       )}
 
       {isConfirmed && (
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ ...circleStyle, background: 'rgba(34, 197, 94, 0.15)', border: '1px solid rgba(34, 197, 94, 0.3)' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <div style={{ ...circleStyle, background: 'rgba(25, 112, 71, 0.12)', border: '1px solid rgba(25, 112, 71, 0.28)' }}>
             <CheckCircle2 size={28} color="var(--emerald-accent)" aria-hidden="true" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--emerald-accent)' }}>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--emerald-accent)', fontFamily: 'var(--font-heading)' }}>
             {t('buyer.status.confirmed.title')}
           </h3>
           <p style={bodyStyle}>{t('buyer.status.confirmed.body')}</p>
@@ -62,11 +62,11 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
       )}
 
       {isExpired && (
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ ...circleStyle, background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <div style={{ ...circleStyle, background: 'rgba(179, 52, 72, 0.12)', border: '1px solid rgba(179, 52, 72, 0.28)' }}>
             <AlertTriangle size={28} color="var(--rose-accent)" aria-hidden="true" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--rose-accent)' }}>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--rose-accent)', fontFamily: 'var(--font-heading)' }}>
             {t('buyer.status.expired.title')}
           </h3>
           <p style={bodyStyle}>{t('buyer.status.expired.body')}</p>
@@ -74,11 +74,11 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
       )}
 
       {(isRejected || isCancelled) && (
-        <div style={{ marginBottom: '16px' }}>
-          <div style={{ ...circleStyle, background: 'rgba(148, 163, 184, 0.15)', border: '1px solid rgba(148, 163, 184, 0.3)' }}>
+        <div style={{ marginBottom: '18px' }}>
+          <div style={{ ...circleStyle, background: 'rgba(78, 101, 92, 0.12)', border: '1px solid rgba(78, 101, 92, 0.25)' }}>
             <XCircle size={28} color="var(--text-secondary)" aria-hidden="true" />
           </div>
-          <h3 style={{ margin: 0, fontSize: '1.2rem', color: 'var(--text-primary)' }}>
+          <h3 style={{ margin: 0, fontSize: '1.25rem', color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>
             {t(isRejected ? 'buyer.status.rejected.title' : 'buyer.status.cancelled.title')}
           </h3>
           <p style={bodyStyle}>
@@ -94,14 +94,17 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
             display: 'inline-block',
             padding: '6px 14px',
             borderRadius: '16px',
-            background: 'var(--bg-surface)',
-            border: '1px solid var(--border-subtle)',
-            fontSize: '0.8rem',
+            background: '#eaf4ee',
+            border: '1px solid #b8d5c5',
+            fontSize: '0.825rem',
             color: 'var(--primary-accent)',
-            marginBottom: '18px',
+            marginBottom: '20px',
           }}
         >
-          {t('buyer.status.reference')}: <span style={{ fontWeight: 600 }}>{order.submission_acknowledgement}</span>
+          {t('buyer.status.reference')}:{' '}
+          <span className="buyer-mono-num" style={{ fontWeight: 700 }}>
+            {order.submission_acknowledgement}
+          </span>
         </div>
       )}
 
@@ -109,7 +112,7 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
       <div
         style={{
           padding: '16px',
-          borderRadius: '8px',
+          borderRadius: '10px',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-subtle)',
           marginBottom: '20px',
@@ -117,51 +120,53 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
         }}
       >
         {isConfirmed && order.actual_cod_minor !== null && (
-          <p style={{ margin: '0 0 8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+          <p style={{ margin: '0 0 10px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
             {t('buyer.status.acceptedAdvance')}:{' '}
-            <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>
+            <span className="buyer-tabular" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
               {formatBDT(order.total_minor - order.actual_cod_minor)}
             </span>
           </p>
         )}
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           <span>{t('buyer.status.product')}</span>
-          <span style={{ fontWeight: 500, color: 'var(--text-primary)', overflowWrap: 'anywhere', textAlign: 'right' }}>
+          <span style={{ fontWeight: 600, color: 'var(--text-primary)', overflowWrap: 'anywhere', textAlign: 'right' }}>
             {order.product_name}
           </span>
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', marginBottom: '8px', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
           <span>{t('buyer.status.total')}</span>
-          <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{formatBDT(order.total_minor)}</span>
+          <span className="buyer-tabular" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>
+            {formatBDT(order.total_minor)}
+          </span>
         </div>
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
             gap: '12px',
-            paddingTop: '8px',
+            paddingTop: '10px',
             borderTop: '1px dashed var(--border-subtle)',
             fontSize: '0.95rem',
-            fontWeight: 600,
+            fontWeight: 700,
             color: isConfirmed ? 'var(--emerald-accent)' : 'var(--text-primary)',
           }}
         >
           <span>{t(isConfirmed ? 'buyer.status.remainingCod' : 'buyer.status.expectedCod')}</span>
-          <span>{formatBDT(order.actual_cod_minor ?? order.expected_cod_minor)}</span>
+          <span className="buyer-tabular">{formatBDT(order.actual_cod_minor ?? order.expected_cod_minor)}</span>
         </div>
       </div>
 
       {/* Manual & Auto Polling Status */}
       {isPending && (
-        <div style={{ marginTop: '14px' }}>
+        <div style={{ marginTop: '16px' }}>
           <button
             type="button"
             onClick={onRefresh}
             disabled={isRefreshing}
             className="btn btn-secondary"
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', padding: '8px 16px' }}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', minHeight: '44px', padding: '8px 18px' }}
           >
-            <RefreshCw size={14} className={isRefreshing ? 'spin' : ''} aria-hidden="true" />
+            <RefreshCw size={15} className={isRefreshing ? 'spin' : ''} aria-hidden="true" />
             <span>{t(isRefreshing ? 'buyer.status.checking' : 'buyer.status.refresh')}</span>
           </button>
           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '8px' }}>

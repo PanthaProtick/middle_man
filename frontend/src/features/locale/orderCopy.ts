@@ -38,6 +38,11 @@ const en = {
   dateRangeInvalid: 'Enter a valid start date and end date.',
   dateRangeReversed: 'The start date must be on or before the end date.',
   dateDaysInvalid: 'Enter a whole number of days from 1 to 3650.',
+  needsAttention: 'Needs Attention',
+  readyForDelivery: 'Ready for Delivery',
+  allOrders: 'All Orders',
+  workQueues: 'Order work queues',
+  todayBanner: 'Today in Bangladesh (Asia/Dhaka)',
 } as const;
 const bn: Record<keyof typeof en, string> = {
   deliveryStaged: 'ডেলিভারির জন্য প্রস্তুত রাখা', deliveryUnstaged: 'ডেলিভারির জন্য প্রস্তুত রাখা হয়নি',
@@ -79,6 +84,11 @@ const bn: Record<keyof typeof en, string> = {
   dateRangeInvalid: 'সঠিক শুরুর তারিখ ও শেষের তারিখ দিন।',
   dateRangeReversed: 'শুরুর তারিখ শেষের তারিখের আগে বা সমান হতে হবে।',
   dateDaysInvalid: '১ থেকে ৩৬৫০ এর মধ্যে পূর্ণ সংখ্যা দিন।',
+  needsAttention: 'মনোযোগ প্রয়োজন',
+  readyForDelivery: 'ডেলিভারির জন্য প্রস্তুত',
+  allOrders: 'সব অর্ডার',
+  workQueues: 'অর্ডারের কাজের সারি',
+  todayBanner: 'আজ বাংলাদেশে (এশিয়া/ঢাকা)',
 };
 export const orderCopy = { en, bn };
 export type OrderCopy = typeof en | typeof bn;

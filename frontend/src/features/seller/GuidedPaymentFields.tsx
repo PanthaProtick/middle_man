@@ -2,6 +2,7 @@ import { guidedPaymentCopy } from '../locale/guidedPaymentCopy';
 import { emptyPaymentFields } from './guidedPayment';
 import { formatOrderAmount } from './orderNumbers';
 import type { AssistantConversation } from './useAssistantConversation';
+import { useLayoutEffect, useRef } from 'react';
 
 export function GuidedPaymentFields({ conversation: c }: { conversation: AssistantConversation }): React.JSX.Element {
   const text = guidedPaymentCopy[c.locale];
@@ -9,13 +10,20 @@ export function GuidedPaymentFields({ conversation: c }: { conversation: Assista
   const summary = c.paymentSummary;
   const submission = c.paymentSubmission;
   const disabled = submission.frozen || Boolean(c.pending);
-  return <div className="assistant-payment-fields">
-    <p>{text.help}</p>
+  const accountInput = useRef<HTMLSelectElement>(null);
+  const review = useRef<HTMLElement>(null);
+  const account = c.accounts.find(item => item.id === summary.payload?.payment_account_id);
+  useLayoutEffect(() => {
+    if (c.paymentReviewing) review.current?.focus();
+    else accountInput.current?.focus();
+  }, [c.paymentReviewing]);
+  return <div className="assistant-payment-fields" aria-busy={submission.state === 'processing'}>
     {summary.errors.length > 0 && <div role="status"><p>{text.missing}</p>
       <ul>{summary.errors.map(key => <li key={key}>{text[key]}</li>)}</ul>
     </div>}
+    {!c.paymentReviewing && <><p>{text.help}</p>
     {summary.errors.includes('account') && <p role="note">{text.accountHelp}</p>}
-    <label>{text.account}<select name="assistant-payment-account" value={fields.account} disabled={disabled}
+    <label>{text.account}<select ref={accountInput} name="assistant-payment-account" value={fields.account} disabled={disabled}
       aria-invalid={summary.errors.includes('account')} onChange={event => c.updatePayment({ account: event.target.value })}>
       <option value="">{text.choose}</option>
       {c.accounts.filter(account => account.is_active).map(account => <option key={account.id} value={account.id}>
@@ -37,17 +45,23 @@ export function GuidedPaymentFields({ conversation: c }: { conversation: Assista
     <label>{text.occurredAt}<input name="assistant-payment-time" type="datetime-local"
       value={fields.occurredAt} aria-invalid={summary.errors.includes('occurredAt')} disabled={disabled}
       onChange={event => c.updatePayment({ occurredAt: event.target.value })} /></label>
-    {summary.payload && <section aria-label={text.summary}>
+    </>}
+    {summary.payload && <section ref={review} tabIndex={-1} aria-label={text.summary}>
       <h5>{text.summary}</h5>
-      <p>{text.account}: {c.accounts.find(account => account.id === summary.payload!.payment_account_id)?.label} · {summary.payload.provider.toUpperCase()}</p>
-      <p>{text.trxId}: {summary.payload.trx_id}</p>
-      <p>{text.amount}: BDT {formatOrderAmount(summary.payload.amount_minor)}</p>
+      <p>{text.account}: {account?.label} · {summary.payload.provider.toUpperCase()} · {account?.receiving_number}</p>
+      <p>{text.trxId}: <span className="assistant-numeric">{summary.payload.trx_id}</span></p>
+      <p>{text.amount}: <span className="assistant-numeric">BDT {formatOrderAmount(summary.payload.amount_minor)}</span></p>
+      {summary.payload.sender_number && <p>{text.sender}: {summary.payload.sender_number}</p>}
+      {summary.payload.occurred_at && <p>{text.occurredAt}: {fields.occurredAt}</p>}
       <p>{text.preview}</p>
       <p role="note">{text.previewWarning}</p>
-      <button type="button" className="btn btn-primary" disabled={disabled} onClick={() => {
+      {c.paymentReviewing && <button type="button" className="btn btn-primary" disabled={disabled} onClick={() => {
         if (summary.payload) void submission.submit(summary.payload);
-      }}>{text.record}</button>
+      }}>{text.confirm}</button>}
     </section>}
+    {c.paymentReviewing && <button type="button" className="btn btn-secondary" disabled={disabled} onClick={c.changePayment}>{text.changes}</button>}
+    {!c.paymentReviewing && <button type="button" className="btn btn-primary" disabled={disabled || !summary.payload}
+      onClick={c.reviewPayment}>{text.review}</button>}
     {submission.state !== 'idle' && <p role="status">{text[submission.state]}</p>}
     {submission.state === 'failed' && submission.failureMessage !== 'failed' &&
       <p role="alert">{text[submission.failureMessage]}</p>}

@@ -5,6 +5,7 @@ import { PaymentAccountList } from './PaymentAccountList';
 import { AddAccountForm } from './AddAccountForm';
 import { PathaoSettings } from './PathaoSettings';
 import type { PaymentAccount } from './types';
+import './PaymentAccounts.css';
 
 interface AccountsSectionProps {
   accounts: PaymentAccount[];
@@ -13,6 +14,7 @@ interface AccountsSectionProps {
   onAccountCreated: (created: PaymentAccount) => void;
   onError: (msg: string | null) => void;
   onReload: () => void;
+  subSection?: 'accounts' | 'courier' | 'all';
 }
 
 export function AccountsSection({
@@ -22,15 +24,23 @@ export function AccountsSection({
   onAccountCreated,
   onError,
   onReload,
+  subSection = 'all',
 }: AccountsSectionProps): React.JSX.Element {
   const c = usePaymentInboxCopy();
+  const showAccounts = subSection === 'all' || subSection === 'accounts';
+  const showCourier = subSection === 'all' || subSection === 'courier';
+
   return (
-    <section aria-labelledby="section-accounts-title">
-      <div className="isolated-section">
+    <section aria-labelledby="section-accounts-title" className="accounts-section-wrapper">
+      <div
+        className="isolated-section"
+        hidden={!showAccounts}
+        style={{ display: showAccounts ? 'block' : 'none' }}
+      >
         <div className="isolated-section-header">
           <div>
             <h4 id="section-accounts-title" className="isolated-section-title">
-              <CreditCard size={18} /> {c("Designated Receiving Accounts")}
+              <CreditCard size={18} aria-hidden="true" /> {c("Designated Receiving Accounts")}
             </h4>
             <p className="isolated-section-desc">
               {c("Manage the bKash, Nagad, and Rocket numbers given to buyers on their confirmation link.")}
@@ -56,11 +66,15 @@ export function AccountsSection({
         />
       </div>
 
-      <div className="isolated-section">
+      <div
+        className="isolated-section"
+        hidden={!showCourier}
+        style={{ display: showCourier ? 'block' : 'none' }}
+      >
         <div className="isolated-section-header" style={{ marginBottom: '12px' }}>
           <div>
             <h4 className="isolated-section-title">
-              <Truck size={18} /> {c("Courier Logistics Integration")}
+              <Truck size={18} aria-hidden="true" /> {c("Courier Logistics Integration")}
             </h4>
             <p className="isolated-section-desc">
               {c("Connect your courier accounts to automate parcel dispatch and delivery tracking.")}

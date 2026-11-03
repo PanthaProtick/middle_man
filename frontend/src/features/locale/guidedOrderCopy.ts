@@ -1,8 +1,10 @@
 const en = {
-  help: 'Use product: Shirt; total: BDT 1,250; advance: 200; account: Main. Or edit the fields below. Nothing is saved until you click Create order.',
+  help: 'Use product: Shirt; total: BDT 1,250; advance: 200; account: Main. Or edit the fields below. Review the details, then click Confirm to save.',
   missing: 'Please supply or correct all highlighted fields. Amounts must be positive and unambiguous; advance cannot exceed total.',
   value: 'Product name', total: 'Order total (BDT)', advance: 'Required advance (BDT)', account: 'Receiving account',
   weight: 'Weight in kg (optional)', quantity: 'Quantity (optional)', choose: 'Choose an active account',
+  remainingCod: 'Remaining COD (BDT)',
+  review: 'Review', confirm: 'Confirm', changes: 'Make Changes',
   summary: 'Ready to create', create: 'Create order', processing: 'Still processing. Keep this action open.',
   unknown: 'Outcome unknown. Check this submission before changing fields or creating another order.',
   check: 'Check submission', retry: 'No saved result found. You can retry the same confirmed submission.',
@@ -14,10 +16,12 @@ const en = {
   open: 'Open order', refresh: 'Refresh accounts', refreshing: 'Refreshing accounts…', refreshFailed: 'Could not refresh accounts. Try again.',
 };
 const bn: typeof en = {
-  help: 'এভাবে লিখুন: পণ্য: শার্ট; মোট: ৳১,২৫০; অগ্রিম: ২০০; অ্যাকাউন্ট: Main। নিচের ঘরগুলোও সম্পাদনা করতে পারেন। অর্ডার তৈরি বোতাম চাপার আগে কিছু সংরক্ষিত হবে না।',
+  help: 'এভাবে লিখুন: পণ্য: শার্ট; মোট: ৳১,২৫০; অগ্রিম: ২০০; অ্যাকাউন্ট: Main। নিচের ঘরগুলোও সম্পাদনা করতে পারেন। তথ্য পর্যালোচনা করে নিশ্চিত করুন বোতাম চাপলে সংরক্ষিত হবে।',
   missing: 'চিহ্নিত সব ঘর পূরণ বা সংশোধন করুন। টাকার পরিমাণ স্পষ্ট ও শূন্যের বেশি হতে হবে; অগ্রিম মোটের বেশি হবে না।',
   value: 'পণ্যের নাম', total: 'অর্ডারের মোট (BDT)', advance: 'প্রয়োজনীয় অগ্রিম (BDT)', account: 'টাকা গ্রহণের অ্যাকাউন্ট',
   weight: 'ওজন কেজিতে (ঐচ্ছিক)', quantity: 'পরিমাণ (ঐচ্ছিক)', choose: 'সক্রিয় অ্যাকাউন্ট বেছে নিন',
+  remainingCod: 'বাকি ক্যাশ অন ডেলিভারি (BDT)',
+  review: 'পর্যালোচনা করুন', confirm: 'নিশ্চিত করুন', changes: 'পরিবর্তন করুন',
   summary: 'তৈরির জন্য প্রস্তুত', create: 'অর্ডার তৈরি করুন', processing: 'এখনও প্রক্রিয়াধীন। এই কাজটি খোলা রাখুন।',
   unknown: 'ফলাফল নিশ্চিত নয়। তথ্য বদলানো বা আরেকটি অর্ডারের আগে এই অনুরোধের ফল দেখুন।',
   check: 'অনুরোধের ফল দেখুন', retry: 'সংরক্ষিত ফল পাওয়া যায়নি। একই নিশ্চিত অনুরোধ আবার পাঠাতে পারেন।',

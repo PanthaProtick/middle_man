@@ -3,31 +3,19 @@ import { AssistantWorkspace } from './AssistantWorkspace';
 import { ShoppingBag } from 'lucide-react';
 import type { SellerOrder, WorkQuery } from './types';
 import { useLocale } from '../locale/context';
-import { orderCopy, lifecycleLabel } from '../locale/orderCopy';
+import { orderCopy } from '../locale/orderCopy';
 import { OrderDetailModal } from './OrderDetailModal';
 import { OrderExport } from './OrderExport';
 import { OrderWorkQueryBanner } from './OrderWorkQueryBanner';
-import { deliveryPreparationCopy } from '../locale/deliveryPreparationCopy';
-import { attentionCopy } from '../locale/attentionCopy';
+import { OrderWorkQueryNav } from './OrderWorkQueryNav';
 import { OrderDateControls } from './OrderDateControls';
 import { OrderCard } from './OrderCard';
+import { OrderSearchControls } from './OrderSearchControls';
+import { resolveOrderEmptyMessage } from './orderEmptyMessage';
 import type { OrderDateError, OrderDateMode, OrderDateRange } from './orderDateFilter';
 import { useScrollRetention } from './useScrollRetention';
 
-interface OrderListProps {
-  token?: string;
-  onCheckTransactions?: () => void;
-  onCorrected?: (order: SellerOrder) => void;
-  orders: SellerOrder[];
-  statusFilter: string;
-  onFilterChange: (status: string) => void;
-  workQuery?: WorkQuery | '';
-  onClearWorkQuery?: () => void;
-  nextCursor: string | null;
-  onLoadMore: () => void;
-  search?: string;
-  onSearchChange?: (search: string) => void;
-  loading?: boolean;
+export interface OrderDateFilterProps {
   dateMode?: OrderDateMode;
   dateFrom?: string;
   dateTo?: string;
@@ -43,12 +31,32 @@ interface OrderListProps {
   onApplyLastDays?: () => void;
 }
 
+export interface OrderListProps extends OrderDateFilterProps {
+  token?: string;
+  onCheckTransactions?: () => void;
+  onCorrected?: (order: SellerOrder) => void;
+  orders: SellerOrder[];
+  statusFilter: string;
+  onFilterChange: (status: string) => void;
+  workQuery?: WorkQuery | '';
+  onSelectWorkQuery?: (query: WorkQuery | '') => void;
+  onClearWorkQuery?: () => void;
+  nextCursor: string | null;
+  onLoadMore: () => void;
+  search?: string;
+  onSearchChange?: (search: string) => void;
+  loading?: boolean;
+}
+
 export function OrderList({
-  token, onCorrected, onCheckTransactions,
+  token,
+  onCorrected,
+  onCheckTransactions,
   orders,
   statusFilter,
   onFilterChange,
   workQuery = '',
+  onSelectWorkQuery = () => undefined,
   onClearWorkQuery = () => undefined,
   nextCursor,
   onLoadMore,
@@ -81,178 +89,150 @@ export function OrderList({
     setExpandedReviewIds((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  const listedSelection = orders.find(order => order.id === selectedOrder?.id);
+  const listedSelection = orders.find((order) => order.id === selectedOrder?.id);
   const detailOrder = listedSelection && selectedOrder && listedSelection.version > selectedOrder.version
-    ? listedSelection : selectedOrder;
+    ? listedSelection
+    : selectedOrder;
   const confirmedCount = orders.filter((o) => o.lifecycle === 'confirmed').length;
   const exceptionCount = orders.filter((o) => o.lifecycle === 'pending' && o.review_reasons?.length > 0).length;
 
+  const eligibleWorkspaceIds = token
+    ? [...orders.filter((order) => order.id !== detailOrder?.id), ...(detailOrder ? [detailOrder] : [])]
+        .filter((order) => order.lifecycle === 'pending' && order.buyer_revision !== null)
+        .map((order) => order.id)
+    : [];
+
   return (
-    <AssistantWorkspace eligibleOrderIds={token ? [...orders.filter(order => order.id !== detailOrder?.id), ...(detailOrder ? [detailOrder] : [])]
-      .filter(order => order.lifecycle === 'pending' && order.buyer_revision !== null).map(order => order.id) : []}>
-    <div className="isolated-section" style={{ marginTop: '20px' }}>
-      <div className="isolated-section-header">
-        <div>
-          <h4 className="isolated-section-title">
-            <ShoppingBag size={18} /> {text.list} ({orders.length})
-          </h4>
-          <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', marginTop: '4px', flexWrap: 'wrap' }}>
-            <span style={{ color: 'var(--emerald-accent)' }}>✓ {text.confirmed}: {confirmedCount}</span>
-            {exceptionCount > 0 && <span style={{ color: 'var(--rose-accent)' }}>⚠ {text.exceptions} {exceptionCount}</span>}
+    <AssistantWorkspace eligibleOrderIds={eligibleWorkspaceIds}>
+      <div className="isolated-section" style={{ marginTop: '20px' }}>
+        <div className="isolated-section-header">
+          <div>
+            <h4 className="isolated-section-title">
+              <ShoppingBag size={18} /> {text.list} ({orders.length})
+            </h4>
+            <div style={{ display: 'flex', gap: '8px', fontSize: '0.75rem', marginTop: '4px', flexWrap: 'wrap' }}>
+              <span style={{ color: 'var(--emerald-accent)' }}>✓ {text.confirmed}: {confirmedCount}</span>
+              {exceptionCount > 0 && (
+                <span style={{ color: 'var(--rose-accent)' }}>⚠ {text.exceptions} {exceptionCount}</span>
+              )}
+            </div>
           </div>
-        </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <form
-            role="search"
-            aria-label={text.searchLabel}
-            onSubmit={(event) => event.preventDefault()}
-            style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}
-          >
-            <label htmlFor="order-search" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
-              {text.searchLabel}
-            </label>
-            <input
-              id="order-search"
-              type="search"
-              value={search}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={text.searchPlaceholder}
-              autoComplete="off"
-              className="form-control"
-              style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', minWidth: '220px' }}
+          {!workQuery && (
+            <OrderSearchControls
+              search={search}
+              onSearchChange={onSearchChange}
+              statusFilter={statusFilter}
+              onFilterChange={onFilterChange}
+              text={text}
             />
-            <button
-              type="button"
-              className="btn btn-secondary btn-sm"
-              onClick={() => onSearchChange(search)}
-              style={{ minHeight: '36px' }}
-            >
-              {text.searchAction}
-            </button>
-            {search && (
-              <button
-                type="button"
-                className="btn btn-secondary btn-sm"
-                aria-label={text.clearSearch}
-                onClick={() => onSearchChange('')}
-                style={{ minHeight: '36px' }}
-              >
-                {text.clearSearch}
-              </button>
-            )}
-          </form>
-          <label htmlFor="order-status-filter" style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>{text.status}</label>
-          <select
-            id="order-status-filter"
-            value={statusFilter}
-            onChange={(e) => onFilterChange(e.target.value)}
-            className="form-control"
-            style={{
-              padding: '4px 8px',
-              fontSize: '0.8rem',
-              minHeight: '36px',
-              width: 'auto',
-            }}
-          >
-            <option value="">{text.all}</option>
-            <option value="awaiting_buyer">{lifecycleLabel("awaiting_buyer", text)}</option>
-            <option value="pending">{lifecycleLabel("pending", text)}</option>
-            <option value="confirmed">{lifecycleLabel("confirmed", text)}</option>
-            <option value="rejected">{lifecycleLabel("rejected", text)}</option>
-            <option value="expired">{lifecycleLabel("expired", text)}</option>
-            <option value="cancelled">{lifecycleLabel("cancelled", text)}</option>
-          </select>
+          )}
         </div>
-      </div>
 
-      {workQuery && <OrderWorkQueryBanner query={workQuery} onClear={onClearWorkQuery} />}
+        <OrderWorkQueryNav
+          workQuery={workQuery}
+          onSelectWorkQuery={onSelectWorkQuery}
+          text={text}
+        />
 
-      <OrderDateControls
-        mode={dateMode}
-        from={dateFrom}
-        to={dateTo}
-        lastDays={lastDays}
-        appliedRange={appliedDateRange}
-        error={dateError}
-        onModeChange={onDateModeChange}
-        onFromChange={onDateFromChange}
-        onToChange={onDateToChange}
-        onLastDaysChange={onLastDaysChange}
-        onApplyDates={onApplyDates}
-        onApplyPreset={onApplyPreset}
-        onApplyLastDays={onApplyLastDays}
-      />
-      <OrderExport
-        key={`${statusFilter}|${search}|${workQuery}|${appliedDateRange?.from ?? ''}|${appliedDateRange?.to ?? ''}`}
-        status={statusFilter}
-        search={search}
-        workQuery={workQuery || undefined}
-        fromDate={appliedDateRange?.from}
-        toDate={appliedDateRange?.to}
-        token={token}
-      />
-      <div
-        ref={viewportRef}
-        onScroll={handleScroll}
-        className="ledger-scroll-viewport order-scroll-viewport"
-        data-testid="order-scroll-viewport"
-      >
-        {loading && orders.length === 0 ? (
-          <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
-            <p role="status" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-              {text.loading}
-            </p>
-          </div>
-        ) : orders.length === 0 ? (
-          <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
-            <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
-              {workQuery ? (workQuery === 'attention'
-                ? attentionCopy[locale].dashboardEmpty : deliveryPreparationCopy[locale].dashboardEmpty)
-                : search.trim() ? text.noMatches : appliedDateRange ? text.noDateMatches : text.empty}
-            </p>
-          </div>
-        ) : (
-          <div className="order-card-list">
-            {orders.map((ord) => (
-              <OrderCard
-                key={ord.id}
-                order={ord}
-                token={token}
-                text={text}
-                locale={locale}
-                expanded={Boolean(expandedReviewIds[ord.id])}
-                onInspect={order => { setInitialTab(0); setSelectedOrder(order); }}
-                onReviewAction={(order, action) => {
-                  if (action === 'CHECK_TRANSACTIONS') onCheckTransactions?.();
-                  else { setInitialTab(3); setSelectedOrder(order); }
-                }}
-                onToggleReview={toggleReviewCodes}
-              />
-            ))}
+        {workQuery && <OrderWorkQueryBanner query={workQuery} onClear={onClearWorkQuery} />}
 
-            {nextCursor && (
-              <div style={{ textAlign: 'center', marginTop: '12px' }}>
-                <button className="btn btn-secondary btn-sm" onClick={onLoadMore}>
-                  {text.more}
-                </button>
-              </div>
-            )}
-          </div>
+        {!workQuery && (
+          <OrderDateControls
+            mode={dateMode}
+            from={dateFrom}
+            to={dateTo}
+            lastDays={lastDays}
+            appliedRange={appliedDateRange}
+            error={dateError}
+            onModeChange={onDateModeChange}
+            onFromChange={onDateFromChange}
+            onToChange={onDateToChange}
+            onLastDaysChange={onLastDaysChange}
+            onApplyDates={onApplyDates}
+            onApplyPreset={onApplyPreset}
+            onApplyLastDays={onApplyLastDays}
+          />
+        )}
+
+        <OrderExport
+          key={resetKey}
+          status={statusFilter}
+          search={search}
+          workQuery={workQuery || undefined}
+          fromDate={appliedDateRange?.from}
+          toDate={appliedDateRange?.to}
+          token={token}
+        />
+
+        <div
+          ref={viewportRef}
+          onScroll={handleScroll}
+          className="ledger-scroll-viewport order-scroll-viewport"
+          data-testid="order-scroll-viewport"
+        >
+          {loading && orders.length === 0 ? (
+            <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
+              <p role="status" style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+                {text.loading}
+              </p>
+            </div>
+          ) : orders.length === 0 ? (
+            <div className="ledger-scroll-empty-state" style={{ borderRadius: '8px', border: '1px dashed var(--border-subtle)' }}>
+              <p style={{ color: 'var(--text-secondary)', margin: 0, fontSize: '0.875rem' }}>
+                {resolveOrderEmptyMessage({ workQuery, search, appliedDateRange, locale, text })}
+              </p>
+            </div>
+          ) : (
+            <div className="order-card-list">
+              {orders.map((ord) => (
+                <OrderCard
+                  key={ord.id}
+                  order={ord}
+                  token={token}
+                  text={text}
+                  locale={locale}
+                  expanded={Boolean(expandedReviewIds[ord.id])}
+                  onInspect={(order) => {
+                    setInitialTab(0);
+                    setSelectedOrder(order);
+                  }}
+                  onReviewAction={(order, action) => {
+                    if (action === 'CHECK_TRANSACTIONS') onCheckTransactions?.();
+                    else {
+                      setInitialTab(3);
+                      setSelectedOrder(order);
+                    }
+                  }}
+                  onToggleReview={toggleReviewCodes}
+                />
+              ))}
+
+              {nextCursor && (
+                <div style={{ textAlign: 'center', marginTop: '12px' }}>
+                  <button className="btn btn-secondary btn-sm" onClick={onLoadMore}>
+                    {text.more}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {selectedOrder && (
+          <OrderDetailModal
+            initialTab={initialTab}
+            onCheckTransactions={onCheckTransactions}
+            token={token}
+            onCorrected={(fresh) => {
+              setSelectedOrder(fresh);
+              onCorrected?.(fresh);
+            }}
+            order={detailOrder!}
+            onClose={() => setSelectedOrder(null)}
+          />
         )}
       </div>
-
-      {selectedOrder && (
-        <OrderDetailModal
-          initialTab={initialTab}
-          onCheckTransactions={onCheckTransactions}
-          token={token}
-          onCorrected={fresh => {setSelectedOrder(fresh); onCorrected?.(fresh);}}
-          order={detailOrder!}
-          onClose={() => setSelectedOrder(null)}
-        />
-      )}
-    </div>
     </AssistantWorkspace>
   );
 }

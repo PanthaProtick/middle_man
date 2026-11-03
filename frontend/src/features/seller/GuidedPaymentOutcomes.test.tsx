@@ -27,7 +27,9 @@ afterEach(async () => {
   vi.restoreAllMocks(); document.body.innerHTML = ''; localStorage.clear();
 });
 async function click(label: string) {
-  const button = Array.from(host.querySelectorAll('button')).find(item => item.textContent === label);
+  const button = Array.from(host.querySelectorAll('button')).find(item =>
+    item.textContent === label || (label === 'Seller assistant' && item.dataset.testid === 'seller-assistant-launcher')
+  );
   expect(button, label).toBeDefined();
   await act(async () => button!.click());
 }
@@ -64,9 +66,9 @@ it('resolves a lost response through the same identity without a second write', 
   });
   await mount();
   await draftPayment();
-  await click('Record payment');
+  await click('Review'); await click('Confirm');
   expect(host.textContent).toContain('Outcome unknown');
-  expect(host.querySelector<HTMLInputElement>('[name="assistant-payment-trx"]')?.disabled).toBe(true);
+  expect(host.querySelector('[name="assistant-payment-trx"]')).toBeNull();
   await click('Check submission');
   expect(writes).toHaveLength(1);
   expect(lookups).toBe(1);
@@ -89,7 +91,7 @@ it('retries the same confirmed identity only after recovery finds no saved resul
   });
   await mount();
   await draftPayment();
-  await click('Record payment'); await click('Check submission');
+  await click('Review'); await click('Confirm'); await click('Check submission');
   expect(host.textContent).toContain('No saved result found');
   await click('Retry confirmed submission');
   expect(writes).toHaveLength(2);
@@ -111,8 +113,8 @@ it('submits once while the explicit action is processing even if it is clicked a
   });
   await mount();
   await draftPayment();
-  await click('Record payment');
-  await click('Record payment');
+  await click('Review'); await click('Confirm');
+  await click('Confirm');
   expect(writes).toBe(1);
   await act(async () => release(new Response(JSON.stringify({ receipt: receipt(), allocated_order_ids: [] }))));
   expect(host.textContent).toContain('Payment recorded');
@@ -126,12 +128,12 @@ it('reports preserved conflict and identical duplicate evidence without inventin
     return new Response(JSON.stringify({ receipt: response, allocated_order_ids: [] }));
   });
   await mount();
-  await draftPayment(); await click('Record payment');
+  await draftPayment(); await click('Review'); await click('Confirm');
   expect(host.textContent).toContain('Conflicting evidence');
   expect(host.textContent).not.toContain('Reconciliation confirmed order');
   response = receipt({ observations: [observation(), observation({ id: 'observation-2', conflict_state: 'identical' })] });
   await click('Record a payment');
-  await send('Record payment; account: Main; trx id: EXACT-2; amount: 100'); await click('Record payment');
+  await send('Record payment; account: Main; trx id: EXACT-2; amount: 100'); await click('Review'); await click('Confirm');
   expect(host.textContent).toContain('This exact evidence was already recorded');
   expect(host.textContent).not.toContain('Reconciliation confirmed order');
 });
@@ -153,7 +155,7 @@ it('shows the actual confirmed order and opens the fetched seller order', async 
     return new Response(JSON.stringify({ items: [], events: [] }));
   });
   await mount();
-  await draftPayment(); await click('Record payment');
+  await draftPayment(); await click('Review'); await click('Confirm');
   expect(host.textContent).toContain('Reconciliation confirmed order');
   await click('Open order');
   expect(host.querySelector('dialog[open]')?.textContent).toContain('Actual confirmed order');
@@ -171,16 +173,18 @@ it('keeps edited fields after a stale account and stays locked after a failed re
     return new Response(JSON.stringify({ error: { code: 'UNAUTHORIZED', message: 'Sign in' } }), { status: 401 });
   });
   await mount();
-  await draftPayment(); await click('Record payment');
+  await draftPayment(); await click('Review'); await click('Confirm');
   expect(host.textContent).toContain('inactive');
+  await click('Make Changes');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-payment-trx"]')?.value).toBe('EXACT-1');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-payment-trx"]')?.disabled).toBe(false);
   await change('assistant-payment-amount', '200');
-  await click('Record payment');
+  await click('Review'); await click('Confirm');
   expect(writes).toBe(2);
   expect(host.textContent).toContain('Outcome unknown');
   await click('Check submission');
   expect(host.textContent).toContain('Outcome unknown');
   expect(host.textContent).toContain('Your seller session is unavailable');
-  expect(host.querySelector<HTMLInputElement>('[name="assistant-payment-amount"]')?.disabled).toBe(true);
+  expect(host.querySelector('[name="assistant-payment-amount"]')).toBeNull();
+  expect(Array.from(host.querySelectorAll('button')).find(item => item.textContent === 'Make Changes')?.disabled).toBe(true);
 });

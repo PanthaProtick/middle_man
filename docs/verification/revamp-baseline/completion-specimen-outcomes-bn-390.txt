@@ -1,0 +1,15 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-outcomes&lang=bn".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-outcomes&lang=bn
+	2 container
+		3 container ভাষা
+			4 checkbox বাংলা, Value: 1
+			5 checkbox English, Value: 0
+			6 text ভাষা: বাংলা
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 text অর্ডারের সিদ্ধান্ত
+		10 button অর্ডার বাতিল করুন
+		11 button জমা প্রত্যাখ্যান করুন
+		12 button বদলে নতুন অর্ডার করুন
+
+The focused UI element is 1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-outcomes&lang=bn

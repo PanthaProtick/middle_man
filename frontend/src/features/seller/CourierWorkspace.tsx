@@ -10,10 +10,10 @@ export function CourierWorkspace({ orderId, token, onAttemptStatusChanged }: {
 }) {
   const [refresh, setRefresh] = useState(0);
   const [choicesSavedParcel, setChoicesSavedParcel] = useState<ParcelRevision>();
-  return <>
-    <CourierDraft orderId={orderId} token={token} reviewManaged choicesSavedParcel={choicesSavedParcel}
-      onSaved={() => setRefresh(value => value + 1)} />
+  return <div className="courier-workspace">
     <CourierReview orderId={orderId} token={token} refresh={refresh} onChoicesSaved={setChoicesSavedParcel}
-      onAttemptStatusChanged={onAttemptStatusChanged} />
-  </>;
+      onAttemptStatusChanged={onAttemptStatusChanged}
+      parcelDetails={<CourierDraft orderId={orderId} token={token} reviewManaged choicesSavedParcel={choicesSavedParcel}
+        onSaved={() => setRefresh(value => value + 1)} />} />
+  </div>;
 }

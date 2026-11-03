@@ -34,12 +34,14 @@ CATEGORY_BY_RANK: dict[int, AttentionCategory] = {
     1: "failed_submission",
     2: "pending_review",
     3: "preparation",
+    4: "awaiting_buyer",
 }
 REASON_BY_RANK: dict[int, AttentionReason] = {
     0: "UNKNOWN_OUTCOME",
     1: "FAILED_SUBMISSION",
     2: "PENDING_REVIEW",
     3: "AWAITING_COURIER_PREPARATION",
+    4: "AWAITING_BUYER_SUBMISSION",
 }
 _ACTIVE_LIFECYCLES = ("pending", "confirmed")
 
@@ -70,6 +72,7 @@ def attention_category_expr() -> ColumnElement[Any]:
         (active & (status == "failed"), 1),
         ((OrderTable.lifecycle == "pending") & status.is_(None), 2),
         ((OrderTable.lifecycle == "confirmed") & ~_has_attempt(), 3),
+        ((OrderTable.lifecycle == "awaiting_buyer") & ~_has_attempt(), 4),
         else_=None,
     )
 
@@ -83,6 +86,7 @@ def attention_outstanding_expr(category: ColumnElement[Any] | None = None) -> Co
     return case(
         (rank.in_((0, 1)), attempt_time),
         (rank == 2, func.coalesce(OrderTable.first_submitted_at, OrderTable.created_at)),
+        (rank == 4, OrderTable.created_at),
         else_=func.coalesce(OrderTable.completed_at, OrderTable.updated_at),
     )
 

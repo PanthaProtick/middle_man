@@ -42,6 +42,12 @@
 .delivery-details li + li { margin-top: 6px; }
 .delivery-details fieldset { min-width: 0; }
 .delivery-details label, .delivery-details select, .delivery-details input { max-width: 100%; }
+.delivery-details select, .delivery-details input:not([type="checkbox"]) {
+  min-height: var(--input-height-min);
+  font-size: var(--input-font-size-min);
+}
+.delivery-details input[type="checkbox"] { width: 20px; height: 20px; }
+.courier-review .courier-stage + .courier-stage { margin-top: var(--space-lg); }
 .delivery-details button, .delivery-details summary { white-space: normal; overflow-wrap: anywhere; }
 .delivery-details button { min-height: 44px; }
 .delivery-details details p { white-space: pre-wrap; }

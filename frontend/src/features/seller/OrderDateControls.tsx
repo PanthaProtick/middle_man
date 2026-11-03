@@ -53,10 +53,10 @@ export function OrderDateControls({
   return (
     <div
       lang={locale === 'bn' ? 'bn-BD' : 'en'}
-      style={{ display: 'flex', flexDirection: 'column', gap: '6px', margin: '10px 0' }}
+      style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: '12px 0' }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-        <label htmlFor={`${idPrefix}-date-mode`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+        <label htmlFor={`${idPrefix}-date-mode`} style={{ fontSize: '0.825rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
           {label ?? text.dateFilter}
         </label>
         <select
@@ -64,7 +64,7 @@ export function OrderDateControls({
           value={mode}
           onChange={(event) => onModeChange(event.target.value as OrderDateMode)}
           className="form-control"
-          style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', width: 'auto' }}
+          style={{ padding: '6px 10px', fontSize: '0.85rem', minHeight: '44px', width: 'auto' }}
         >
           <option value="any">{text.dateAnyTime}</option>
           <option value="today">{text.dateToday}</option>
@@ -79,7 +79,7 @@ export function OrderDateControls({
             onSubmit={(event) => { event.preventDefault(); onApplyDates(); }}
             style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}
           >
-            <label htmlFor={`${idPrefix}-date-from`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <label htmlFor={`${idPrefix}-date-from`} style={{ fontSize: '0.825rem', color: 'var(--text-secondary)' }}>
               {text.dateFrom}
             </label>
             <input
@@ -90,9 +90,9 @@ export function OrderDateControls({
               aria-invalid={rangeInvalid || undefined}
               aria-describedby={rangeInvalid ? describedBy : undefined}
               className="form-control"
-              style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', width: 'auto' }}
+              style={{ padding: '6px 10px', fontSize: '0.85rem', minHeight: '44px', width: 'auto' }}
             />
-            <label htmlFor={`${idPrefix}-date-to`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+            <label htmlFor={`${idPrefix}-date-to`} style={{ fontSize: '0.825rem', color: 'var(--text-secondary)' }}>
               {text.dateTo}
             </label>
             <input
@@ -103,9 +103,9 @@ export function OrderDateControls({
               aria-invalid={rangeInvalid || undefined}
               aria-describedby={rangeInvalid ? describedBy : undefined}
               className="form-control"
-              style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', width: 'auto' }}
+              style={{ padding: '6px 10px', fontSize: '0.85rem', minHeight: '44px', width: 'auto' }}
             />
-            <button type="submit" className="btn btn-secondary btn-sm" style={{ minHeight: '36px' }}>
+            <button type="submit" className="btn btn-secondary btn-sm" style={{ minHeight: '44px', padding: '6px 14px' }}>
               {text.dateApply}
             </button>
           </form>
@@ -119,7 +119,7 @@ export function OrderDateControls({
                 type="button"
                 className="btn btn-secondary btn-sm"
                 onClick={() => onApplyPreset(days)}
-                style={{ minHeight: '36px' }}
+                style={{ minHeight: '44px', padding: '6px 12px' }}
               >
                 {text.dateLastDaysPreset.replace('{days}', String(days))}
               </button>
@@ -130,7 +130,7 @@ export function OrderDateControls({
               onSubmit={(event) => { event.preventDefault(); onApplyLastDays(); }}
               style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}
             >
-              <label htmlFor={`${idPrefix}-date-days`} style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+              <label htmlFor={`${idPrefix}-date-days`} style={{ fontSize: '0.825rem', color: 'var(--text-secondary)' }}>
                 {text.dateLastDaysLabel}
               </label>
               <input
@@ -144,9 +144,9 @@ export function OrderDateControls({
                 aria-invalid={daysInvalid || undefined}
                 aria-describedby={daysInvalid ? describedBy : undefined}
                 className="form-control"
-                style={{ padding: '4px 8px', fontSize: '0.8rem', minHeight: '36px', width: '100px' }}
+                style={{ padding: '6px 10px', fontSize: '0.85rem', minHeight: '44px', width: '100px' }}
               />
-              <button type="submit" className="btn btn-secondary btn-sm" style={{ minHeight: '36px' }}>
+              <button type="submit" className="btn btn-secondary btn-sm" style={{ minHeight: '44px', padding: '6px 14px' }}>
                 {text.dateApplyLastDays}
               </button>
             </form>

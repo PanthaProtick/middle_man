@@ -1,0 +1,84 @@
+[
+  {
+    "ordersHeadingTop": 1258.390625,
+    "smallControls": [
+      {
+        "height": 36,
+        "text": "order-search"
+      },
+      {
+        "height": 36,
+        "text": "Search"
+      },
+      {
+        "height": 36,
+        "text": "All StatusesAwaiting BuyerPending ReviewConfirmedR"
+      },
+      {
+        "height": 36,
+        "text": "Any timeTodayCustom datesLast X days"
+      },
+      {
+        "height": 36,
+        "text": "Download English CSV"
+      }
+    ],
+    "smallInputs": [
+      {
+        "fontSize": "12.8px",
+        "id": "order-search"
+      },
+      {
+        "fontSize": "12.8px",
+        "id": "order-status-filter"
+      },
+      {
+        "fontSize": "12.8px",
+        "id": "order-date-mode"
+      }
+    ],
+    "width": 390,
+    "workspaceTop": 520.34375
+  },
+  {
+    "ordersHeadingTop": 784.515625,
+    "smallControls": [
+      {
+        "height": 36,
+        "text": "order-search"
+      },
+      {
+        "height": 36,
+        "text": "Search"
+      },
+      {
+        "height": 36,
+        "text": "All StatusesAwaiting BuyerPending ReviewConfirmedR"
+      },
+      {
+        "height": 36,
+        "text": "Any timeTodayCustom datesLast X days"
+      },
+      {
+        "height": 36,
+        "text": "Download English CSV"
+      }
+    ],
+    "smallInputs": [
+      {
+        "fontSize": "12.8px",
+        "id": "order-search"
+      },
+      {
+        "fontSize": "12.8px",
+        "id": "order-status-filter"
+      },
+      {
+        "fontSize": "12.8px",
+        "id": "order-date-mode"
+      }
+    ],
+    "width": 1440,
+    "workspaceTop": 348.359375
+  }
+]

@@ -2,6 +2,7 @@ import { canonicalizeBdPhone } from './api';
 import { conversationalAmount } from './guidedOrder';
 import { asciiDigits } from './orderNumbers';
 import type { ManualReceiptInput, PaymentAccount } from './types';
+import { paymentMessageFields } from './paymentMessageFields';
 
 export interface PaymentFields {
   account: string;
@@ -52,8 +53,21 @@ export function resolvePaymentAccount(value: string, accounts: PaymentAccount[])
 }
 
 export function hasMultiplePaymentFields(message: string): boolean {
-  const matched = [...message.matchAll(labels)].map(match => keys[match.groups!.label.toLowerCase()]);
-  return new Set(matched).size !== matched.length;
+  const matches = [...message.matchAll(labels)];
+  const matched = matches.map(match => keys[match.groups!.label.toLowerCase()]);
+  return new Set(matched).size !== matched.length || paymentMessageFields(unlabeledPaymentText(message, matches)).multiple;
+}
+
+function unlabeledPaymentText(message: string, matches: RegExpMatchArray[]): string {
+  if (!matches.length) return message;
+  let text = message.slice(0, matches[0].index);
+  for (const [index, match] of matches.entries()) {
+    const end = matches[index + 1]?.index ?? message.length;
+    const value = message.slice(match.index! + match[0].length, end);
+    const separator = value.indexOf(';');
+    if (separator >= 0) text += ` ${value.slice(separator + 1)}`;
+  }
+  return text;
 }
 
 export function paymentMessage(message: string, accounts: PaymentAccount[]): Partial<PaymentFields> {
@@ -67,8 +81,14 @@ export function paymentMessage(message: string, accounts: PaymentAccount[]): Par
     // The next label may consume its separator; otherwise remove only that separator.
     const value = key === 'trxId'
       ? (next && /^\s/.test(next[0]) ? raw.replace(/[;,]$/, '').trim() : raw)
-      : raw.replace(/[;,]+$/, '').trim();
+      : raw.split(';')[0].replace(/[;,]+$/, '').trim();
     patch[key] = key === 'account' ? resolvePaymentAccount(value, accounts) : value;
+  }
+  // Do not interpret a labeled identifier or other field's value as an account.
+  const natural = paymentMessageFields(unlabeledPaymentText(message, matches));
+  if (!('account' in patch) && natural.provider) patch.account = resolvePaymentAccount(natural.provider, accounts);
+  for (const key of ['amount', 'trxId', 'sender'] as const) {
+    if (!(key in patch) && natural[key] !== undefined) patch[key] = natural[key];
   }
   return patch;
 }

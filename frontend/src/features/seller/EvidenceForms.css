@@ -1,0 +1,33 @@
+.evidence-form select,
+.evidence-form textarea,
+.receipt-correction-form select,
+.receipt-correction-form input,
+.receipt-correction-form textarea {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  min-height: var(--input-height-min);
+  padding: 10px 12px;
+  color: var(--text-primary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font: inherit;
+  font-size: 1rem;
+}
+
+.evidence-form textarea,
+.receipt-correction-form textarea {
+  min-height: 84px;
+  resize: vertical;
+}
+
+.evidence-form select:focus,
+.evidence-form textarea:focus,
+.receipt-correction-form select:focus,
+.receipt-correction-form input:focus,
+.receipt-correction-form textarea:focus {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}

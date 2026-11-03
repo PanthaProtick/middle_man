@@ -1,0 +1,35 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=advice-error".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-payment&lang=en&fault=advice-error
+	2 container
+		3 container Language
+			4 checkbox বাংলা, Value: 0
+			5 checkbox English, Value: 1
+			6 text Language: English
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 text Review Required
+		10 button (collapsed) Show error codes (for dev), Secondary Actions: Expand
+		11 text Payment amount does not match Fixed Receiving Account Snapshot Synthetic receiving account  —  BKASH  ( 01700000000 ) Immutable destination for this order (deactivating or editing accounts later does not alter this).
+		12 button (expanded) Description: Ask AI for explanation and suggested actions, Secondary Actions: Collapse
+		13 container Ask AI
+			14 heading হাতে তৈরি নকশিকাঁথা — special gift package, Value: 3
+				15 text হাতে তৈরি নকশিকাঁথা — special gift package
+			16 text baseline-order-1
+			17 button Back to order
+			18 container Ask AI
+				19 text Local guidance
+				20 button Close guidance
+				21 text Unable to load review assistance.
+				22 button Try again
+		23 container Accept payment exception
+			24 heading Accept payment exception, Value: 4
+				25 text Accept payment exception
+			26 text This records your acceptance of the payment; it is not independent provider verification.
+			27 container
+				28 text Existing seller receipt
+				29 pop up button (collapsed, settable) Existing seller receipt, Value: Select a receipt, Secondary Actions: Expand
+					30 menu
+						31 (selected)  Select a receipt
+						32 bkash · SYNTHETIC01 · BDT 500.00
+
+The focused UI element is 13 container Ask AI

@@ -13,6 +13,21 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          const normalized = id.replace(/\\/g, '/');
+          if (normalized.includes('clerk') || normalized.includes('@clerk')) {
+            return 'clerk';
+          }
+          if (normalized.includes('lucide-react')) {
+            return 'icons';
+          }
+        },
+      },
+    },
+  },
   test: {
     globals: true,
     environment: 'happy-dom',

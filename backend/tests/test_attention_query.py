@@ -96,6 +96,7 @@ async def all_ids(client: AsyncClient, limit: int = 2) -> list[str]:
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_priority_order_and_categories_with_overlap(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     unknown = await add_confirmed(client, base, 'unknown')
     failed = await add_confirmed(client, base, 'failed')
     overlap = await add_pending(client, base, 'overlap')
@@ -122,13 +123,14 @@ async def test_priority_order_and_categories_with_overlap(client: AsyncClient):
         'unknown_outcome', 'failed_submission', 'failed_submission',
         'pending_review', 'pending_review', 'preparation',
     ]
-    assert body['items'][0]['reason_codes'] == ['UNKNOWN_OUTCOME']
-    assert body['items'][1]['reason_codes'] == ['FAILED_SUBMISSION']
+    assert body['items'][0]['reason_codes'][0] == 'UNKNOWN_OUTCOME'
+    assert body['items'][1]['reason_codes'][0] == 'FAILED_SUBMISSION'
 
 
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_latest_attempt_decides_and_supersedes_history(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     superseded = await add_confirmed(client, base, 'superseded')
     active = await add_confirmed(client, base, 'active')
     recovered = await add_confirmed(client, base, 'recovered')
@@ -151,6 +153,7 @@ async def test_latest_attempt_decides_and_supersedes_history(client: AsyncClient
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_oldest_outstanding_and_id_tie_breaker(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     older = await add_confirmed(client, base, 'older')
     newer = await add_confirmed(client, base, 'newer')
     set_completed(older['id'], minutes=30)
@@ -170,6 +173,7 @@ async def test_oldest_outstanding_and_id_tie_breaker(client: AsyncClient):
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_pagination_is_stable_across_pages_and_total_stays_full(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     orders = [await add_confirmed(client, base, f'page-{index}') for index in range(5)]
     for index, order in enumerate(orders):
         set_completed(order['id'], minutes=50 - index * 5)
@@ -191,6 +195,7 @@ async def test_pagination_is_stable_across_pages_and_total_stays_full(client: As
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_cursor_survives_cursor_order_leaving_and_changing_category(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     orders = [await add_confirmed(client, base, f'leaving-{index}') for index in range(3)]
     for index, order in enumerate(orders):
         set_completed(order['id'], minutes=30 - index * 5)
@@ -210,6 +215,7 @@ async def test_cursor_survives_cursor_order_leaving_and_changing_category(client
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_unknown_cursor_restarts_at_first_page(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     order = await add_confirmed(client, base, 'restart')
     body = await preview(client, cursor='not-a-real-cursor')
     assert [item['order']['id'] for item in body['items']] == [order['id']]
@@ -218,6 +224,7 @@ async def test_unknown_cursor_restarts_at_first_page(client: AsyncClient):
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
 async def test_prior_day_backlog_reason_and_midnight_boundary(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     backlog = await add_confirmed(client, base, 'backlog')
     fresh = await add_confirmed(client, base, 'fresh')
     set_created(backlog['id'], days=2)
@@ -240,12 +247,12 @@ async def test_prior_day_backlog_reason_and_midnight_boundary(client: AsyncClien
 
 
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
-async def test_terminal_retained_cross_shop_and_awaiting_orders_are_excluded(client: AsyncClient):
+async def test_terminal_retained_cross_shop_orders_are_excluded(client: AsyncClient):
     base = await _create_test_order(client)
+    _memory_orders[base['id']]['lifecycle'] = 'cancelled'
     terminal = await add_pending(client, base, 'terminal')
     retained = await add_pending(client, base, 'retained')
     other_shop = await add_pending(client, base, 'other-shop')
-    awaiting = await add_order(client, base, 'awaiting')
     for index, lifecycle in enumerate(('cancelled', 'rejected', 'expired')):
         order = await add_pending(client, base, f'terminal-{index}')
         _memory_orders[order['id']]['lifecycle'] = lifecycle
@@ -259,7 +266,6 @@ async def test_terminal_retained_cross_shop_and_awaiting_orders_are_excluded(cli
 
     assert body['items'] == []
     assert body['total'] == 0
-    assert awaiting['id'] not in {item['order']['id'] for item in body['items']}
 
 
 @pytest.mark.usefixtures('clean_memory_stores', 'seller_identity')
@@ -270,7 +276,8 @@ async def test_no_matches_and_no_shop_return_valid_empty_pages(client: AsyncClie
     assert empty['query'] == 'attention' and empty['timezone'] == 'Asia/Dhaka'
     assert datetime.datetime.fromisoformat(empty['retrieved_at'])
 
-    await _create_test_order(client)
+    order = await _create_test_order(client)
+    _memory_orders[order['id']]['lifecycle'] = 'cancelled'
     body = await preview(client)
     assert body['items'] == [] and body['total'] == 0
 

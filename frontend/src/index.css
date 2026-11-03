@@ -1,7 +1,8 @@
+@import "./styles/tokens.css";
 @import "./styles/foundation.css";
+@import "./styles/primitives.css";
 @import "./styles/navigation.css";
 @import "./styles/workspace.css";
 @import "./styles/sections.css";
 @import "./styles/buyer.css";
-@import "./styles/demo.css";
 @import "./styles/theme.css";

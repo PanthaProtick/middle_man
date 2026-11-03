@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { Globe, Plus, Sparkles, X } from 'lucide-react';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import type { AssistantConversation as Conversation } from './useAssistantConversation';
 import { AssistantConversation } from './GuidedAssistant';
@@ -9,18 +10,28 @@ interface Props {
   conversation: Conversation;
   reviewing: boolean;
   close: () => void;
-  showGeneral: () => void;
   setReviewTarget: (target: HTMLDivElement | null) => void;
 }
-export function AssistantWindow({ target, conversation, reviewing, close, showGeneral, setReviewTarget }: Props): React.JSX.Element | null {
+export function AssistantWindow({ target, conversation, reviewing, close, setReviewTarget }: Props): React.JSX.Element | null {
   const text = sellerAssistantCopy[conversation.locale];
   const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!reviewing) panelRef.current?.focus();
   }, [reviewing, target]);
   useEffect(() => {
-    if (reviewing) return;
     const escape = (event: KeyboardEvent) => {
+      if (event.key === 'Tab' && panelRef.current) {
+        const elements = Array.from(panelRef.current.querySelectorAll<HTMLElement>(
+          'button:not(:disabled), select:not(:disabled), textarea:not(:disabled), input:not(:disabled), a[href], [tabindex="0"]',
+        )).filter(element => !element.closest('[hidden]'));
+        const first = elements[0]; const last = elements[elements.length - 1];
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) {
+          event.preventDefault(); last?.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panelRef.current)) {
+          event.preventDefault(); first?.focus();
+        }
+        return;
+      }
       if (event.key !== 'Escape') return;
       event.preventDefault(); event.stopImmediatePropagation(); close();
     };
@@ -30,22 +41,45 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
   return target && createPortal(<div ref={panelRef} tabIndex={-1} className="seller-assistant-window"
     role="region" aria-label={text.title} lang={conversation.locale}>
     <div className="assistant-window-header">
-      <h3>{text.title}</h3>
-      <button type="button" className="btn btn-secondary btn-sm" onClick={close} aria-label={text.close}>×</button>
+      <div className="assistant-header-top">
+        <div className="assistant-header-brand">
+          <span className="assistant-brand-icon" aria-hidden="true">
+            <Sparkles size={16} />
+          </span>
+          <div className="assistant-title-cluster">
+            <h3>{text.title}</h3>
+            <span className="assistant-status-badge">
+              <span className="assistant-status-dot" aria-hidden="true">
+                <span className="assistant-status-ping" />
+              </span>
+              <span>{conversation.locale === 'bn' ? 'সক্রিয়' : 'Online'}</span>
+            </span>
+          </div>
+        </div>
+        <div className="assistant-header-actions">
+          <button type="button" className="assistant-close-btn" onClick={close} aria-label={text.close}>
+            <X size={16} aria-hidden="true" />
+          </button>
+          <label className="assistant-language-control" aria-label={text.language}>
+            <Globe size={14} className="assistant-lang-icon" aria-hidden="true" />
+            <select name="assistant-language" value={conversation.locale}
+              onChange={event => conversation.setLanguage(event.target.value === 'bn' ? 'bn' : 'en')}>
+              <option value="en">English</option><option value="bn">বাংলা</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <nav aria-label={text.title} className="assistant-context-controls">
+        <button type="button" className="btn btn-secondary btn-sm" disabled={conversation.locked}
+          onClick={conversation.newConversation}>
+          <Plus size={14} aria-hidden="true" />
+          {text.newChat}
+        </button>
+      </nav>
     </div>
-    <label>{text.language}
-      <select name="assistant-language" value={conversation.locale}
-        onChange={event => conversation.setLanguage(event.target.value === 'bn' ? 'bn' : 'en')}>
-        <option value="en">English</option><option value="bn">বাংলা</option>
-      </select>
-    </label>
-    <nav aria-label={text.title} className="assistant-context-controls">
-      <button type="button" className="btn btn-secondary btn-sm" aria-pressed={!reviewing} onClick={showGeneral}>{text.general}</button>
-      <button type="button" className="btn btn-secondary btn-sm" disabled={conversation.locked}
-        onClick={() => { conversation.newConversation(); showGeneral(); }}>{text.newChat}</button>
-    </nav>
-    <p className="assistant-context-label" role="status">{reviewing ? text.review : text.general}</p>
-    <div ref={setReviewTarget} />
-    {!reviewing && <AssistantConversation conversation={conversation} />}
+    {reviewing && <p className="assistant-context-label" role="status">
+      <Sparkles size={13} aria-hidden="true" /> {text.review}
+    </p>}
+    <AssistantConversation conversation={conversation} setReviewTarget={setReviewTarget} />
   </div>, target);
 }

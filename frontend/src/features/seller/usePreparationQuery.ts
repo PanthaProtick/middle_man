@@ -23,8 +23,8 @@ const EMPTY: PreparationState = {
 };
 
 /** Server-authoritative preview of confirmed orders with no courier attempt. */
-export function usePreparationQuery(token?: string) {
-  const [state, setState] = useState<PreparationState>(EMPTY);
+export function usePreparationQuery(token?: string, initialState?: PreparationState) {
+  const [state, setState] = useState<PreparationState>(initialState ?? EMPTY);
   const [authorization, setAuthorization] = useState(token);
   const requestRef = useRef(0);
   const mounted = useRef(true);

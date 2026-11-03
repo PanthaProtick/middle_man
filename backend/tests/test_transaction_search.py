@@ -188,14 +188,16 @@ async def test_search_ignores_raw_sms_text_and_never_matches_missing_senders(
     seller_client: AsyncClient,
 ) -> None:
     setup = await _setup_shop_and_account(seller_client)
-    sms = 'bKash: You have received Tk 150.00 from 01799998877. TrxID SYNTHETIC1 at 2026-10-24T12:00:00+06:00'
-    imported = await seller_client.post(
-        '/api/seller/transactions/sms-import',
-        json={'payment_account_id': setup['account_id'], 'messages': [sms]},
-        headers={'Idempotency-Key': 'search-sms'},
-    )
-    assert imported.status_code == 200, imported.text
-    receipt_id = imported.json()['items'][0]['receipt_id']
+    receipt = await _record(seller_client, setup['account_id'], 'SYNTHETIC1', sender='01799998877')
+    receipt_id = receipt['id']
+    from legacy_sms_support import historical_sms_rows
+
+    from app.services.legacy_sms_store import _memory_evidence, _memory_imports
+
+    evidence, imported = historical_sms_rows(setup['shop_id'], 'mock-seller', setup['account_id'], receipt_id)
+    evidence.raw_text = 'bKash: You have received Tk 150.00 from 01799998877. TrxID SYNTHETIC1'
+    _memory_evidence[(setup['shop_id'], evidence.text_digest)] = evidence
+    _memory_imports[(setup['shop_id'], imported.mutation_key)] = imported
 
     assert await _ids(seller_client, search='SYNTHETIC1') == [receipt_id]
     assert await _ids(seller_client, search='received Tk') == []

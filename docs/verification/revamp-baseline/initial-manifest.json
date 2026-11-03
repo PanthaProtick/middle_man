@@ -1,0 +1,1362 @@
+{
+  "sourceCommit": "0d2f05857eea9940df13a351e80a80917f512ca6",
+  "date": "2026-11-02",
+  "method": "Current App and feature modules; browser-local synthetic API; no mutation proof",
+  "captures": [
+    {
+      "name": "buyer-en-390",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer&lang=en",
+      "alerts": [
+        "Pathao locations are unavailable. You can submit your written address and payment claim for seller resolution."
+      ],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "Delivery and payment details",
+        "Recipient information",
+        "Delivery location",
+        "Advance payment claim"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2860,
+      "scrollWidth": 382,
+      "width": 390
+    },
+    {
+      "name": "buyer-en-1440",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer&lang=en",
+      "alerts": [
+        "Pathao locations are unavailable. You can submit your written address and payment claim for seller resolution."
+      ],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "Delivery and payment details",
+        "Recipient information",
+        "Delivery location",
+        "Advance payment claim"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 2339,
+      "scrollWidth": 1432,
+      "width": 1440
+    },
+    {
+      "name": "buyer-bn-1440",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer&lang=bn",
+      "alerts": [
+        "Pathao-এর এলাকার তালিকা পাওয়া যাচ্ছে না। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা ও পেমেন্টের তথ্য জমা দিতে পারেন।"
+      ],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "ডেলিভারি ও পেমেন্টের তথ্য",
+        "প্রাপকের তথ্য",
+        "ডেলিভারির ঠিকানা",
+        "ডেলিভারির আগে অগ্রিমের পেমেন্টের তথ্য"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 2424,
+      "scrollWidth": 1432,
+      "width": 1440
+    },
+    {
+      "name": "buyer-bn-390",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer&lang=bn",
+      "alerts": [
+        "Pathao-এর এলাকার তালিকা পাওয়া যাচ্ছে না। বিক্রেতার যাচাইয়ের জন্য লেখা ঠিকানা ও পেমেন্টের তথ্য জমা দিতে পারেন।"
+      ],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "ডেলিভারি ও পেমেন্টের তথ্য",
+        "প্রাপকের তথ্য",
+        "ডেলিভারির ঠিকানা",
+        "ডেলিভারির আগে অগ্রিমের পেমেন্টের তথ্য"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2962,
+      "scrollWidth": 382,
+      "width": 390
+    },
+    {
+      "name": "setup-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order."
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 954,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "signedout-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=signedout&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        "Sign in to your shop"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 986,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "empty-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=empty&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (0)"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2201,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "error-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=error&lang=en",
+      "alerts": [
+        "Workspace ErrorUnable to complete this request. Please retry. Retry"
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        "Workspace Error"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 956,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "loading-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order."
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 844,
+      "scrollWidth": 390,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "noaccounts-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=noaccounts&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2304,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "seller-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2330,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "seller-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1745,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "accounts-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Designated Receiving Accounts",
+        " Courier Logistics Integration",
+        "Pathao courier account"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1857,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 217.359375
+    },
+    {
+      "name": "accounts-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Designated Receiving Accounts",
+        " Courier Logistics Integration",
+        "Pathao courier account"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2621,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 327.34375
+    },
+    {
+      "name": "payments-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Received Payments Inbox",
+        "Import received payment SMS",
+        " Transaction Ledger & Observations"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2877,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -27.65625
+    },
+    {
+      "name": "payments-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Received Payments Inbox",
+        "Import received payment SMS",
+        " Transaction Ledger & Observations"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 2105,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -199.640625
+    },
+    {
+      "name": "retention-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Data retention policy",
+        " 30-Day Raw Evidence Retention",
+        " Completed record retention"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1463,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 217.359375
+    },
+    {
+      "name": "retention-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Data retention policy",
+        " 30-Day Raw Evidence Retention",
+        " Completed record retention"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2033,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 327.34375
+    },
+    {
+      "name": "assistant-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Seller assistant"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2302,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -27.65625
+    },
+    {
+      "name": "assistant-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Seller assistant"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1725,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -199.640625
+    },
+    {
+      "name": "detail-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [
+        "Correction unavailable. Refresh and try again."
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Order & Link Details",
+        "Accept payment exception",
+        "Parcel details",
+        "Correct buyer information",
+        "Buyer link access"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1725,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -376.640625
+    },
+    {
+      "name": "detail-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [
+        "Correction unavailable. Refresh and try again."
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Order & Link Details",
+        "Accept payment exception",
+        "Parcel details",
+        "Correct buyer information",
+        "Buyer link access"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2310,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -204.65625
+    },
+    {
+      "name": "payment-review-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [
+        "Correction unavailable. Refresh and try again."
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Order & Link Details",
+        "Accept payment exception",
+        "Parcel details",
+        "Correct buyer information",
+        "Buyer link access"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2310,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -204.65625
+    },
+    {
+      "name": "payment-review-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [
+        "Correction unavailable. Refresh and try again."
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Order & Link Details",
+        "Accept payment exception",
+        "Parcel details",
+        "Correct buyer information",
+        "Buyer link access"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1725,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -314.640625
+    },
+    {
+      "name": "payment-review-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [
+        "সংশোধন এখন সম্ভব নয়। রিফ্রেশ করে আবার চেষ্টা করুন।"
+      ],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "অর্ডার ও লিংকের বিস্তারিত",
+        "পেমেন্টের ব্যতিক্রম গ্রহণ করুন",
+        "পার্সেলের তথ্য",
+        "ক্রেতার তথ্য সংশোধন",
+        "ক্রেতার লিংকের প্রবেশাধিকার"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1754,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "payment-review-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [
+        "সংশোধন এখন সম্ভব নয়। রিফ্রেশ করে আবার চেষ্টা করুন।"
+      ],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "অর্ডার ও লিংকের বিস্তারিত",
+        "পেমেন্টের ব্যতিক্রম গ্রহণ করুন",
+        "পার্সেলের তথ্য",
+        "ক্রেতার তথ্য সংশোধন",
+        "ক্রেতার লিংকের প্রবেশাধিকার"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2400,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "seller-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1774,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -374.828125
+    },
+    {
+      "name": "seller-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2420,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -164.1875
+    },
+    {
+      "name": "payments-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " প্রাপ্ত পেমেন্টের ইনবক্স",
+        "প্রাপ্ত পেমেন্টের SMS যোগ করুন",
+        " পেমেন্ট ও প্রাপ্ত তথ্যের তালিকা"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2971,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -48.1875
+    },
+    {
+      "name": "payments-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " প্রাপ্ত পেমেন্টের ইনবক্স",
+        "প্রাপ্ত পেমেন্টের SMS যোগ করুন",
+        " পেমেন্ট ও প্রাপ্ত তথ্যের তালিকা"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 2116,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -258.828125
+    },
+    {
+      "name": "accounts-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " নির্ধারিত প্রাপক অ্যাকাউন্ট",
+        " কুরিয়ার লজিস্টিকস ইন্টিগ্রেশন",
+        "Pathao কুরিয়ার অ্যাকাউন্ট"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2677,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -106.1875
+    },
+    {
+      "name": "accounts-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " নির্ধারিত প্রাপক অ্যাকাউন্ট",
+        " কুরিয়ার লজিস্টিকস ইন্টিগ্রেশন",
+        "Pathao কুরিয়ার অ্যাকাউন্ট"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1868,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -316.828125
+    },
+    {
+      "name": "retention-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " তথ্য সংরক্ষণের নীতি",
+        " মূল তথ্য 30 দিন সংরক্ষণ",
+        " সম্পন্ন রেকর্ড সংরক্ষণ"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2118,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -106.1875
+    },
+    {
+      "name": "retention-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " তথ্য সংরক্ষণের নীতি",
+        " মূল তথ্য 30 দিন সংরক্ষণ",
+        " সম্পন্ন রেকর্ড সংরক্ষণ"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1449,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -35.828125
+    },
+    {
+      "name": "setup-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 1004,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "signedout-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=signedout&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        "আপনার দোকানে সাইন ইন করুন"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 1075,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "empty-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=empty&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (0)"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2276,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "error-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=error&lang=bn",
+      "alerts": [
+        "কর্মক্ষেত্রে সমস্যাঅনুরোধটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন। আবার চেষ্টা করুন"
+      ],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        "কর্মক্ষেত্রে সমস্যা"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 1007,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "loading-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 892,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "noaccounts-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=noaccounts&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2393,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "buyer-pending-en-390",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer-pending&lang=en",
+      "alerts": [],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "Pending Seller Review"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 1462,
+      "scrollWidth": 382,
+      "width": 390
+    },
+    {
+      "name": "buyer-confirmed-en-390",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer-confirmed&lang=en",
+      "alerts": [],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "Order Confirmed"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 1349,
+      "scrollWidth": 382,
+      "width": 390
+    },
+    {
+      "name": "buyer-expired-en-390",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer-expired&lang=en",
+      "alerts": [],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "Order Link Expired"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 1349,
+      "scrollWidth": 382,
+      "width": 390
+    },
+    {
+      "name": "buyer-error-en-390",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer-error&lang=en",
+      "alerts": [
+        "Unable to Load OrderUnable to load order. Please retry.Retry"
+      ],
+      "headings": [
+        "Unable to Load Order"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 844,
+      "scrollWidth": 390,
+      "width": 390
+    },
+    {
+      "name": "create-order-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Create Order & Buyer Link"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2330,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 251.34375
+    },
+    {
+      "name": "create-order-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Create Order & Buyer Link"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1745,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 141.359375
+    },
+    {
+      "name": "create-validation-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [
+        "Product name is required"
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Create Order & Buyer Link"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1745,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 141.359375
+    },
+    {
+      "name": "record-payment-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        " Record Received Payment"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1745,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "record-payment-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        " Record Received Payment"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2330,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 520.34375
+    },
+    {
+      "name": "record-payment-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        " প্রাপ্ত পেমেন্ট রেকর্ড করুন"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2420,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "record-payment-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        " প্রাপ্ত পেমেন্ট রেকর্ড করুন"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1774,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "create-order-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "অর্ডার ও ক্রেতার লিংক তৈরি করুন"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1773,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "create-order-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "অর্ডার ও ক্রেতার লিংক তৈরি করুন"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2420,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "buyer-validation-en-390",
+      "url": "http://127.0.0.1:5186/orders/synthetic?case=buyer&lang=en",
+      "alerts": [
+        "Enter your full name.",
+        "Enter your contact number.",
+        "Pathao locations are unavailable. You can submit your written address and payment claim for seller resolution.",
+        "Enter your full delivery address.",
+        "Enter the payment sender number.",
+        "Enter the transaction ID (TrxID)."
+      ],
+      "headings": [
+        "Synthetic shop / পরীক্ষামূলক দোকান",
+        "Delivery and payment details",
+        "Recipient information",
+        "Delivery location",
+        "Advance payment claim"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2976,
+      "scrollWidth": 382,
+      "width": 390
+    },
+    {
+      "name": "courier-unknown-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=courier-unknown&lang=en",
+      "alerts": [
+        "Booking outcome unknown. The submission was sent, but the courier response was interrupted or could not be verified. Further attempts are blocked to prevent duplicate booking.",
+        "Correction unavailable. Refresh and try again."
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Order & Link Details",
+        "Parcel details",
+        "Parcel details",
+        "Review current delivery draft",
+        "Correct buyer information",
+        "Buyer link access"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1725,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -376.640625
+    },
+    {
+      "name": "courier-unknown-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=courier-unknown&lang=en",
+      "alerts": [
+        "Booking outcome unknown. The submission was sent, but the courier response was interrupted or could not be verified. Further attempts are blocked to prevent duplicate booking.",
+        "Correction unavailable. Refresh and try again."
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Order & Link Details",
+        "Parcel details",
+        "Parcel details",
+        "Review current delivery draft",
+        "Correct buyer information",
+        "Buyer link access"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2310,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -23.65625
+    },
+    {
+      "name": "courier-recovery-en-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=courier-unknown&lang=en",
+      "alerts": [
+        "Booking outcome unknown. The submission was sent, but the courier response was interrupted or could not be verified. Further attempts are blocked to prevent duplicate booking.",
+        "Correction unavailable. Refresh and try again."
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)",
+        "Order & Link Details",
+        "Parcel details",
+        "Parcel details",
+        "Review current delivery draft",
+        "Correct buyer information",
+        "Buyer link access"
+      ],
+      "height": 844,
+      "language": "en",
+      "pageHeight": 2302,
+      "scrollWidth": 390,
+      "width": 390,
+      "workspaceTop": -23.65625
+    },
+    {
+      "name": "courier-recovery-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=courier-unknown&lang=en",
+      "alerts": [
+        "বুকিংয়ের ফলাফল অনিশ্চিত। অনুরোধ পাঠানো হয়েছে, কিন্তু কুরিয়ারের উত্তর বাধাগ্রস্ত হয়েছে বা যাচাই করা যায়নি। একই বুকিং দুবার হওয়া ঠেকাতে পরবর্তী প্রচেষ্টা বন্ধ আছে।",
+        "সংশোধন এখন সম্ভব নয়। রিফ্রেশ করে আবার চেষ্টা করুন।"
+      ],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "অর্ডার ও লিংকের বিস্তারিত",
+        "পার্সেলের তথ্য",
+        "পার্সেলের তথ্য",
+        "বর্তমান কুরিয়ার অনুরোধের খসড়া পর্যালোচনা করুন",
+        "ক্রেতার তথ্য সংশোধন",
+        "ক্রেতার লিংকের প্রবেশাধিকার"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2400,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": -26.1875
+    },
+    {
+      "name": "courier-recovery-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=courier-unknown&lang=en",
+      "alerts": [
+        "বুকিংয়ের ফলাফল অনিশ্চিত। অনুরোধ পাঠানো হয়েছে, কিন্তু কুরিয়ারের উত্তর বাধাগ্রস্ত হয়েছে বা যাচাই করা যায়নি। একই বুকিং দুবার হওয়া ঠেকাতে পরবর্তী প্রচেষ্টা বন্ধ আছে।",
+        "সংশোধন এখন সম্ভব নয়। রিফ্রেশ করে আবার চেষ্টা করুন।"
+      ],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "অর্ডার ও লিংকের বিস্তারিত",
+        "পার্সেলের তথ্য",
+        "পার্সেলের তথ্য",
+        "বর্তমান কুরিয়ার অনুরোধের খসড়া পর্যালোচনা করুন",
+        "ক্রেতার তথ্য সংশোধন",
+        "ক্রেতার লিংকের প্রবেশাধিকার"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1754,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": -236.828125
+    },
+    {
+      "name": "assistant-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "বিক্রেতা সহকারী"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1753,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "assistant-bn-390",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)",
+        "বিক্রেতা সহকারী"
+      ],
+      "height": 844,
+      "language": "bn-BD",
+      "pageHeight": 2400,
+      "scrollWidth": 382,
+      "width": 390,
+      "workspaceTop": 563.8125
+    },
+    {
+      "name": "seller-en-320",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)"
+      ],
+      "height": 900,
+      "language": "en",
+      "pageHeight": 2578,
+      "scrollWidth": 312,
+      "width": 320,
+      "workspaceTop": 555.25
+    },
+    {
+      "name": "seller-en-768",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)"
+      ],
+      "height": 900,
+      "language": "en",
+      "pageHeight": 2082,
+      "scrollWidth": 760,
+      "width": 768,
+      "workspaceTop": 459.328125
+    },
+    {
+      "name": "seller-en-1024",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)"
+      ],
+      "height": 900,
+      "language": "en",
+      "pageHeight": 1839,
+      "scrollWidth": 1016,
+      "width": 1024,
+      "workspaceTop": 334.6875
+    },
+    {
+      "name": "setup-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order."
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "signedout-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=signedout&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        "Sign in to your shop"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "empty-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=empty&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (0)"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1607,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "error-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=error&lang=en",
+      "alerts": [
+        "Workspace ErrorUnable to complete this request. Please retry. Retry"
+      ],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        "Workspace Error"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "loading-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order."
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "noaccounts-en-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=noaccounts&lang=en",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "Your shop, in good order.",
+        " Orders & Active Buyer Links (3)"
+      ],
+      "height": 1000,
+      "language": "en",
+      "pageHeight": 1745,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 348.359375
+    },
+    {
+      "name": "setup-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=setup&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "signedout-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=signedout&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        "আপনার দোকানে সাইন ইন করুন"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "empty-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=empty&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (0)"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1603,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "error-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=error&lang=bn",
+      "alerts": [
+        "কর্মক্ষেত্রে সমস্যাঅনুরোধটি সম্পন্ন করা যায়নি। আবার চেষ্টা করুন। আবার চেষ্টা করুন"
+      ],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        "কর্মক্ষেত্রে সমস্যা"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "loading-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=loading&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1000,
+      "scrollWidth": 1440,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    },
+    {
+      "name": "noaccounts-bn-1440",
+      "url": "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=noaccounts&lang=bn",
+      "alerts": [],
+      "headings": [
+        "middleman",
+        "আপনার দোকান, গোছানো অর্ডার।",
+        " অর্ডার ও সক্রিয় ক্রেতার লিংক (3)"
+      ],
+      "height": 1000,
+      "language": "bn-BD",
+      "pageHeight": 1773,
+      "scrollWidth": 1432,
+      "width": 1440,
+      "workspaceTop": 353.171875
+    }
+  ]
+}

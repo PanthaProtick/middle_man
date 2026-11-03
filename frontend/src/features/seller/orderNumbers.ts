@@ -12,6 +12,14 @@ export function orderAmountMinor(value: string): number | null {
   const minor = BigInt(whole) * 100n + BigInt(fraction.padEnd(2, '0'));
   return minor > 0n && minor <= BigInt(Number.MAX_SAFE_INTEGER) ? Number(minor) : null;
 }
+export function acceptedAdvanceMinor(
+  totalMinor: number,
+  actualCodMinor: number | null | undefined,
+  expectedCodMinor: number,
+): number {
+  return totalMinor - (actualCodMinor ?? expectedCodMinor);
+}
+
 /** Format safe integer minor units without a floating-point division losing cents. */
 export function formatOrderAmount(minor: number): string {
   return formatIntegerMinor(minor);

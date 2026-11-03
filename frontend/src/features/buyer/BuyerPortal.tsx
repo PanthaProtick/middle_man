@@ -52,12 +52,12 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   if (gateDisabled) {
     return (
       <div className="portal-notice portal-notice--warning" role="alert">
-        <ShieldAlert size={24} color="var(--amber-accent)" aria-hidden="true" />
+        <ShieldAlert size={24} color="var(--amber-accent)" aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div>
-          <h2 style={{ margin: '0 0 4px', color: 'var(--amber-accent)', fontSize: '1.05rem' }}>
+          <h2 style={{ margin: '0 0 4px', color: 'var(--amber-accent)', fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
             {t('buyer.gate.title')}
           </h2>
-          <p style={{ margin: 0, lineHeight: 1.5 }}>{t('buyer.gate.body')}</p>
+          <p style={{ margin: 0 }}>{t('buyer.gate.body')}</p>
         </div>
       </div>
     );
@@ -66,15 +66,21 @@ function BuyerPortalSession({ portalToken }: BuyerPortalProps): React.JSX.Elemen
   if (error || !order) {
     return (
       <div className="portal-notice portal-notice--error" role="alert">
-        <AlertCircle size={24} color="var(--rose-accent)" aria-hidden="true" />
+        <AlertCircle size={24} color="var(--rose-accent)" aria-hidden="true" style={{ flexShrink: 0, marginTop: '2px' }} />
         <div>
-          <h2 style={{ margin: '0 0 4px', color: 'var(--rose-accent)', fontSize: '1.05rem' }}>
+          <h2 style={{ margin: '0 0 4px', color: 'var(--rose-accent)', fontSize: '1.05rem', fontFamily: 'var(--font-heading)' }}>
             {t('buyer.loadError.title')}
           </h2>
-          <p style={{ margin: '0 0 14px', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 14px' }}>
             {t(error ? PROBLEM_MESSAGES[error] : 'buyer.errors.loadFailed')}
           </p>
-          <button type="button" onClick={refresh} disabled={isRefreshing} className="btn btn-secondary">
+          <button
+            type="button"
+            onClick={refresh}
+            disabled={isRefreshing}
+            className="btn btn-secondary"
+            style={{ minHeight: '44px', padding: '8px 16px' }}
+          >
             {t('buyer.loadError.retry')}
           </button>
         </div>

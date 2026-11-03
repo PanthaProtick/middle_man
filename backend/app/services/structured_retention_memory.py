@@ -9,8 +9,9 @@ from app.services.structured_retention import calendar_deadline
 
 async def purge_memory(now: datetime, shop_id: str) -> int:
     from app.core.idempotency import _memory_idempotency_store
-    from app.models.sms import ImportResult
+    from app.models.legacy_sms import ImportResult
     from app.services.buyer_service import _memory_buyer_revisions
+    from app.services.legacy_sms_store import _memory_imports
     from app.services.order_service import _memory_orders
     from app.services.payment_marker_protection import verify_marker_key
     from app.services.receipt_identity import receipt_identities
@@ -19,7 +20,6 @@ async def purge_memory(now: datetime, shop_id: str) -> int:
         _memory_audit_events,
         _memory_order_review_reasons,
     )
-    from app.services.sms_import import _memory_imports
     from app.services.transaction_store import _memory_observations, _memory_transactions
     await verify_marker_key(None, shop_id)
     removed = 0

@@ -2,6 +2,8 @@ import type { Locale } from '../locale/storage';
 import type { OrderFields } from './guidedOrder';
 import type { PaymentFields } from './guidedPayment';
 
+const receivedPayment = /(?:\b(?:bkash|nagad)\b|বিকাশ|নগদ).{0,80}(?:\breceived\b|\bpeyechi\b|পেয়েছি|পেয়েছি)|\breceived\b.{0,30}(?:\bbkash\b|\bnagad\b)/i;
+
 export type AssistantWorkflow = 'order' | 'payment' | 'attention' | 'preparation';
 export type CreationWorkflow = Extract<AssistantWorkflow, 'order' | 'payment'>;
 export interface AssistantDraft {
@@ -20,9 +22,9 @@ export function interpretWorkflow(message: string): AssistantWorkflow[] {
   if (/\b(cancel|delete|refund|reject|book)\b|বাতিল|মুছে|ফেরত/.test(text)) return [];
   const matches: AssistantWorkflow[] = [];
   if (/(?:create|new|make|add|notun).{0,25}order|order.{0,25}(?:create|ban|kor|toiri|তৈরি)|(?:নতুন|তৈরি).{0,20}অর্ডার|অর্ডার.{0,20}(?:তৈরি|কর)/.test(text)) matches.push('order');
-  if (/(?:record|add|received|log).{0,25}(?:payment|transaction)|(?:payment|transaction|পেমেন্ট|লেনদেন).{0,25}(?:record|entry|লিখ|রেকর্ড|যোগ|kor|peyechi)|(?:টাকা|taka).{0,15}(?:পেয়েছি|পেয়েছি|জমা|peyechi)/.test(text)) matches.push('payment');
-  if (/attention|needs? attention|outstanding|pending work|to-?do|নজর|মনোযোগ|সমস্যা|করণীয়|করণীয়|কাজ বাকি|kaj baki|najar|attention dorkar/.test(text)) matches.push('attention');
-  if (/(?:delivery|ডেলিভারি|ডেলিভারির|কুরিয়ার|preparation|prepare).{0,35}(?:prepar|stag|প্রস্তুতি|বাকি|baki|bak[iy]|ho?be|korte|korte hobe|awaiting)|(?:awaiting|pending).{0,20}(?:delivery|preparation)|(?:preparation|প্রস্তুতি).{0,20}(?:baki|bak[iy]|বাকি)|(?:baki|বাকি).{0,20}(?:delivery|preparation|প্রস্তুতি)|ডেলিভারির.{0,20}প্রস্তুতি/.test(text)) matches.push('preparation');
+  if (receivedPayment.test(text) || /(?:record|add|received|log).{0,25}(?:payment|transaction)|(?:payment|transaction|পেমেন্ট|লেনদেন).{0,25}(?:record|entry|লিখ|রেকর্ড|যোগ|kor|peyechi)|(?:টাকা|taka).{0,15}(?:পেয়েছি|পেয়েছি|জমা|peyechi)/.test(text)) matches.push('payment');
+  if (/attention|needs? attention|outstanding|pending work|to-?do|নজর|মনোযোগ|সমস্যা|করণীয়|করণীয়|কাজ বাকি|kaj\s+(?:ki\s+)?baki|najar|attention dorkar/.test(text)) matches.push('attention');
+  if (/(?:delivery|ডেলিভারি|ডেলিভারির|কুরিয়ার|preparation|prepare).{0,35}(?:prepar|stag|প্রস্তুতি|বাকি|baki|bak[iy]|ho?be|korte|korte hobe|awaiting)|(?:awaiting|pending|ready for).{0,20}(?:delivery|preparation)|(?:preparation|প্রস্তুতি).{0,20}(?:baki|bak[iy]|বাকি)|(?:baki|বাকি).{0,20}(?:delivery|preparation|প্রস্তুতি)|ডেলিভারির.{0,20}প্রস্তুতি/.test(text)) matches.push('preparation');
   return matches;
 }
 

@@ -1,0 +1,63 @@
+Browser tab: 5, Title: "Synthetic baseline", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-evidence&lang=bn".
+1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-evidence&lang=bn
+	2 container
+		3 container ভাষা
+			4 checkbox বাংলা, Value: 1
+			5 checkbox English, Value: 0
+			6 text ভাষা: বাংলা
+		7 heading Conditional baseline specimen, Value: 1
+			8 text Conditional baseline specimen
+		9 container তথ্যের বিরোধের সিদ্ধান্ত
+			10 heading তুলনা করে সিদ্ধান্ত নিন, Value: 4
+				11 text তুলনা করে সিদ্ধান্ত নিন
+			12 text প্রাপ্ত তথ্য বেছে নিন। একটি দাবি বাছলে অন্য বর্তমান দাবিগুলো স্থগিত থাকবে; সঠিক মিলের নিয়ম প্রযোজ্য থাকবে।
+			13 content list
+				14 container
+					15 AXListMarker •
+					16 text Synthetic buyer / পরীক্ষামূলক ক্রেতা  —  baseline-order-1 :  অপেক্ষমাণ ;  প্রেরক 01900000000 ;  ৳450.00 . টাকার পরিমাণ মেলেনি
+			17 container পেমেন্ট রেকর্ড সংশোধন
+				18 heading বরাদ্দ না হওয়া পেমেন্ট রেকর্ড সংশোধন করুন, Value: 5
+					19 text বরাদ্দ না হওয়া পেমেন্ট রেকর্ড সংশোধন করুন
+				20 container
+					21 text আগে :  bkash  /  SYNTHETIC01 ;  ৳500.00 ; 01900000000 ;  02 নভেম্বর 2026, 12:00 pm (বাংলাদেশ সময়) ;  অ্যাকাউন্ট baseline-account .
+				22 container পেমেন্ট রেকর্ড সংশোধন করুন
+					23 container
+						24 text প্রাপক অ্যাকাউন্ট
+						25 pop up button (collapsed, settable) Description: সংশোধিত অ্যাকাউন্ট, Value: Synthetic receiving account (bkash), Secondary Actions: Expand
+							26 menu
+								27 (selected) Synthetic receiving account (bkash)
+						28 text TrxID
+						29 text field (settable) Description: সংশোধিত TrxID, Value: SYNTHETIC01
+						30 text প্রাপ্ত টাকার পরিমাণ (BDT)
+						31 text field (settable) Description: সংশোধিত টাকার পরিমাণ, Value: 500.00
+						32 text পেমেন্ট প্রেরক (অজানা হলে ফাঁকা রাখুন)
+						33 text field (settable) Description: সংশোধিত প্রেরক, Value: 01900000000
+						34 text পেমেন্টের সময় (সময় অঞ্চলসহ ISO, অজানা হলে ফাঁকা রাখুন)
+						35 text field (settable) Description: সংশোধিত সময়, Value: 2026-11-02T06:00:00Z
+						36 text সংশোধনের কারণ — আবশ্যক
+						37 text entry area (settable) সংশোধনের কারণ
+					38 button (disabled) সংশোধন সংরক্ষণ করে দাবি যাচাই করুন
+			39 container তথ্যের বিরোধ মেটান
+				40 container
+					41 text প্রাপ্ত তথ্য
+					42 text — এগোতে সম্পূর্ণ তথ্য বেছে নিন।
+					43 pop up button (collapsed, settable) Description: প্রাপ্ত তথ্য, Value: সম্পূর্ণ তথ্য বেছে নিন, Secondary Actions: Expand
+						44 menu
+							45 (selected) সম্পূর্ণ তথ্য বেছে নিন
+							46 হাতে লেখা: ৳500.00, 01900000000, 02 নভেম্বর 2026, 12:00 pm (বাংলাদেশ সময়), অ্যাকাউন্ট baseline-account
+					47 text দাবির সিদ্ধান্ত
+					48 pop up button (collapsed, settable) Description: দাবির সিদ্ধান্ত, Value: শুধু তথ্যের বিরোধ মেটান; অন্য দাবি স্থগিত রাখুন, Secondary Actions: Expand
+						49 menu
+							50 (selected) শুধু তথ্যের বিরোধ মেটান; অন্য দাবি স্থগিত রাখুন
+							51 Synthetic buyer / পরীক্ষামূলক ক্রেতা — baseline-order-1
+					52 text সিদ্ধান্তের কারণ
+					53 text — কারণ লিখতে হবে।
+					54 text entry area (settable) সিদ্ধান্তের কারণ
+				55 button (disabled) সিদ্ধান্ত রেকর্ড করুন
+			56 button তুলনা হালনাগাদ করুন
+			57 heading সংশোধনের ইতিহাস, Value: 5
+				58 text সংশোধনের ইতিহাস
+			59 heading সিদ্ধান্তের ইতিহাস, Value: 5
+				60 text সিদ্ধান্তের ইতিহাস
+
+The focused UI element is 1 AXWebArea Synthetic baseline, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=specimen-evidence&lang=bn

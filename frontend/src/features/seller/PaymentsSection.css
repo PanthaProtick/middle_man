@@ -1,0 +1,118 @@
+.payments-section {
+  min-width: 0;
+}
+
+.payments-section-header {
+  margin-bottom: var(--space-lg);
+}
+
+.payments-step-rail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-sm);
+  margin-bottom: var(--space-md);
+}
+
+.payments-step-link {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  min-height: var(--touch-target-min);
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  text-decoration: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.payments-step-link:hover {
+  border-color: var(--border-hover);
+  background: var(--bg-card-hover);
+}
+
+.payments-step-link:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-outline-offset);
+}
+
+.payments-step-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-full);
+  background: var(--color-status-cyan-bg);
+  color: var(--color-status-cyan);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.payments-step-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.payments-step-label {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.payments-step-hint {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.45;
+}
+
+.payments-observation-note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-sm);
+  margin: 0 0 var(--space-md);
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  line-height: 1.55;
+}
+
+.payments-observation-note svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--color-status-cyan);
+}
+
+.payments-step-panel {
+  scroll-margin-top: 72px;
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .payments-step-rail {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .payments-step-link {
+    padding: 10px;
+  }
+
+  .payments-section-header {
+    align-items: stretch;
+  }
+
+  .payments-section-header > button {
+    align-self: flex-start;
+  }
+}

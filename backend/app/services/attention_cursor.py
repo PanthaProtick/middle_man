@@ -23,7 +23,7 @@ def encode_cursor(rank: int, outstanding: datetime.datetime, order_id: str) -> s
 
 def decode_cursor(cursor: str) -> CursorKey | None:
     parts = cursor.split(":", 2)
-    if len(parts) != 3 or parts[0] not in {"0", "1", "2", "3"}:
+    if len(parts) != 3 or parts[0] not in {"0", "1", "2", "3", "4"}:
         return None
     try:
         micros = int(parts[1])

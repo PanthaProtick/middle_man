@@ -6,6 +6,7 @@ import {
 import Header from './components/Header';
 import { SellerWorkspace } from './features/seller';
 import { BuyerPortal } from './features/buyer';
+import { LandingPage } from './features/landing';
 import { LocaleProvider, LocaleSwitch, useLocale } from './features/locale';
 import { sellerCopy } from './features/locale/sellerCopy';
 import { fetchHealth, type HealthStatus } from './services/api';
@@ -42,11 +43,24 @@ export function AppShell({ token, sessionId, sessionNotice, onSignIn, onSignOut 
 
   useEffect(() => {
     if (isOrderPortal) return;
-    fetchHealth().then(setHealth);
-    const interval = setInterval(() => {
-      fetchHealth().then(setHealth);
-    }, 10000);
-    return () => clearInterval(interval);
+    let active = true;
+    const check = () => {
+      if (typeof document !== 'undefined' && document.hidden) return;
+      void fetchHealth().then((h) => {
+        if (active) setHealth(h);
+      });
+    };
+    check();
+    const interval = setInterval(check, 10000);
+    const onVisibilityChange = () => {
+      if (typeof document !== 'undefined' && !document.hidden) check();
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => {
+      active = false;
+      clearInterval(interval);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+    };
   }, [isOrderPortal]);
 
   if (showingPortal) {
@@ -86,25 +100,15 @@ export function AppShell({ token, sessionId, sessionNotice, onSignIn, onSignOut 
         onSignOut={onSignOut}
       />
 
-      <section className="app-masthead" aria-labelledby="workspace-heading">
-        <div>
-          <p className="eyebrow">{text.eyebrow}</p>
-          <h2 id="workspace-heading">{text.heading} <em>{text.headingEm}</em></h2>
-          <p className="masthead-copy">
-            {text.intro}
-          </p>
-        </div>
-        <ol className="workflow-guide" aria-label={text.guide}>
-          <li><span>01</span> {text.step1}</li>
-          <li><span>02</span> {text.step2}</li>
-          <li><span>03</span> {text.step3}</li>
-        </ol>
-      </section>
-
-      {/* Main View Area */}
-      <main id="workspace" tabIndex={-1}>
-        {sessionNotice ?? <SellerWorkspace key={sessionId ?? 'signed-out'} token={token} onSignIn={onSignIn} />}
-      </main>
+      {token || sessionNotice ? (
+        <main id="workspace" tabIndex={-1}>
+          {sessionNotice ?? <SellerWorkspace key={sessionId ?? 'signed-out'} token={token} onSignIn={onSignIn} />}
+        </main>
+      ) : (
+        <LandingPage onSignIn={onSignIn}>
+          <SellerWorkspace key={sessionId ?? 'signed-out'} token={token} onSignIn={onSignIn} />
+        </LandingPage>
+      )}
 
       {/* Footer */}
       <footer className="footer">

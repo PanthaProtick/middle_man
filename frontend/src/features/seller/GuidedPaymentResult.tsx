@@ -8,13 +8,14 @@ import { AssistantResult } from './AssistantResult';
 
 interface Props {
   result: RecordedTransactionResult;
+  account?: string;
   locale: Locale;
   token?: string;
   onOpenOrder: (order: SellerOrder) => void;
   onOpenPayment: (receiptId: string) => void;
 }
 
-export function GuidedPaymentResult({ result, locale, token, onOpenOrder, onOpenPayment }: Props): React.JSX.Element {
+export function GuidedPaymentResult({ result, account, locale, token, onOpenOrder, onOpenPayment }: Props): React.JSX.Element {
   const text = guidedPaymentCopy[locale];
   const { receipt, allocated_order_ids: orderIds } = result;
   const latest = receipt.observations[receipt.observations.length - 1];
@@ -26,6 +27,7 @@ export function GuidedPaymentResult({ result, locale, token, onOpenOrder, onOpen
     <p>{text.receiptId}: {receipt.id}</p>
     <p>{text.receipt}: {receipt.trx_id}</p>
     <p>{text.provider}: {receipt.provider.toUpperCase()}</p>
+    <p>{text.account}: {account ?? receipt.payment_account_id}</p>
     <p>{text.amountLine}: BDT {formatOrderAmount(receipt.amount_minor)}</p>
     {receipt.has_conflict ? <p role="alert">{text.conflicted}</p>
       : orderIds.length > 0 ? <>

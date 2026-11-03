@@ -1,0 +1,45 @@
+Browser tab: 4, Title: "বিক্রেতার কর্মক্ষেত্র · middleman", URL: "http://127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en".
+1 AXWebArea বিক্রেতার কর্মক্ষেত্র · middleman, URL: 127.0.0.1:5186/.issues/project-revamp/baseline-fixture/index.html?case=seller&lang=en
+	2 container অর্ডার ও লিংকের বিস্তারিত
+		3 container ভাষা
+			4 checkbox বাংলা, Value: 1
+			5 checkbox English, Value: 0
+			6 text ভাষা: বাংলা
+		7 button ডেলিভারির সারসংক্ষেপ কপি করুন
+		8 text ম্যানুয়াল ডেলিভারির সহায়তার জন্য; কোনো কুরিয়ার বুকিং, হালনাগাদ বা ডেলিভারি খরচের হিসাব নয়।
+		9 heading অর্ডার ও লিংকের বিস্তারিত, Value: 3
+			10 text অর্ডার ও লিংকের বিস্তারিত
+		11 button অর্ডারের বিস্তারিত বন্ধ করুন
+		12 text হাতে তৈরি নকশিকাঁথা — special gift package
+		13 text পর্যালোচনার অপেক্ষায়
+		14 button পেমেন্ট পর্যালোচনা করুন
+		15 tab group অর্ডার ও লিংকের বিস্তারিত
+			16 tab (selectable, settable, boolean) সারাংশ, Value: 0
+			17 tab (selected, settable, boolean) পেমেন্ট, Value: 1
+			18 tab (selectable, settable, boolean) ডেলিভারি, Value: 0
+			19 tab (selectable, settable, boolean) ক্রেতা ও লিংক, Value: 0
+		45 container পেমেন্ট
+			46 text পর্যালোচনা প্রয়োজন
+			47 button (collapsed) ত্রুটির কোড দেখুন (কারিগরি সহায়তা), Secondary Actions: Expand
+			48 text পেমেন্টের অঙ্ক মিলছে না
+			49 text টাকা গ্রহণের অ্যাকাউন্টের স্থির তথ্য
+			50 container
+				51 text Synthetic receiving account  —  BKASH  ( 01700000000 )
+			52 text এই অর্ডারের টাকা গ্রহণের গন্তব্য অপরিবর্তনীয়। পরে অ্যাকাউন্ট বন্ধ বা সম্পাদনা করলেও এটি বদলাবে না।
+			53 button (collapsed) Description: Ask AI for explanation and suggested actions, Secondary Actions: Expand
+			54 container পেমেন্টের ব্যতিক্রম গ্রহণ করুন
+				55 heading পেমেন্টের ব্যতিক্রম গ্রহণ করুন, Value: 4
+					56 text পেমেন্টের ব্যতিক্রম গ্রহণ করুন
+				57 text এতে আপনার পেমেন্ট গ্রহণের সিদ্ধান্ত রেকর্ড হবে; সেবাদাতার স্বাধীন যাচাই হবে না।
+				58 container
+					59 text বিক্রেতার রেকর্ড করা পেমেন্ট
+					60 pop up button (collapsed, settable) বিক্রেতার রেকর্ড করা পেমেন্ট, Value: একটি রেকর্ড বেছে নিন, Secondary Actions: Expand
+						61 menu
+							62 (selected)  একটি রেকর্ড বেছে নিন
+							63 bkash · SYNTHETIC01 · BDT 500.00
+		41 button পেছনে
+		42 button পরবর্তী
+		43 button বন্ধ করুন
+		44 button (collapsed) Seller assistant, Secondary Actions: Expand
+
+The focused UI element is 4 checkbox বাংলা, Value: 1

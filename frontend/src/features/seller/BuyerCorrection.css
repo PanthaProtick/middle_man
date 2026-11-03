@@ -1,34 +1,144 @@
 .buyer-correction {
   margin: var(--section-gap) 0;
-  padding: 16px;
+  padding: 18px;
   border: 1px solid var(--border-subtle);
   border-radius: 12px;
   background: var(--bg-surface);
+  line-height: 1.7;
 }
-.buyer-correction h3 { margin: 0 0 12px; font-size: 1.05rem; }
-.buyer-correction fieldset { border: 0; padding: 0; margin: 0; min-width: 0; }
-.buyer-correction fieldset fieldset { border-top: 1px solid var(--border-subtle); margin-top: 12px; padding-top: 8px; }
-.buyer-correction label { display: grid; gap: 6px; margin: 12px 0; font-size: 0.85rem; }
-.buyer-correction input, .buyer-correction textarea, .buyer-correction select {
+
+.buyer-correction h3 {
+  margin: 0 0 12px;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.buyer-correction fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.buyer-correction fieldset fieldset {
+  border-top: 1px solid var(--border-subtle);
+  margin-top: 16px;
+  padding-top: 12px;
+}
+
+.buyer-correction label {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.buyer-correction input,
+.buyer-correction textarea,
+.buyer-correction select {
   box-sizing: border-box;
   width: 100%;
-  min-height: 42px;
-  padding: 10px;
+  min-height: 46px;
+  padding: 10px 14px;
   color: var(--text-primary, #f8fafc);
   background: var(--bg-input);
-  border: 1px solid #64748b;
-  border-radius: 6px;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
   font: inherit;
+  font-size: 1rem;
 }
-.buyer-correction textarea { min-height: 76px; resize: vertical; }
-.buyer-correction :disabled { opacity: 0.65; }
-.buyer-correction button { padding: 10px 14px; margin: 8px 0; cursor: pointer; }
-.buyer-correction summary { padding: 12px 0; cursor: pointer; }
-.buyer-correction article { border-top: 1px solid var(--border-subtle); overflow-wrap: anywhere; font-size: 0.85rem; }
-.buyer-correction [role=alert] { color: #fca5a5; }
-.order-outcomes { overflow-wrap: anywhere; }
-.order-outcomes form, .order-outcomes label { min-width: 0; }
-.order-outcomes label { display: grid; gap: 4px; }
-.order-outcomes input, .order-outcomes textarea, .order-outcomes select { box-sizing: border-box; max-width: 100%; }
-.order-outcomes-amounts { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); }
-.order-outcomes button { white-space: normal; min-height: 40px; }
+
+.buyer-correction input[inputmode="decimal"],
+.buyer-correction input[inputmode="numeric"] {
+  font-variant-numeric: tabular-nums;
+}
+
+.buyer-correction textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.buyer-correction :disabled {
+  opacity: 0.65;
+}
+
+.buyer-correction button {
+  min-height: 44px;
+  padding: 10px 16px;
+  margin: 8px 0;
+  cursor: pointer;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.buyer-correction button[type="submit"] {
+  background: var(--primary-accent);
+  color: #ffffff;
+  border: none;
+  transition: opacity 0.15s;
+}
+
+.buyer-correction button[type="submit"]:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.buyer-correction summary {
+  padding: 12px 0;
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.buyer-correction article {
+  border-top: 1px solid var(--border-subtle);
+  padding: 10px 0;
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.buyer-correction [role=alert] {
+  color: var(--rose-accent);
+}
+
+.order-outcomes {
+  overflow-wrap: anywhere;
+  line-height: 1.7;
+}
+
+.order-outcomes form,
+.order-outcomes label {
+  min-width: 0;
+}
+
+.order-outcomes label {
+  display: grid;
+  gap: 4px;
+}
+
+.order-outcomes input,
+.order-outcomes textarea,
+.order-outcomes select {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.order-outcomes input[inputmode="decimal"] {
+  font-variant-numeric: tabular-nums;
+}
+
+.order-outcomes-amounts {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+}
+
+.order-outcomes button {
+  white-space: normal;
+  min-height: 44px;
+  padding: 8px 14px;
+}

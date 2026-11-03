@@ -180,7 +180,7 @@ select option {
 
 .btn-primary:hover:not(:disabled) {
   opacity: 0.95;
-  box-shadow: 0 0 30px -3px rgba(99, 102, 241, 0.5);
+  box-shadow: 0 2px 8px rgba(20, 102, 83, 0.15);
   transform: translateY(-1px);
 }
 

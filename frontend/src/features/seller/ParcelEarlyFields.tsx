@@ -3,6 +3,7 @@ import { orderCreationCopy } from '../locale/orderCreationCopy';
 import { useEffect, useRef } from 'react';
 import { MAX_PARCEL_QUANTITY, MAX_PARCEL_WEIGHT_GRAMS } from './parcel';
 import type { ParcelErrors } from './useEarlyParcelDetails';
+import { shopDeskInputStyle as inputStyle } from './orderFormStyles';
 
 interface ParcelEarlyFieldsProps {
   weightKg: string;
@@ -15,15 +16,6 @@ interface ParcelEarlyFieldsProps {
   serverField?: string | null;
   serverErrorId?: string;
 }
-
-const inputStyle = {
-  width: '100%',
-  padding: '8px 12px',
-  background: 'var(--bg-surface)',
-  border: '1px solid var(--border-subtle)',
-  borderRadius: '6px',
-  color: 'var(--text-primary)',
-} as const;
 
 export function ParcelEarlyFields({
   weightKg,
@@ -51,7 +43,7 @@ export function ParcelEarlyFields({
       </p>
       <div className="form-grid-2">
         <div>
-          <label htmlFor="parcel-weight-kg" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+          <label htmlFor="parcel-weight-kg" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
             {text.weight}
           </label>
           <input
@@ -74,7 +66,7 @@ export function ParcelEarlyFields({
           {errors.weight && <p id="parcel-weight-error" role="alert">{text[errors.weight]}</p>}
         </div>
         <div>
-          <label htmlFor="parcel-quantity" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+          <label htmlFor="parcel-quantity" style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
             {text.quantity}
           </label>
           <input

@@ -1,15 +1,14 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Send, AlertCircle, MapPin } from 'lucide-react';
+import { Send, AlertCircle, MapPin, Loader2 } from 'lucide-react';
 import type { BuyerFormDraft, BuyerSubmissionInput, PublicOrder } from './types';
 import type { LocationAvailability } from './pathaoTypes';
 import { BuyerContactFields } from './BuyerContactFields';
 import { PaymentClaimFields } from './PaymentClaimFields';
 import { PathaoLocations } from './PathaoLocations';
-import { useLocale } from '../locale';
+import { useLocale, type MessageKey } from '../locale';
 import { validateBuyerDraft } from './validateBuyerDraft';
 import { parseClaimedAmount, type ApiError } from './api';
 import { formFieldName, fieldMessage } from './submissionErrors';
-import type { MessageKey } from '../locale';
 
 interface BuyerSubmissionFormProps {
   portalToken?: string;
@@ -25,7 +24,8 @@ interface BuyerSubmissionFormProps {
 
 function focusFirstError(form: HTMLFormElement | null, errors: Record<string, unknown>): void {
   Array.from(form?.querySelectorAll<HTMLInputElement>('input[name], textarea[name], select[name]') ?? [])
-    .find(input => errors[input.name])?.focus();
+    .find((input) => errors[input.name])
+    ?.focus();
 }
 
 export function BuyerSubmissionForm({
@@ -41,33 +41,47 @@ export function BuyerSubmissionForm({
 }: BuyerSubmissionFormProps): React.JSX.Element {
   const { t, locale } = useLocale();
   const form = useRef<HTMLFormElement>(null);
-  const [validation, setValidation] = useState<{fields: Record<string, MessageKey | ''>; serverFields: ApiError['fields']}>({fields: {}, serverFields});
-  const [availability, setAvailability] = useState<LocationAvailability>(() => portalToken
-    ? {state: 'loading', city: false, zone: false, area: false}
-    : {state: 'unavailable', city: false, zone: false, area: false});
+  const [validation, setValidation] = useState<{
+    fields: Record<string, MessageKey | ''>;
+    serverFields: ApiError['fields'];
+  }>({ fields: {}, serverFields });
+  const [availability, setAvailability] = useState<LocationAvailability>(() =>
+    portalToken
+      ? { state: 'loading', city: false, zone: false, area: false }
+      : { state: 'unavailable', city: false, zone: false, area: false }
+  );
+
   const clearLocationErrors = useCallback(() => {
-    setValidation(current => {
+    setValidation((current) => {
       const fields = Object.entries(current.fields).filter(([field]) => !field.startsWith('pathao_'));
-      return fields.length === Object.keys(current.fields).length ? current : {...current, fields: Object.fromEntries(fields)};
+      return fields.length === Object.keys(current.fields).length
+        ? current
+        : { ...current, fields: Object.fromEntries(fields) };
     });
   }, []);
-  const handleAvailabilityChange = useCallback((next: LocationAvailability) => {
-    setAvailability(next);
-    clearLocationErrors();
-  }, [clearLocationErrors]);
+
+  const handleAvailabilityChange = useCallback(
+    (next: LocationAvailability) => {
+      setAvailability(next);
+      clearLocationErrors();
+    },
+    [clearLocationErrors]
+  );
+
   const localErrors = validation.serverFields === serverFields ? validation.fields : {};
   const fieldErrors = {
-    ...Object.fromEntries((serverFields ?? []).map(field => [formFieldName(field.field), fieldMessage(t, field)])),
+    ...Object.fromEntries((serverFields ?? []).map((field) => [formFieldName(field.field), fieldMessage(t, field)])),
     ...Object.fromEntries(Object.entries(localErrors).map(([field, code]) => [field, code ? t(code) : ''])),
   };
+
   useEffect(() => {
-    focusFirstError(form.current, Object.fromEntries((serverFields ?? []).map(field => [formFieldName(field.field), true])));
+    focusFirstError(form.current, Object.fromEntries((serverFields ?? []).map((field) => [formFieldName(field.field), true])));
   }, [serverFields]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const errors = validateBuyerDraft(draft, portalToken ? availability : undefined);
-    setValidation({fields: errors, serverFields});
+    setValidation({ fields: errors, serverFields });
     if (Object.keys(errors).length) {
       focusFirstError(form.current, errors);
       return;
@@ -79,7 +93,9 @@ export function BuyerSubmissionForm({
       contact_number: draft.contact_number.trim(),
       address: {
         raw_text: draft.address_raw.trim(),
-        ...(draft.pathao ? {pathao: {...draft.pathao, catalog_version: availability.catalog_version ?? draft.pathao.catalog_version}} : {}),
+        ...(draft.pathao
+          ? { pathao: { ...draft.pathao, catalog_version: availability.catalog_version ?? draft.pathao.catalog_version } }
+          : {}),
       },
       payment_claim: {
         provider: draft.payment_provider,
@@ -95,7 +111,7 @@ export function BuyerSubmissionForm({
   const updateField = (field: keyof BuyerFormDraft, value: string) => {
     onDraftChange({ ...draft, [field]: value });
     if (fieldErrors[field]) {
-      setValidation({fields: { ...localErrors, [field]: '' }, serverFields});
+      setValidation({ fields: { ...localErrors, [field]: '' }, serverFields });
     }
   };
 
@@ -114,19 +130,19 @@ export function BuyerSubmissionForm({
         <div
           role="alert"
           style={{
-            padding: '12px',
+            padding: '12px 14px',
             borderRadius: '8px',
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            background: '#fdf4f5',
+            border: '1px solid rgba(179, 52, 72, 0.35)',
             color: 'var(--rose-accent)',
             fontSize: '0.85rem',
             marginBottom: '16px',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px',
+            gap: '10px',
           }}
         >
-          <AlertCircle size={16} />
+          <AlertCircle size={18} aria-hidden="true" style={{ flexShrink: 0 }} />
           <span>{submissionError}</span>
         </div>
       )}
@@ -144,13 +160,23 @@ export function BuyerSubmissionForm({
             </div>
           </div>
 
-          {portalToken && <PathaoLocations portalToken={portalToken} value={draft.pathao ?? {}} fieldErrors={fieldErrors}
-            disabled={isSubmitting || isLocked} onChange={pathao => { clearLocationErrors(); onDraftChange({...draft, pathao}); }}
-            onAvailabilityChange={handleAvailabilityChange} />}
+          {portalToken && (
+            <PathaoLocations
+              portalToken={portalToken}
+              value={draft.pathao ?? {}}
+              fieldErrors={fieldErrors}
+              disabled={isSubmitting || isLocked}
+              onChange={(pathao) => {
+                clearLocationErrors();
+                onDraftChange({ ...draft, pathao });
+              }}
+              onAvailabilityChange={handleAvailabilityChange}
+            />
+          )}
 
           <div className="form-group" style={{ marginBottom: '10px' }}>
-            <label htmlFor="address_raw" style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.85rem', color: 'var(--text-primary)' }}>
-              <MapPin size={15} color="var(--primary-accent)" />
+            <label htmlFor="address_raw">
+              <MapPin size={15} color="var(--primary-accent)" aria-hidden="true" />
               <span>{t('buyer.form.address')} <span style={{ color: 'var(--rose-accent)' }}>*</span></span>
             </label>
             <textarea
@@ -167,7 +193,9 @@ export function BuyerSubmissionForm({
               style={{ marginTop: '6px', width: '100%', resize: 'vertical' }}
             />
             {fieldErrors.address_raw && (
-              <div id="address_raw-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>{fieldErrors.address_raw}</div>
+              <div id="address_raw-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
+                {fieldErrors.address_raw}
+              </div>
             )}
           </div>
         </div>
@@ -198,16 +226,18 @@ export function BuyerSubmissionForm({
         className="btn btn-primary"
         style={{
           width: '100%',
-          padding: '12px',
+          marginTop: '18px',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
-          fontWeight: 600,
-          fontSize: '0.95rem',
         }}
       >
-        <Send size={18} aria-hidden="true" />
+        {isSubmitting ? (
+          <Loader2 size={18} className="spin" aria-hidden="true" />
+        ) : (
+          <Send size={18} aria-hidden="true" />
+        )}
         <span>{t(isSubmitting ? 'buyer.form.submitting' : isLocked ? 'buyer.form.retry' : 'buyer.form.submit')}</span>
       </button>
     </form>

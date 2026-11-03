@@ -4,6 +4,7 @@ import { X, ShoppingBag, AlertCircle, ArrowRight } from 'lucide-react';
 import { formatOrderAmount } from './orderNumbers';
 import { ParcelEarlyFields } from './ParcelEarlyFields';
 import { useOrderCreation, type CreateOrderModalProps } from './useOrderCreation';
+import { shopDeskInputStyle as inputStyle, shopDeskSelectStyle as selectStyle } from './orderFormStyles';
 
 export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Element {
   const { onClose } = props;
@@ -16,7 +17,6 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
       role="presentation"
       style={{
         position: 'fixed', inset: 0, backgroundColor: 'rgba(0, 0, 0, 0.75)',
-        backdropFilter: 'blur(8px)', WebkitBackdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '16px',
       }}
     >
@@ -26,9 +26,9 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
         aria-modal="true"
         aria-labelledby="create-order-dialog-title"
         style={{
-          width: '100%', maxWidth: '520px', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', background: 'var(--bg-surface)',
+          width: '100%', maxWidth: '520px', maxHeight: 'calc(100dvh - 32px)', overflowY: 'auto', background: 'var(--bg-card)',
           border: '1px solid var(--border-subtle)', borderRadius: '16px', padding: '24px',
-          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
         }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
@@ -40,7 +40,7 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
             onClick={onClose}
             aria-label={text.closeDialog}
             disabled={submitting}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', padding: '4px', borderRadius: '4px', display: 'flex' }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', minHeight: '44px', minWidth: '44px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px' }}
           >
             <X size={20} />
           </button>
@@ -55,14 +55,14 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
             <p style={{ color: 'var(--text-primary)', marginBottom: '16px' }}>
               {text.noAccounts}
             </p>
-            <button className="btn btn-secondary" onClick={onClose}>
+            <button className="btn btn-secondary" onClick={onClose} style={{ minHeight: '44px' }}>
               {text.close}
             </button>
           </div>
         ) : (
           <form ref={formRef} onSubmit={handleSubmit} noValidate>
             <div style={{ marginBottom: '14px' }}>
-              <label htmlFor="create-order-product-name" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              <label htmlFor="create-order-product-name" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 {text.product}
               </label>
               <input
@@ -77,13 +77,13 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 required
-                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                style={inputStyle}
               />
             </div>
 
             <div className="form-grid-2">
               <div>
-                <label htmlFor="create-order-total-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                <label htmlFor="create-order-total-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   {text.total}
                 </label>
                 <input
@@ -92,20 +92,20 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
                   type="text"
                   inputMode="decimal"
                   name="totalBdt"
-                {...errorProps("totalBdt")}
-                disabled={submitting}
+                  {...errorProps("totalBdt")}
+                  disabled={submitting}
                   placeholder={text.totalExample}
                   min="1"
                   step="1"
                   value={totalBdt}
                   onChange={(e) => setTotalBdt(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                  style={inputStyle}
                 />
               </div>
 
               <div>
-                <label htmlFor="create-order-advance-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+                <label htmlFor="create-order-advance-bdt" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                   {text.advance}
                 </label>
                 <input
@@ -114,15 +114,15 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
                   type="text"
                   inputMode="decimal"
                   name="advanceBdt"
-                {...errorProps("advanceBdt")}
-                disabled={submitting}
+                  {...errorProps("advanceBdt")}
+                  disabled={submitting}
                   placeholder={text.advanceExample}
                   min="1"
                   step="1"
                   value={advanceBdt}
                   onChange={(e) => setAdvanceBdt(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                  style={inputStyle}
                 />
               </div>
             </div>
@@ -130,10 +130,10 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
             <div
               style={{
                 marginBottom: '14px',
-                padding: '10px 14px',
+                padding: '12px 14px',
                 background: 'rgba(99, 102, 241, 0.08)',
-                border: '1px solid rgba(99, 102, 241, 0.2)',
-                borderRadius: '6px',
+                border: '1px solid rgba(99, 102, 241, 0.25)',
+                borderRadius: '8px',
                 fontSize: '0.875rem',
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -143,7 +143,7 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
               }}
             >
               <span style={{ color: 'var(--text-secondary)' }}>{text.cod}</span>
-              <span style={{ fontWeight: 600, color: 'var(--primary-accent)', fontSize: '1rem' }}>
+              <span style={{ fontWeight: 600, color: 'var(--primary-accent)', fontSize: '1rem', fontVariantNumeric: 'tabular-nums' }}>
                 BDT {formatOrderAmount(expectedCod)}
               </span>
             </div>
@@ -161,7 +161,7 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
             />
 
             <div style={{ marginBottom: '20px' }}>
-              <label htmlFor="create-order-payment-account-id" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '4px' }}>
+              <label htmlFor="create-order-payment-account-id" style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '6px' }}>
                 {text.account}
               </label>
               <select
@@ -172,7 +172,7 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
                 disabled={submitting}
                 value={selectedAccountId}
                 onChange={(e) => setSelectedAccountId(e.target.value)}
-                style={{ width: '100%', padding: '8px 12px', background: 'var(--bg-surface)', border: '1px solid var(--border-subtle)', borderRadius: '6px', color: 'var(--text-primary)' }}
+                style={selectStyle}
               >
                 {activeAccounts.map((acc) => (
                   <option key={acc.id} value={acc.id}>
@@ -180,16 +180,16 @@ export function CreateOrderModal(props: CreateOrderModalProps): React.JSX.Elemen
                   </option>
                 ))}
               </select>
-              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '6px' }}>
                 {text.snapshot}
               </p>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', flexWrap: 'wrap' }}>
-              <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+              <button type="button" className="btn btn-secondary" onClick={onClose} disabled={submitting} style={{ minHeight: '44px' }}>
                 {text.cancel}
               </button>
-              <button type="submit" className="btn btn-primary" disabled={submitting}>
+              <button type="submit" className="btn btn-primary" disabled={submitting} style={{ minHeight: '44px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
                 {submitting ? text.creating : text.create} <ArrowRight size={14} />
               </button>
             </div>

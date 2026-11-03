@@ -43,6 +43,8 @@ def memory_attention_facts(
             or _coerce(raw.get("updated_at"))
             or get_utc_now()
         )
+    if lifecycle == "awaiting_buyer" and not attempts:
+        return 4, _coerce(raw.get("created_at")) or get_utc_now()
     return None
 
 

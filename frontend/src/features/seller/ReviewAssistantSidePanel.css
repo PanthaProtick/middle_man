@@ -18,16 +18,20 @@
   max-height: 85vh;
   overflow-y: auto;
   padding: 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
   overflow-wrap: anywhere;
 }
 .review-assistant-side-panel:focus {
-  outline: 2px solid var(--primary-accent);
+  outline: 2px solid var(--primary-accent, #146653);
+  outline-offset: -1px;
 }
 .review-assistant-side-panel .assistant-back {
   display: none;
+  min-height: 44px;
+  align-items: center;
 }
 .review-assistant-side-panel .assistant-back-required {
   display: inline-flex;
@@ -46,8 +50,205 @@
 .order-detail-main {
   min-width: 0;
 }
+
+/* Modern Dhaka Shop Desk Review Assistant Panel */
+.review-assistant-panel {
+  margin-top: 8px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--bg-card, #ffffff);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  animation: review-panel-in var(--duration-smooth, 480ms) var(--ease-out-calm, cubic-bezier(0.2, 0.9, 0.3, 1)) both;
+}
+.review-assistant-panel:lang(bn),
+.review-assistant-side-panel:lang(bn) {
+  line-height: 1.7;
+}
+.review-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.review-panel-badges {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.review-guidance-badge {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  background: #eaf4ee;
+  color: #146653;
+  border: 1px solid #b8d5c5;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  letter-spacing: 0.02em;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              border-color var(--duration-fast, 260ms) var(--ease-out-calm);
+}
+.review-guidance-badge.is-generated {
+  background: #fdf6ea;
+  color: #8a570b;
+  border: 1px solid #e8cda2;
+}
+.review-panel-close {
+  background: var(--bg-surface, #f5f6f2);
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  color: var(--text-primary, #192f29);
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  border-radius: 8px;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              color var(--duration-fast, 260ms) var(--ease-out-calm),
+              border-color var(--duration-fast, 260ms) var(--ease-out-calm);
+}
+.review-panel-close:hover {
+  background: #eaf1eb;
+  color: var(--text-primary, #192f29);
+  border-color: var(--border-hover, #9bb4a9);
+}
+.review-panel-close:focus-visible {
+  outline: 2px solid var(--primary-accent, #146653);
+  outline-offset: 2px;
+}
+.review-loading-state {
+  font-size: 0.875rem;
+  color: var(--text-secondary, #4b5563);
+  padding: 6px 0;
+  animation: review-loading-pulse 2.2s var(--ease-in-out-calm, ease-in-out) infinite;
+}
+.review-error-state {
+  font-size: 0.85rem;
+  color: var(--color-danger, #b91c1c);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-block: 8px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+.review-assistance-explanation {
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--text-primary, #1f2937);
+  margin: 0 0 12px 0;
+}
+.review-facts-container {
+  margin-top: 12px;
+  border-top: 1px solid var(--border-subtle, #d8e2dd);
+  padding-top: 10px;
+}
+.review-facts-title {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #4b5563);
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.review-facts-dl {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+}
+.review-fact-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 0.825rem;
+}
+.review-fact-dt {
+  color: var(--text-secondary, #4b5563);
+}
+.review-fact-dd {
+  margin: 0;
+  color: var(--text-primary, #1f2937);
+  font-weight: 500;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.review-fact-dd.is-numeric {
+  font-family: var(--font-mono);
+}
+.review-actions-section {
+  margin-top: 14px;
+}
+.review-actions-title {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #4b5563);
+  margin-bottom: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.review-actions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.review-action-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+  min-height: 44px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              color var(--duration-fast, 260ms) var(--ease-out-calm),
+              border-color var(--duration-fast, 260ms) var(--ease-out-calm),
+              box-shadow var(--duration-normal, 360ms) var(--ease-out-calm),
+              transform var(--duration-fast, 260ms) var(--ease-out-calm);
+}
+.review-action-button:hover {
+  transform: translateX(2px);
+}
+.review-action-button:focus-visible {
+  outline: 2px solid var(--primary-accent, #146653);
+  outline-offset: 2px;
+}
+.review-advisory-note {
+  margin-top: 12px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle, #d8e2dd);
+  font-size: 0.75rem;
+  color: var(--text-secondary, #4b5563);
+  font-style: italic;
+  line-height: 1.4;
+}
+.review-assistance-explanation:lang(bn),
+.review-advisory-note:lang(bn) {
+  line-height: 1.7;
+}
+
+@keyframes review-panel-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes review-loading-pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
 @media (max-width: 800px) {
-  .assistant-workspace:has(> .assistant-slot .review-assistant-side-panel), .order-detail-layout:has(.review-assistant-side-panel) {
+  .assistant-workspace:has(> .assistant-slot .review-assistant-side-panel),
+  .order-detail-layout:has(.review-assistant-side-panel) {
     grid-template-columns: minmax(0, 1fr);
   }
   .assistant-workspace:has(> .assistant-slot .review-assistant-side-panel) > .assistant-orders,
@@ -71,5 +272,14 @@
   }
   .review-assistant-side-panel .assistant-back {
     display: inline-flex;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-assistant-panel,
+  .review-loading-state,
+  .review-action-button {
+    animation: none !important;
+    transition: none !important;
   }
 }

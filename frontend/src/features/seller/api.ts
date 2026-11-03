@@ -1,7 +1,6 @@
 import { formatOrderAmount } from './orderNumbers';
 import { sellerFetch } from './sessionRequest';
 import { formatBangladeshDateTime, normalizeBengaliDigits } from '../locale/format';
-import type { ImportList, ImportResult } from './smsTypes';
 import type {
   AccountInput,
   AccountUpdateInput,
@@ -280,17 +279,4 @@ export async function recordManualTransaction(
     token,
     idempotencyKey,
   );
-}
-
-export async function importSms(
-  input: { payment_account_id: string; messages: string[] }, key: string, token?: string,
-): Promise<ImportResult> {
-  return requestJson<ImportResult>('/api/seller/transactions/sms-import', {
-    method: 'POST', body: JSON.stringify(input),
-  }, token, key);
-}
-
-export async function fetchSmsImports(cursor?: string, token?: string): Promise<ImportList> {
-  const query = cursor ? `?cursor=${encodeURIComponent(cursor)}` : '';
-  return requestJson<ImportList>(`/api/seller/transactions/sms-imports${query}`, {}, token);
 }

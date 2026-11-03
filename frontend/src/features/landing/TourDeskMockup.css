@@ -1,0 +1,174 @@
+/* Tour Shop Desk & Courier Mockup */
+
+.mock-desk-shell {
+  width: 100%;
+  max-width: 440px;
+  background: #ffffff;
+  border: 1px solid #d8e2dd;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+}
+
+.mock-desk-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #d8e2dd;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
+.desk-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: #1b2e2b;
+}
+
+.status-chip {
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.status-chip.success {
+  background: #eaf4ee;
+  color: #146653;
+  border: 1px solid #b8d5c5;
+}
+
+.status-chip.ready {
+  background: #eef3f7;
+  color: #2b567a;
+  border: 1px solid #bed2e2;
+}
+
+.mock-recon-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.recon-card {
+  background: #f8faf9;
+  border: 1px solid #d8e2dd;
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.recon-card.buyer-side {
+  animation: mock-recon-in 240ms var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) both;
+}
+
+.recon-card.seller-side {
+  animation: mock-recon-in 240ms var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) 120ms both;
+}
+
+.recon-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #146653;
+  padding: 4px 0;
+  animation: mock-recon-in 240ms var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) 60ms both;
+}
+
+@keyframes mock-recon-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.recon-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #146653;
+  text-transform: uppercase;
+}
+
+.recon-party {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 4px 0 2px;
+  color: #1b2e2b;
+}
+
+.recon-amount {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #146653;
+  margin: 0;
+}
+
+.recon-tag {
+  font-size: 0.75rem;
+  color: #4a5d58;
+  font-family: inherit;
+  font-variant-numeric: tabular-nums;
+}
+
+.recon-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #146653;
+  padding: 4px 0;
+}
+
+.mock-recon-footer {
+  margin-top: 12px;
+  font-size: 0.82rem;
+  color: #4a5d58;
+  border-top: 1px solid #d8e2dd;
+  padding-top: 8px;
+}
+
+/* Courier Slip */
+.courier-slip {
+  background: #f8faf9;
+  border: 1px solid #d8e2dd;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.courier-badge-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.courier-tag {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #146653;
+}
+
+.courier-details p {
+  font-size: 0.88rem;
+  margin: 0 0 6px;
+  color: #1b2e2b;
+}
+
+.courier-cod-box {
+  background: #eaf4ee;
+  border: 1px solid #b8d5c5;
+  border-radius: 6px;
+  padding: 8px 12px;
+  margin: 12px 0 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cod-amount {
+  font-size: 1.1rem;
+  color: #146653;
+  font-weight: 700;
+}

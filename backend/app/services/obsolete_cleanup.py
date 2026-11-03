@@ -18,7 +18,7 @@ from app.models.entities import (
     ShopTable,
     TransactionObservationTable,
 )
-from app.models.sms import ImportResult
+from app.models.legacy_sms import ImportResult
 from app.models.sms_entities import SmsEvidenceTable, SmsImportTable
 from app.services.structured_retention_db import remove_order
 

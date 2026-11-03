@@ -41,10 +41,13 @@ function AuthorizedReviewAssistant({ order, token, receiptId, receiptVersion, on
   const isOpen = workspace ? workspace.activeId === order.id &&
     (workspace.modalId ? inModal : !inModal) : localOpen;
   const workspaceClose = workspace?.close;
+  const workspaceFloating = workspace?.floating;
+  const showGeneral = workspace?.showGeneral;
   const close = useCallback((returnFocus = true) => {
-    if (workspaceClose) workspaceClose(returnFocus);
+    if (workspaceFloating && showGeneral) showGeneral();
+    else if (workspaceClose) workspaceClose(returnFocus);
     else { setLocalOpen(false); if (returnFocus) triggerRef.current?.focus(); }
-  }, [workspaceClose]);
+  }, [workspaceClose, workspaceFloating, showGeneral]);
   const [assistance, setAssistance] = useState<ReviewAssistanceResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);

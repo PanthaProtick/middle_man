@@ -3,6 +3,7 @@ import { interpretWorkflow } from './assistantConversation';
 
 const preparationMessages = [
   'show orders awaiting delivery preparation',
+  'What orders are ready for delivery?',
   'delivery preparation baki order',
   'delivery prepare korte hobe',
   'ডেলিভারির প্রস্তুতি বাকি অর্ডার',
@@ -33,6 +34,7 @@ describe('attention intent', () => {
     'pending work list',
     'show outstanding orders',
     'kaj baki ache',
+    'Kaj ki baki?',
     'যে অর্ডারে নজর দিতে হবে',
     'করণীয় কাজ দেখাও',
   ])('recognizes %s locally', message => {

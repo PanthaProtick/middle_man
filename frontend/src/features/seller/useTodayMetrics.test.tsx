@@ -32,3 +32,47 @@ it('reloads independent totals after list changes and rejects late responses and
   expect(host.textContent).toBe('unavailable');
   await act(async () => root.unmount()); host.remove();
 });
+
+it('periodically refreshes metrics via 60s timer across midnight interval', async () => {
+  let intervalCallback: (() => void) | null = null;
+  vi.spyOn(window, 'setInterval').mockImplementation(((callback: () => void, ms?: number) => {
+    if (ms === 60_000) intervalCallback = callback;
+    return 123 as unknown as number;
+  }) as unknown as typeof window.setInterval);
+  const pending: Array<(response: Response) => void> = [];
+  vi.spyOn(globalThis, 'fetch').mockImplementation(() =>
+    new Promise<Response>((resolve) => pending.push(resolve)),
+  );
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const emptyOrders: SellerOrder[] = [];
+  const emptyReceipts: ReceiptView[] = [];
+  function Harness() {
+    const metrics = useTodayMetrics('seller', emptyOrders, emptyReceipts);
+    return <span>{metrics?.orders ?? 'unavailable'}</span>;
+  }
+  await act(async () => root.render(<Harness />));
+  expect(pending).toHaveLength(1);
+  await act(async () => {
+    pending[0](new Response(JSON.stringify({
+      date: '2026-10-31', timezone: 'Asia/Dhaka', orders: 10, confirmed: 1, awaiting: 0, pending: 0, payments: 2, staged_for_delivery: 1,
+    })));
+  });
+  expect(host.textContent).toBe('10');
+
+  expect(intervalCallback).not.toBeNull();
+  await act(async () => {
+    intervalCallback!();
+  });
+  expect(pending).toHaveLength(2);
+  await act(async () => {
+    pending[1](new Response(JSON.stringify({
+      date: '2026-11-01', timezone: 'Asia/Dhaka', orders: 0, confirmed: 0, awaiting: 0, pending: 0, payments: 0, staged_for_delivery: 0,
+    })));
+  });
+  expect(host.textContent).toBe('0');
+
+  await act(async () => root.unmount());
+  host.remove();
+});

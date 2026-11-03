@@ -2,7 +2,7 @@ import { useEffect, useLayoutEffect, useState } from 'react';
 import { useAuth, useClerk } from '@clerk/react';
 import { SellerSignIn } from './SellerSignIn';
 import { AppShell } from '../../App';
-import { LocaleProvider, LocaleSwitch, useLocale } from '../locale';
+import { LocaleProvider, useLocale } from '../locale';
 import './SellerSession.css';
 import { sessionReason } from './sessionReason';
 import { sellerCopy } from '../locale/sellerCopy';
@@ -110,8 +110,20 @@ function SellerSessionContent(): React.JSX.Element {
     setRetry(value => value + 1);
   };
 
-  if (!isLoaded) return <><LocaleSwitch /><p role="status">{text.sessionLoading}</p></>;
-  if (signInOpen && !isSignedIn) return <SellerSignIn />;
+  if (!isLoaded) {
+    return (
+      <AppShell
+        sessionNotice={
+          <section className="card seller-session-notice" role="status">
+            <p role="status">{text.sessionLoading}</p>
+          </section>
+        }
+      />
+    );
+  }
+  if (signInOpen && !isSignedIn) {
+    return <AppShell sessionNotice={<SellerSignIn />} onSignIn={() => setSignInOpen(true)} />;
+  }
 
   const notice = blocked || error ? <section className="card seller-session-notice"
     role={recovering ? 'status' : 'alert'} aria-live={recovering ? 'polite' : 'assertive'}>

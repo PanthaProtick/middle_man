@@ -46,7 +46,7 @@ current route/service/model split; update the owning annex when behavior changes
 - [Pathao review](pathao-review-contract.md)
 - [Pathao submission](pathao-submission-contract.md)
 - [Retention lifecycle](retention-lifecycle.md)
-- [SMS import](sms-import.md)
+- [SMS import retirement and historical data](sms-import.md)
 - [Order delivery workflow](order-delivery-workflow.md)
 
 ## Maintenance

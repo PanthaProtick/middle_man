@@ -60,13 +60,14 @@ it('runs the shared attention query from the workflow button and keeps an unfini
   vi.mocked(fetchAttentionPreview).mockResolvedValue(preview);
   const { host, root, choice, onShowInDashboard } = await open();
 
-  await act(async () => choice('Create an order').click());
+  await act(async () => choice('New order').click());
   expect(host.querySelector('[name="assistant-draft"]')).not.toBeNull();
 
   await act(async () => choice('Orders needing attention').click());
   await act(async () => { await Promise.resolve(); });
 
   expect(fetchAttentionPreview).toHaveBeenCalledWith({ cursor: undefined, limit: 10 }, 'seller-token');
+  expect(host.querySelector('[role="log"] [data-testid="attention-order"]')).not.toBeNull();
   expect(host.textContent).toContain('Showing 1 of 1');
   expect(host.textContent).toContain('Courier submission failed');
   expect(host.querySelector('[data-testid="attention-order"]')).not.toBeNull();

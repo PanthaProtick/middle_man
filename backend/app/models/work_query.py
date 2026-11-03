@@ -7,12 +7,13 @@ from app.models.order import SellerOrder
 
 PreparationReason = Literal["AWAITING_COURIER_PREPARATION", "PRIOR_DAY_BACKLOG"]
 AttentionCategory = Literal[
-    "unknown_outcome", "failed_submission", "pending_review", "preparation"
+    "unknown_outcome", "failed_submission", "pending_review", "preparation", "awaiting_buyer"
 ]
 AttentionReason = Literal[
     "UNKNOWN_OUTCOME",
     "FAILED_SUBMISSION",
     "PENDING_REVIEW",
+    "AWAITING_BUYER_SUBMISSION",
     "AWAITING_COURIER_PREPARATION",
     "PRIOR_DAY_BACKLOG",
 ]

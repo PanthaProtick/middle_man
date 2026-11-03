@@ -13,7 +13,7 @@ const english = {
     sections: 'Seller Desk Sections',
     newEntries: 'new entries',
     orders: 'Orders & Links',
-    payments: 'Payments & SMS',
+    payments: 'Payments',
     accounts: 'Receiving Accounts',
     retention: 'Data Retention',
     overview: "Shop orders and payments",
@@ -68,7 +68,10 @@ const english = {
   checkSetup: 'Check shop setup',
   recoveryFailed: 'Unable to check shop setup. Please try the check again.',
   nameLimit: 'Shop name must be between 1 and 200 characters.',
-  sessionRejected: 'Your seller session was rejected. Please sign in again.'
+  sessionRejected: 'Your seller session was rejected. Please sign in again.',
+  settings: 'Settings',
+  courier: 'Courier Logistics',
+  dismiss: 'Dismiss'
 } as const;
 
 const bengali: Record<keyof typeof english, string> = {
@@ -86,7 +89,7 @@ const bengali: Record<keyof typeof english, string> = {
     sections: 'বিক্রেতার কর্মক্ষেত্রের বিভাগ',
     newEntries: 'নতুন তথ্য',
     orders: 'অর্ডার ও লিংক',
-    payments: 'পেমেন্ট ও SMS',
+    payments: 'পেমেন্ট',
     accounts: 'টাকা গ্রহণের অ্যাকাউন্ট',
     retention: 'তথ্য সংরক্ষণ',
     overview: 'দোকানের অর্ডার ও পেমেন্ট',
@@ -141,7 +144,10 @@ const bengali: Record<keyof typeof english, string> = {
     checkSetup: 'দোকানের সেটআপ পরীক্ষা করুন',
     recoveryFailed: 'দোকানের সেটআপ পরীক্ষা করা যায়নি। আবার পরীক্ষা করুন।',
     nameLimit: 'দোকানের নাম 1 থেকে 200 অক্ষরের মধ্যে হতে হবে।',
-    sessionRejected: 'বিক্রেতার সেশন গ্রহণ করা যায়নি। আবার সাইন ইন করুন।'
+    sessionRejected: 'বিক্রেতার সেশন গ্রহণ করা যায়নি। আবার সাইন ইন করুন।',
+  settings: 'সেটিংস',
+  courier: 'কুরিয়ার লজিস্টিকস',
+  dismiss: 'বন্ধ করুন'
 };
 
 export const sellerCopy = { en: english, bn: bengali };

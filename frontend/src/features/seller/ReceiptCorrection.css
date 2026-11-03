@@ -1,0 +1,73 @@
+.receipt-correction {
+  margin-bottom: var(--space-md);
+  padding: 14px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  min-width: 0;
+}
+
+.receipt-correction-title {
+  margin: 0 0 var(--space-xs);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.receipt-correction-before {
+  margin: 0 0 var(--space-md);
+  font-size: var(--font-size-xs);
+  line-height: 1.6;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.receipt-correction-fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.receipt-correction-legend {
+  padding: 0;
+  margin-bottom: var(--space-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.receipt-correction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  gap: var(--space-md);
+}
+
+.receipt-correction-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.receipt-correction-reason {
+  grid-column: 1 / -1;
+}
+
+.receipt-correction-error {
+  margin: var(--space-sm) 0 0;
+  padding: 8px 10px;
+  border: 1px solid #e4bcc2;
+  border-radius: var(--radius-sm);
+  background: var(--color-status-rose-bg);
+  color: var(--color-status-rose);
+  font-size: var(--font-size-sm);
+}
+
+.receipt-correction-submit {
+  margin-top: var(--space-md);
+  min-height: var(--touch-target-min);
+}
+

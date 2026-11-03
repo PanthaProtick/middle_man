@@ -7,6 +7,7 @@ import { useAssistantConversation, type ConversationOptions } from './useAssista
 import { AssistantWindow } from './AssistantWindow';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import { createPortal } from 'react-dom';
+import { Sparkles } from 'lucide-react';
 import { OrderDetailModal } from './OrderDetailModal';
 import type { SellerOrder } from './types';
 
@@ -27,7 +28,6 @@ export function AssistantWorkspace({ children, eligibleOrderIds = [], floating =
 function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...options }: Props): React.JSX.Element {
   const { locale } = useLocale();
   const [openedOrder, setOpenedOrder] = useState<SellerOrder | null>(null);
-  const conversation = useAssistantConversation(locale, { ...options, onOpenOrder: setOpenedOrder });
   const [registeredIds, setEligible] = useState<string[] | null>(null);
   const [generalOpen, setGeneralOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -39,11 +39,28 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
   const rootRef = useRef<HTMLDivElement>(null);
   const focusOrderId = useRef<string | null>(null);
   const opener = useRef<HTMLElement | null>(null);
+  const minimizedReview = useRef<string | null>(null);
+  const restoreFocus = useRef(false);
+  const onOpenOrder = options.onOpenOrder;
+  const handleOpenOrder = useCallback((order: SellerOrder) => {
+    restoreFocus.current = false;
+    minimizedReview.current = null;
+    setActiveId(null);
+    setGeneralOpen(false);
+    setOpenedOrder(order);
+    onOpenOrder?.(order);
+  }, [onOpenOrder]);
+  const conversation = useAssistantConversation(locale, { ...options, onOpenOrder: handleOpenOrder,
+    onConversationReset: () => {
+      minimizedReview.current = null; setActiveId(null); setGeneralOpen(true);
+      options.onConversationReset?.();
+    },
+  });
   const followModal = useCallback((id: string | null) => {
     if (id) focusOrderId.current = id;
     setModalId(id); setActiveId(current => current && id ? id : current);
   }, []);
-  const restoreFocus = useRef(false);
+
   useLayoutEffect(() => {
     if (activeId || generalOpen || !restoreFocus.current) return;
     restoreFocus.current = false;
@@ -60,16 +77,28 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
   }, [activeId, generalOpen, modalId, target]);
   const close = useCallback((returnFocus = true) => {
     restoreFocus.current = returnFocus;
+    minimizedReview.current = activeId;
     setActiveId(null);
     setGeneralOpen(false);
-  }, []);
+  }, [activeId]);
   if (activeId && !(registeredIds ?? eligibleOrderIds).includes(activeId)) setActiveId(null);
-  const showGeneral = () => { setActiveId(null); setGeneralOpen(true); };
+  const showGeneral = () => { minimizedReview.current = null; setActiveId(null); setGeneralOpen(true); };
   const launcher = <button type="button" className="btn btn-primary seller-assistant-launcher"
     hidden={Boolean(activeId || generalOpen)}
     data-testid="seller-assistant-launcher" aria-expanded={Boolean(activeId || generalOpen)}
-    onClick={event => { opener.current = event.currentTarget; showGeneral(); }}>
-    {sellerAssistantCopy[conversation.locale].title}
+    onClick={event => {
+      opener.current = event.currentTarget;
+      const id = minimizedReview.current;
+      if (id && (registeredIds ?? eligibleOrderIds).includes(id)) setActiveId(id);
+      else showGeneral();
+    }}>
+    <span className="assistant-launcher-badge" aria-hidden="true">
+      <Sparkles size={18} className="assistant-launcher-icon" />
+    </span>
+    <span className="assistant-launcher-text">{sellerAssistantCopy[conversation.locale].title}</span>
+    <span className="assistant-status-dot" aria-hidden="true">
+      <span className="assistant-status-ping" />
+    </span>
   </button>;
   return <Context.Provider value={{activeId, modalId, target: floating ? reviewTarget : target, setTarget, close,
     open: (id, trigger) => { focusOrderId.current = id; opener.current = trigger; setGeneralOpen(false); setActiveId(id); },
@@ -82,7 +111,7 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
       {!modalId && <div className="assistant-slot" ref={setListTarget} />}
       {floating && (modalId ? target && createPortal(launcher, target) : launcher)}
       {floating && (activeId || generalOpen) && <AssistantWindow target={target} conversation={conversation}
-        reviewing={Boolean(activeId)} close={close} showGeneral={showGeneral} setReviewTarget={setReviewTarget} />}
+        reviewing={Boolean(activeId)} close={close} setReviewTarget={setReviewTarget} />}
     </div>
   </Context.Provider>;
 }

@@ -19,6 +19,7 @@ const categoryLabelKeys: Record<AttentionCategory, keyof typeof attentionCopy.en
   failed_submission: 'categoryFailedSubmission',
   pending_review: 'categoryPendingReview',
   preparation: 'categoryPreparation',
+  awaiting_buyer: 'categoryAwaitingBuyer',
 };
 
 export function AttentionPreview({
@@ -55,19 +56,21 @@ export function AttentionPreview({
     {state.retrievedAt && <p><small>{text.retrieved.replace('{time}', formatBangladeshDateTime(state.retrievedAt, locale))}</small></p>}
     {state.items.length === 0
       ? <p role="status">{text.empty}</p>
-      : <ul>
+      : <ul tabIndex={0} aria-label={text.title}>
         {state.items.map(item => <li key={item.order.id} data-testid="attention-order"
           data-category={item.category}>
           <h5>{text[categoryLabelKeys[item.category]]}</h5>
           <p>{item.order.product_name}</p>
-          <p>{item.order.id}</p>
+          <p className="assistant-numeric">{item.order.id}</p>
           <ul>{item.reason_codes.map(code => <li key={code}>{reasonLabel(code)}</li>)}</ul>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => onOpenOrder(item.order)}>
-            {text.openOrder}
-          </button>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => void copyReference(item.order)}>
-            {text.copyReference}
-          </button>
+          <div className="preview-order-actions">
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => onOpenOrder(item.order)}>
+              {text.openOrder}
+            </button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => void copyReference(item.order)}>
+              {text.copyReference}
+            </button>
+          </div>
         </li>)}
       </ul>}
     {copyStatus !== 'idle' && <p role={copyStatus === 'failed' ? 'alert' : 'status'}>
