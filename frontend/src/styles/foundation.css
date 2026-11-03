@@ -67,131 +67,146 @@ svg.lucide,
   will-change: transform;
 }
 
-/* Direct Icon Territory Hover */
-svg.lucide:hover,
-.lucide:hover {
-  transform: scale(1.18) translateY(-1px);
+/* Apply Hover Animations strictly on Desktop / Pointer Views */
+@media (min-width: 769px) and (hover: hover) {
+  /* Direct Icon Territory Hover */
+  svg.lucide:hover,
+  .lucide:hover {
+    transform: scale(1.18) translateY(-1px);
+  }
+
+  /* Interactive Host Territory: Buttons and Links */
+  button:hover:not(:disabled) svg.lucide,
+  button:hover:not(:disabled) .lucide,
+  .btn:hover:not(:disabled) svg,
+  .mm-button:hover:not(:disabled) svg,
+  .header-action-btn:hover svg,
+  a:hover svg.lucide,
+  a:hover .lucide {
+    transform: scale(1.14);
+  }
+
+  /* Button Active Press */
+  button:active:not(:disabled) svg.lucide,
+  button:active:not(:disabled) .lucide,
+  .btn:active:not(:disabled) svg,
+  .mm-button:active:not(:disabled) svg {
+    transform: scale(0.94);
+  }
+
+  /* Directional Icons (Territory: Arrow / Chevron controls) */
+  button:hover:not(:disabled) .lucide-arrow-right,
+  .btn:hover:not(:disabled) .lucide-arrow-right,
+  a:hover .lucide-arrow-right,
+  .step-tab:hover .lucide-arrow-right {
+    transform: translateX(4px) scale(1.08);
+  }
+
+  button:hover:not(:disabled) .lucide-chevron-right,
+  .btn:hover:not(:disabled) .lucide-chevron-right,
+  a:hover .lucide-chevron-right {
+    transform: translateX(3px) scale(1.06);
+  }
+
+  button:hover:not(:disabled) .lucide-chevron-down,
+  summary:hover .lucide-chevron-down,
+  .order-card-mobile-summary:hover .lucide-chevron-down,
+  .transaction-card-header:hover .lucide-chevron-down {
+    transform: translateY(3px) scale(1.08);
+  }
+
+  button:hover:not(:disabled) .lucide-chevron-up,
+  summary:hover .lucide-chevron-up {
+    transform: translateY(-3px) scale(1.08);
+  }
+
+  /* Action & State Icons */
+  button:hover:not(:disabled) .lucide-refresh-cw,
+  .btn:hover:not(:disabled) .lucide-refresh-cw,
+  .header-action-btn:hover .lucide-refresh-cw,
+  .metric-chip:hover .lucide-refresh-cw {
+    transform: rotate(90deg) scale(1.12);
+  }
+
+  button:hover:not(:disabled) .lucide-sparkles,
+  .btn:hover:not(:disabled) .lucide-sparkles,
+  .landing-cta:hover .lucide-sparkles,
+  .assistant-trigger:hover .lucide-sparkles {
+    transform: scale(1.22) rotate(12deg);
+    filter: drop-shadow(0 0 6px rgba(20, 102, 83, 0.35));
+  }
+
+  button:hover:not(:disabled) .lucide-copy,
+  .btn:hover:not(:disabled) .lucide-copy,
+  .copy-button:hover .lucide-copy {
+    transform: scale(1.18) rotate(-6deg);
+  }
+
+  button:hover:not(:disabled) .lucide-check,
+  button:hover:not(:disabled) .lucide-check-circle-2,
+  .btn:hover:not(:disabled) .lucide-check,
+  .btn:hover:not(:disabled) .lucide-check-circle-2 {
+    transform: scale(1.18) rotate(4deg);
+  }
+
+  /* Metrics & Workspace Territory */
+  .metric-chip:hover .metric-icon-wrap svg {
+    transform: scale(1.22) translateY(-2px);
+  }
+
+  .metric-chip:hover .metric-icon-wrap {
+    transform: scale(1.06);
+    box-shadow: 0 3px 8px rgba(20, 102, 83, 0.12);
+    transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 260ms ease;
+  }
+
+  .workspace-section-tab:hover svg,
+  .workspace-subnav-tab:hover svg {
+    transform: scale(1.16) translateY(-1px);
+  }
+
+  .brand-section:hover .brand-logo svg {
+    transform: scale(1.15) rotate(-6deg);
+  }
+
+  /* Landing & Showcase Territory */
+  .landing-feature-card:hover .landing-feature-icon-wrapper svg {
+    transform: scale(1.16) rotate(4deg);
+  }
+
+  .guarantee-chip:hover svg {
+    transform: scale(1.2);
+  }
+
+  .step-tab:hover svg {
+    transform: scale(1.15);
+  }
+
+  /* Section Title & Card Territory */
+  .isolated-section-title:hover svg,
+  .card-title:hover svg,
+  .order-card:hover .order-card-mobile-inspect-hint svg,
+  .order-card:hover .lucide-eye {
+    transform: scale(1.18) translateY(-1px);
+  }
+
+  .mm-status-chip:hover svg,
+  .badge:hover svg {
+    transform: scale(1.15);
+  }
 }
 
-/* Interactive Host Territory: Buttons and Links */
-button:hover:not(:disabled) svg.lucide,
-button:hover:not(:disabled) .lucide,
-.btn:hover:not(:disabled) svg,
-.mm-button:hover:not(:disabled) svg,
-.header-action-btn:hover svg,
-a:hover svg.lucide,
-a:hover .lucide {
-  transform: scale(1.14);
-}
-
-/* Button Active Press */
-button:active:not(:disabled) svg.lucide,
-button:active:not(:disabled) .lucide,
-.btn:active:not(:disabled) svg,
-.mm-button:active:not(:disabled) svg {
-  transform: scale(0.94);
-}
-
-/* Directional Icons (Territory: Arrow / Chevron controls) */
-button:hover:not(:disabled) .lucide-arrow-right,
-.btn:hover:not(:disabled) .lucide-arrow-right,
-a:hover .lucide-arrow-right,
-.step-tab:hover .lucide-arrow-right {
-  transform: translateX(4px) scale(1.08);
-}
-
-button:hover:not(:disabled) .lucide-chevron-right,
-.btn:hover:not(:disabled) .lucide-chevron-right,
-a:hover .lucide-chevron-right {
-  transform: translateX(3px) scale(1.06);
-}
-
-button:hover:not(:disabled) .lucide-chevron-down,
-summary:hover .lucide-chevron-down,
-.order-card-mobile-summary:hover .lucide-chevron-down,
-.transaction-card-header:hover .lucide-chevron-down {
-  transform: translateY(3px) scale(1.08);
-}
-
-button:hover:not(:disabled) .lucide-chevron-up,
-summary:hover .lucide-chevron-up {
-  transform: translateY(-3px) scale(1.08);
-}
-
-/* Action & State Icons */
-button:hover:not(:disabled) .lucide-refresh-cw,
-.btn:hover:not(:disabled) .lucide-refresh-cw,
-.header-action-btn:hover .lucide-refresh-cw,
-.metric-chip:hover .lucide-refresh-cw {
-  transform: rotate(90deg) scale(1.12);
-}
-
-button:hover:not(:disabled) .lucide-sparkles,
-.btn:hover:not(:disabled) .lucide-sparkles,
-.landing-cta:hover .lucide-sparkles,
-.assistant-trigger:hover .lucide-sparkles {
-  transform: scale(1.22) rotate(12deg);
-  filter: drop-shadow(0 0 6px rgba(20, 102, 83, 0.35));
-}
-
-button:hover:not(:disabled) .lucide-copy,
-.btn:hover:not(:disabled) .lucide-copy,
-.copy-button:hover .lucide-copy {
-  transform: scale(1.18) rotate(-6deg);
-}
-
-button:hover:not(:disabled) .lucide-check,
-button:hover:not(:disabled) .lucide-check-circle-2,
-.btn:hover:not(:disabled) .lucide-check,
-.btn:hover:not(:disabled) .lucide-check-circle-2 {
-  transform: scale(1.18) rotate(4deg);
-}
-
-/* Metrics & Workspace Territory */
-.metric-chip:hover .metric-icon-wrap svg {
-  transform: scale(1.22) translateY(-2px);
-}
-
-.metric-chip:hover .metric-icon-wrap {
-  transform: scale(1.06);
-  box-shadow: 0 3px 8px rgba(20, 102, 83, 0.12);
-  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1),
-              box-shadow 260ms ease;
-}
-
-.workspace-section-tab:hover svg,
-.workspace-subnav-tab:hover svg {
-  transform: scale(1.16) translateY(-1px);
-}
-
-.brand-section:hover .brand-logo svg {
-  transform: scale(1.15) rotate(-6deg);
-}
-
-/* Landing & Showcase Territory */
-.landing-feature-card:hover .landing-feature-icon-wrapper svg {
-  transform: scale(1.16) rotate(4deg);
-}
-
-.guarantee-chip:hover svg {
-  transform: scale(1.2);
-}
-
-.step-tab:hover svg {
-  transform: scale(1.15);
-}
-
-/* Section Title & Card Territory */
-.isolated-section-title:hover svg,
-.card-title:hover svg,
-.order-card:hover .order-card-mobile-inspect-hint svg,
-.order-card:hover .lucide-eye {
-  transform: scale(1.18) translateY(-1px);
-}
-
-.mm-status-chip:hover svg,
-.badge:hover svg {
-  transform: scale(1.15);
+/* Exclude hover animation in phone views & coarse touch screens */
+@media (max-width: 768px), (hover: none) {
+  svg.lucide,
+  .lucide,
+  .metric-icon-wrap,
+  .metric-icon-wrap svg {
+    transform: none !important;
+    filter: none !important;
+    transition: none !important;
+  }
 }
 
 /* Reduced Motion Override */
@@ -199,9 +214,7 @@ button:hover:not(:disabled) .lucide-check-circle-2,
   svg.lucide,
   .lucide,
   .metric-icon-wrap,
-  .metric-icon-wrap svg,
-  button:hover:not(:disabled) svg.lucide,
-  .btn:hover:not(:disabled) svg {
+  .metric-icon-wrap svg {
     transform: none !important;
     transition: none !important;
     animation: none !important;
