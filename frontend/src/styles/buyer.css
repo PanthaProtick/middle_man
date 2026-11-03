@@ -89,7 +89,7 @@
   margin-top: 18px;
   border-top: 1px solid var(--border-subtle);
 }
-.buyer-form-section:first-of-type { padding-top: 0; margin-top: 0; border-top: none; }
+.buyer-form-section:first-of-type { margin-top: 0; }
 
 .buyer-form-section-header {
   display: flex;
@@ -104,7 +104,7 @@
   border-radius: 50%;
   background: var(--primary-accent);
   color: #ffffff;
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
   font-size: 0.82rem;
   font-weight: 700;
   display: flex;
@@ -166,7 +166,7 @@
 .buyer-tabular,
 .buyer-mono-num {
   font-variant-numeric: tabular-nums;
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
 }
 
 /* Touch targets: all buttons at least 44px */

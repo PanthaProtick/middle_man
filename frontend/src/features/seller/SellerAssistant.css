@@ -229,7 +229,7 @@
 
 .seller-assistant-window :is([name*="amount"], [name*="total"], [name*="advance"], [name*="trx"], [name*="quantity"], [name*="weight"], [name*="sender"], [name*="time"]),
 .assistant-numeric {
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
   font-variant-numeric: tabular-nums;
 }
 

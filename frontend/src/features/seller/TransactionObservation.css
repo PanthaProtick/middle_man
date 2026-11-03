@@ -81,7 +81,7 @@
 
 .transaction-observation-actor {
   margin: 8px 0 0;
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
   font-size: var(--font-size-xs);
   color: var(--text-secondary);
   overflow-wrap: anywhere;

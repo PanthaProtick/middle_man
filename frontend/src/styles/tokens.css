@@ -40,7 +40,7 @@
   /* Typography Stacks */
   --font-heading: 'Manrope', 'Noto Sans Bengali', 'Nirmala UI', system-ui, sans-serif;
   --font-body: 'Manrope', 'Noto Sans Bengali', 'Nirmala UI', system-ui, sans-serif;
-  --font-mono: 'DM Mono', monospace;
+  --font-numeric: Arial, 'Noto Sans Bengali', 'Nirmala UI', sans-serif;
 
   /* Typographic Scale (1.125-1.2 ratio) */
   --font-size-xs: 0.75rem;
@@ -120,6 +120,7 @@ body:lang(bn) {
 /* Tabular figures for financial amounts, phone numbers, and transaction IDs */
 .tabular-nums,
 [data-tabular-nums="true"] {
+  font-family: var(--font-numeric);
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
 }

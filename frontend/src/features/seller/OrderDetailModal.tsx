@@ -145,7 +145,7 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
 
             <div className="order-detail-context">
               <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', flexWrap: 'wrap', minWidth: 0, flex: '1 1 auto' }}>
-                <span style={{ fontFamily: "'DM Mono', monospace", fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>
+                <span style={{ fontFamily: "var(--font-numeric)", fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-secondary)', wordBreak: 'break-all' }}>
                   #{order.id}
                 </span>
                 <strong>{order.product_name}</strong>

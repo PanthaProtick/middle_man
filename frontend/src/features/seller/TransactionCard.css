@@ -68,7 +68,7 @@
 }
 
 .transaction-trx {
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--primary-accent);

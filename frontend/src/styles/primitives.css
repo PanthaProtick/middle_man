@@ -176,7 +176,7 @@
 }
 
 /* 9. AmountDisplay Primitive */
-.mm-amount-display { display: inline-flex; align-items: baseline; gap: 3px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
+.mm-amount-display { display: inline-flex; align-items: baseline; gap: 3px; font-family: var(--font-numeric); font-variant-numeric: tabular-nums; font-feature-settings: "tnum" 1; }
 .mm-amount-display--advance { color: var(--color-status-emerald); font-weight: 700; }
 .mm-amount-display--cod { color: var(--color-text-primary); font-weight: 700; }
 .mm-amount-display--due { color: var(--color-status-amber); font-weight: 700; }

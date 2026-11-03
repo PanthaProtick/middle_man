@@ -168,7 +168,7 @@
 }
 
 .manual-payment-trx {
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
 }
 
 .manual-payment-optional {

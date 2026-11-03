@@ -139,7 +139,7 @@
 
 .assistant-chat-feed .review-assistant-side-panel > p {
   font-size: 0.75rem;
-  font-family: var(--font-mono, monospace);
+  font-family: var(--font-numeric);
   color: var(--text-secondary, #4b5563);
   margin: 0 0 8px;
 }

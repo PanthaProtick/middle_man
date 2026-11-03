@@ -1,7 +1,6 @@
 /* Middleman: a quiet, mobile-friendly shop desk. Light is the supported theme. */
 :root {
   color-scheme: light;
-  --font-mono: 'DM Mono', monospace;
   --bg-main: #f5f6f2;
   --bg-card: #ffffff;
   --bg-card-hover: #f5faf8;

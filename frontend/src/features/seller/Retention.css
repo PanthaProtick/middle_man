@@ -132,7 +132,7 @@
 
 .retention-alert-list code,
 .retention-alert-list strong {
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
   font-variant-numeric: tabular-nums;
 }
 

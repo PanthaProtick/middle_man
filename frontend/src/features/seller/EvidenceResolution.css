@@ -94,7 +94,7 @@
 }
 
 .evidence-trx {
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--text-primary);
@@ -169,7 +169,7 @@
 }
 
 .evidence-claim-order {
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
   font-size: var(--font-size-xs);
   color: var(--primary-accent);
 }

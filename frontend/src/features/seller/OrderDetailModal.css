@@ -115,7 +115,7 @@
 }
 
 .order-detail-metric-value {
-  font-family: 'DM Mono', monospace;
+  font-family: var(--font-numeric);
   font-size: 0.95rem;
   font-weight: 600;
   font-variant-numeric: tabular-nums;

@@ -28,7 +28,7 @@ typography:
   fontFamilies:
     heading: "Manrope, 'Noto Sans Bengali', 'Nirmala UI', sans-serif"
     body: "Manrope, 'Noto Sans Bengali', 'Nirmala UI', sans-serif"
-    mono: "'DM Mono', monospace"
+    numeric: "Arial, 'Noto Sans Bengali', 'Nirmala UI', sans-serif"
   scale:
     xs: "0.75rem"
     sm: "0.85rem"
@@ -106,7 +106,7 @@ Middleman operates strictly in a calm light theme (`color-scheme: light`):
 
 ## Typography & Script Rules
 - **Font Stack**: `Manrope` with robust fallback to Bengali system fonts (`Noto Sans Bengali`, `Nirmala UI`, `Vrinda`, sans-serif).
-- **Monospace Font**: `DM Mono` for order IDs, transaction numbers (TrxID), phone numbers, and currency values.
+- **Numeric Font**: `--font-numeric` uses Arial with Bengali fallbacks for order IDs, transaction numbers (TrxID), phone numbers, and currency values. Keep tabular figures for alignment; reserve monospace for code and diagnostic output.
 - **Bengali Script Clearance**: Line-height set to `1.7` (`body:lang(bn) { line-height: 1.7; }`) to ensure full clearance of ascenders, descenders, and complex conjuncts (e.g., র্, ্র, ্ক, ক্ষ, ্তু, ্য).
 - **Tabular Figures**: All financial metrics, phone numbers, and TrxIDs utilize `font-variant-numeric: tabular-nums` to eliminate column jitter.
 - **Form Text**: Form inputs enforce minimum `16px` font-size to prevent iOS mobile auto-zoom.

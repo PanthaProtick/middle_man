@@ -120,7 +120,7 @@
 }
 
 .microcard-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-.microcard-order-id { font-family: var(--font-mono, monospace); font-size: 0.8rem; font-weight: 700; color: var(--text-primary, #192f29); padding: 2px 8px; border-radius: 4px; background: #eef3f0; }
+.microcard-order-id { font-family: var(--font-numeric); font-size: 0.8rem; font-weight: 700; color: var(--text-primary, #192f29); padding: 2px 8px; border-radius: 4px; background: #eef3f0; }
 .microcard-status-pill { display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; background: #eaf4ee; color: #146653; border: 1px solid #b8d5c5; }
 .microcard-step-title { font-size: 0.85rem; font-weight: 700; color: var(--primary-accent, #146653); margin-top: -4px; }
 .microcard-item-row { display: flex; flex-direction: column; gap: 2px; }
@@ -133,7 +133,7 @@
 .metric-value.highlight { color: var(--primary-accent, #146653); }
 .microcard-highlight-bar { display: flex; justify-content: space-between; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 6px; background: #f4f8f6; border: 1px solid #d4e4dc; font-size: 0.8rem; }
 .highlight-label { color: var(--text-secondary, #4e655c); font-weight: 500; }
-.highlight-value { font-family: var(--font-mono, monospace); font-weight: 600; color: var(--primary-accent, #146653); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.highlight-value { font-family: var(--font-numeric); font-weight: 600; color: var(--primary-accent, #146653); font-variant-numeric: tabular-nums; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .microcard-note { font-size: 0.8rem; color: var(--text-secondary, #4e655c); line-height: 1.5; margin: 0; }
 
 /* Guarantees Bar */

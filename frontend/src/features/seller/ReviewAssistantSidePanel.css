@@ -182,7 +182,7 @@
   font-variant-numeric: tabular-nums;
 }
 .review-fact-dd.is-numeric {
-  font-family: var(--font-mono);
+  font-family: var(--font-numeric);
 }
 .review-actions-section {
   margin-top: 14px;
