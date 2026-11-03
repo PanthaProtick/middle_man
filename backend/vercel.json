@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "fastapi",
+  "installCommand": "uv sync --locked --no-dev",
+  "functions": {
+    "app/main.py": {
+      "excludeFiles": "{tests/**,.env,.env.*,README.md}"
+    }
+  }
+}

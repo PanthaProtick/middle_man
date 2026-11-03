@@ -1,7 +1,7 @@
 import json
-from typing import List, Literal, Union
+from typing import List, Literal, Self, Union
 
-from pydantic import Field, field_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -15,6 +15,7 @@ def _has_placeholder(val: str, specific: list[str]) -> bool:
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Middleman API"
     ENV: str = "development"
+    VERCEL_ENV: Literal["", "development", "preview", "production"] = ""
     DEBUG: bool = True
     API_PREFIX: str = "/api"
 
@@ -177,6 +178,17 @@ class Settings(BaseSettings):
                 return [str(item) for item in parsed]
             return [str(parsed)]
         return list(v)
+
+    @model_validator(mode="after")
+    def validate_vercel_environment(self) -> Self:
+        if self.VERCEL_ENV == "preview":
+            if self.is_production or self.PATHAO_PRODUCTION_BOOKING_ENABLED:
+                raise ValueError("Vercel preview cannot enable production mode or courier booking")
+            if self.effective_database_url and not self.SELF_TEST_MODE:
+                raise ValueError("Vercel preview database access requires explicit isolated SELF_TEST_MODE")
+        if self.VERCEL_ENV == "production" and not self.is_production:
+            raise ValueError("Vercel production requires ENV=production")
+        return self
 
     model_config = SettingsConfigDict(
         env_file=".env",
