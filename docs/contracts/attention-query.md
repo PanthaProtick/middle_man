@@ -12,13 +12,14 @@ most once, in the highest-priority applicable category:
 | 1 | `failed_submission` | lifecycle `pending`/`confirmed`, latest attempt `failed` | latest attempt `updated_at`, then `created_at` |
 | 2 | `pending_review` | lifecycle `pending`, no attempt at all | `first_submitted_at`, then `created_at` |
 | 3 | `preparation` | lifecycle `confirmed`, no attempt at all | `coalesce(completed_at, updated_at)` |
+| 4 | `awaiting_buyer` | lifecycle `awaiting_buyer`, no attempt at all | `created_at` |
 
 Latest means the highest `attempt_number` (database order
 `attempt_number DESC, id DESC`). The in-memory store mirrors
 `get_latest_attempt` by using the last recorded attempt. Historical attempts never
 admit an order on their own, so a current `success` or `submitting` attempt
 supersedes an older failure or unknown outcome and removes the order. Terminal
-lifecycles (`cancelled`, `rejected`, `expired`), `awaiting_buyer`, other shops, and
+lifecycles (`cancelled`, `rejected`, `expired`), other shops, and
 retained orders are excluded.
 
 `pending_review` includes every pending submission regardless of stored
@@ -54,7 +55,8 @@ Refresh retrieves the current priority ordering and removes resolved work.
   whole authorized match set, not the page, and may change while browsing a live
   dataset.
 - Each item carries `order`, `category`, and `reason_codes` (`UNKNOWN_OUTCOME`,
-  `FAILED_SUBMISSION`, `PENDING_REVIEW`, or `AWAITING_COURIER_PREPARATION`, plus
+  `FAILED_SUBMISSION`, `PENDING_REVIEW`, `AWAITING_COURIER_PREPARATION`, or
+  `AWAITING_BUYER_SUBMISSION`, plus
   `PRIOR_DAY_BACKLOG` when the order's creation date is before the retrieval date
   in the Bangladesh calendar). There is no created-today restriction.
 - All returned identities and actions are server-generated. The assistant never

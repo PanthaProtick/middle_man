@@ -23,8 +23,8 @@ const EMPTY: AttentionState = {
 };
 
 /** Server-authoritative preview of orders needing seller attention. */
-export function useAttentionQuery(token?: string) {
-  const [state, setState] = useState<AttentionState>(EMPTY);
+export function useAttentionQuery(token?: string, initialState?: AttentionState) {
+  const [state, setState] = useState<AttentionState>(initialState ?? EMPTY);
   const [authorization, setAuthorization] = useState(token);
   const requestRef = useRef(0);
   const mounted = useRef(true);

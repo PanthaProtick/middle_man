@@ -85,7 +85,7 @@ it('recognizes a mixed-language preparation request without a live provider call
   await act(async () => { await Promise.resolve(); });
 
   expect(fetchPreparationPreview).toHaveBeenCalledOnce();
-  expect(host.querySelector('[data-testid="assistant-workflow"]')?.textContent).toMatch(/Awaiting delivery preparation|ডেলিভারির প্রস্তুতি বাকি/);
+  expect(host.querySelector('[role="log"] [data-testid="assistant-query"]')?.textContent).toMatch(/Awaiting delivery preparation|ডেলিভারির প্রস্তুতি বাকি/);
   expect(host.textContent).toContain('prep-order-1');
   await act(async () => root.unmount());
 });

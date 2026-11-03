@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { createQuerySession, type AssistantQuerySession } from './assistantQuerySession';
 import type { Locale } from '../locale/storage';
 import { interpretWorkflow, isCreation, messageLocale, type AssistantDraft, type AssistantWorkflow } from './assistantConversation';
 import { emptyOrderFields, hasMultipleOrderFields, orderMessage, orderSummary, type OrderFields } from './guidedOrder';
@@ -7,8 +8,6 @@ import {
 } from './guidedPayment';
 import { useGuidedOrderSubmission } from './useGuidedOrderSubmission';
 import { useGuidedPaymentSubmission } from './useGuidedPaymentSubmission';
-import { useAttentionQuery } from './useAttentionQuery';
-import { usePreparationQuery } from './usePreparationQuery';
 import { fetchPaymentAccounts } from './api';
 import type { PaymentAccount, RecordedTransactionResult, SellerOrder, WorkQuery } from './types';
 
@@ -22,11 +21,16 @@ export interface ConversationOptions {
 }
 
 type Message = ({ user: string } | { reply: 'clarify' | 'multiple' | AssistantWorkflow } |
-  { orderResult: SellerOrder } | { paymentResult: RecordedTransactionResult; account: string }) & { at: string };
+  { query: WorkQuery; session: AssistantQuerySession } | { orderResult: SellerOrder } | { paymentResult: RecordedTransactionResult; account: string }) & { at: string };
 export function useAssistantConversation(initialLocale: Locale, options: ConversationOptions = {}) {
   const [locale, setLocale] = useState(initialLocale);
   const [manualLanguage, setManualLanguage] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [authorization, setAuthorization] = useState(options.token);
+  if (authorization !== options.token) {
+    setAuthorization(options.token);
+    setMessages(current => current.map(message => 'query' in message ? { ...message, session: createQuerySession() } : message));
+  }
   const [input, setInput] = useState('');
   const [workflow, setWorkflow] = useState<AssistantWorkflow | null>(null);
   const [draft, setDraft] = useState<AssistantDraft | null>(null);
@@ -51,8 +55,6 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     setWorkflow(current => current === 'payment' ? null : current);
     options.onPaymentRecorded?.(result);
   });
-  const preparation = usePreparationQuery(options.token);
-  const attention = useAttentionQuery(options.token);
   const locked = orderSubmission.locked || paymentSubmission.locked;
   const frozen = orderSubmission.frozen || paymentSubmission.frozen;
   const updateOrder = (patch: Partial<OrderFields & { value: string }>) => {
@@ -84,14 +86,11 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
       });
     }
     setWorkflow(next);
-    if (next === 'preparation') void preparation.refresh();
-    if (next === 'attention') void attention.refresh();
+    if (!isCreation(next)) setMessages(current => [...current, { query: next, session: createQuerySession(), at: new Date().toISOString() }]);
   };
   const reset = () => {
     setOrderReviewing(false);
     orderSubmission.reset(); paymentSubmission.reset();
-    preparation.reset();
-    attention.reset();
     setPaymentReviewing(false);
     setMessages([]); setInput(''); setWorkflow(null); setDraft(null); setPending(null);
   };
@@ -100,8 +99,6 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     submission: orderSubmission, paymentSubmission, locked, frozen, token: options.token,
     openOrder: (order: SellerOrder) => options.onOpenOrder?.(order),
     openPayment: (receiptId: string) => options.onOpenPayment?.(receiptId),
-    preparation,
-    attention,
     showInDashboard: (query: WorkQuery) => options.onShowInDashboard?.(query),
     updateOrder, updatePayment,
     orderReviewing,

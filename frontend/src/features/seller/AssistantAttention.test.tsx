@@ -67,6 +67,7 @@ it('runs the shared attention query from the workflow button and keeps an unfini
   await act(async () => { await Promise.resolve(); });
 
   expect(fetchAttentionPreview).toHaveBeenCalledWith({ cursor: undefined, limit: 10 }, 'seller-token');
+  expect(host.querySelector('[role="log"] [data-testid="attention-order"]')).not.toBeNull();
   expect(host.textContent).toContain('Showing 1 of 1');
   expect(host.textContent).toContain('Courier submission failed');
   expect(host.querySelector('[data-testid="attention-order"]')).not.toBeNull();

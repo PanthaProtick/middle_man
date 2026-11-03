@@ -8,8 +8,7 @@ import { GuidedOrderFields } from './GuidedOrderFields';
 import { GuidedOrderResult } from './GuidedOrderResult';
 import { GuidedPaymentFields } from './GuidedPaymentFields';
 import { GuidedPaymentResult } from './GuidedPaymentResult';
-import { PreparationPreview } from './PreparationPreview';
-import { AttentionPreview } from './AttentionPreview';
+import { AssistantQueryCard } from './AssistantQueryCard';
 
 export function AssistantConversation({ conversation }: { conversation: Conversation }): React.JSX.Element {
   const c = conversation;
@@ -34,24 +33,18 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
         : 'paymentResult' in message
         ? <GuidedPaymentResult key={index} result={message.paymentResult} account={message.account} locale={c.locale}
           token={c.token} onOpenOrder={c.openOrder} onOpenPayment={c.openPayment} />
+        : 'query' in message
+        ? <AssistantQueryCard key={index} query={message.query} session={message.session} conversation={c} />
         : <p key={index} className={'user' in message ? 'assistant-user-message' : 'assistant-reply'}>
         {!('user' in message) && <span className="assistant-avatar" aria-hidden="true">M</span>}
         <span>{'user' in message ? message.user : text[message.reply]}</span>
         <time dateTime={message.at}>{new Date(message.at).toLocaleTimeString(c.locale, { hour: '2-digit', minute: '2-digit' })}</time>
       </p>)}
     </div>
-    {c.workflow && <section data-testid="assistant-workflow" aria-label={text[c.workflow]}>
+    {c.workflow && isCreation(c.workflow) && <section data-testid="assistant-workflow" aria-label={text[c.workflow]}>
       <h4>{text[c.workflow]}</h4>
       {c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
       : c.draft?.workflow === 'payment' && c.workflow === 'payment' ? <GuidedPaymentFields conversation={c} />
-      : c.workflow === 'attention' ? <AttentionPreview
-        locale={c.locale} state={c.attention}
-        onRefresh={c.attention.refresh} onLoadMore={c.attention.loadMore}
-        onOpenOrder={c.openOrder} onShowInDashboard={() => c.showInDashboard('attention')} />
-      : c.workflow === 'preparation' ? <PreparationPreview
-        locale={c.locale} state={c.preparation}
-        onRefresh={c.preparation.refresh} onLoadMore={c.preparation.loadMore}
-        onOpenOrder={c.openOrder} onShowInDashboard={() => c.showInDashboard('preparation')} />
       : c.draft?.workflow === c.workflow ? <>
         <p>{text.draftHelp}</p>
         <label>{c.workflow === 'order' ? text.orderField : text.paymentField}

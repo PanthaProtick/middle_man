@@ -25,3 +25,10 @@
   .seller-assistant-workspace .assistant-slot:has(.seller-assistant-window) { max-height: calc(100dvh - 72px); }
   .seller-assistant-window { height: calc(100dvh - 120px); }
 }
+
+.assistant-query-card { min-width: 0; padding: 12px; border: 1px solid var(--border-subtle, #d8e2dd); border-radius: 12px; }
+.assistant-query-card h4 { margin: 0 0 8px; }
+.assistant-query-card :is(.attention-preview, .preparation-preview) > ul { max-height: 18rem; overflow-y: auto; overscroll-behavior: contain; padding-inline-start: 20px; }
+.assistant-query-card :is(.attention-preview, .preparation-preview) > ul > li { padding-block: 8px; border-bottom: 1px solid var(--border-subtle, #d8e2dd); }
+.assistant-query-card .assistant-numeric { overflow-wrap: anywhere; }
+.assistant-query-card :is(.attention-actions, .preparation-actions) { display: flex; flex-wrap: wrap; gap: 8px; }

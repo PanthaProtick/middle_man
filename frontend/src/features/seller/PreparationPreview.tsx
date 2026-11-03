@@ -52,7 +52,7 @@ export function PreparationPreview({
     {state.retrievedAt && <p><small>{text.retrieved.replace('{time}', formatBangladeshDateTime(state.retrievedAt, locale))}</small></p>}
     {state.items.length === 0
       ? <p role="status">{text.empty}</p>
-      : <ul>
+      : <ul tabIndex={0} aria-label={text.title}>
         {state.items.map(item => <li key={item.order.id} data-testid="preparation-order">
           <h5>{item.order.product_name}</h5>
           <p className="assistant-numeric">{item.order.id}</p>
