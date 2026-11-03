@@ -44,6 +44,8 @@ function doctor() {
 
 const tasks = {
   'refresh:locations': () => backend(['python', '-m', 'app.services.pathao_snapshot_sync']),
+  'db:migrate': () => backend(['python', '-m', 'app.core.migrations_cli', ...args]),
+  'db:init': () => backend(['python', '-m', 'app.core.migrations_cli', '--require-clean', ...args]),
   doctor,
   context: () => console.log(context(args)),
   conventions,
