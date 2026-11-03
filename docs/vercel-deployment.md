@@ -102,6 +102,9 @@ is committed here. Check current platform limits rather than assuming Hobby is
 suitable for commercial traffic. Keep real Pathao booking disabled. Serverless
 concurrency, database lifecycle, global admission controls, and retention are
 separate tickets; configuration flags do not establish their readiness.
+Shared public admission is implemented as documented in
+[the admission operator guide](public-admission.md); deployed enforcement still
+requires ticket 09 acceptance.
 
 ## Local verification and hosted acceptance
 

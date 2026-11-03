@@ -14,6 +14,7 @@ from app.core.migrations import DEFAULT_MIGRATIONS_DIR, load_disk_migrations
 logger = logging.getLogger(__name__)
 
 EXPECTED_SCHEMA_TABLES: list[str] = [
+    "public_admission",
     "shops",
     "payment_accounts",
     "idempotency_records",
@@ -41,6 +42,7 @@ EXPECTED_SCHEMA_TABLES: list[str] = [
 ]
 
 REQUIRED_SCHEMA_COLUMNS: dict[str, list[str]] = {
+    "public_admission": ["id", "expires_at", "requests"],
     "shops": ["id", "owner_id", "display_name"],
     "payment_accounts": ["id", "shop_id", "provider", "receiving_number", "label", "is_active", "version"],
     "orders": [

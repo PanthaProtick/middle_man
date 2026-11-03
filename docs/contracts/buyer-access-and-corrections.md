@@ -53,7 +53,8 @@ to exact integer minor units; names, addresses, TrxIDs and raw phone evidence st
 unchanged. Phones already accept Bengali digits at their validation boundary.
 
 All HTTP requests under `/api/public/orders` share an aggregate fixed-window quota
-per application worker, before token lookup, validation or storage access. Defaults
+in PostgreSQL for durable/Vercel runtimes, before token lookup or domain work.
+Offline development uses a per-worker quota. Defaults
 (positive integer environment settings): `PUBLIC_REQUESTS_PER_WINDOW=600`,
 `PUBLIC_REQUEST_WINDOW_SECONDS=60`, and `PUBLIC_REQUEST_MAX_BYTES=65536`.
 The same bounded request envelope applies to all public operations.
@@ -71,11 +72,16 @@ retry after the delay, retaining an existing key when recovering an uncertain ea
 attempt. Both use the standard error envelope and private/no-store/referrer headers.
 The buyer form preserves input and displays the rejection without claiming success.
 
-Limiter state is two numbers: it retains no tokens, IP addresses or request bodies.
+`503 PUBLIC_ADMISSION_UNAVAILABLE` fails closed with `Retry-After: 5` if shared
+admission cannot be confirmed. See [control and operator verification](../public-admission.md)
+for cross-instance scope, configuration, operational limits and hosted acceptance.
+
+Limiter state retains no tokens, IP addresses or request bodies.
 Invalid tokens, spoofed forwarded headers and changing URLs cannot bypass the shared
 quota. One noisy caller can exhaust capacity for other buyers; boundaries permit a
-burst either side of window reset. Workers/restarts have independent quotas. This is
-local self-test admission control, not distributed hosted abuse protection.
+burst either side of window reset. Only offline non-Vercel workers/restarts have
+independent quotas; durable/Vercel runtimes use the same PostgreSQL row across
+instances. Actual hosted enforcement remains pending ticket 09.
 
 
 ## Address entry without AI

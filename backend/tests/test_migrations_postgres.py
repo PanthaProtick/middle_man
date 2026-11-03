@@ -57,12 +57,12 @@ async def test_clean_database_initialization(pg_schema):
         search_path=schema,
     )
     assert result.status == "applied"
-    assert result.applied_count == 28
-    assert len(result.applied_versions) == 28
+    assert result.applied_count == 29
+    assert len(result.applied_versions) == 29
 
     async with open_test_conn(url, schema) as conn:
         rows = await conn.fetch("SELECT version FROM schema_migrations ORDER BY version")
-        assert len(rows) == 28
+        assert len(rows) == 29
         assert rows[0]["version"] == "0001_initial_seller_tables"
 
 
@@ -76,7 +76,7 @@ async def test_repeat_execution_idempotency(pg_schema, tmp_path: Path):
         require_clean=True,
         search_path=schema,
     )
-    assert first.applied_count == 28
+    assert first.applied_count == 29
 
     # Safe rerun of the exact same clean initialization command
     second = await run_migrations(
@@ -130,11 +130,11 @@ async def test_concurrent_runners_advisory_locking(pg_schema):
 
     res1, res2 = await asyncio.gather(execute_runner(), execute_runner())
     counts = sorted([res1.applied_count, res2.applied_count])
-    assert counts == [0, 28]
+    assert counts == [0, 29]
 
     async with open_test_conn(url, schema) as conn:
         rows = await conn.fetch("SELECT count(*) as cnt FROM schema_migrations")
-        assert rows[0]["cnt"] == 28
+        assert rows[0]["cnt"] == 29
 
 
 async def test_checksum_mismatch_rejected(pg_schema):

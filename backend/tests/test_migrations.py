@@ -65,12 +65,12 @@ def test_normalize_asyncpg_url():
     )
 
 
-def test_load_disk_migrations_finds_all_28_ordered():
+def test_load_disk_migrations_finds_all_29_ordered():
     migrations_dir = Path(__file__).parents[1] / "migrations"
     migrations = load_disk_migrations(migrations_dir)
-    assert len(migrations) == 28
+    assert len(migrations) == 29
     assert migrations[0].version == "0001_initial_seller_tables"
-    assert migrations[-1].version == "0028_pathao_catalog_snapshots"
+    assert migrations[-1].version == "0029_public_admission"
 
     # Strict sorting
     versions = [m.version for m in migrations]

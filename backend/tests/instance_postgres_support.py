@@ -47,7 +47,7 @@ class Instances:
         self.marker = uuid.uuid4().hex + uuid.uuid4().hex
 
     @asynccontextmanager
-    async def start(self):
+    async def start(self, **environment):
         with socket.socket() as listener:
             listener.bind(("127.0.0.1", 0))
             port = listener.getsockname()[1]
@@ -56,6 +56,7 @@ class Instances:
                    PUBLIC_BUYER_ACCESS_POLICY="self_test_link_possession", VERCEL_ENV="",
                    ORDER_LINK_ENCRYPTION_KEY=self.key, PAYMENT_MARKER_SECRET=self.marker,
                    DURABILITY_PORT=str(port))
+        env.update(environment)
         log = (self.directory / f"{port}.log").open("w", encoding="utf-8")
         try:
             process = subprocess.Popen([sys.executable, "tests/instance_worker.py"],

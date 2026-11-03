@@ -1,4 +1,4 @@
-"""Bound public ingress before routing; one aggregate quota per application worker."""
+"""Bound public ingress; durable runtimes share a PostgreSQL quota."""
 
 import math
 from time import monotonic
@@ -8,6 +8,7 @@ from starlette.responses import JSONResponse
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 from app.core.config import settings
+from app.core.shared_admission import AdmissionUnavailable, reserve_public_request
 from app.models.seller import ErrorBody, StandardErrorResponse
 
 
@@ -24,17 +25,33 @@ class PublicAdmissionMiddleware:
             await self.app(scope, receive, send)
             return
 
+        if settings.is_durable_mode or settings.VERCEL_ENV in {"production", "preview"}:
+            try:
+                retry = await reserve_public_request()
+            except AdmissionUnavailable:
+                await self.reject(scope, receive, send, 503, "PUBLIC_ADMISSION_UNAVAILABLE",
+                                  "Request protection is unavailable. Retry after 5 seconds.", 5)
+                return
+        else:
+            retry = self.reserve_local()
+        if retry is not None:
+            await self.reject(scope, receive, send, 429, "PUBLIC_RATE_LIMITED",
+                              f"Too many requests. Retry after {retry} seconds.", retry)
+            return
+        await self.forward_bounded(scope, receive, send)
+
+    def reserve_local(self) -> int | None:
         now = monotonic()
         window = settings.PUBLIC_REQUEST_WINDOW_SECONDS
         if now - self.window_start >= window:
             self.window_start, self.requests = now, 0
         if self.requests >= settings.PUBLIC_REQUESTS_PER_WINDOW:
-            retry = max(1, math.ceil(window - (now - self.window_start)))
-            await self.reject(scope, receive, send, 429, "PUBLIC_RATE_LIMITED",
-                              f"Too many requests. Retry after {retry} seconds.", retry)
-            return
+            return max(1, math.ceil(window - (now - self.window_start)))
         # No awaits between testing and reserving the slot on this event loop.
         self.requests += 1
+        return None
+
+    async def forward_bounded(self, scope: Scope, receive: Receive, send: Send) -> None:
         limit = settings.PUBLIC_REQUEST_MAX_BYTES
         headers = scope.get("headers", [])
         for name, value in headers:

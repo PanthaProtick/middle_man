@@ -9,6 +9,22 @@ from app.core.public_admission import PublicAdmissionMiddleware
 from app.main import app
 
 
+@pytest.mark.asyncio
+async def test_durable_admission_without_shared_storage_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
+    from app.core import database
+
+    monkeypatch.setattr(settings, "SELF_TEST_MODE", True)
+    monkeypatch.setattr(database, "AsyncSessionLocal", None)
+    guarded = PublicAdmissionMiddleware(FastAPI())
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=guarded), base_url="http://test") as client:
+        response = await client.post("/api/public/orders/secret-token/submission", content=b"{}")
+    assert response.status_code == 503
+    assert response.json()["error"]["code"] == "PUBLIC_ADMISSION_UNAVAILABLE"
+    assert response.headers["retry-after"] == "5"
+    assert response.headers["cache-control"] == "no-store, private"
+    assert "secret-token" not in response.text
+
+
 @pytest.fixture(autouse=True)
 def fresh_worker(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     monkeypatch.setattr(app, "middleware_stack", None)

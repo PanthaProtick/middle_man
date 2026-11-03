@@ -15,7 +15,7 @@ ticket 09; public admission coordination belongs to ticket 07.
 | Clerk verification keys | Process-local cache of verification material; missing entries require verification/key fetch, never a grant of authority. Provider/key outages can reject requests. |
 | Pathao on-demand location lists, access tokens, locks and cooldowns | Process-local optimizations; credential revision keys and database rechecks preserve seller connection/link authority. Missing entries can cause extra provider calls or unavailable suggestions. Written-address fallback and seller resolution remain required. |
 | Retained Pathao snapshot jobs and publication | In durable mode, PostgreSQL `CatalogSyncTable` leases/cooldown metadata and shop locks coordinate refresh claims and atomic publication. `_jobs` is only the standby alternative; these jobs are separate from on-demand lookup coordination. |
-| Public admission counter | Process-local best effort only; replacement or concurrent instances bypass a deployment-wide request budget. Ticket 07 owns shared/ingress protection. |
+| Public admission counter | PostgreSQL singleton quota for durable/Vercel runtimes; offline development remains process-local. See [admission control](public-admission.md) for scope, fail-closed behavior and pending hosted verification. |
 | Template items and diagnostics | Process-local, outside durable seller workflows. |
 
 Stable secrets must match across every concurrent/replacement instance and remain
