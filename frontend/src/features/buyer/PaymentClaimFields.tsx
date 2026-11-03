@@ -27,18 +27,16 @@ export function PaymentClaimFields({
             <CreditCard size={15} color="var(--primary-accent)" aria-hidden="true" />
             <span>{t('buyer.form.method')}</span>
           </label>
-          <select
+          <input
             id="payment_provider"
             name="payment_provider"
-            value={draft.payment_provider}
+            type="text"
+            readOnly
+            value={order.account_provider === 'nagad' ? 'Nagad' : 'bKash'}
             aria-describedby={fieldErrors.payment_provider ? 'payment_provider-error' : undefined}
             aria-invalid={!!fieldErrors.payment_provider}
-            onChange={(e) => onUpdateField('payment_provider', e.target.value as 'bkash' | 'nagad')}
             className="form-control"
-          >
-            <option value="bkash">bKash</option>
-            <option value="nagad">Nagad</option>
-          </select>
+          />
           {fieldErrors.payment_provider && (
             <div id="payment_provider-error" role="alert" style={{ color: 'var(--rose-accent)', fontSize: '0.75rem', marginTop: '4px' }}>
               {fieldErrors.payment_provider}

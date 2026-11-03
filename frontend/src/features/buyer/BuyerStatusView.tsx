@@ -87,26 +87,26 @@ export function BuyerStatusView({ order, onRefresh, isRefreshing }: BuyerStatusV
         </div>
       )}
 
-      {/* Acknowledgement Reference */}
-      {order.submission_acknowledgement && (
-        <div
-          style={{
-            display: 'inline-block',
-            padding: '6px 14px',
-            borderRadius: '16px',
-            background: '#eaf4ee',
-            border: '1px solid #b8d5c5',
-            fontSize: '0.825rem',
-            color: 'var(--primary-accent)',
-            marginBottom: '20px',
-          }}
-        >
-          {t('buyer.status.reference')}:{' '}
-          <span className="buyer-mono-num" style={{ fontWeight: 700 }}>
-            {order.submission_acknowledgement}
-          </span>
-        </div>
-      )}
+      {/* Shared buyer/seller order reference */}
+      <div
+        style={{
+          display: 'inline-block',
+          padding: '6px 14px',
+          borderRadius: '16px',
+          background: '#eaf4ee',
+          border: '1px solid #b8d5c5',
+          fontSize: '0.825rem',
+          color: 'var(--primary-accent)',
+          marginBottom: '20px',
+          maxWidth: '100%',
+          overflowWrap: 'anywhere',
+        }}
+      >
+        {t('buyer.status.reference')}:{' '}
+        <span className="buyer-mono-num" style={{ fontWeight: 700 }}>
+          {order.id}
+        </span>
+      </div>
 
       {/* COD Summary Box */}
       <div

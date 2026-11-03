@@ -59,7 +59,7 @@ const englishCatalog = {
   'buyer.status.rejected.body': 'Please contact the seller on Facebook/Messenger for further details.',
   'buyer.status.cancelled.title': 'Order Cancelled',
   'buyer.status.cancelled.body': 'Please contact the seller on Facebook/Messenger for further details.',
-  'buyer.status.reference': 'Reference',
+  'buyer.status.reference': 'Order reference',
   'buyer.status.product': 'Product',
   'buyer.status.total': 'Total',
   'buyer.status.acceptedAdvance': 'Advance accepted by the seller',
@@ -131,7 +131,7 @@ const bengaliCatalog: Record<MessageKey, string> = {
   'buyer.status.cancelled.title': 'অর্ডার বাতিল করা হয়েছে',
   'buyer.status.cancelled.body':
     'আরও তথ্যের জন্য Facebook/Messenger-এ বিক্রেতার সাথে যোগাযোগ করুন।',
-  'buyer.status.reference': 'রেফারেন্স',
+  'buyer.status.reference': 'অর্ডার রেফারেন্স',
   'buyer.status.product': 'পণ্য',
   'buyer.status.total': 'মোট মূল্য',
   'buyer.status.acceptedAdvance': 'বিক্রেতার গ্রহণ করা অগ্রিম',

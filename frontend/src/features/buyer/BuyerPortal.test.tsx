@@ -146,7 +146,7 @@ describe('BuyerPortal Component', () => {
     });
 
     // Should now show pending status and acknowledgement
-    expect(container.textContent).toContain('ACK-ORDER-1');
+    expect(container.textContent).toContain(mockPublicOrderAwaiting.id);
     expect(container.textContent).toContain('Pending Seller Review');
     expect(container.textContent).toContain('৳3,000.00'); // Expected COD preserved
   });
@@ -206,6 +206,6 @@ describe('BuyerPortal Component', () => {
     expect(container.textContent).toContain('Order Confirmed');
     expect(container.textContent).toContain('Remaining COD');
     expect(container.textContent).toContain('৳3,000.00');
-    expect(container.textContent).toContain('ACK-ORDER-1');
+    expect(container.textContent).toContain(mockPublicOrderAwaiting.id);
   });
 });

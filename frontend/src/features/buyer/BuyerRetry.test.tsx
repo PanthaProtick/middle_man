@@ -129,7 +129,7 @@ it('reconciles a lost response to saved pending status without another submissio
   const page = await filledPortal();
   try {
     await page.submit();
-    expect(page.container.textContent).toContain('ACK-SAVED');
+    expect(page.container.textContent).toContain(order.id);
     expect(page.container.querySelector('form')).toBeNull();
     expect(fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')).toHaveLength(1);
   } finally { await page.close(); }
@@ -155,7 +155,7 @@ it('preserves input and shows server field validation before allowing a correcte
     await page.submit();
     const posts = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
     expect(posts[1][1]?.headers).not.toEqual(posts[0][1]?.headers);
-    expect(page.container.textContent).toContain('ACK-CORRECTED');
+    expect(page.container.textContent).toContain(order.id);
   } finally { await page.close(); }
 });
 
@@ -194,6 +194,6 @@ it.each([413, 429])('preserves uncertain attempt after admission rejection %s', 
     const finalAttempt = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST')[2];
     expect(finalAttempt[1]?.body).toBe(attempts[0][1]?.body);
     expect(finalAttempt[1]?.headers).toEqual(attempts[0][1]?.headers);
-    expect(page.container.textContent).toContain('ACK-RETRY');
+    expect(page.container.textContent).toContain(order.id);
   } finally { await page.close(); vi.useRealTimers(); }
 });

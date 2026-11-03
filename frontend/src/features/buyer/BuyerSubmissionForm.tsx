@@ -98,7 +98,7 @@ export function BuyerSubmissionForm({
           : {}),
       },
       payment_claim: {
-        provider: draft.payment_provider,
+        provider: order.account_provider === 'nagad' ? 'nagad' : 'bkash',
         trx_id: draft.payment_trx_id.trim(),
         sender_number: draft.payment_sender.trim(),
         amount_minor: amountMinor,

@@ -53,6 +53,14 @@ async function renderFailure(locale: 'bn' | 'en', status: number, code: string):
 }
 
 describe('Buyer lifecycle copy in Bengali', () => {
+  it('shows the shared order ID without relying on an acknowledgement', async () => {
+    const id = '67d3eb4f-1234-4567-8901-123456789abc';
+    await render('en', { ...pending, id, submission_acknowledgement: null });
+    expect(container.textContent).toContain('Order reference');
+    expect(Array.from(container.querySelectorAll('.buyer-mono-num')).map(node => node.textContent)).toContain(id);
+    expect(container.textContent).not.toContain('ACK-');
+  });
+
   it.each([
     ['pending', pending, 'বিক্রেতার পর্যালোচনা চলছে', 'আপনার দেওয়া পেমেন্টের তথ্য'],
     ['confirmed', { ...pending, lifecycle: 'confirmed', actual_cod_minor: 300000 }, 'অর্ডার নিশ্চিত করা হয়েছে', 'বিক্রেতা আপনার ডেলিভারির আগে অগ্রিম গ্রহণ করেছেন'],
@@ -64,7 +72,9 @@ describe('Buyer lifecycle copy in Bengali', () => {
 
     expect(container.textContent).toContain(title);
     expect(container.textContent).toContain(body);
-    expect(container.textContent).toContain('ACK-1');
+    expect(container.textContent).toContain('অর্ডার রেফারেন্স');
+    expect(container.textContent).toContain(order.id);
+    expect(container.textContent).not.toContain('ACK-');
     expect(container.querySelector('form')).toBeNull();
   });
 

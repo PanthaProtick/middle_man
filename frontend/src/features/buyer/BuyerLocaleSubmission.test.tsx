@@ -135,7 +135,7 @@ it('localizes structured field errors and parameters, keeps focus and allows a c
   expect(container.querySelector('#payment_trx_id-error')).toBeNull();
   await submit();
   expect(container.textContent).toContain('Pending Seller Review');
-  expect(container.textContent).toContain('ACK-১২ab');
+  expect(container.textContent).toContain(awaitingOrder.id);
   const posts = fetchMock.mock.calls.filter(([, init]) => init?.method === 'POST');
   expect(posts).toHaveLength(2);
   expect(posts[1][1]?.headers).not.toEqual(posts[0][1]?.headers);
