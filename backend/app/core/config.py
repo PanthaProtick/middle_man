@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     # Self-test integration mode (requires durable storage, real auth)
     SELF_TEST_MODE: bool = False
     PUBLIC_BUYER_ACCESS_POLICY: Literal["", "self_test_link_possession"] = ""
+    PRODUCTION_BUYER_ACCESS_POLICY: Literal["", "link_possession"] = ""
     PUBLIC_REQUEST_MAX_BYTES: int = Field(default=64 * 1024, gt=0)
     PUBLIC_REQUESTS_PER_WINDOW: int = Field(default=600, gt=0)
     PUBLIC_REQUEST_WINDOW_SECONDS: int = Field(default=60, gt=0)

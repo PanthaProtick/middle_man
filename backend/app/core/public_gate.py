@@ -12,7 +12,9 @@ class PublicAccessGateError(HTTPException):
 
 
 async def verify_public_access_gate() -> bool:
-    """Explicit local self-test consent; token and lifecycle checks remain in services."""
+    """Explicit environment policy; token and lifecycle checks remain in services."""
+    if settings.is_production and settings.PRODUCTION_BUYER_ACCESS_POLICY == "link_possession":
+        return True
     if (
         settings.SELF_TEST_MODE
         and settings.ENV in ("development", "test")

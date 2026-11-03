@@ -2,6 +2,7 @@
 
 import pytest
 from httpx import AsyncClient
+from pydantic import ValidationError
 from test_public_order_routes import _create_test_order
 from test_seller_auth_integration import _generate_rsa_key_pair, _make_token
 
@@ -27,7 +28,12 @@ def public_policy_state(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_enabled_policy_allows_token_possession_without_buyer_identity(client: AsyncClient, monkeypatch):
+@pytest.mark.parametrize("production", [False, True])
+async def test_enabled_policy_allows_token_possession_without_buyer_identity(client: AsyncClient, monkeypatch, production):
+    if production:
+        monkeypatch.setattr(public_gate, "settings", Settings(
+            ENV="production", PRODUCTION_BUYER_ACCESS_POLICY="link_possession",
+        ))
     issuer = "https://clerk.integration.example.com"
     private_key, jwk = _generate_rsa_key_pair()
     monkeypatch.setattr(settings, "CLERK_ISSUER", issuer)
@@ -106,3 +112,26 @@ async def test_public_validation_does_not_echo_personal_input(client: AsyncClien
     assert "Synthetic Private Name" not in response.text
     assert "private-contact" not in response.text
     assert "Private raw address" not in response.text
+
+
+@pytest.mark.parametrize("value", ["enabled", "self_test_link_possession", "LINK_POSSESSION"])
+def test_unknown_production_policy_is_rejected(value):
+    with pytest.raises(ValidationError):
+        Settings(PRODUCTION_BUYER_ACCESS_POLICY=value)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("environment", ["development", "test", "staging", "production"])
+async def test_production_policy_is_separate_and_default_disabled(client, monkeypatch, environment):
+    config = Settings(ENV=environment, SELF_TEST_MODE=False)
+    assert config.PRODUCTION_BUYER_ACCESS_POLICY == ""
+    if environment != "production":
+        config.PRODUCTION_BUYER_ACCESS_POLICY = "link_possession"
+    monkeypatch.setattr(public_gate, "settings", config)
+    for method, suffix, kwargs in (
+        ("GET", "", {}),
+        ("POST", "/submission", {"json": {}, "headers": {"Idempotency-Key": "disabled"}}),
+    ):
+        response = await client.request(method, "/api/public/orders/unknown" + suffix, **kwargs)
+        assert response.status_code == 503
+        assert response.json()["error"]["code"] == "PUBLIC_ACCESS_POLICY_UNSETTLED"

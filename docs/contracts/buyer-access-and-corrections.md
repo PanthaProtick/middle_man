@@ -1,5 +1,25 @@
 # Buyer access and corrections
 
+## Production access policy
+
+Public buyer access defaults to disabled. In `ENV=production`, explicitly set
+`PRODUCTION_BUYER_ACCESS_POLICY="link_possession"` to permit public terms/status
+and the initial submission. The only accepted values are empty (disabled) and
+`link_possession`; unknown values fail settings validation. This setting cannot
+enable access in development, test or staging. Local self-tests retain their
+separate `PUBLIC_BUYER_ACCESS_POLICY="self_test_link_possession"` and
+`SELF_TEST_MODE=True` requirements; those never enable production access.
+
+Link possession establishes no buyer identity. Forwarding can expose public terms
+or allow another holder to submit first. Personal details, payment evidence,
+history, corrections and seller actions retain seller authentication and ownership
+checks. Token lookup, revocation and retention checks precede cached replay.
+Submitted-order status remains available after the initial submission deadline.
+Reissue invalidates predecessor tokens without disclosing replacements or changing
+the deadline, submission state or payment allocation. Request bounds and existing
+correction rules still apply. This policy does not enable AI or courier booking,
+establish distributed admission protection, or prove hosted acceptance.
+
 ## Same-order buyer-link reissue
 
 `POST /api/seller/orders/{order_id}/reissue-link` requires the owning seller,
