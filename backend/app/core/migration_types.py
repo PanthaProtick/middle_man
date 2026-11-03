@@ -40,6 +40,7 @@ class MigrationFile:
     path: Path
     checksum: str
     sql: str
+    transactional: bool = True
 
 
 @dataclass(frozen=True)

@@ -20,7 +20,7 @@ Or with an explicit direct connection URL:
 npm run db:init -- --url "$DIRECT_URL" --confirm-target <database_name>
 ```
 
-`db:init` enforces `--require-clean`: it verifies that the target database schema is completely empty before applying any migrations. If tables already exist, it aborts immediately.
+`db:init` enforces `--require-clean`: it verifies that the target database schema is clean before applying initial migrations. Rerunning `db:init` on an already-initialized database that is fully up-to-date succeeds safely as an idempotent rerun. If unrecognized or partially migrated tables exist, it aborts immediately with `DirtyTargetError`.
 
 ### Incremental Migrations and Safe Reruns
 
@@ -89,7 +89,7 @@ Each migration file executes inside an isolated database transaction (`BEGIN ...
 3. Re-run `npm run db:migrate -- --confirm-target <database_name>`. The runner automatically resumes from the unapplied migration.
 
 ### Non-Transactional Operations
-Standard migrations use transactional DDL. If a hypothetical future operation uses non-transactional statements (such as `CREATE INDEX CONCURRENTLY`):
+Standard migrations use transactional DDL. If an operation requires non-transactional statements (such as `CREATE INDEX CONCURRENTLY`), include `-- no-transaction` in the SQL script header:
 1. In the event of a failure, check for partially created artifacts (`SELECT * FROM pg_class WHERE relname = ...`).
 2. Drop any invalid artifact (e.g., `DROP INDEX IF EXISTS <index_name>;`).
 3. Re-run `npm run db:migrate -- --confirm-target <database_name>`.

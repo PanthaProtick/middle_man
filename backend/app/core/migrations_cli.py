@@ -106,19 +106,13 @@ async def execute_cli(args: argparse.Namespace) -> int:
         )
         print(format_report(result, as_json=args.json_output))
         return 0
-    except MigrationError as err:
+    except (MigrationError, Exception) as err:
         err_msg = sanitize_db_url(str(err))
         if args.json_output:
             print(json.dumps({"status": "error", "error": err_msg}), file=sys.stderr)
         else:
-            print(f"Migration Error: {err_msg}", file=sys.stderr)
-        return 1
-    except Exception as exc:
-        err_msg = sanitize_db_url(str(exc))
-        if args.json_output:
-            print(json.dumps({"status": "error", "error": err_msg}), file=sys.stderr)
-        else:
-            print(f"Unexpected Execution Error: {err_msg}", file=sys.stderr)
+            prefix = "Migration Error:" if isinstance(err, MigrationError) else "Unexpected Execution Error:"
+            print(f"{prefix} {err_msg}", file=sys.stderr)
         return 1
 
 

@@ -13,3 +13,14 @@
 - [x] Disposable PostgreSQL integration tests cover clean initialization, repeat execution, concurrent runners, checksum mismatch, ambiguous existing schema, and failed migration. Mock SQL is not sufficient evidence.
 - [x] Document the command, target checks, direct versus pooled connection roles, and failure recovery without applying remote migrations as part of this ticket.
 - [x] Run focused checks and final root `npm run check`; record exact results and the fresh result artifact. Mark unavailable PostgreSQL evidence explicitly.
+
+## Verification Evidence
+
+- **Focused Unit & Integration Tests**:
+  - `npm run test:backend -- tests/test_migrations.py tests/test_migrations_postgres.py`: 11 passed, 6 skipped in 0.26s.
+  - Disposable PostgreSQL loopback evidence: 6 tests marked skipped in offline standby mode due to unset `BUYER_TEST_POSTGRES_URL`.
+- **Pre-handoff Root Check Gate**:
+  - Command: `npm run check`
+  - Result: All stages passed (Tooling tests, Repository conventions, Backend lint, Backend types, Backend tests, Frontend lint, Frontend test, Frontend build, HTTP smoke).
+  - Result artifact: `.cache/checks/check-S3L6HR/result.json`
+

@@ -152,3 +152,16 @@ def test_build_parser_requires_confirm_target():
     parser = build_parser()
     with pytest.raises(SystemExit):
         parser.parse_args([])
+
+
+def test_load_disk_migrations_detects_no_transaction_directive(tmp_path: Path):
+    (tmp_path / "0001_standard.sql").write_text("CREATE TABLE t1 (id INT);", encoding="utf-8")
+    (tmp_path / "0002_concurrent.sql").write_text(
+        "-- NO-TRANSACTION\nCREATE INDEX CONCURRENTLY idx ON t1 (id);",
+        encoding="utf-8",
+    )
+    migrations = load_disk_migrations(tmp_path)
+    assert len(migrations) == 2
+    assert migrations[0].transactional is True
+    assert migrations[1].transactional is False
+
