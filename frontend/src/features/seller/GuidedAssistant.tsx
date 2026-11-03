@@ -19,7 +19,7 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
   const composer = useRef<HTMLTextAreaElement>(null);
   useLayoutEffect(() => {
     if (feed.current) feed.current.scrollTop = feed.current.scrollHeight;
-  }, [c.messages, c.workflow, c.pending]);
+  }, [c.messages, c.workflow, c.pending, c.orderReviewing, c.submission.state]);
   useLayoutEffect(() => {
     if (!composer.current) return;
     composer.current.style.height = 'auto';
@@ -29,7 +29,9 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
     <div className="assistant-chat-feed" ref={feed}>
     <p>{text.welcome}</p>
     <div role="log" aria-label={text.log} aria-live="polite" aria-relevant="additions">
-      {c.messages.map((message, index) => <p key={index} className={'user' in message ? 'assistant-user-message' : 'assistant-reply'}>
+      {c.messages.map((message, index) => 'orderResult' in message
+        ? <GuidedOrderResult key={index} order={message.orderResult} locale={c.locale} token={c.token} onOpenOrder={c.openOrder} />
+        : <p key={index} className={'user' in message ? 'assistant-user-message' : 'assistant-reply'}>
         {!('user' in message) && <span className="assistant-avatar" aria-hidden="true">M</span>}
         <span>{'user' in message ? message.user : text[message.reply]}</span>
         <time dateTime={message.at}>{new Date(message.at).toLocaleTimeString(c.locale, { hour: '2-digit', minute: '2-digit' })}</time>
@@ -40,7 +42,6 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
       {c.completedPayment && c.workflow === 'payment'
         ? <GuidedPaymentResult result={c.completedPayment} locale={c.locale} token={c.token}
           onOpenOrder={c.openOrder} onOpenPayment={c.openPayment} />
-      : c.completedOrder && c.workflow === 'order' ? <GuidedOrderResult order={c.completedOrder} locale={c.locale} token={c.token} onOpenOrder={c.openOrder} />
       : c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
       : c.draft?.workflow === 'payment' && c.workflow === 'payment' ? <GuidedPaymentFields conversation={c} />
       : c.workflow === 'attention' ? <AttentionPreview

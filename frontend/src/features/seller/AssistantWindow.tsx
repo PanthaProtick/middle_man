@@ -56,7 +56,7 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
         onClick={() => { conversation.newConversation(); showGeneral(); }}>{text.newChat}</button>
     </nav>
     </div>
-    <p className="assistant-context-label" role="status">{reviewing ? text.review : text.general}</p>
+    {reviewing && <p className="assistant-context-label" role="status">{text.review}</p>}
     <div ref={setReviewTarget} />
     {!reviewing && <AssistantConversation conversation={conversation} />}
   </div>, target);

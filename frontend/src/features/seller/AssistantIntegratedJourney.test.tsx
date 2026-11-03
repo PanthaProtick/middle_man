@@ -71,7 +71,7 @@ it('keeps editable order terms through both searches and contextual review befor
     expect(host.querySelector<HTMLInputElement>(`[name="${name}"]`)?.value).toBe(value);
   }
   expect(writes).toHaveLength(0);
-  await change('assistant-total', '1500'); await click('Create order');
+  await change('assistant-total', '1500'); await click('Review'); await click('Confirm');
   expect(writes).toHaveLength(1);
   expect(JSON.parse(String(writes[0].body))).toMatchObject({ product_name: 'Mixed শার্ট', total_minor: 150000,
     required_advance_minor: 20000, parcel_weight_grams: 750, parcel_quantity: 2, payment_account_id: 'acc-1' });

@@ -17,11 +17,17 @@ editable suggestions rather than general natural-language understanding. The
 New order chip opens an empty draft. Optional parcel fields remain weight and
 quantity; the order contract has no notes field.
 
-The summary shows interpreted amounts and selected account. Only the explicit
-Create order button confirms its current payload. Conversational agreement and
+The summary shows interpreted amounts and selected account. Review replaces the
+editable form with a reconfirmation summary; Make Changes restores its fields in
+place. Only Confirm submits the reviewed payload. Conversational corrections
+return it to editing and require another review. Conversational agreement and
 Enter in the composer cannot submit it. Optional weight and quantity reuse parcel
 validation. The API revalidates authorization, account activity, and `OrderInput`.
-The result includes the actual buyer link and a seller-detail action. No buyer
+Successful results remain in the chat timeline across subsequent workflows and
+minimize/reopen, until New Chat or the seller session resets. Each result records
+the returned order reference, product, agreed amounts, receiving account, actual
+buyer link with transient copy feedback, and a seller-detail action that fetches
+the current order without changing the recorded result. No buyer
 delivery details or courier booking are collected.
 
 ## Confirmed action API
