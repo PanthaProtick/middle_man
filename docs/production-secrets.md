@@ -9,7 +9,7 @@ This guide documents the application secret inventory, cryptographic isolation g
 | Secret Variable | Required In Production | Purpose & Algorithm |
 | :--- | :--- | :--- |
 | `DATABASE_URL` | **Yes** | PostgreSQL connection string (masked in logs/diagnostics). |
-| `ORDER_LINK_ENCRYPTION_KEY` | **Yes** | 32-byte secret for AES-GCM encryption of public buyer portal tokens. |
+| `ORDER_LINK_ENCRYPTION_KEY` | **Yes** | Secret key for Fernet authenticated encryption (AES-128-CBC + HMAC-SHA256) of public buyer portal tokens. |
 | `PAYMENT_MARKER_SECRET` | **Yes** | HMAC secret used to derive unique transaction fingerprints and prevent payment marker reuse across shops. |
 | `CLERK_ISSUER` | **Yes** | Production Clerk issuer URL (must start with `https://` and reject `*.clerk.accounts.dev`). |
 | `CLERK_SECRET_KEY` | Optional | Live Clerk secret key (`sk_live_*`; `sk_test_*` rejected at startup). |
@@ -41,27 +41,20 @@ Startup validation fails closed (`ProductionReadinessError`) if `ORDER_LINK_ENCR
 
 ## 4. Key Rotation Procedures & Consequences
 
+Secrets must remain stable across deployments; never generate fresh keys on deployment. If an administrative rotation is necessary:
+
 ### Rotating `ORDER_LINK_ENCRYPTION_KEY`
-- **Impact:** Existing order links encrypted under the previous key will fail decryption unless re-encrypted.
-- **Procedure:**
-  1. Deploy a dual-read migration script that attempts decryption with the new key, falls back to the old key, and writes back ciphertext under the new key for all unexpired orders.
-  2. Complete cutover to the new key once all unexpired orders are re-encrypted.
+- **Consequences:** Existing buyer links encrypted under the previous key fail decryption immediately with HTTP 503 (`LINK_ENCRYPTION_KEY_INCOMPATIBLE`).
+- **Operational Recovery:** Rotation invalidates unresolved buyer links. Sellers must reissue buyer links via `POST /seller/orders/{order_id}/reissue-link`, which encrypts a fresh token using the newly active key and invalidates the previous token lookup digest.
 
 ### Rotating `PAYMENT_MARKER_SECRET`
-- **Impact:** Historical marker digests in `used_payment_markers` depend on the HMAC key.
-- **Procedure:**
-  1. Retain historical markers during active accounting windows.
-  2. Coordinate rotation with marker migration or dual-verification during transaction matching windows.
+- **Consequences:** Derived HMAC digests for incoming transaction identifiers change. Previously recorded digests in `used_payment_markers` will no longer match new submissions of the same transaction ID under the new key, temporarily opening a window where transaction IDs could be re-claimed.
+- **Operational Recovery:** Schedule marker secret rotations during quiet maintenance periods after pending order verification windows close, or verify transactions manually during the transition period.
 
 ### Rotating `PATHAO_CREDENTIAL_ENCRYPTION_KEY`
-- **Impact:** Unsealing `pathao_connection_revisions.encrypted_credentials` will fail if the key changes without re-encrypting existing revisions.
-- **Procedure:**
-  1. Decrypt current credentials with the existing Fernet key.
-  2. Re-encrypt credentials under the new Fernet key and insert new connection revisions.
-  3. Deploy the new key to production environment variables.
+- **Consequences:** Stored merchant API credentials in `pathao_connection_revisions.encrypted_credentials` cannot be decrypted. Courier booking and address lookup fail.
+- **Operational Recovery:** After rotating the key in environment variables, merchants reconnect their courier accounts by submitting fresh credentials through the seller courier settings interface.
 
 ### Rotating Clerk Credentials (`CLERK_SECRET_KEY` / `CLERK_JWT_KEY`)
-- **Impact:** Zero impact on database persistence or encrypted records.
-- **Procedure:**
-  1. Generate new keys in Clerk Dashboard.
-  2. Update environment variables and restart backend processes.
+- **Consequences:** Zero impact on database persistence or encrypted domain entities. Active seller sessions verified via the rotated key will be rejected upon next token expiration.
+- **Operational Recovery:** Sellers re-authenticate via the Clerk sign-in flow to obtain new session tokens.

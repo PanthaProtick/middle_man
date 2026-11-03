@@ -7,45 +7,25 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.asymmetric import rsa
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from fastapi import FastAPI
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.core.clerk_verifier import ClerkTokenVerifier
 from app.core.config import Settings, settings
-from app.core.database import (
-    EXPECTED_SCHEMA_TABLES,
-    DurableStorageUnavailableError,
-    check_database_readiness,
-    sanitize_db_url,
-)
-from app.core.migration_ledger import verify_ledger_integrity
-from app.core.migration_types import MigrationError, MigrationRecord
-from app.core.migrations import DEFAULT_MIGRATIONS_DIR, load_disk_migrations
+from app.core.database import DurableStorageUnavailableError, check_database_readiness
+from app.core.schema import REQUIRED_SCHEMA_COLUMNS, check_schema_compatibility
 from app.core.tokens import check_link_encryption_readiness
 from app.services.payment_marker_protection import check_payment_marker_readiness
 
 logger = logging.getLogger(__name__)
 
-REQUIRED_SCHEMA_COLUMNS: dict[str, list[str]] = {
-    "shops": ["id", "owner_id", "display_name"],
-    "payment_accounts": ["id", "shop_id", "provider", "receiving_number", "label", "is_active", "version"],
-    "orders": [
-        "id",
-        "shop_id",
-        "payment_account_id",
-        "token_lookup_digest",
-        "encrypted_portal_token",
-        "lifecycle",
-        "version",
-        "buyer_link_revoked_at",
-    ],
-    "buyer_revisions": ["id", "order_id", "revision_number", "contact_number_canonical", "payment_trx_id"],
-    "used_payment_markers": ["id", "shop_id", "provider", "transaction_digest"],
-    "received_transactions": ["id", "shop_id", "provider", "trx_id"],
-    "idempotency_records": ["key", "scope", "operation"],
-    "payment_marker_keys": ["shop_id", "fingerprint"],
-    "courier_drafts": ["order_id", "version"],
-    "pathao_connection_revisions": ["shop_id", "environment", "version"],
-}
+__all__ = [
+    "ProductionReadinessError",
+    "REQUIRED_SCHEMA_COLUMNS",
+    "check_schema_compatibility",
+    "validate_production_secrets",
+    "validate_seller_auth_readiness",
+    "check_production_readiness",
+]
 
 
 class ProductionReadinessError(RuntimeError):
@@ -58,7 +38,7 @@ class ProductionReadinessError(RuntimeError):
 
 
 def validate_production_secrets(cfg: Settings) -> None:
-    """Verifies that secrets are configured, non-placeholder, and independent."""
+    """Verifies that secrets are configured, non-placeholder, and cryptographically independent."""
     courier_enabled = (
         cfg.PATHAO_PRODUCTION_BOOKING_ENABLED
         or cfg.PATHAO_LOCATION_ENVIRONMENT.strip().lower() != "offline"
@@ -77,16 +57,6 @@ def validate_production_secrets(cfg: Settings) -> None:
             raise ProductionReadinessError(
                 f"PATHAO_CREDENTIAL_ENCRYPTION_KEY must be a valid Fernet key: {exc}"
             )
-        unrelated = (
-            cfg.ORDER_LINK_ENCRYPTION_KEY.strip(),
-            cfg.effective_payment_marker_secret.strip(),
-            cfg.CLERK_SECRET_KEY.strip(),
-            cfg.CLERK_JWT_KEY.strip(),
-        )
-        if courier_key in unrelated:
-            raise ProductionReadinessError(
-                "PATHAO_CREDENTIAL_ENCRYPTION_KEY must be independent of application and authentication secrets"
-            )
 
     if not cfg.is_production:
         return
@@ -103,10 +73,28 @@ def validate_production_secrets(cfg: Settings) -> None:
             "PAYMENT_MARKER_SECRET must be configured with a stable production secret"
         )
 
-    if link_key == marker_secret:
-        raise ProductionReadinessError(
-            "ORDER_LINK_ENCRYPTION_KEY and PAYMENT_MARKER_SECRET must be independent secrets"
+    # Check pairwise independence across all configured production secrets
+    active_secrets: list[tuple[str, str]] = [
+        ("ORDER_LINK_ENCRYPTION_KEY", link_key),
+        ("PAYMENT_MARKER_SECRET", marker_secret),
+    ]
+    if courier_enabled and cfg.PATHAO_CREDENTIAL_ENCRYPTION_KEY.strip():
+        active_secrets.append(
+            ("PATHAO_CREDENTIAL_ENCRYPTION_KEY", cfg.PATHAO_CREDENTIAL_ENCRYPTION_KEY.strip())
         )
+    if cfg.CLERK_SECRET_KEY.strip():
+        active_secrets.append(("CLERK_SECRET_KEY", cfg.CLERK_SECRET_KEY.strip()))
+    if cfg.CLERK_JWT_KEY.strip():
+        active_secrets.append(("CLERK_JWT_KEY", cfg.CLERK_JWT_KEY.strip()))
+
+    for i in range(len(active_secrets)):
+        for j in range(i + 1, len(active_secrets)):
+            name1, val1 = active_secrets[i]
+            name2, val2 = active_secrets[j]
+            if val1 == val2:
+                raise ProductionReadinessError(
+                    f"{name1} and {name2} must be independent secrets"
+                )
 
 
 def validate_seller_auth_readiness(cfg: Settings, app: Optional[FastAPI] = None) -> None:
@@ -162,68 +150,15 @@ def validate_seller_auth_readiness(cfg: Settings, app: Optional[FastAPI] = None)
         except Exception as exc:
             raise ProductionReadinessError(f"CLERK_JWT_KEY is not a valid PEM public key: {exc}")
 
-
-async def check_schema_compatibility(session: AsyncSession) -> tuple[bool, str]:
-    """Verifies schema table presence, column presence, and migration ledger alignment."""
-    # 1. Table inventory check
-    t_stmt = text(
-        "SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()"
-    )
-    t_res = await session.execute(t_stmt)
-    existing_tables = {str(row[0]) for row in t_res.fetchall()}
-
-    missing_tables = [t for t in EXPECTED_SCHEMA_TABLES if t not in existing_tables]
-    if missing_tables:
-        return False, f"Database schema incomplete; missing tables: {', '.join(sorted(missing_tables))}"
-
-    if "schema_migrations" not in existing_tables:
-        return False, "Database schema incomplete; missing migration ledger table 'schema_migrations'"
-
-    # 2. Required columns check
-    c_stmt = text(
-        "SELECT table_name, column_name FROM information_schema.columns WHERE table_schema = current_schema()"
-    )
-    c_res = await session.execute(c_stmt)
-    existing_cols: dict[str, set[str]] = {}
-    for t_name, c_name in c_res.fetchall():
-        existing_cols.setdefault(str(t_name), set()).add(str(c_name))
-
-    missing_cols: list[str] = []
-    for tbl, cols in REQUIRED_SCHEMA_COLUMNS.items():
-        tbl_cols = existing_cols.get(tbl, set())
-        for col in cols:
-            if col not in tbl_cols:
-                missing_cols.append(f"{tbl}.{col}")
-    if missing_cols:
-        return False, f"Database schema incomplete; missing required columns: {', '.join(sorted(missing_cols))}"
-
-    # 3. Migration ledger and pending checks
     try:
-        m_stmt = text(
-            "SELECT version, checksum, applied_at, execution_time_ms FROM schema_migrations ORDER BY version ASC"
+        ClerkTokenVerifier(
+            issuer=issuer,
+            jwt_key_pem=jwt_key or None,
+            authorized_party=cfg.CLERK_AUTHORIZED_PARTY or None,
+            audience=cfg.CLERK_AUDIENCE or None,
         )
-        m_res = await session.execute(m_stmt)
-        applied = [
-            MigrationRecord(
-                version=str(r[0]),
-                checksum=str(r[1]),
-                applied_at=str(r[2]),
-                execution_time_ms=int(r[3]),
-            )
-            for r in m_res.fetchall()
-        ]
-        disk = load_disk_migrations(DEFAULT_MIGRATIONS_DIR)
-        pending = verify_ledger_integrity(applied, disk)
-        if pending:
-            pending_versions = [p.version for p in pending]
-            return False, f"Database schema is behind migrations: missing {len(pending)} unapplied migration(s) ({pending_versions[:3]})"
-    except MigrationError as m_exc:
-        return False, f"Migration ledger integrity check failed: {m_exc}"
     except Exception as exc:
-        sanitized = sanitize_db_url(str(exc))
-        return False, f"Migration ledger query failed: {sanitized}"
-
-    return True, ""
+        raise ProductionReadinessError(f"Clerk token verifier initialization failed: {exc}")
 
 
 async def check_production_readiness(

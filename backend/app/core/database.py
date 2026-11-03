@@ -1,5 +1,4 @@
 import logging
-import re
 from dataclasses import dataclass
 from typing import AsyncGenerator, Optional
 
@@ -12,15 +11,11 @@ from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import Settings, settings
 from app.core.database_engine import create_database_engine
+from app.core.database_engine import sanitize_db_url as sanitize_db_url
+from app.core.schema import EXPECTED_SCHEMA_TABLES as EXPECTED_SCHEMA_TABLES
+from app.core.schema import check_schema_compatibility
 
 logger = logging.getLogger(__name__)
-
-
-def sanitize_db_url(url: Optional[str]) -> str:
-    """Masks database credentials from connection strings for diagnostics and logging."""
-    if not url:
-        return ""
-    return re.sub(r"://([^:@/]+):([^@/]+)@", r"://\1:***@", url)
 
 
 def validate_database_config(cfg: Settings) -> tuple[bool, str]:
@@ -63,34 +58,6 @@ def ensure_durable_storage(db: Optional[AsyncSession], component: str = "operati
         )
 
 
-EXPECTED_SCHEMA_TABLES = [
-    "shops",
-    "payment_accounts",
-    "idempotency_records",
-    "orders",
-    "buyer_revisions",
-    "link_measurements",
-    "received_transactions",
-    "transaction_observations",
-    "allocations",
-    "used_payment_markers",
-    "audit_events",
-    "order_review_reasons",
-    "sms_evidence",
-    "sms_imports",
-    "payment_metrics",
-    "evidence_cleanups",
-    "payment_marker_keys",
-    "courier_drafts",
-    "pathao_connection_revisions",
-    "courier_attempts",
-    "courier_reconciliations",
-    "pathao_catalog_snapshots",
-    "pathao_catalog_lists",
-    "pathao_catalog_sync",
-]
-
-
 @dataclass(frozen=True)
 class DatabaseReadinessStatus:
     is_ready: bool
@@ -98,12 +65,18 @@ class DatabaseReadinessStatus:
     missing_tables: tuple[str, ...] = ()
 
 
-async def check_schema_inventory(session: AsyncSession) -> tuple[bool, list[str]]:
-    """Queries current schema to verify all expected migration tables exist."""
+async def check_schema_inventory_tables(session: AsyncSession) -> tuple[set[str], list[str]]:
+    """Queries current schema to verify all expected migration tables exist and returns discovered tables."""
     stmt = text("SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()")
     result = await session.execute(stmt)
     existing = {str(row[0]) for row in result.fetchall()}
     missing = [t for t in EXPECTED_SCHEMA_TABLES if t not in existing]
+    return existing, missing
+
+
+async def check_schema_inventory(session: AsyncSession) -> tuple[bool, list[str]]:
+    """Queries current schema to verify all expected migration tables exist."""
+    _, missing = await check_schema_inventory_tables(session)
     return (len(missing) == 0, missing)
 
 
@@ -127,16 +100,15 @@ async def check_database_readiness(
     try:
         async with factory() as session:
             await session.execute(text("SELECT 1"))
-            all_present, missing = await check_schema_inventory(session)
-            if not all_present:
+            existing, missing = await check_schema_inventory_tables(session)
+            if missing:
                 return DatabaseReadinessStatus(
                     is_ready=False,
                     diagnostic=f"Database schema incomplete: missing tables {missing}",
                     missing_tables=tuple(missing),
                 )
-            from app.core.readiness import check_schema_compatibility
 
-            compat_ok, compat_diag = await check_schema_compatibility(session)
+            compat_ok, compat_diag = await check_schema_compatibility(session, existing_tables=existing)
             if not compat_ok:
                 return DatabaseReadinessStatus(
                     is_ready=False,

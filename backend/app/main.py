@@ -23,7 +23,7 @@ from app.api.structured_retention import router as structured_retention_router
 from app.api.transaction_submissions import router as transaction_submissions_router
 from app.api.transactions import router as transactions_router
 from app.api.work_queries import router as work_queries_router
-from app.core.auth import get_request_id
+from app.core.auth import get_request_id, get_seller_identity
 from app.core.auth_diagnostics import rejection_reason
 from app.core.config import settings
 from app.core.public_admission import PublicAdmissionMiddleware
@@ -62,6 +62,11 @@ app = FastAPI(
 
 @app.middleware("http")
 async def protect_public_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
+    if settings.is_production and get_seller_identity in getattr(request.app, "dependency_overrides", {}):
+        return JSONResponse(
+            status_code=401,
+            content={"code": "UNAUTHORIZED", "message": "Seller identity overrides are forbidden in production"},
+        )
     response: Response
     # Retired collection names also match the generic receipt-ID route.
     if request.url.path.rstrip("/") in {

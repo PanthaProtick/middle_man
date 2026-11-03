@@ -1,5 +1,15 @@
+import re
+from typing import Optional
+
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+
+
+def sanitize_db_url(url: Optional[str]) -> str:
+    """Masks database credentials from connection strings for diagnostics and logging."""
+    if not url:
+        return ""
+    return re.sub(r"://([^:@/]+):([^@/]+)@", r"://\1:***@", url)
 
 
 def create_database_engine(raw_url: str, *, debug: bool = False) -> AsyncEngine:

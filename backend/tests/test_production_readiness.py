@@ -52,6 +52,25 @@ def test_production_secrets_missing_or_placeholder() -> None:
     with pytest.raises(ProductionReadinessError, match="independent"):
         validate_production_secrets(s4)
 
+    # Collision with Clerk secrets
+    s5 = Settings(
+        ENV="production",
+        ORDER_LINK_ENCRYPTION_KEY="shared_secret_val",
+        PAYMENT_MARKER_SECRET="unique_marker_secret",
+        CLERK_SECRET_KEY="shared_secret_val",
+    )
+    with pytest.raises(ProductionReadinessError, match="ORDER_LINK_ENCRYPTION_KEY and CLERK_SECRET_KEY must be independent"):
+        validate_production_secrets(s5)
+
+    s6 = Settings(
+        ENV="production",
+        ORDER_LINK_ENCRYPTION_KEY="unique_link_secret",
+        PAYMENT_MARKER_SECRET="shared_secret_val",
+        CLERK_JWT_KEY="shared_secret_val",
+    )
+    with pytest.raises(ProductionReadinessError, match="PAYMENT_MARKER_SECRET and CLERK_JWT_KEY must be independent"):
+        validate_production_secrets(s6)
+
 
 def test_conditional_courier_key(valid_fernet_key: str) -> None:
     # Disabled courier: no key required
@@ -197,3 +216,25 @@ async def test_auth_token_rejection_in_production(monkeypatch: pytest.MonkeyPatc
 
     with pytest.raises(AuthenticationError, match="Development seller tokens are not permitted"):
         await get_seller_identity(req, authorization="Bearer dev-seller-1")
+
+
+@pytest.mark.asyncio
+async def test_production_request_middleware_blocks_dependency_overrides(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from httpx import ASGITransport, AsyncClient
+
+    from app.core.auth import get_seller_identity
+    from app.main import app
+
+    monkeypatch.setattr("app.main.settings.ENV", "production")
+    app.dependency_overrides[get_seller_identity] = lambda: "mock_value"
+    try:
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get("/api/health")
+            assert response.status_code == 401
+            data = response.json()
+            assert data.get("code") == "UNAUTHORIZED"
+    finally:
+        app.dependency_overrides.clear()
