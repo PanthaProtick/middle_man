@@ -65,7 +65,7 @@ export function TransactionInbox({
             <ReceiptText size={18} aria-hidden="true" /> {c("Transaction Ledger & Observations")}
           </h4>
           <p className="isolated-section-desc">
-            {c("Received payment SMS extractions, manual payment records, and reconciliation history.")}
+            {c("Received payment records and reconciliation history.")}
           </p>
         </div>
         <span className="section-tab-count transaction-count">

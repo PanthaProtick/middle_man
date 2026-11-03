@@ -60,9 +60,9 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
         advanceLabel: 'Claimed TrxID',
         advanceValue: 'BL9X4M291Q',
         primaryMetricLabel: 'Reconciliation Result',
-        primaryMetricValue: 'Matched with Merchant SMS',
-        statusChip: 'Advance Verified',
-        note: 'No fake payment screenshots or manual bank checking. Advance is verified and locked before packaging.',
+        primaryMetricValue: 'Matched with Seller Record',
+        statusChip: 'Advance Accepted',
+        note: 'Record the payment from your payment app and review the buyer claim. Accepted advances stay linked to their order; matching is not provider verification.',
       },
       courier: {
         tab: '3. Pathao Dispatch',

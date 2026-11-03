@@ -192,15 +192,15 @@ export function InteractiveProductTour({ locale }: InteractiveProductTourProps):
                   <ShieldCheck size={20} color="var(--primary-accent)" aria-hidden="true" />
                   <span>Exact Match</span>
                 </div>
-                <div className="recon-card sms-side">
-                  <span className="recon-label">bKash Merchant SMS</span>
+                <div className="recon-card seller-side">
+                  <span className="recon-label">Seller payment record</span>
                   <p className="recon-party">Received from {copy.simulation.customerPhone}</p>
                   <p className="recon-amount num">{copy.simulation.advanceAmount}</p>
                   <span className="recon-tag">TrxID: {copy.simulation.trxId}</span>
                 </div>
               </div>
               <div className="mock-recon-footer">
-                <p>Payment recorded and matched automatically. Ready for courier staging.</p>
+                <p>Seller payment record matched with the buyer claim. Ready for courier preparation.</p>
               </div>
             </div>
           )}

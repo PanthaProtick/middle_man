@@ -1,7 +1,6 @@
 import { usePaymentInboxCopy } from '../locale/paymentInboxCopy';
 import React from 'react';
 import { ShieldCheck, Smartphone, Plus } from 'lucide-react';
-import { SmsImportPanel } from './SmsImportPanel';
 import { TransactionInbox } from './TransactionInbox';
 import type { PaymentAccount, ReceiptView } from './types';
 import type { useDateSelection } from './useDateSelection';
@@ -49,7 +48,7 @@ export function PaymentsSection({
             <Smartphone size={18} aria-hidden="true" /> {c("Received Payments Inbox")}
           </h4>
           <p className="isolated-section-desc">
-            {c("Paste bKash, Nagad, or Rocket SMS to automatically extract transactions and resolve pending buyer orders.")}
+            {c("Record received payments from your payment app and review matches with buyer claims.")}
           </p>
         </div>
         <button className="btn btn-primary btn-sm" onClick={() => onOpenRecordModal()}>
@@ -58,13 +57,13 @@ export function PaymentsSection({
       </div>
 
       <nav className="payments-step-rail" aria-label={c("Payment evidence steps")}>
-        <a className="payments-step-link" href="#payments-evidence">
+        <button type="button" className="payments-step-link" onClick={() => onOpenRecordModal()}>
           <span className="payments-step-number" aria-hidden="true">1</span>
           <span className="payments-step-copy">
             <span className="payments-step-label">{c("Step 1 · Add evidence")}</span>
-            <span className="payments-step-hint">{c("Paste SMS or record a manual payment")}</span>
+            <span className="payments-step-hint">{c("Record a received payment")}</span>
           </span>
-        </a>
+        </button>
         <a className="payments-step-link" href="#payments-reconciliation">
           <span className="payments-step-number" aria-hidden="true">2</span>
           <span className="payments-step-copy">
@@ -76,17 +75,8 @@ export function PaymentsSection({
 
       <p className="payments-observation-note">
         <ShieldCheck size={16} aria-hidden="true" />
-        <span>{c("Seller records and SMS evidence are observations, not provider verification.")}</span>
+        <span>{c("Seller payment records are observations, not provider verification.")}</span>
       </p>
-
-      <div id="payments-evidence" className="payments-step-panel">
-        <SmsImportPanel
-          accounts={accounts}
-          token={token}
-          onManual={(id) => onOpenRecordModal(id)}
-          onImported={onTransactionsChanged}
-        />
-      </div>
 
       <div id="payments-reconciliation" className="payments-step-panel">
         <TransactionInbox

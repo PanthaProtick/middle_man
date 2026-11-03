@@ -38,7 +38,7 @@ export const landingCopy: Record<Locale, LandingCopyContent> = {
           tag: 'Step 3',
           title: 'Reconcile on Shop Desk',
           subtitle: 'Match TrxID without banking confusion',
-          caption: 'Your shop inbox matches the buyer payment claim against your merchant SMS records. Zero guessing, zero fake screenshots, instant verification.',
+          caption: 'Your shop inbox compares the buyer payment claim with your recorded received payment. Review discrepancies before accepting the advance.',
         },
         {
           id: 'courier',
@@ -76,7 +76,7 @@ export const landingCopy: Record<Locale, LandingCopyContent> = {
         {
           id: 'reconciliation-engine',
           title: 'Two-Way Payment Matching',
-          description: 'Keep buyer payment claims and your recorded SMS transactions distinct. Middleman flags discrepancies, duplicate TrxIDs, and timing gaps.',
+          description: 'Keep buyer payment claims and your recorded received payments distinct. Middleman flags discrepancies, duplicate TrxIDs, and timing gaps.',
           highlight: 'Audit-ready bookkeeping',
         },
         {
