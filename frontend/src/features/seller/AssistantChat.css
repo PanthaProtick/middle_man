@@ -32,3 +32,11 @@
 .assistant-query-card :is(.attention-preview, .preparation-preview) > ul > li { padding-block: 8px; border-bottom: 1px solid var(--border-subtle, #d8e2dd); }
 .assistant-query-card .assistant-numeric { overflow-wrap: anywhere; }
 .assistant-query-card :is(.attention-actions, .preparation-actions) { display: flex; flex-wrap: wrap; gap: 8px; }
+.assistant-chat-feed .review-assistant-side-panel {
+  position: static;
+  max-height: none;
+  overflow: visible;
+  padding: 0;
+  border: 0;
+  box-shadow: none;
+}

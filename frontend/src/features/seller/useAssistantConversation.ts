@@ -18,6 +18,7 @@ export interface ConversationOptions {
   onPaymentRecorded?: (result: RecordedTransactionResult) => void;
   onOpenPayment?: (receiptId: string) => void;
   onShowInDashboard?: (query: WorkQuery) => void;
+  onConversationReset?: () => void;
 }
 
 type Message = ({ user: string } | { reply: 'clarify' | 'multiple' | AssistantWorkflow } |
@@ -37,6 +38,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
   const [orderReviewing, setOrderReviewing] = useState(false);
   const [paymentReviewing, setPaymentReviewing] = useState(false);
   const [pending, setPending] = useState<AssistantWorkflow | 'reset' | 'discard' | null>(null);
+  const [pendingDraft, setPendingDraft] = useState<AssistantDraft | null>(null);
   const [refreshedAccounts, setRefreshedAccounts] = useState<PaymentAccount[] | null>(null);
   const [accountStatus, setAccountStatus] = useState<'idle' | 'refreshing' | 'refreshFailed'>('idle');
   const accounts = refreshedAccounts ?? options.accounts ?? [];
@@ -75,7 +77,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
   const select = (next: AssistantWorkflow) => {
     if (locked && isCreation(next)) return;
     if (isCreation(next)) {
-      if (draft && draft.workflow !== next) { setPending(next); return; }
+      if (draft) { setPendingDraft(null); setPending(next); return; }
       if (!draft) {
         setOrderReviewing(false);
         orderSubmission.reset(); paymentSubmission.reset();
@@ -92,7 +94,8 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     setOrderReviewing(false);
     orderSubmission.reset(); paymentSubmission.reset();
     setPaymentReviewing(false);
-    setMessages([]); setInput(''); setWorkflow(null); setDraft(null); setPending(null);
+    setMessages([]); setInput(''); setWorkflow(null); setDraft(null); setPending(null); setPendingDraft(null);
+    options.onConversationReset?.();
   };
   return {
     locale, messages, input, setInput, workflow, draft, pending, accounts,
@@ -135,13 +138,24 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
         hasMultipleOrderFields(message) || hasMultiplePaymentFields(message) || intents.length > 1) {
         setMessages(current => [...current, { user: message, at }, { reply: 'multiple', at }]); return;
       }
-      if (draft?.workflow === 'order' && /\b(?:another|second|next|additional)\s+order\b|আরেক(?:টি|টা)?\s*অর্ডার|arek(?:ta|ti)?\s+order/i.test(message)) {
-        setMessages(current => [...current, { user: message, at }, { reply: 'multiple', at }]);
-        if (!locked) setPending('order');
+      const explicitNew = message.match(/\b(?:new|another|second|next|additional|notun)\s+(?:order|payment|transaction)\b|(?:নতুন|আরেক(?:টি|টা)?)\s*(?:অর্ডার|পেমেন্ট|লেনদেন)|arek(?:ta|ti)?\s+(?:order|payment)/i);
+      const newWorkflow = explicitNew ? /order|অর্ডার/i.test(explicitNew[0]) ? 'order' : 'payment' : undefined;
+      const replacement = newWorkflow ?? (intents[0] !== draft?.workflow ? intents[0] : undefined);
+      if (draft && replacement && isCreation(replacement)) {
+        setMessages(current => [...current, { user: message, at }, { reply: replacement, at }]);
+        if (!locked) {
+          const { value = '', ...order } = orderMessage(message, accounts);
+          setPendingDraft(replacement === 'order' ? { workflow: 'order', value, order: { ...emptyOrderFields(), ...order } }
+            : { workflow: 'payment', value: '', payment: { ...emptyPaymentFields(), ...paymentMessage(message, accounts) } });
+          setPending(replacement);
+        }
         return;
       }
       setMessages(current => [...current, { user: message, at }, { at, reply: intents.length === 1 ? intents[0] : intents.length ? 'multiple' : 'clarify' }]);
-      if (intents.length === 1) select(intents[0]);
+      if (intents.length === 1) {
+        if (intents[0] === draft?.workflow) setWorkflow(intents[0]);
+        else select(intents[0]);
+      }
       if ((draft?.workflow === 'order' && workflow === 'order' && !intents.length) ||
         (intents[0] === 'order' && (!draft || draft.workflow === 'order'))) {
         const patch = orderMessage(message, accounts);
@@ -167,19 +181,19 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     edit: (value: string) => { if (draft?.workflow === 'order') updateOrder({ value }); },
     newConversation: () => { if (locked) return; if (draft) setPending('reset'); else reset(); },
     requestDiscard: () => { if (draft && !locked) setPending('discard'); },
-    resume: () => { if (draft) setWorkflow(draft.workflow); setPending(null); },
-    cancel: () => setPending(null),
+    resume: () => { if (draft) setWorkflow(draft.workflow); setPending(null); setPendingDraft(null); },
+    cancel: () => { setPending(null); setPendingDraft(null); },
     confirmDiscard: () => {
       if (locked) return;
       setOrderReviewing(false);
       orderSubmission.reset(); paymentSubmission.reset();
       setPaymentReviewing(false);
       const next = pending;
-      setDraft(null); setPending(null);
+      setDraft(null); setPending(null); setPendingDraft(null);
       if (next === 'reset') reset();
       else if (next && next !== 'discard') {
         setWorkflow(next);
-        if (isCreation(next)) setDraft({ workflow: next, value: '',
+        if (isCreation(next)) setDraft(pendingDraft ?? { workflow: next, value: '',
           ...(next === 'payment' ? { payment: emptyPaymentFields() } : {}) });
       } else setWorkflow(null);
     },

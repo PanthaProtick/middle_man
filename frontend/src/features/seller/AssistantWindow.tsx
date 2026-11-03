@@ -19,7 +19,6 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
     if (!reviewing) panelRef.current?.focus();
   }, [reviewing, target]);
   useEffect(() => {
-    if (reviewing) return;
     const escape = (event: KeyboardEvent) => {
       if (event.key === 'Tab' && panelRef.current) {
         const elements = Array.from(panelRef.current.querySelectorAll<HTMLElement>(
@@ -53,11 +52,10 @@ export function AssistantWindow({ target, conversation, reviewing, close, showGe
     <nav aria-label={text.title} className="assistant-context-controls">
       <button type="button" className="btn btn-secondary btn-sm" aria-pressed={!reviewing} onClick={showGeneral}>{text.general}</button>
       <button type="button" className="btn btn-secondary btn-sm" disabled={conversation.locked}
-        onClick={() => { conversation.newConversation(); showGeneral(); }}>{text.newChat}</button>
+        onClick={conversation.newConversation}>{text.newChat}</button>
     </nav>
     </div>
     {reviewing && <p className="assistant-context-label" role="status">{text.review}</p>}
-    <div ref={setReviewTarget} />
-    {!reviewing && <AssistantConversation conversation={conversation} />}
+    <AssistantConversation conversation={conversation} setReviewTarget={setReviewTarget} />
   </div>, target);
 }

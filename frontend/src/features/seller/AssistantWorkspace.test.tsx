@@ -47,9 +47,15 @@ it('clarifies locally and recognizes multilingual workflows independently of app
     await send(message);
     expect(Array.from(host.querySelectorAll('[data-testid="assistant-query"]')).at(-1)?.textContent).toMatch(/attention|নজর/);
   }
-  for (const message of ['Create an order', 'নতুন অর্ডার তৈরি', 'ekta notun order chai', 'order toiri korte chai']) {
+  for (const [message, replacesDraft] of [
+    ['Create an order', false], ['নতুন অর্ডার তৈরি', true],
+    ['ekta notun order chai', true], ['order toiri korte chai', false],
+  ] as const) {
     await act(async () => host.querySelectorAll<HTMLButtonElement>('.assistant-workflow-choices button')[2].click());
     await send(message);
+    const prompt = host.querySelector('[role="alertdialog"]');
+    expect(Boolean(prompt)).toBe(replacesDraft);
+    if (replacesDraft) await act(async () => prompt!.querySelector<HTMLButtonElement>('.btn-danger')!.click());
     expect(host.querySelector('[name="assistant-draft"]')).not.toBeNull();
     expect(host.querySelector('[data-testid="assistant-workflow"]')?.textContent).toMatch(/Create an order|অর্ডার তৈরি/);
   }

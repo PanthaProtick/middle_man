@@ -10,7 +10,9 @@ import { GuidedPaymentFields } from './GuidedPaymentFields';
 import { GuidedPaymentResult } from './GuidedPaymentResult';
 import { AssistantQueryCard } from './AssistantQueryCard';
 
-export function AssistantConversation({ conversation }: { conversation: Conversation }): React.JSX.Element {
+export function AssistantConversation({ conversation, setReviewTarget }: {
+  conversation: Conversation; setReviewTarget?: (target: HTMLDivElement | null) => void;
+}): React.JSX.Element {
   const c = conversation;
   const text = sellerAssistantCopy[c.locale];
   const { input, setInput } = c;
@@ -27,6 +29,7 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
   return <div className="assistant-conversation" lang={c.locale}>
     <div className="assistant-chat-feed" ref={feed}>
     <p>{text.welcome}</p>
+    {setReviewTarget && <div ref={setReviewTarget} />}
     <div role="log" aria-label={text.log} aria-live="polite" aria-relevant="additions">
       {c.messages.map((message, index) => 'orderResult' in message
         ? <GuidedOrderResult key={index} order={message.orderResult} locale={c.locale} token={c.token} onOpenOrder={c.openOrder} />

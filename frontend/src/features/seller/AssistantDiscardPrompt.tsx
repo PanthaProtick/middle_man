@@ -12,8 +12,7 @@ export function AssistantDiscardPrompt({ conversation: c }: { conversation: Assi
   }, []);
   return <section role="alertdialog" aria-modal="false" aria-label={text.confirm}>
     <h4>{text.confirm}</h4><p>{text.confirmHelp}</p>
-    <button ref={resume} type="button" className="btn btn-secondary" onClick={c.resume}>{text.resume}</button>
-    <button type="button" className="btn btn-danger" onClick={c.confirmDiscard}>{text.discard}</button>
-    <button type="button" className="btn btn-secondary" onClick={c.cancel}>{text.cancel}</button>
+    <button ref={resume} type="button" className="btn btn-secondary" onClick={c.resume}>{text.keepEditing}</button>
+    <button type="button" className="btn btn-danger" onClick={c.confirmDiscard}>{text.discardProceed}</button>
   </section>;
 }

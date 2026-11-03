@@ -27,7 +27,6 @@ export function AssistantWorkspace({ children, eligibleOrderIds = [], floating =
 function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...options }: Props): React.JSX.Element {
   const { locale } = useLocale();
   const [openedOrder, setOpenedOrder] = useState<SellerOrder | null>(null);
-  const conversation = useAssistantConversation(locale, { ...options, onOpenOrder: setOpenedOrder });
   const [registeredIds, setEligible] = useState<string[] | null>(null);
   const [generalOpen, setGeneralOpen] = useState(false);
   const [activeId, setActiveId] = useState<string | null>(null);
@@ -39,6 +38,13 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
   const rootRef = useRef<HTMLDivElement>(null);
   const focusOrderId = useRef<string | null>(null);
   const opener = useRef<HTMLElement | null>(null);
+  const minimizedReview = useRef<string | null>(null);
+  const conversation = useAssistantConversation(locale, { ...options, onOpenOrder: setOpenedOrder,
+    onConversationReset: () => {
+      minimizedReview.current = null; setActiveId(null); setGeneralOpen(true);
+      options.onConversationReset?.();
+    },
+  });
   const followModal = useCallback((id: string | null) => {
     if (id) focusOrderId.current = id;
     setModalId(id); setActiveId(current => current && id ? id : current);
@@ -60,15 +66,21 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
   }, [activeId, generalOpen, modalId, target]);
   const close = useCallback((returnFocus = true) => {
     restoreFocus.current = returnFocus;
+    minimizedReview.current = activeId;
     setActiveId(null);
     setGeneralOpen(false);
-  }, []);
+  }, [activeId]);
   if (activeId && !(registeredIds ?? eligibleOrderIds).includes(activeId)) setActiveId(null);
-  const showGeneral = () => { setActiveId(null); setGeneralOpen(true); };
+  const showGeneral = () => { minimizedReview.current = null; setActiveId(null); setGeneralOpen(true); };
   const launcher = <button type="button" className="btn btn-primary seller-assistant-launcher"
     hidden={Boolean(activeId || generalOpen)}
     data-testid="seller-assistant-launcher" aria-expanded={Boolean(activeId || generalOpen)}
-    onClick={event => { opener.current = event.currentTarget; showGeneral(); }}>
+    onClick={event => {
+      opener.current = event.currentTarget;
+      const id = minimizedReview.current;
+      if (id && (registeredIds ?? eligibleOrderIds).includes(id)) setActiveId(id);
+      else showGeneral();
+    }}>
     {sellerAssistantCopy[conversation.locale].title}
   </button>;
   return <Context.Provider value={{activeId, modalId, target: floating ? reviewTarget : target, setTarget, close,

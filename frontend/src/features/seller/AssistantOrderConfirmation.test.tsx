@@ -172,7 +172,7 @@ it('retains multiple order results until New Chat and leaves the link usable whe
   const results = Array.from(host.querySelectorAll('[role="log"] .assistant-result'));
   expect(results).toHaveLength(2);
   expect(results[0].textContent).toContain('Saved 1'); expect(results[1].textContent).toContain('Saved 2');
-  await click('New conversation');
+  await click('New Chat');
   expect(host.querySelectorAll('[role="log"] .assistant-result')).toHaveLength(0);
   expect(posts).toBe(2);
 });

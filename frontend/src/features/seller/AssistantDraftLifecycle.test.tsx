@@ -51,13 +51,13 @@ it('keeps one draft through close, searches, and review, and confirms switching 
   await act(async () => { language.value = 'bn'; language.dispatchEvent(new Event('change', { bubbles: true })); });
   expect(review.getAttribute('lang')).toBe('bn');
   await act(async () => { language.value = 'en'; language.dispatchEvent(new Event('change', { bubbles: true })); });
-  expect(host.querySelector('[name="assistant-draft"]')).toBeNull();
+  expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের কাজ Shirt');
   await click('Guided workflows');
   expect(host.querySelector('[data-testid="review-assistant-panel"]')).toBeNull();
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের কাজ Shirt');
   await click('Record a payment');
   expect(host.querySelector('[role="alertdialog"]')).not.toBeNull();
-  await click('Keep draft');
+  await click('Keep Editing');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('হাতের কাজ Shirt');
   await click('Record a payment');
   await act(async () => host.querySelector<HTMLButtonElement>('[role="alertdialog"] .btn-danger')!.click());
@@ -67,9 +67,9 @@ it('keeps one draft through close, searches, and review, and confirms switching 
 
 it('requires confirmation for reset and discard, restores focus, and clears on a new shop lifetime', async () => {
   await mount();
-  await click('New conversation');
+  await click('New Chat');
   expect(host.querySelector('[role="alertdialog"]')).not.toBeNull();
-  await click('Keep draft');
+  await click('Keep Editing');
   await act(async () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })));
   await act(async () => new Promise(requestAnimationFrame));
   expect(document.activeElement).toBe(host.querySelector('[data-testid="seller-assistant-launcher"]'));
@@ -77,7 +77,7 @@ it('requires confirmation for reset and discard, restores focus, and clears on a
   expect(host.querySelector('[role="alertdialog"]')).not.toBeNull();
   await act(async () => host.querySelector<HTMLButtonElement>('[role="alertdialog"] .btn-danger')!.click());
   expect(host.querySelector('[name="assistant-draft"]')).toBeNull();
-  await click('New order'); await click('New conversation');
+  await click('New order'); await click('New Chat');
   await act(async () => host.querySelector<HTMLButtonElement>('[role="alertdialog"] .btn-danger')!.click());
   expect(host.querySelector('[data-testid="assistant-workflow"]')).toBeNull();
   await click('New order');
@@ -98,7 +98,7 @@ it('preserves unsent text on close and clears it only when a new conversation is
   await act(async () => host.querySelector<HTMLButtonElement>('[aria-label="Close assistant"]')!.click());
   await click('Seller assistant');
   expect(host.querySelector<HTMLTextAreaElement>('[name="assistant-message"]')?.value).toBe('Unsaved question');
-  await click('New conversation');
+  await click('New Chat');
   await act(async () => host.querySelector<HTMLButtonElement>('[role="alertdialog"] .btn-danger')!.click());
   expect(host.querySelector<HTMLTextAreaElement>('[name="assistant-message"]')?.value).toBe('');
 });

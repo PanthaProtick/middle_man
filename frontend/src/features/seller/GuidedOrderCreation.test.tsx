@@ -214,7 +214,7 @@ it('clarifies repeated same-workflow actions and confirms discard before creatin
   await send('Create another order; product: Bag');
   expect(host.querySelector('[role="alertdialog"]')).not.toBeNull();
   expect(host.querySelector<HTMLInputElement>('[name="assistant-draft"]')?.value).toBe('Shirt');
-  await click('Keep draft');
+  await click('Keep Editing');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-total"]')?.value).toBe('1000');
   expect(fetcher).not.toHaveBeenCalled();
 });
