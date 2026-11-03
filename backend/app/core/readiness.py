@@ -13,6 +13,7 @@ from app.core.clerk_verifier import ClerkTokenVerifier
 from app.core.config import Settings, settings
 from app.core.database import DurableStorageUnavailableError, check_database_readiness
 from app.core.schema import REQUIRED_SCHEMA_COLUMNS, check_schema_compatibility
+from app.core.session_trust import validate_session_trust
 from app.core.tokens import check_link_encryption_readiness
 from app.services.payment_marker_protection import check_payment_marker_readiness
 
@@ -112,10 +113,6 @@ def validate_seller_auth_readiness(cfg: Settings, app: Optional[FastAPI] = None)
         raise ProductionReadinessError("CLERK_ISSUER must be configured in production")
     if not issuer.startswith("https://"):
         raise ProductionReadinessError("CLERK_ISSUER must use https:// protocol in production")
-    if ".clerk.accounts.dev" in issuer:
-        raise ProductionReadinessError(
-            f"Development Clerk issuer is not permitted in production: {issuer}"
-        )
     if any(p in issuer for p in ["clerk.your-domain.com", "your-clerk-issuer"]):
         raise ProductionReadinessError(
             f"Placeholder Clerk issuer is not permitted in production: {issuer}"
@@ -151,6 +148,7 @@ def validate_seller_auth_readiness(cfg: Settings, app: Optional[FastAPI] = None)
             raise ProductionReadinessError(f"CLERK_JWT_KEY is not a valid PEM public key: {exc}")
 
     try:
+        validate_session_trust(cfg)
         ClerkTokenVerifier(
             issuer=issuer,
             jwt_key_pem=jwt_key or None,

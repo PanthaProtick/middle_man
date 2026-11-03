@@ -3,6 +3,7 @@ import App from './App';
 import { useLocale } from './features/locale';
 import { clerkBengaliLocalization } from './features/locale/clerkLocalization';
 import { SellerSession } from './features/seller/SellerSession';
+import { validateSessionConfiguration } from './features/seller/sessionConfiguration';
 
 export interface RootProps {
   publishableKey?: string;
@@ -16,6 +17,7 @@ export interface RootProps {
  */
 export function Root({ publishableKey, publicPortal = false }: RootProps): React.JSX.Element {
   const { locale } = useLocale();
+  validateSessionConfiguration(publishableKey, import.meta.env.PROD, publicPortal);
 
   if (!publishableKey || publishableKey.includes('your_clerk') || publicPortal) {
     return <App />;

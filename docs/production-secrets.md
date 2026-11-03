@@ -12,6 +12,7 @@ This guide documents the application secret inventory, cryptographic isolation g
 | `ORDER_LINK_ENCRYPTION_KEY` | **Yes** | Secret key for Fernet authenticated encryption (AES-128-CBC + HMAC-SHA256) of public buyer portal tokens. |
 | `PAYMENT_MARKER_SECRET` | **Yes** | HMAC secret used to derive unique transaction fingerprints and prevent payment marker reuse across shops. |
 | `CLERK_ISSUER` | **Yes** | Production Clerk issuer URL (must start with `https://` and reject `*.clerk.accounts.dev`). |
+| `CLERK_AUTHORIZED_PARTY` | **Yes** | Exact HTTPS seller frontend origin, also listed in `CORS_ORIGINS`; see [seller sessions](production-seller-sessions.md). |
 | `CLERK_SECRET_KEY` | Optional | Live Clerk secret key (`sk_live_*`; `sk_test_*` rejected at startup). |
 | `CLERK_PUBLISHABLE_KEY` | Optional | Live Clerk publishable key (`pk_live_*`; `pk_test_*` rejected at startup). |
 | `CLERK_JWT_KEY` | Optional | PEM-encoded RSA public key for offline JWT verification without network calls. |

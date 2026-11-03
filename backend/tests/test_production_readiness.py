@@ -166,6 +166,8 @@ def test_production_seller_auth_rejections(valid_rsa_pem: str) -> None:
         CLERK_SECRET_KEY="sk_live_123",
         CLERK_PUBLISHABLE_KEY="pk_live_123",
         CLERK_JWT_KEY=valid_rsa_pem,
+        CLERK_AUTHORIZED_PARTY="https://seller.prod.com",
+        CORS_ORIGINS=["https://seller.prod.com"],
     )
     validate_seller_auth_readiness(s7)
 
@@ -197,6 +199,8 @@ async def test_production_readiness_storage_failure(monkeypatch: pytest.MonkeyPa
         CLERK_ISSUER="https://clerk.prod.com",
         ORDER_LINK_ENCRYPTION_KEY="valid_link_secret",
         PAYMENT_MARKER_SECRET="valid_marker_secret",
+        CLERK_AUTHORIZED_PARTY="https://seller.prod.com",
+        CORS_ORIGINS=["https://seller.prod.com"],
     )
     monkeypatch.setattr(
         "app.core.readiness.check_database_readiness",
