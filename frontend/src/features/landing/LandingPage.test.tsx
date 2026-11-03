@@ -104,7 +104,7 @@ describe('LandingPage surface', () => {
     expect(showcase?.textContent).toContain('Two-way bKash & Nagad reconciliation');
     expect(showcase?.textContent).toContain('Claimed TrxID');
     expect(showcase?.textContent).toContain('BL9X4M291Q');
-    expect(showcase?.textContent).toContain('Advance Verified');
+    expect(showcase?.textContent).toContain('Advance Accepted');
 
     // Switch to step 3: Pathao Dispatch
     await act(async () => {
@@ -143,7 +143,7 @@ describe('LandingPage surface', () => {
     });
     expect(container.textContent).toContain('Reconcile on Shop Desk');
     expect(container.textContent).toContain('Shop Desk Inbox');
-    expect(container.textContent).toContain('bKash Merchant SMS');
+    expect(container.textContent).toContain('Seller payment record');
 
     // Click on Step 4 tab: Courier Handoff
     await act(async () => {

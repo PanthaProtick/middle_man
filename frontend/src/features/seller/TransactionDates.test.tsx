@@ -102,7 +102,7 @@ function setupWorkspaceFetch(
 
 async function openPayments(host: HTMLElement): Promise<void> {
   const tab = Array.from(host.querySelectorAll('button')).find((item) =>
-    item.textContent?.includes('Payments & SMS'),
+    item.textContent?.includes('Payments'),
   );
   if (!tab) throw new Error('Missing payments section tab');
   await act(async () => tab.click());

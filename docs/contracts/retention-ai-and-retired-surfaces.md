@@ -2,8 +2,8 @@
 
 ## Raw evidence retention and cleanup (Ticket 18)
 
-- Raw SMS bodies expire 30 days from original collection. Reprocessing/reimport
-  never restarts deadlines.
+- Historical raw SMS bodies expire 30 days from original collection. SMS import
+  is retired; removal does not restart deadlines or restore erased bodies.
 - `purge_raw_evidence` sets the raw `raw_text` column to NULL. Structured
   observations, claims, order status, accepted allocation, COD, and used-payment
   markers remain intact.

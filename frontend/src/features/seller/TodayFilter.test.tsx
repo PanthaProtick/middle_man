@@ -51,7 +51,7 @@ it.each([
     return found;
   };
   if (section === 'transactions') await act(async () => {
-    Array.from(host.querySelectorAll('button')).find((item) => item.textContent?.includes('Payments & SMS'))!.click();
+    Array.from(host.querySelectorAll('button')).find((item) => item.textContent?.includes('Payments'))!.click();
   });
   const requests = () => queries.filter((url) => url.pathname === `/api/seller/${section}`);
   const mode = host.querySelector<HTMLSelectElement>(`#${prefix}-date-mode`)!;

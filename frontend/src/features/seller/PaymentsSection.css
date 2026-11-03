@@ -24,6 +24,9 @@
   background: var(--bg-card);
   color: var(--text-primary);
   text-decoration: none;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 

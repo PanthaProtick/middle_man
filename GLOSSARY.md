@@ -31,7 +31,7 @@ An order the seller has accepted, including acceptance of its delivery advance. 
 _Avoid_: Verified order
 
 **Seller transaction record**:
-Details of a received payment supplied by the seller, primarily from an incoming payment SMS or manually from the seller's payment app.
+Details of a received payment supplied by the seller through manual or guided entry from the seller's payment app. Historical SMS-origin records remain seller-supplied evidence after SMS import retirement.
 
 **Buyer payment proof**:
 _Bengali_: ক্রেতার দেওয়া পেমেন্টের তথ্য
