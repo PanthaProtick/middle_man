@@ -10,7 +10,7 @@ export const sellerAssistantCopy = {
     queryHelp: 'This selects a search workflow. No search has run and no results have been retrieved.',
     confirm: 'Discard your unfinished draft?', confirmHelp: 'Your draft will be lost. You can resume it instead.',
     resume: 'Resume draft', discard: 'Discard draft', cancel: 'Keep draft',
-    order: 'Create an order', payment: 'Record a payment', attention: 'Orders needing attention',
+    order: 'Create an order', newOrder: 'New order', payment: 'Record a payment', attention: 'Orders needing attention',
     preparation: 'Awaiting delivery preparation', log: 'Temporary conversation',
   },
   bn: {
@@ -24,7 +24,7 @@ export const sellerAssistantCopy = {
     queryHelp: 'এটি খোঁজার কাজ নির্বাচন করে। এখনো খোঁজা হয়নি বা কোনো ফলাফল আনা হয়নি।',
     confirm: 'অসমাপ্ত খসড়া বাদ দেবেন?', confirmHelp: 'খসড়াটি হারিয়ে যাবে। চাইলে আবার চালিয়ে যেতে পারেন।',
     resume: 'খসড়া চালিয়ে যান', discard: 'খসড়া বাদ দিন', cancel: 'খসড়া রাখুন',
-    order: 'অর্ডার তৈরি', payment: 'পেমেন্ট রেকর্ড', attention: 'নজর দেওয়া দরকার এমন অর্ডার',
+    order: 'অর্ডার তৈরি', newOrder: 'নতুন অর্ডার', payment: 'পেমেন্ট রেকর্ড', attention: 'নজর দেওয়া দরকার এমন অর্ডার',
     preparation: 'ডেলিভারির প্রস্তুতি বাকি', log: 'অস্থায়ী কথোপকথন',
   },
 };

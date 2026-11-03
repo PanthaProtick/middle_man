@@ -70,7 +70,7 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
     <div className="assistant-workflow-choices">
       {workflows.map(workflow => <button key={workflow} type="button" className="btn btn-secondary btn-sm"
         disabled={Boolean(c.pending) || (c.locked && isCreation(workflow))}
-        onClick={() => c.select(workflow)}>{text[workflow]}</button>)}
+        onClick={() => c.select(workflow)}>{workflow === 'order' ? text.newOrder : text[workflow]}</button>)}
     </div>
     <form onSubmit={event => {
       event.preventDefault();

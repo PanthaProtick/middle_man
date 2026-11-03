@@ -21,7 +21,7 @@ async function mount() {
   await act(async () => root.render(<AssistantWorkspace floating eligibleOrderIds={[baseOrder.id]}>
     <ReviewAssistant order={baseOrder} token="seller" />
   </AssistantWorkspace>));
-  await click('Seller assistant'); await click('Create an order');
+  await click('Seller assistant'); await click('New order');
   const input = host.querySelector<HTMLInputElement>('[name="assistant-draft"]')!;
   await act(async () => {
     Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(input, 'হাতের কাজ Shirt');
@@ -77,10 +77,10 @@ it('requires confirmation for reset and discard, restores focus, and clears on a
   expect(host.querySelector('[role="alertdialog"]')).not.toBeNull();
   await act(async () => host.querySelector<HTMLButtonElement>('[role="alertdialog"] .btn-danger')!.click());
   expect(host.querySelector('[name="assistant-draft"]')).toBeNull();
-  await click('Create an order'); await click('New conversation');
+  await click('New order'); await click('New conversation');
   await act(async () => host.querySelector<HTMLButtonElement>('[role="alertdialog"] .btn-danger')!.click());
   expect(host.querySelector('[data-testid="assistant-workflow"]')).toBeNull();
-  await click('Create an order');
+  await click('New order');
   await act(async () => root.render(<AssistantWorkspace key="next-shop" floating><p>Other shop</p></AssistantWorkspace>));
   await click('Seller assistant');
   expect(host.querySelector('[name="assistant-draft"]')).toBeNull();

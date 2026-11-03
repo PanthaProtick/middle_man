@@ -60,7 +60,7 @@ it('runs the shared attention query from the workflow button and keeps an unfini
   vi.mocked(fetchAttentionPreview).mockResolvedValue(preview);
   const { host, root, choice, onShowInDashboard } = await open();
 
-  await act(async () => choice('Create an order').click());
+  await act(async () => choice('New order').click());
   expect(host.querySelector('[name="assistant-draft"]')).not.toBeNull();
 
   await act(async () => choice('Orders needing attention').click());

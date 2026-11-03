@@ -7,6 +7,16 @@ Banglish equivalents) and editable inputs preserve entered text. Clear BDT, Tk,
 Ambiguous amounts and account matches require correction. Product names, chat,
 and account details are never sent to Gemini. Unmatched wording gets local help.
 
+Creation messages also accept bounded sentence templates, such as `Create order
+for 1500 taka silk saree, advance 300`, Bengali price/product clauses ending in
+`অর্ডার তৈরি করুন`, and `notun order for …, ogrim …`. Explicit `total` / `মোট` /
+`mot` and `advance` / `অগ্রিম` / `ogrim` cues without colons supply candidate
+amounts. Repeated amount cues leave that candidate unresolved. Labeled values
+override sentence candidates, and missing accounts stay unselected. These are
+editable suggestions rather than general natural-language understanding. The
+New order chip opens an empty draft. Optional parcel fields remain weight and
+quantity; the order contract has no notes field.
+
 The summary shows interpreted amounts and selected account. Only the explicit
 Create order button confirms its current payload. Conversational agreement and
 Enter in the composer cannot submit it. Optional weight and quantity reuse parcel

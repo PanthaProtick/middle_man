@@ -51,7 +51,7 @@ it('runs the shared preparation query from the workflow button and keeps an unfi
   const choice = (label: string) => Array.from(host.querySelectorAll<HTMLButtonElement>('.assistant-workflow-choices button'))
     .find(item => item.textContent === label)!;
 
-  await act(async () => choice('Create an order').click());
+  await act(async () => choice('New order').click());
   expect(host.querySelector('[name="assistant-draft"]')).not.toBeNull();
 
   await act(async () => choice('Awaiting delivery preparation').click());
