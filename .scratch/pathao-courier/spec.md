@@ -6,7 +6,7 @@ Date: 2026-10-26
 
 ## Problem Statement
 
-Sellers currently confirm chat-negotiated orders and collect delivery advances in Middle Man, then manually copy buyer and payment information into a courier workflow. Existing exports are manual delivery aids and do not create courier bookings. Re-entering recipient details and calculating the amount payable on delivery creates avoidable work and errors.
+Sellers currently confirm chat-negotiated orders and collect delivery advances in Middleman, then manually copy buyer and payment information into a courier workflow. Existing exports are manual delivery aids and do not create courier bookings. Re-entering recipient details and calculating the amount payable on delivery creates avoidable work and errors.
 
 A confirmed order expresses seller acceptance of the order and delivery advance; it does not establish parcel readiness or independent verification by a payment provider. Immediately requesting pickup on confirmation could submit incomplete parcel details, use an incorrect COD amount, or book under the wrong seller account. Buyer corrections, cancellation, duplicate requests, and uncertain network outcomes must not silently produce incorrect or duplicate bookings.
 
@@ -136,7 +136,7 @@ Start with offline synthetic verification and then an actual Pathao sandbox jour
 
 - Immediate external booking on payment confirmation or unattended automatic pickup submission.
 - A shared platform-owned merchant account, platform-managed COD settlement, or a generic multi-courier marketplace.
-- Automatic updates or cancellation of existing Pathao bookings, delivery-status synchronization/webhooks, and shipment tracking inside Middle Man beyond booking result and consignment ID.
+- Automatic updates or cancellation of existing Pathao bookings, delivery-status synchronization/webhooks, and shipment tracking inside Middleman beyond booking result and consignment ID.
 - Multiple bookings per order, split COD allocation, split shipments, and replacement shipments.
 - AI address guessing, silent location substitution, invented parcel weight, or upgrading seller-supplied payment evidence into provider-verified payment.
 - Changes to agreed order totals or delivery pricing, new payment-provider integrations, and automatic refunds.

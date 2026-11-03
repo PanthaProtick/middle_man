@@ -6,7 +6,7 @@
 
 ---
 
-**Project:** Middle Man
+**Project:** Middleman
 **Generated:** 2026-10-24 21:06:10
 **Category:** Marketplace (P2P)
 

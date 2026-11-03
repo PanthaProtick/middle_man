@@ -1,5 +1,5 @@
 {
-  "name": "dev-template",
+  "name": "middleman",
   "private": true,
   "version": "1.0.0",
   "description": "React and FastAPI development template for agent-assisted full-stack prototyping",

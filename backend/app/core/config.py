@@ -13,7 +13,7 @@ def _has_placeholder(val: str, specific: list[str]) -> bool:
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME: str = "Dev Template API"
+    PROJECT_NAME: str = "Middleman API"
     ENV: str = "development"
     DEBUG: bool = True
     API_PREFIX: str = "/api"

@@ -96,7 +96,7 @@ class ClerkTokenVerifier:
             return
         jwks_url = f"{self.issuer}/.well-known/jwks.json"
         try:
-            req = Request(jwks_url, headers={"User-Agent": "dev-template-auth"})
+            req = Request(jwks_url, headers={"User-Agent": "middleman-auth"})
             with urlopen(req, timeout=5) as response:
                 if response.status != 200:
                     raise AuthenticationUnavailableError("Failed to fetch JWKS from identity provider")

@@ -43,7 +43,7 @@ it('shows initialization rather than a missing-configuration diagnosis while Cle
   clerk.sessionId = undefined;
   await act(async () => root.render(<SellerSession />));
   expect(container.textContent).toContain('Loading seller sign-in');
-  expect(document.title).toBe('Seller workspace · middleman');
+  expect(document.title).toBe('Seller workspace · Middleman');
   expect(container.textContent).not.toContain('Configure Clerk');
   expect(container.textContent).not.toContain('Session verification is unavailable');
   expect(clerk.getToken).not.toHaveBeenCalled();

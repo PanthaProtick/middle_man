@@ -24,7 +24,7 @@ router = APIRouter()
 _in_memory_items: List[ItemResponse] = [
     ItemResponse(
         id=str(uuid.uuid4()),
-        title="Dev Template Architecture",
+        title="Middleman Architecture",
         description="FastAPI + React + Neon Postgres + Gemini SDK setup.",
         tags=["Template", "FastAPI", "React", "Gemini"],
         created_at=datetime.datetime.now(datetime.timezone.utc).isoformat(),

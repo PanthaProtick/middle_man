@@ -13,11 +13,11 @@ Status: Completed (design and specification only)
 - Offer courier details while the seller creates a buyer link, so they can supply information early.
 - Collect the remaining COD balance based on the advance actually accepted by the seller. Fully paid orders collect zero.
 - Before submission, buyer-detail corrections update the draft and cancellation prevents submission.
-- After submission, flag corrections or cancellation for seller resolution in Pathao; changing Middle Man does not imply the booking changed.
+- After submission, flag corrections or cancellation for seller resolution in Pathao; changing Middleman does not imply the booking changed.
 - An ambiguous submission outcome blocks resubmission until reconciled. Clear validation failures remain editable and retryable.
 - Sellers can save default pickup store and delivery service. Parcel weight and quantity are explicit per-order values, entered during link creation or draft review.
 - Buyers must select delivery locations using Pathao's hierarchy and supply a detailed address. This supersedes the proposal to have sellers select the location IDs after buyer submission.
-- The first version supports one Pathao booking per confirmed order. Split and replacement shipments are handled outside Middle Man.
+- The first version supports one Pathao booking per confirmed order. Split and replacement shipments are handled outside Middleman.
 - Show the consignment ID and booking result; use Pathao for delivery tracking in the first version.
 - Implement and verify with synthetic orders and the sandbox first. Production booking requires a separate acceptance step.
 - If courier location choices cannot load, allow submission of the written address and payment proof. Block booking until the seller resolves the delivery location.

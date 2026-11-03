@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
-# Middle Man: Pre-commit CI verification gate
+# Middleman: Pre-commit CI verification gate
 # Runs the full CI test & verification suite before any commit is accepted.
 
 echo ""

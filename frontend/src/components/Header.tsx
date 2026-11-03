@@ -25,7 +25,7 @@ export default function Header({
           <ShoppingBag size={21} aria-hidden="true" />
         </div>
         <div className="brand-text">
-          <h1>middleman</h1>
+          <h1>Middleman</h1>
           <p>{text.tagline}</p>
         </div>
       </div>

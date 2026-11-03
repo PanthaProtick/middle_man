@@ -1,8 +1,8 @@
-# Dev Template
+# Middleman
 
 A React and FastAPI starting point for developers building full-stack prototypes with Codex or Antigravity.
 
-Dev Template brings a typed frontend, validated API contracts, local mock Gemini demos, and a shared verification command into one workspace. Start locally without cloud credentials, then replace the demo behavior with your application's domain logic.
+Middleman brings a typed frontend, validated API contracts, local mock Gemini demos, and a shared verification command into one workspace. Start locally without cloud credentials, then replace the demo behavior with your application's domain logic.
 
 ## What's included
 
@@ -75,7 +75,7 @@ Environment files are optional for the local standby demo. To customize settings
 
 | Setting | Location | Current role |
 | --- | --- | --- |
-| `PROJECT_NAME` | Backend | API title and health response; defaults to `Dev Template API` |
+| `PROJECT_NAME` | Backend | API title and health response; defaults to `Middleman API` |
 | `GEMINI_API_KEY`, `GEMINI_MODEL` | Backend | Shared settings reserved for the later seller review assistant; public demos remain local mocks |
 | `DATABASE_URL` or individual `PG*` fields | Backend | Configure the optional SQLAlchemy/asyncpg database layer |
 | `DIRECT_URL` | Backend | Reserved configuration; no migration workflow is included |

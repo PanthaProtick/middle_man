@@ -73,20 +73,20 @@ it('starts in Bengali for a Bengali browser and persists an explicit English cho
 
   expect(container.textContent).toContain('আপনার দোকানে সাইন ইন করুন');
   expect(document.documentElement.lang).toBe('bn-BD');
-  expect(document.title).toBe('বিক্রেতার কর্মক্ষেত্র · middleman');
+  expect(document.title).toBe('বিক্রেতার কর্মক্ষেত্র · Middleman');
 
   await act(async () => findLanguageButton(container, 'English').click());
 
   expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('en');
   expect(document.documentElement.lang).toBe('en');
-  expect(document.title).toBe('Seller workspace · middleman');
+  expect(document.title).toBe('Seller workspace · Middleman');
 
   await act(async () => root.unmount());
   root = createRoot(container);
   await renderApp();
 
   expect(container.textContent).toContain('Sign in to your shop');
-  expect(document.title).toBe('Seller workspace · middleman');
+  expect(document.title).toBe('Seller workspace · Middleman');
 });
 
 it('starts in English when the browser does not prefer Bengali', async () => {
@@ -107,14 +107,14 @@ it('shares one device locale between the buyer portal and seller entry paths', a
 
   expect(container.textContent).toContain('অর্ডার নিশ্চিতকরণ');
   expect(container.textContent).toContain('ডেলিভারির আগে অগ্রিম');
-  expect(document.title).toBe('অর্ডার নিশ্চিতকরণ · middleman');
+  expect(document.title).toBe('অর্ডার নিশ্চিতকরণ · Middleman');
   expect(container.querySelectorAll('.locale-switch')).toHaveLength(1);
 
   window.history.replaceState({}, '', '/');
   await renderApp();
 
   expect(container.textContent).toContain('আপনার দোকানে সাইন ইন করুন');
-  expect(document.title).toBe('বিক্রেতার কর্মক্ষেত্র · middleman');
+  expect(document.title).toBe('বিক্রেতার কর্মক্ষেত্র · Middleman');
   expect(window.localStorage.getItem(LOCALE_STORAGE_KEY)).toBe('bn');
   expect(container.querySelectorAll('.locale-switch')).toHaveLength(1);
 });
@@ -135,7 +135,7 @@ it('gives a shared buyer link the buyer device preference without reading a supp
   expect(container.textContent).toContain('Delivery advance');
   expect(container.textContent).not.toContain('ডেলিভারির আগে অগ্রিম');
   expect(container.textContent).not.toContain('Sign in to your shop');
-  expect(document.title).toBe('Order confirmation · middleman');
+  expect(document.title).toBe('Order confirmation · Middleman');
   expect(fetchMock.mock.calls.filter(([url]) => String(url) === '/api/public/orders/seller-authored-token')).toHaveLength(1);
 });
 
@@ -163,6 +163,6 @@ it('switches a populated buyer form in place without losing values, remounting, 
   expect(read('payment_trx_id').value).toBe('Tx১২ab');
   expect(read('claimed_advance_bdt').value).toBe('১২.০১');
   expect(fetchMock).toHaveBeenCalledTimes(requests);
-  expect(document.title).toBe('Order confirmation · middleman');
+  expect(document.title).toBe('Order confirmation · Middleman');
   expect(document.documentElement.lang).toBe('en');
 });

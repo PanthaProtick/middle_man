@@ -50,7 +50,7 @@ export async function fetchHealth(): Promise<HealthStatus> {
     const errorMessage = err instanceof Error ? err.message : String(err);
     return {
       status: 'offline',
-      project_name: 'Dev Template API (Unreachable)',
+      project_name: 'Middleman API (Unreachable)',
       environment: 'local',
       database_configured: false,
       gemini_configured: false,

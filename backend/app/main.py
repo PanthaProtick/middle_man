@@ -62,7 +62,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
-    description="Dev Template API powered by FastAPI, with optional Neon Postgres and Google Gemini integrations.",
+    description="Middleman API powered by FastAPI, with optional Neon Postgres and Google Gemini integrations.",
     version="1.0.0",
     docs_url="/docs",
     redoc_url="/redoc",

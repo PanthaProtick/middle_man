@@ -4,7 +4,7 @@ Status: ready-for-agent
 
 ## Problem Statement
 
-Buyers and sellers encounter inconsistent English and Bengali across Middle Man.
+Buyers and sellers encounter inconsistent English and Bengali across Middleman.
 Seller screens are mostly English, while buyer screens often combine both
 languages in the same label. Someone confused by English cannot reliably choose
 Bengali for an entire task: errors, instructions, authentication, historical

@@ -60,7 +60,7 @@ Confirmed orders still needing courier preparation, excluding orders already boo
 **Courier draft**:
 _Bengali_: কুরিয়ার অনুরোধের খসড়া
 
-A proposed delivery request prepared in Middle Man when an order is confirmed, awaiting seller review and submission. It is not a booking with the courier.
+A proposed delivery request prepared in Middleman when an order is confirmed, awaiting seller review and submission. It is not a booking with the courier.
 
 **Pathao booking**:
 A delivery request accepted by Pathao under the seller's own merchant account, with a consignment ID identifying the request.
