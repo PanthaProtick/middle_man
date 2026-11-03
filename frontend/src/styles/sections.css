@@ -265,3 +265,18 @@
   text-align: center;
   padding: 24px;
 }
+
+/* Expanded Window for Orders Section */
+.order-scroll-viewport {
+  max-height: clamp(540px, 78vh, 880px);
+  min-height: 480px;
+}
+.order-scroll-viewport .ledger-scroll-empty-state {
+  min-height: 440px;
+}
+@media (max-width: 640px) {
+  .order-scroll-viewport {
+    max-height: clamp(440px, 72vh, 660px);
+    min-height: 380px;
+  }
+}
