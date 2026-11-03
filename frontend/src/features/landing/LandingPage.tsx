@@ -6,6 +6,7 @@ import { LandingHero } from './LandingHero';
 import { InteractiveProductTour } from './InteractiveProductTour';
 import { LandingFeatures } from './LandingFeatures';
 import './LandingPage.css';
+import './LandingMobile.css';
 
 interface LandingPageProps {
   onSignIn?: () => void;
