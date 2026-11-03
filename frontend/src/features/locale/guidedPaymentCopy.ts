@@ -1,5 +1,5 @@
 const en = {
-  help: 'Enter the received payment below. Receiving account, exact transaction ID and amount are required; sender number and occurrence time are optional. Nothing is saved until you click Record payment.',
+  help: 'Enter the received payment below. Receiving account, exact transaction ID and amount are required; sender number and occurrence time are optional. Review the details, then click Confirm to save.',
   missing: 'Please supply or correct all highlighted fields. Amounts must be positive; the transaction ID must be exact.',
   account: 'Receiving account', trxId: 'Transaction ID', amount: 'Amount received (BDT)',
   sender: 'Sender number (optional)', occurredAt: 'Occurrence time (optional)', choose: 'Choose an active account',
@@ -8,6 +8,7 @@ const en = {
   summary: 'Ready to record', preview: 'Recording runs reconciliation and may automatically confirm an eligible order.',
   previewWarning: 'Recording your evidence does not mean the payment provider verified the transaction.',
   record: 'Record payment',
+  review: 'Review', confirm: 'Confirm', changes: 'Make Changes',
   idle: '',
   processing: 'Still processing. Keep this action open.',
   unknown: 'Outcome unknown. Check this submission before changing fields or recording another payment.',
@@ -32,7 +33,8 @@ const en = {
   notVerified: 'This is your recorded evidence. It does not mean the payment provider verified the transaction.',
 };
 const bn: Record<keyof typeof en, string> = {
-  help: 'নিচে প্রাপ্ত পেমেন্ট লিখুন। টাকা গ্রহণের অ্যাকাউন্ট, সঠিক ট্রানজ্যাকশন আইডি ও পরিমাণ আবশ্যক; প্রেরকের নম্বর ও সময় ঐচ্ছিক। পেমেন্ট রেকর্ড বোতাম চাপার আগে কিছু সংরক্ষিত হবে না।',
+  help: 'নিচে প্রাপ্ত পেমেন্ট লিখুন। টাকা গ্রহণের অ্যাকাউন্ট, সঠিক ট্রানজ্যাকশন আইডি ও পরিমাণ আবশ্যক; প্রেরকের নম্বর ও সময় ঐচ্ছিক। পর্যালোচনা করে নিশ্চিত করুন বোতাম চাপলে সংরক্ষিত হবে।',
+  review: 'পর্যালোচনা করুন', confirm: 'নিশ্চিত করুন', changes: 'পরিবর্তন করুন',
   missing: 'চিহ্নিত সব ঘর পূরণ বা সংশোধন করুন। টাকার পরিমাণ শূন্যের বেশি হতে হবে; ট্রানজ্যাকশন আইডি হুবহু দিতে হবে।',
   account: 'টাকা গ্রহণের অ্যাকাউন্ট', trxId: 'ট্রানজ্যাকশন আইডি', amount: 'প্রাপ্ত টাকার পরিমাণ (BDT)',
   sender: 'প্রেরকের নম্বর (ঐচ্ছিক)', occurredAt: 'পেমেন্টের সময় (ঐচ্ছিক)', choose: 'সক্রিয় অ্যাকাউন্ট বেছে নিন',

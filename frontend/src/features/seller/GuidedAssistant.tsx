@@ -19,7 +19,7 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
   const composer = useRef<HTMLTextAreaElement>(null);
   useLayoutEffect(() => {
     if (feed.current) feed.current.scrollTop = feed.current.scrollHeight;
-  }, [c.messages, c.workflow, c.pending, c.orderReviewing, c.submission.state]);
+  }, [c.messages, c.workflow, c.pending, c.orderReviewing, c.paymentReviewing, c.submission.state, c.paymentSubmission.state]);
   useLayoutEffect(() => {
     if (!composer.current) return;
     composer.current.style.height = 'auto';
@@ -31,6 +31,9 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
     <div role="log" aria-label={text.log} aria-live="polite" aria-relevant="additions">
       {c.messages.map((message, index) => 'orderResult' in message
         ? <GuidedOrderResult key={index} order={message.orderResult} locale={c.locale} token={c.token} onOpenOrder={c.openOrder} />
+        : 'paymentResult' in message
+        ? <GuidedPaymentResult key={index} result={message.paymentResult} account={message.account} locale={c.locale}
+          token={c.token} onOpenOrder={c.openOrder} onOpenPayment={c.openPayment} />
         : <p key={index} className={'user' in message ? 'assistant-user-message' : 'assistant-reply'}>
         {!('user' in message) && <span className="assistant-avatar" aria-hidden="true">M</span>}
         <span>{'user' in message ? message.user : text[message.reply]}</span>
@@ -39,10 +42,7 @@ export function AssistantConversation({ conversation }: { conversation: Conversa
     </div>
     {c.workflow && <section data-testid="assistant-workflow" aria-label={text[c.workflow]}>
       <h4>{text[c.workflow]}</h4>
-      {c.completedPayment && c.workflow === 'payment'
-        ? <GuidedPaymentResult result={c.completedPayment} locale={c.locale} token={c.token}
-          onOpenOrder={c.openOrder} onOpenPayment={c.openPayment} />
-      : c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
+      {c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
       : c.draft?.workflow === 'payment' && c.workflow === 'payment' ? <GuidedPaymentFields conversation={c} />
       : c.workflow === 'attention' ? <AttentionPreview
         locale={c.locale} state={c.attention}

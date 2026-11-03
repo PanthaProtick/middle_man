@@ -21,7 +21,8 @@ export interface ConversationOptions {
   onShowInDashboard?: (query: WorkQuery) => void;
 }
 
-type Message = ({ user: string } | { reply: 'clarify' | 'multiple' | AssistantWorkflow } | { orderResult: SellerOrder }) & { at: string };
+type Message = ({ user: string } | { reply: 'clarify' | 'multiple' | AssistantWorkflow } |
+  { orderResult: SellerOrder } | { paymentResult: RecordedTransactionResult; account: string }) & { at: string };
 export function useAssistantConversation(initialLocale: Locale, options: ConversationOptions = {}) {
   const [locale, setLocale] = useState(initialLocale);
   const [manualLanguage, setManualLanguage] = useState(false);
@@ -30,8 +31,8 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
   const [workflow, setWorkflow] = useState<AssistantWorkflow | null>(null);
   const [draft, setDraft] = useState<AssistantDraft | null>(null);
   const [orderReviewing, setOrderReviewing] = useState(false);
+  const [paymentReviewing, setPaymentReviewing] = useState(false);
   const [pending, setPending] = useState<AssistantWorkflow | 'reset' | 'discard' | null>(null);
-  const [completedPayment, setCompletedPayment] = useState<RecordedTransactionResult | null>(null);
   const [refreshedAccounts, setRefreshedAccounts] = useState<PaymentAccount[] | null>(null);
   const [accountStatus, setAccountStatus] = useState<'idle' | 'refreshing' | 'refreshFailed'>('idle');
   const accounts = refreshedAccounts ?? options.accounts ?? [];
@@ -42,7 +43,13 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     options.onOrderCreated?.(order);
   });
   const paymentSubmission = useGuidedPaymentSubmission(options.token, result => {
-    setCompletedPayment(result); setDraft(null); options.onPaymentRecorded?.(result);
+    const account = accounts.find(item => item.id === result.receipt.payment_account_id);
+    setMessages(current => [...current, { paymentResult: result,
+      account: account ? `${account.label} · ${account.provider.toUpperCase()} · ${account.receiving_number}` : result.receipt.payment_account_id,
+      at: new Date().toISOString() }]);
+    setDraft(null); setPaymentReviewing(false);
+    setWorkflow(current => current === 'payment' ? null : current);
+    options.onPaymentRecorded?.(result);
   });
   const preparation = usePreparationQuery(options.token);
   const attention = useAttentionQuery(options.token);
@@ -58,6 +65,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
   };
   const updatePayment = (patch: Partial<PaymentFields>) => {
     if (frozen) return;
+    setPaymentReviewing(false);
     paymentSubmission.reset();
     setDraft(current => current?.workflow === 'payment' ? { ...current,
       payment: { ...emptyPaymentFields(), ...current.payment, ...patch } } : current);
@@ -69,7 +77,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
       if (!draft) {
         setOrderReviewing(false);
         orderSubmission.reset(); paymentSubmission.reset();
-        setCompletedPayment(null);
+        setPaymentReviewing(false);
       }
       setDraft(current => current ?? {
         workflow: next, value: '', ...(next === 'payment' ? { payment: emptyPaymentFields() } : {}),
@@ -84,11 +92,11 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     orderSubmission.reset(); paymentSubmission.reset();
     preparation.reset();
     attention.reset();
-    setCompletedPayment(null);
+    setPaymentReviewing(false);
     setMessages([]); setInput(''); setWorkflow(null); setDraft(null); setPending(null);
   };
   return {
-    locale, messages, input, setInput, workflow, draft, pending, accounts, completedPayment,
+    locale, messages, input, setInput, workflow, draft, pending, accounts,
     submission: orderSubmission, paymentSubmission, locked, frozen, token: options.token,
     openOrder: (order: SellerOrder) => options.onOpenOrder?.(order),
     openPayment: (receiptId: string) => options.onOpenPayment?.(receiptId),
@@ -97,6 +105,11 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
     showInDashboard: (query: WorkQuery) => options.onShowInDashboard?.(query),
     updateOrder, updatePayment,
     orderReviewing,
+    paymentReviewing,
+    reviewPayment: () => {
+      if (!frozen && !pending && paymentSummary(draft?.payment ?? emptyPaymentFields(), accounts).payload) setPaymentReviewing(true);
+    },
+    changePayment: () => { if (!frozen && !pending) { paymentSubmission.reset(); setPaymentReviewing(false); } },
     reviewOrder: () => {
       if (!frozen && !pending && orderSummary(draft?.value ?? '', draft?.order ?? emptyOrderFields(), accounts).payload) setOrderReviewing(true);
     },
@@ -147,6 +160,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
         (intents[0] === 'payment' && (!draft || draft.workflow === 'payment'))) {
         const patch = paymentMessage(message, accounts);
         if (Object.keys(patch).length && !paymentSubmission.frozen) {
+          setPaymentReviewing(false);
           paymentSubmission.reset();
           setDraft(current => ({ workflow: 'payment', value: current?.value ?? '',
             payment: { ...emptyPaymentFields(), ...current?.payment, ...patch } }));
@@ -162,7 +176,7 @@ export function useAssistantConversation(initialLocale: Locale, options: Convers
       if (locked) return;
       setOrderReviewing(false);
       orderSubmission.reset(); paymentSubmission.reset();
-      setCompletedPayment(null);
+      setPaymentReviewing(false);
       const next = pending;
       setDraft(null); setPending(null);
       if (next === 'reset') reset();
