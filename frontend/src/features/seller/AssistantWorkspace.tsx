@@ -7,6 +7,7 @@ import { useAssistantConversation, type ConversationOptions } from './useAssista
 import { AssistantWindow } from './AssistantWindow';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import { createPortal } from 'react-dom';
+import { Sparkles } from 'lucide-react';
 import { OrderDetailModal } from './OrderDetailModal';
 import type { SellerOrder } from './types';
 
@@ -81,7 +82,13 @@ function OwnedWorkspace({ children, eligibleOrderIds = [], floating = false, ...
       if (id && (registeredIds ?? eligibleOrderIds).includes(id)) setActiveId(id);
       else showGeneral();
     }}>
-    {sellerAssistantCopy[conversation.locale].title}
+    <span className="assistant-launcher-badge" aria-hidden="true">
+      <Sparkles size={18} className="assistant-launcher-icon" />
+    </span>
+    <span className="assistant-launcher-text">{sellerAssistantCopy[conversation.locale].title}</span>
+    <span className="assistant-status-dot" aria-hidden="true">
+      <span className="assistant-status-ping" />
+    </span>
   </button>;
   return <Context.Provider value={{activeId, modalId, target: floating ? reviewTarget : target, setTarget, close,
     open: (id, trigger) => { focusOrderId.current = id; opener.current = trigger; setGeneralOpen(false); setActiveId(id); },

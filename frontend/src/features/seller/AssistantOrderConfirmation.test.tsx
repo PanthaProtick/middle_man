@@ -14,7 +14,9 @@ afterEach(async () => {
   vi.restoreAllMocks(); vi.useRealTimers(); document.body.innerHTML = ''; localStorage.clear();
 });
 function button(label: string) {
-  const found = Array.from(host.querySelectorAll('button')).find(item => item.textContent === label);
+  const found = Array.from(host.querySelectorAll('button')).find(item =>
+    item.textContent === label || (label === 'Seller assistant' && item.dataset.testid === 'seller-assistant-launcher')
+  );
   expect(found, label).toBeDefined(); return found!;
 }
 async function click(label: string) { await act(async () => button(label).click()); }

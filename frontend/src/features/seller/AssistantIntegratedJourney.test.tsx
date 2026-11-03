@@ -15,7 +15,9 @@ afterEach(async () => {
   vi.restoreAllMocks(); document.body.innerHTML = ''; localStorage.clear();
 });
 async function click(label: string) {
-  const button = Array.from(host.querySelectorAll('button')).find(item => item.textContent === label);
+  const button = Array.from(host.querySelectorAll('button')).find(item =>
+    item.textContent === label || (label === 'Seller assistant' && item.dataset.testid === 'seller-assistant-launcher')
+  );
   expect(button, label).toBeDefined();
   await act(async () => button!.click());
 }

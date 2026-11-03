@@ -1,6 +1,6 @@
 export const sellerAssistantCopy = {
   en: {
-    title: 'Seller assistant', close: 'Close assistant', general: 'Guided workflows', review: 'Order review',
+    title: 'AI Assistant', close: 'Close assistant', general: 'Guided workflows', review: 'Order review',
     language: 'Conversation language', newChat: 'New Chat', message: 'What would you like to do?', send: 'Send',
     welcome: 'Choose a workflow or tell me what you need. Your conversation stays in this tab.',
     clarify: 'Hi! I can help you create an order, record a payment, check your attention backlog, or prepare deliveries. Choose one of the four workflows below to get started.',
@@ -15,7 +15,7 @@ export const sellerAssistantCopy = {
     preparation: 'Awaiting delivery preparation', log: 'Temporary conversation',
   },
   bn: {
-    title: 'বিক্রেতা সহকারী', close: 'সহকারী বন্ধ করুন', general: 'ধাপে ধাপে কাজ', review: 'অর্ডার পর্যালোচনা',
+    title: 'এআই সহকারী', close: 'সহকারী বন্ধ করুন', general: 'ধাপে ধাপে কাজ', review: 'অর্ডার পর্যালোচনা',
     language: 'কথোপকথনের ভাষা', newChat: 'নতুন কথোপকথন', message: 'কী করতে চান?', send: 'পাঠান',
     welcome: 'একটি কাজ বেছে নিন বা কী করতে চান বলুন। কথোপকথন শুধু এই ট্যাবে থাকবে।',
     clarify: 'হ্যালো! আমি অর্ডার তৈরি, পেমেন্ট রেকর্ড, নজর দেওয়ার কাজ দেখা বা ডেলিভারির প্রস্তুতিতে সাহায্য করতে পারি। শুরু করতে নিচের একটি কাজ বেছে নিন।',
