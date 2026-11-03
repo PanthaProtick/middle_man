@@ -15,6 +15,13 @@ async def conflict_case(client, competing=False):
         assert rival_response.status_code == 201
         rival = rival_response.json()
     when = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    for index, amount in enumerate((200000, 200100)):
+        recorded = await client.post('/api/seller/transactions', json={
+            'payment_account_id': order['payment_account_id'], 'provider': 'bkash',
+            'trx_id': 'RESOLVE', 'amount_minor': amount,
+            'sender_number': '01822222222', 'occurred_at': when,
+        }, headers={'Idempotency-Key': f'observation-{index}'})
+        assert recorded.status_code in (200, 201), recorded.text
     claim = {'buyer_name': 'Synthetic Buyer', 'contact_number': '01711111111',
              'address': {'raw_text': 'Synthetic Dhaka address'},
              'payment_claim': {'provider': 'bkash', 'trx_id': 'RESOLVE',
@@ -24,12 +31,6 @@ async def conflict_case(client, competing=False):
     if rival:
         assert (await client.post(f"/api/public/orders/{rival['portal_token']}/submission", json=claim,
                                  headers={'Idempotency-Key': 'rival-claim'})).status_code == 200
-    payload = {'payment_account_id' : order['payment_account_id'], 'messages': [
-        f'bKash: You have received Tk 2000.00 from 01822222222. TrxID RESOLVE at {when}',
-        f'bKash: You have received Tk 2001.00 from 01822222222. TrxID RESOLVE at {when}']}
-    imported = await client.post('/api/seller/transactions/sms-import', json=payload,
-                                headers={'Idempotency-Key': 'batch'})
-    assert imported.status_code == 200
     receipt = (await client.get('/api/seller/transactions')).json()['items'][0]
     return order, receipt
 

@@ -8,6 +8,7 @@ from app.core.public_gate import allow_synthetic_buyer_demo, verify_public_acces
 from app.main import app
 from app.models.sms_entities import SmsEvidenceTable
 from app.services.buyer_service import reset_buyer_memory_store
+from app.services.legacy_sms_store import _memory_evidence as _memory_sms
 from app.services.order_service import reset_order_memory_store
 from app.services.raw_evidence_cleanup import (
     get_retention_status,
@@ -15,7 +16,6 @@ from app.services.raw_evidence_cleanup import (
     reset_cleanup_memory,
 )
 from app.services.seller_service import reset_memory_store
-from app.services.sms_import import _memory_evidence as _memory_sms
 
 
 @pytest.fixture(autouse=True)

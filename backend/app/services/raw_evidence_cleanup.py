@@ -12,8 +12,8 @@ from app.models.cleanup import (
     RetentionStatusResponse,
 )
 from app.models.sms_entities import SmsEvidenceTable
+from app.services.legacy_sms_store import _memory_evidence as _memory_sms
 from app.services.raw_evidence_status import get_retention_status as _get_retention_status
-from app.services.sms_import import _memory_evidence as _memory_sms
 
 _memory_cleanups: list[dict[str, Any]] = []
 

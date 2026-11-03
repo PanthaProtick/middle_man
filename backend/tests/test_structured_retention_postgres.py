@@ -52,7 +52,7 @@ async def test_postgres_removal_keeps_consumed_payment_unspendable_after_restart
         'payment_account_id': receipt['payment_account_id'], 'messages': [
         'bKash: You have received Tk 1500.00 from 01799999999. TrxID EXCEPTION at 2026-01-01T12:00:00+06:00']},
         headers={'Idempotency-Key': 'sms-replay'})
-    assert imported.status_code == 409, imported.text
+    assert imported.status_code == 404, imported.text
     # Privacy checks against persisted storage are intentional deletion acceptance.
     assert await connection.fetchval('SELECT count(*) FROM buyer_revisions') == 0
     assert await connection.fetchval('SELECT count(*) FROM transaction_observations') == 0

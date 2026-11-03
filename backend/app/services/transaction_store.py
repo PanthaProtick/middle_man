@@ -13,7 +13,7 @@ _memory_observations: dict[str, list[dict[str, Any]]] = {}
 
 
 def reset_transaction_memory_store() -> None:
-    from app.services.sms_import import reset_sms_store
+    from app.services.legacy_sms_store import reset_sms_store
     reset_sms_store()
     _memory_transactions.clear()
     _memory_observations.clear()

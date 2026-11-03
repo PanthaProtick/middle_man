@@ -46,14 +46,18 @@ async def test_unknown_target_or_memory_fails_closed(postgres_buyer):
 
 async def test_sms_copies_are_erased(postgres_buyer):
     client, connection, sessions, order = postgres_buyer
-    imported = await client.post('/api/seller/transactions/sms-import', json={
-        'payment_account_id': order['payment_account_id'],
-        'messages': ['bKash: You have received Tk 2000.00 from 01822222222. TrxID OLDTEST001 at 2026-10-25T10:00:00+06:00']},
-        headers={'Idempotency-Key': 'obsolete-sms'})
-    assert imported.status_code == 200, imported.text
-    # Parser-independent receipt claim uses the exact identity returned by import.
-    receipt_id = imported.json()['items'][0]['receipt_id']
-    assert receipt_id is not None, imported.text
+    from legacy_sms_support import historical_sms_rows
+
+    recorded = await client.post('/api/seller/transactions', json={
+        'payment_account_id': order['payment_account_id'], 'provider': 'bkash',
+        'trx_id': 'OLDTEST001', 'amount_minor': 200000,
+        'sender_number': '01822222222', 'occurred_at': '2026-10-25T10:00:00+06:00'},
+        headers={'Idempotency-Key': 'legacy-receipt'})
+    assert recorded.status_code == 201, recorded.text
+    receipt_id = recorded.json()['id']
+    async with sessions() as db:
+        db.add_all(historical_sms_rows(order['shop_id'], 'pilot_seller', order['payment_account_id'], receipt_id))
+        await db.commit()
     submitted = await client.post(f"/api/public/orders/{order['portal_token']}/submission", json={
         'buyer_name': 'Old Buyer', 'contact_number': '01711111111',
         'address': {'raw_text': 'Old address'}, 'payment_claim': {

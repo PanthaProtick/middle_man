@@ -10,7 +10,7 @@ from app.models.cleanup import (
     RetentionStatusResponse,
 )
 from app.models.sms_entities import SmsEvidenceTable
-from app.services.sms_import import _memory_evidence as _memory_sms
+from app.services.legacy_sms_store import _memory_evidence as _memory_sms
 
 
 async def get_retention_status(

@@ -5,7 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.entities import IdempotencyRecordTable
-from app.models.sms import ImportResult
+from app.models.legacy_sms import ImportResult
 from app.models.sms_entities import SmsImportTable
 
 

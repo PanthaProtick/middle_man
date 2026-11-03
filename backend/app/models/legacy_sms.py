@@ -1,18 +1,12 @@
-"""Bounded seller-only wire contracts; raw text never appears in results."""
+"""Historical persisted SMS results retained solely for privacy redaction."""
 import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 
 from app.models.transaction import ManualReceipt
 
 ImportState = Literal['imported', 'duplicate', 'conflicting', 'unsupported', 'missing', 'masked', 'ambiguous', 'provider_mismatch']
-
-
-class SmsImportInput(BaseModel):
-    model_config = ConfigDict(extra='forbid')
-    payment_account_id: str = Field(min_length=1, max_length=36)
-    messages: list[str] = Field(min_length=1, max_length=50)
 
 
 class SmsItemResult(BaseModel):
@@ -32,8 +26,3 @@ class ImportResult(BaseModel):
     payment_account_id: str
     created_at: datetime.datetime
     items: list[SmsItemResult]
-
-
-class ImportList(BaseModel):
-    items: list[ImportResult]
-    next_cursor: str | None = None

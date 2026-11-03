@@ -88,22 +88,14 @@ async def test_postgres_synthetic_seller_to_buyer_confirmation_journey(postgres_
     assert pub_initial["lifecycle"] == "awaiting_buyer"
     assert "owner_id" not in pub_initial
 
-    # 4. Seller receives SMS batch with valid item and unsupported item
+    # Seller manually records the received payment before the claim arrives.
     created_at = datetime.datetime.fromisoformat(order["created_at"])
     rec_time = created_at + datetime.timedelta(milliseconds=10)
-    sms_valid = f"bKash: You have received Tk 1000.00 from 01899112233. TrxID SYNTH-JOURNEY-01 at {rec_time.isoformat()}"
-    sms_unsupported = "Some arbitrary marketing or unrecognized SMS"
-
-    sms_res = await client.post(
-        "/api/seller/transactions/sms-import",
-        json={"payment_account_id": acc_id, "messages": [sms_valid, sms_unsupported]},
-        headers={"Idempotency-Key": "journey-sms-batch"},
-    )
-    assert sms_res.status_code == 200
-    sms_items = sms_res.json()["items"]
-    assert len(sms_items) == 2
-    assert sms_items[0]["state"] == "imported"
-    assert sms_items[1]["state"] == "unsupported"
+    recorded = await client.post('/api/seller/transactions', json={
+        'payment_account_id': acc_id, 'provider': 'bkash', 'trx_id': 'SYNTH-JOURNEY-01',
+        'amount_minor': advance, 'sender_number': '01899112233', 'occurred_at': rec_time.isoformat(),
+    }, headers={'Idempotency-Key': 'journey-manual'})
+    assert recorded.status_code == 201, recorded.text
 
     # 4. Buyer submits payment claim with representation variation (+880 country code format)
     sub_res = await client.post(

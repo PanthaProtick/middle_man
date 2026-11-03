@@ -19,7 +19,6 @@ from app.api.public_orders import router as public_orders_router
 from app.api.review_assistance import router as review_assistance_router
 from app.api.routes import router as api_router
 from app.api.seller import router as seller_router
-from app.api.sms import router as sms_router
 from app.api.structured_retention import router as structured_retention_router
 from app.api.transaction_submissions import router as transaction_submissions_router
 from app.api.transactions import router as transactions_router
@@ -73,7 +72,15 @@ app = FastAPI(
 
 @app.middleware("http")
 async def protect_public_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
-    response = await call_next(request)
+    response: Response
+    # Retired collection names also match the generic receipt-ID route.
+    if request.url.path.rstrip("/") in {
+        f"{settings.API_PREFIX}/seller/transactions/sms-import",
+        f"{settings.API_PREFIX}/seller/transactions/sms-imports",
+    }:
+        response = JSONResponse(status_code=404, content={"detail": "Not Found"})
+    else:
+        response = await call_next(request)
     if request.url.path.startswith((f"{settings.API_PREFIX}/public/orders", f"{settings.API_PREFIX}/seller/")):
         response.headers["Cache-Control"] = "no-store, private"
         response.headers["Referrer-Policy"] = "no-referrer"
@@ -139,9 +146,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             message="Request validation failed",
             fields=fields,
         ),
-        detail=(None if is_courier_settings or is_public_order or request.url.path.startswith(
-                    f"{settings.API_PREFIX}/seller/transactions/sms-"
-                )
+        detail=(None if is_courier_settings or is_public_order
                 else jsonable_encoder(exc.errors())),
         request_id=request_id,
     )
@@ -160,8 +165,6 @@ app.include_router(review_assistance_router, prefix=settings.API_PREFIX)
 app.include_router(courier_router, prefix=settings.API_PREFIX)
 app.include_router(pathao_router, prefix=settings.API_PREFIX)
 app.include_router(link_access_router, prefix=settings.API_PREFIX)
-# Literal SMS paths must precede the receipt-ID route.
-app.include_router(sms_router, prefix=settings.API_PREFIX)
 app.include_router(transactions_router, prefix=settings.API_PREFIX)
 app.include_router(work_queries_router, prefix=settings.API_PREFIX)
 app.include_router(public_orders_router, prefix=settings.API_PREFIX)

@@ -7,9 +7,9 @@ from app.main import app
 
 
 @pytest.mark.asyncio
-async def test_postgres_unsupported_sms_stays_unresolved_zero_ai_and_manual_recovery(postgres_buyer):
+async def test_postgres_retired_sms_cannot_confirm_and_manual_entry_recovers(postgres_buyer):
     """
-    AC49, AC13, AC14: Unsupported SMS stays visibly unresolved without any AI call.
+    Retired SMS ingestion cannot mutate a pending claim.
     Seller can then manually record the transaction to confirm the pending claim.
     """
     client, connection, _, order = postgres_buyer
@@ -44,11 +44,7 @@ async def test_postgres_unsupported_sms_stays_unresolved_zero_ai_and_manual_reco
         json={"payment_account_id": account_id, "messages": [unsupported_text]},
         headers={"Idempotency-Key": "sms-unsupported-key"},
     )
-    assert import_res.status_code == 200
-    items = import_res.json()["items"]
-    assert len(items) == 1
-    assert items[0]["state"] == "unsupported"
-    assert items[0]["receipt_id"] is None
+    assert import_res.status_code == 404
 
     # Order remains pending with zero allocations
     assert await connection.fetchval("SELECT lifecycle FROM orders WHERE id=$1", order["id"]) == "pending"
