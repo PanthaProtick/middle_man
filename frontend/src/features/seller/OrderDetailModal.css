@@ -8,14 +8,32 @@
   animation: order-drawer-slide-in var(--duration-smooth, 280ms) var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1));
 }
 
+.order-detail-dialog.order-detail-dialog--closing {
+  animation: order-drawer-slide-out var(--duration-smooth, 240ms) var(--ease-out-calm, cubic-bezier(0.16, 1, 0.3, 1)) forwards;
+}
+
+.order-detail-dialog.order-detail-dialog--closing::backdrop {
+  animation: modal-backdrop-fade-out var(--duration-normal, 200ms) var(--ease-out-calm, ease) forwards;
+}
+
 @keyframes order-drawer-slide-in {
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
 
+@keyframes order-drawer-slide-out {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); }
+}
+
 @keyframes modal-backdrop-fade {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes modal-backdrop-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
 
 .order-detail-dialog {
@@ -56,8 +74,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 8px;
+  gap: 8px 16px;
   margin-bottom: 12px;
 }
 
@@ -65,9 +82,15 @@
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  gap: 12px;
+  flex-wrap: wrap;
+  gap: 8px 12px;
   margin-bottom: 10px;
   color: var(--text-primary);
+}
+
+.order-detail-status {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .order-detail-context span {
@@ -179,6 +202,30 @@
 .order-detail-footer button {
   min-height: 44px;
   padding: 8px 16px;
+}
+
+.order-detail-dialog section[role="tabpanel"] {
+  animation: order-tab-panel-enter var(--duration-normal, 200ms) var(--ease-out-calm, ease);
+}
+
+@keyframes order-tab-panel-enter {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .order-detail-dialog,
+  .order-detail-dialog::backdrop,
+  .order-detail-dialog section[role="tabpanel"] {
+    animation: none !important;
+    transition: none !important;
+  }
 }
 
 @media (max-width: 768px) {
