@@ -57,12 +57,14 @@ export function PreparationPreview({
           <h5>{item.order.product_name}</h5>
           <p className="assistant-numeric">{item.order.id}</p>
           <ul>{item.reason_codes.map(code => <li key={code}>{reasonLabel(code)}</li>)}</ul>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => onOpenOrder(item.order)}>
-            {text.openOrder}
-          </button>
-          <button type="button" className="btn btn-secondary btn-sm" onClick={() => void copyReference(item.order)}>
-            {text.copyReference}
-          </button>
+          <div className="preview-order-actions">
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => onOpenOrder(item.order)}>
+              {text.openOrder}
+            </button>
+            <button type="button" className="btn btn-secondary btn-sm" onClick={() => void copyReference(item.order)}>
+              {text.copyReference}
+            </button>
+          </div>
         </li>)}
       </ul>}
     {copyStatus !== 'idle' && <p role={copyStatus === 'failed' ? 'alert' : 'status'}>
