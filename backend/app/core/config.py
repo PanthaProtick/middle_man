@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     VERCEL_ENV: Literal["", "development", "preview", "production"] = ""
     DEBUG: bool = True
     API_PREFIX: str = "/api"
+    CRON_SECRET: str = ""
 
     # Self-test integration mode (requires durable storage, real auth)
     SELF_TEST_MODE: bool = False

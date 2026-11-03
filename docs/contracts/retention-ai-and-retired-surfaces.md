@@ -29,8 +29,9 @@
   repeatedly from an operator/scheduler with its own database session. Due work is
   discovered from durable completion timestamps; per-order attempts and safe failure
   codes survive restart. A failed order is rolled back independently and retried.
-  Hosting/scheduling this maintenance is a deployment gate; no hosted scheduler has
-  been installed. Run the raw-evidence worker separately at its 30-day deadline.
+  The authenticated scheduler invokes both policies; see
+  [scheduled retention operations](../scheduled-retention.md). Deployed scheduling
+  remains a ticket 09 acceptance gate.
 - The deletion date is the first completion plus 12 calendar months, clamping leap
   day to February's last day. Cancellation and later corrections preserve the first
   completion. Unopened awaiting-buyer records use their original expiry as completion.

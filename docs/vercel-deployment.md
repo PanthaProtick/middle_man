@@ -134,3 +134,6 @@ Primary platform references, consulted 2026-11-04:
 
 See [cross-instance durability](cross-instance-durability.md) for database/session
 ownership, process-local coordination limits, and local PostgreSQL evidence.
+
+See [scheduled retention operations](scheduled-retention.md) for cron configuration,
+authorization, monitoring, and recovery. Hosted verification remains ticket 09.

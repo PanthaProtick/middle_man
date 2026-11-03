@@ -60,3 +60,8 @@ Local unit tests and PostgreSQL integration run offline using isolated adapters 
 3. **External Provider Logging (Google Gemini)**
    - Address parsing no longer sends buyer text to Gemini (ADR-0007). Screenshot extraction was retired by ADR-0005. Shared Gemini demos remain template surfaces.
    - *Launch Gate*: Enterprise API data governance terms must be bound to ensure model provider requests are subject to zero-data-retention or matching retention lifecycles, and that prompt caching or abuse monitoring logs align with privacy policy commitments.
+
+## Scheduled maintenance
+
+See [scheduled retention operations](scheduled-retention.md) for the authenticated
+all-shop scheduler, cadence, failure visibility, and safe retry.

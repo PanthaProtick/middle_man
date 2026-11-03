@@ -39,7 +39,7 @@ async def purge_raw_evidence(
         )
         if shop_id:
             sms_query = sms_query.where(SmsEvidenceTable.shop_id == shop_id)
-        sms_records = (await db.scalars(sms_query)).all()
+        sms_records = (await db.scalars(sms_query.with_for_update())).all()
         for sms in sms_records:
             sms.raw_text = None
             purged_count += 1

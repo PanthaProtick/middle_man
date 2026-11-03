@@ -31,3 +31,13 @@ test('environment templates expose only public frontend values and previews star
   assert.equal(backend.installCommand, 'uv sync --locked --no-dev');
   assert.equal(backend.framework, 'fastapi');
 });
+
+test('retention cron targets only the backend maintenance endpoint daily', () => {
+  assert.deepEqual(JSON.parse(read('backend/vercel.json')).crons, [
+    { path: '/api/maintenance/retention', schedule: '0 0 * * *' },
+  ]);
+  for (const environment of ['production', 'preview']) {
+    assert.ok(read(`backend/.env.${environment}.example`).split(/\r?\n/).includes('CRON_SECRET='));
+  }
+  assert.equal(JSON.parse(read('frontend/vercel.json')).crons, undefined);
+});
