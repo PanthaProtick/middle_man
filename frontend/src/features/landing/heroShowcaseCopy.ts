@@ -117,7 +117,7 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
         advanceLabel: 'দাবিকৃত TrxID',
         advanceValue: 'BL9X4M291Q',
         primaryMetricLabel: 'যাচাই ফলাফল',
-        primaryMetricValue: 'মার্চেন্ট এসএমএস-এর সাথে মিল পাওয়া গেছে',
+        primaryMetricValue: 'বিক্রেতার পেমেন্ট রেকর্ডের সাথে মিল পাওয়া গেছে',
         statusChip: 'অগ্রিম নিশ্চিত',
         note: 'ভুয়া স্ক্রিনশট বা ব্যাংকিং বিভ্রান্তির অবসান। পার্সেল প্যাক করার আগেই অগ্রিম নিশ্চিত ও সংরক্ষিত।',
       },

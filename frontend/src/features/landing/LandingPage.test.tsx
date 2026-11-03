@@ -77,6 +77,13 @@ describe('LandingPage surface', () => {
     expect(container.textContent).toContain('চ্যাটে কথা ও লিংক প্রদান');
     expect(container.textContent).toContain('মধ্যস্বত্ব শপ ডেস্ক');
     expect(container.textContent).toContain('ঢাকা শপ অপারেশন সক্রিয়');
+    await act(async () => {
+      container.querySelectorAll<HTMLButtonElement>('.showcase-tab')[1].click();
+      container.querySelectorAll<HTMLButtonElement>('.step-tab')[2].click();
+    });
+    expect(container.textContent).toContain('বিক্রেতার পেমেন্ট রেকর্ডের সাথে মিল পাওয়া গেছে');
+    expect(container.textContent).not.toContain('এসএমএস');
+
   });
 
   it('renders hero showcase asset on right side introducing Middleman', async () => {

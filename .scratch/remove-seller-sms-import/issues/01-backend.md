@@ -16,3 +16,9 @@ Kept shared receipt/reconciliation code. Converted shared journey, resolution, s
 - Disposable loopback PostgreSQL 18: 18 passed across historical SMS retirement, obsolete cleanup, structured retention, reconciliation isolation and durable confirmation journey. All migrations applied to fresh isolated schemas; seeded legacy receipt/allocation/raw evidence remained stable through retirement and original-deadline cleanup. No schema upgrade was introduced or required.
 - `npm run lint:backend`: passed. `npm run typecheck:backend`: passed (143 files).
 - Browser and final root gate belong to integration ticket 03.
+
+## Review follow-up
+
+Resolved review findings: search exclusion now seeds actual historical raw evidence and its receipt-linked result, so assertions exercise private SMS text rather than an empty fixture. Bengali landing payment-match views now describe seller payment records; the existing rendered landing test first failed on the old SMS claim, then passed after copy updates. ADR 0001 preserves the original Phase 1 decision and records retirement in a dated 2026-11-03 superseding note.
+
+Checks: landing UI 6 passed; transaction search 6 passed; backend and frontend lint passed. Root integration verification remains ticket 03.
