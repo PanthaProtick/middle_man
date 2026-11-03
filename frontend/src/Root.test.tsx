@@ -58,10 +58,20 @@ beforeEach(() => {
 });
 
 afterEach(async () => {
+  vi.unstubAllEnvs();
   await act(async () => root.unmount());
   container.remove();
   window.localStorage.clear();
   window.history.replaceState({}, '', '/');
+});
+
+it('renders seller sign-in with a development Clerk key in an optimized preview build', async () => {
+  vi.stubEnv('PROD', true);
+  vi.stubEnv('VERCEL_ENV', 'preview');
+  await act(async () => {
+    root.render(<LocaleProvider><Root publishableKey="pk_test_synthetic" /></LocaleProvider>);
+  });
+  expect(clerk.providerMounts).toBe(1);
 });
 
 function languageButton(name: string): HTMLButtonElement {

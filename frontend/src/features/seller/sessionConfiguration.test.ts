@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import { validateSessionConfiguration } from './sessionConfiguration';
 
+it('permits a separate development Clerk instance in an optimized Vercel preview build', () => {
+  expect(() => validateSessionConfiguration('pk_test_synthetic', true, false, 'preview')).not.toThrow();
+  expect(() => validateSessionConfiguration(undefined, true, false, 'preview')).not.toThrow();
+  expect(() => validateSessionConfiguration('pk_test_synthetic', true, false, 'production')).toThrow();
+});
+
 describe('production seller configuration', () => {
   it.each([undefined, '', 'pk_test_synthetic', 'sk_live_secret', 'pk_live_'])
   ('rejects missing or nonproduction publishable keys: %s', key => {

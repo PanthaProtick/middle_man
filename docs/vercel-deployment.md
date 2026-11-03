@@ -51,6 +51,10 @@ project and Production or Preview scope. Do not upload `.env` files. Vercel supp
 - Preview defaults: no database, secrets, live providers, or buyer-link access.
   These previews are disposable demos, with process-local state that may vanish.
   They do not establish durable or hosted acceptance.
+  Vite embeds only Vercel's public `VERCEL_ENV` label to distinguish optimized
+  preview bundles from production. Preview bundles permit development Clerk keys
+  and credential-free demos; production and unlabelled optimized builds continue
+  to require a live key for seller pages.
 - For an authenticated synthetic preview, provision an independent **empty**
   database/role with no production grants and a separate Clerk development
   instance. Do not clone production customer data. Set `SELF_TEST_MODE=true`,
@@ -105,6 +109,10 @@ Local checks import the configured ASGI entry, request `/api/health`, exercise
 allowed/foreign-origin preflights, reject unsafe preview configuration, inspect
 the SPA fallback and template defaults, and run the normal production build.
 They do not emulate Vercel's router, Linux packaging, DNS, TLS, or Clerk sessions.
+An isolated Windows environment was also installed with `uv sync --locked --no-dev`;
+the configured app imported, ran its offline lifespan, and served health without
+pytest installed. This verifies the local production dependency graph, not the
+hosted Linux bundle.
 `/api/health` alone is not proof of database readiness or authenticated workflows.
 
 Ticket 09 must verify actual Vercel build/install logs (without secrets), runtime

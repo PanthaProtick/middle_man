@@ -4,16 +4,16 @@
 
 **Blocked by:** None (can start immediately).
 
-**Status:** in-progress
+**Status:** resolved
 
-- [ ] Expose the existing FastAPI application through a supported Vercel entry point and configure the Vite frontend separately from the same repository.
-- [ ] Pin compatible runtimes and reproducible production dependencies; verify imported runtime packages are declared directly where appropriate.
-- [ ] Configure SPA fallback so direct buyer-link navigation and refresh load the portal; configure the API base URL at build time.
-- [ ] Configure exact frontend origins for backend CORS and Clerk authorized-party checks; arbitrary preview origins do not acquire production trust.
-- [ ] Provide separate production and preview environment templates and instructions that prevent previews from using production write access. Backend secrets never enter frontend bundles or logs.
-- [ ] Document owner-supplied domains, DNS, regions, plan constraints, production Git branch, and matching Clerk instance setup. Do not purchase plans, configure accounts, or deploy remotely in this ticket.
-- [ ] Verify routing/build configuration and runtime packaging with appropriate local checks; record hosted and platform behaviors that still require ticket 09 acceptance.
-- [ ] Run focused checks and final root `npm run check`; record exact results and the fresh result artifact.
+- [x] Expose the existing FastAPI application through a supported Vercel entry point and configure the Vite frontend separately from the same repository.
+- [x] Pin compatible runtimes and reproducible production dependencies; verify imported runtime packages are declared directly where appropriate.
+- [x] Configure SPA fallback so direct buyer-link navigation and refresh load the portal; configure the API base URL at build time.
+- [x] Configure exact frontend origins for backend CORS and Clerk authorized-party checks; arbitrary preview origins do not acquire production trust.
+- [x] Provide separate production and preview environment templates and instructions that prevent previews from using production write access. Backend secrets never enter frontend bundles or logs.
+- [x] Document owner-supplied domains, DNS, regions, plan constraints, production Git branch, and matching Clerk instance setup. Do not purchase plans, configure accounts, or deploy remotely in this ticket.
+- [x] Verify routing/build configuration and runtime packaging with appropriate local checks; record hosted and platform behaviors that still require ticket 09 acceptance.
+- [x] Run focused checks and final root `npm run check`; record exact results and the fresh result artifact.
 
 ## Implementation evidence (2026-11-04)
 
@@ -33,5 +33,23 @@
   existed, then 2 passed. `npm run typecheck`: passed both applications.
 - Lock refresh: offline resolution lacked cache metadata; normal sandbox network
   was blocked; authorized network retry of `uv lock` succeeded (56 packages).
-- Next: independent standards/spec review, final root check, record fresh artifact,
-  resolve review findings, and commit final evidence. No remote changes performed.
+- Independent review: Standards 0 findings. Spec initially found preview builds
+  rejecting development Clerk keys and missing isolated production-only packaging
+  evidence. Both resolved; follow-up Standards 0 / Spec 0 remaining findings.
+- Preview builds now embed only the platform `VERCEL_ENV` label; Root distinguishes
+  previews from optimized production builds. Default/production optimized builds
+  retain live-key enforcement. Focused frontend regressions: 13 passed.
+- Isolated `.cache/vercel-runtime`: `uv sync --locked --no-dev` installed 41 runtime
+  packages. Offline probe imported configured app, ran lifespan, served health=200,
+  and verified pytest absent. Windows evidence only; Vercel Linux bundle unrun.
+- Final `npm run check`: PASS, all nine stages, artifact
+  `.cache/checks/check-yHbT1Z/result.json`; backend 755 passed / 187 skipped,
+  frontend 687 passed in 126 files, build and HTTP smoke passed.
+- An earlier final attempt `.cache/checks/check-xiZGop/result.json` failed only on
+  three Windows system-temp permissions (752 passed / 187 skipped); workspace-local
+  pytest base temp resolved it. Focused typechecking passed both applications.
+- No hosted deployment, DNS/account/plan change, live provider call, PostgreSQL
+  acceptance, or hosted/browser acceptance performed. Ticket 09 owns those gates.
+- Next: owner supplies and authorizes actual targets; follow dependent runtime,
+  ingress, retention, and hosted acceptance tickets before inviting real users.
+
