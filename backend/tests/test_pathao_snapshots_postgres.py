@@ -62,6 +62,12 @@ async def test_database_leases_atomic_failure_and_replaced_version_expiry(postgr
     client, sql, sessions, order = postgres_buyer
     await client.put('/api/seller/courier/pathao/offline', json={'expected_version': 0})
     shop = await sql.fetchval('SELECT shop_id FROM orders WHERE id=$1', order['id'])
+    # Connecting no longer crawls/seeds a catalogue. Seed the retained historical
+    # artifact explicitly before exercising its durable replacement semantics.
+    async with sessions() as db:
+        seed = await jobs.claim(db, shop, 'offline', True)
+        assert seed is not None
+        await jobs.finish(db, shop, 'offline', *seed, sample_tree())
     now = jobs.get_utc_now() + dt.timedelta(days=1)
     monkeypatch.setattr(jobs, 'get_utc_now', lambda: now)
     monkeypatch.setattr(store, 'get_utc_now', lambda: now)
@@ -111,6 +117,9 @@ async def test_scheduled_sweep_is_retired_and_preserves_historical_snapshots(pos
     await client.put('/api/seller/courier/pathao/offline', json={'expected_version': 0})
     shop = await sql.fetchval('SELECT shop_id FROM orders WHERE id=$1', order['id'])
     async with sessions() as db:
+        seed = await jobs.claim(db, shop, 'offline', True)
+        assert seed is not None
+        await jobs.finish(db, shop, 'offline', *seed, sample_tree())
         old = await store.snapshot(db, shop, 'offline')
     now = jobs.get_utc_now() + dt.timedelta(days=2)
     monkeypatch.setattr(jobs, 'get_utc_now', lambda: now)

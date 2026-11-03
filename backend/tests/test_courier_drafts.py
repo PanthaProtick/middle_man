@@ -16,7 +16,7 @@ async def parcel_order(client, key: str, **parcel) -> dict:
     return response.json()
 
 
-async def confirm_automatically(client, order, transaction_id: str) -> None:
+async def confirm_automatically(client, order, transaction_id: str, *, pathao=None) -> None:
     receipt = await client.post('/api/seller/transactions', json={
         'payment_account_id': order['payment_account_id'], 'provider': 'bkash',
         'trx_id': transaction_id, 'amount_minor': 200000, 'sender_number': '01822222222',
@@ -25,7 +25,7 @@ async def confirm_automatically(client, order, transaction_id: str) -> None:
     assert receipt.status_code == 201, receipt.text
     claim = await client.post(f"/api/public/orders/{order['portal_token']}/submission", json={
         'buyer_name': 'Parcel Buyer', 'contact_number': '01711111111',
-        'address': {'raw_text': 'Parcel address, Dhaka'},
+        'address': {'raw_text': 'Parcel address, Dhaka', **({'pathao': pathao} if pathao else {})},
         'payment_claim': {'provider': 'bkash', 'trx_id': transaction_id,
                           'sender_number': '01822222222', 'amount_minor': 200000},
     }, headers={'Idempotency-Key': f'claim-{transaction_id}'})

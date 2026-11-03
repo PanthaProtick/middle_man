@@ -41,13 +41,19 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     logger.info(
         f"Starting {settings.PROJECT_NAME} in {settings.ENV} mode (durable_storage={settings.is_durable_mode})..."
     )
-    if settings.is_durable_mode:
-        from app.core.readiness import check_production_readiness
+    try:
+        if settings.is_durable_mode:
+            from app.core.readiness import check_production_readiness
 
-        await check_production_readiness(settings, app=app)
-        logger.info("Startup readiness verified: storage, schema, secrets, and auth are ready.")
-    yield
-    logger.info(f"Shutting down {settings.PROJECT_NAME}...")
+            await check_production_readiness(settings, app=app)
+            logger.info("Startup readiness verified: storage, schema, secrets, and auth are ready.")
+        yield
+    finally:
+        from app.core import database
+
+        if database.engine is not None:
+            await database.engine.dispose()
+        logger.info(f"Shutting down {settings.PROJECT_NAME}...")
 
 
 app = FastAPI(

@@ -149,7 +149,7 @@ async def test_pending_migrations_rejected(
         shutil.copy(f, tmp_path / f.name)
     (tmp_path / "0099_unapplied_new_feature.sql").write_text("SELECT 1;", encoding="utf-8")
 
-    monkeypatch.setattr("app.core.readiness.DEFAULT_MIGRATIONS_DIR", tmp_path)
+    monkeypatch.setattr("app.core.schema.DEFAULT_MIGRATIONS_DIR", tmp_path)
 
     factory = session_factory_builder(url, schema)
     async with factory() as session:

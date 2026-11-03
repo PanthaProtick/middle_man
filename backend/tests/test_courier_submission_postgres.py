@@ -1,6 +1,7 @@
 """Real PostgreSQL courier submission persistence, concurrency, and durability acceptance."""
 import asyncio
 
+import pytest
 from courier_submission_support import postgres_offline_settings  # noqa: F401
 from test_courier_drafts import confirm_automatically, parcel_order
 from test_courier_review import ready_review
@@ -21,8 +22,9 @@ from test_courier_submission_failures import (
 )
 
 
-async def test_postgres_submission_success_and_replay(postgres_buyer):
-    await success_case(postgres_buyer[0])
+@pytest.mark.parametrize('locale', ['en', 'bn'])
+async def test_postgres_submission_success_and_replay(postgres_buyer, monkeypatch, locale):
+    await success_case(postgres_buyer[0], monkeypatch, locale)
     connection = postgres_buyer[1]
     count = await connection.fetchval('SELECT count(*) FROM courier_attempts WHERE status = $1', 'success')
     assert count == 1
@@ -32,12 +34,14 @@ async def test_postgres_prepaid_zero_cod(postgres_buyer):
     await prepaid_case(postgres_buyer[0])
 
 
-async def test_postgres_definitive_failure_retryable(postgres_buyer, monkeypatch):
-    await fail_case(postgres_buyer[0], monkeypatch)
+@pytest.mark.parametrize('locale', ['en', 'bn'])
+async def test_postgres_definitive_failure_retryable(postgres_buyer, monkeypatch, locale):
+    await fail_case(postgres_buyer[0], monkeypatch, locale)
 
 
-async def test_postgres_unknown_timeout_blocks_retry(postgres_buyer, monkeypatch):
-    await timeout_case(postgres_buyer[0], monkeypatch)
+@pytest.mark.parametrize('locale', ['en', 'bn'])
+async def test_postgres_unknown_timeout_blocks_retry(postgres_buyer, monkeypatch, locale):
+    await timeout_case(postgres_buyer[0], monkeypatch, locale)
 
 
 async def test_postgres_cancellation_ordering(postgres_buyer):

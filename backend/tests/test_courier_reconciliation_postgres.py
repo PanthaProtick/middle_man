@@ -172,7 +172,8 @@ async def test_postgres_duplicate_consignment_association_rejected(postgres_buye
     client, connection, _, _ = postgres_buyer
     order, path, ready, attempt = await unknown_attempt(client, monkeypatch, 'pg-duplicate')
     other = await parcel_order(client, 'pg-duplicate-other', parcel_weight_grams=700, parcel_quantity=1)
-    await confirm_automatically(client, other, 'PG-DUPLICATE-OTHER')
+    await confirm_automatically(client, other, 'PG-DUPLICATE-OTHER',
+                                pathao={'city_id': 1, 'zone_id': 10, 'area_id': 100})
     other_path, other_ready = await ready_with_existing_connection(client, other)
     assert (await client.post(other_path, json={'expected_token': other_ready['token']})).status_code == 200
     submitted = await client.post(

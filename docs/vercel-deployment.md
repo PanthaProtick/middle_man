@@ -128,3 +128,6 @@ Primary platform references, consulted 2026-11-04:
 [Python runtime and packaging](https://vercel.com/docs/functions/runtimes/python),
 [Vite SPA fallback](https://vercel.com/docs/frameworks/frontend/vite),
 [monorepo projects](https://vercel.com/docs/monorepos).
+
+See [cross-instance durability](cross-instance-durability.md) for database/session
+ownership, process-local coordination limits, and local PostgreSQL evidence.

@@ -35,7 +35,9 @@ async def test_manual_rollback_durability_and_replay(postgres_buyer):
     assert result.status_code == 200, result.text
     from app.services.order_service import reset_order_memory_store
     reset_order_memory_store()
-    assert (await client.get(path)).json() == result.json()
+    # Read responses derive staging from the persisted courier draft. The
+    # idempotency receipt retains the original mutation response unchanged.
+    assert (await client.get(path)).json() == {**result.json(), 'delivery_staged': True}
     assert (await decision(client,order,receipt)).json() == result.json()
     assert await connection.fetchval('SELECT count(*) FROM allocations') == 1
     assert await connection.fetchval('SELECT count(*) FROM used_payment_markers') == 1
