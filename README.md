@@ -1,153 +1,195 @@
 # Middleman
 
-A React and FastAPI starting point for developers building full-stack prototypes with Codex or Antigravity.
+> Order confirmation, payment reconciliation, and delivery preparation for Bangladesh social-commerce sellers.
 
-Middleman brings a typed frontend, validated API contracts, local mock Gemini demos, and a shared verification command into one workspace. Start locally without cloud credentials, then replace the demo behavior with your application's domain logic.
+Middleman handles the work after a seller and buyer agree on a sale in chat.
+Sellers create an order and share a buyer link, compare payment claims with recorded
+receipts, and review the order before sending it to a courier. Buyers use a focused
+mobile web portal to review the terms and submit their delivery and payment details.
 
-## What's included
+Built with **React 19, TypeScript, and FastAPI**, with Bengali and English interfaces.
+The workflow targets one confirmation operator per shop.
 
-- **React 19 + TypeScript:** Vite development server, strict types, and feature folders for UI and related tests.
-- **FastAPI + Pydantic v2:** Typed Python endpoints with interactive API documentation.
-- **Working demos:** Gemini chat, structured idea generation, and item creation/listing.
-- **Checks from the root:** Tooling tests, repository conventions, Ruff, Mypy, pytest, Oxlint, Vitest, production build, and local HTTP smoke.
-- **Agent guidance:** Shared rules in [AGENTS.md](AGENTS.md), focused references in `docs/`, and resumable task templates.
-- **GitHub Actions:** The same setup and verification commands on Windows and Ubuntu for pushes and pull requests targeting `main` or `master`.
+**Status:** Under development. Local checks and synthetic exercises do not establish
+production readiness, live-provider reliability, or measured seller outcomes.
 
-This is a development template. Item persistence and authentication still need implementation before use in a deployed application.
+[Quickstart](#quickstart) · [Seller workflow](#seller-workflow) · [Configuration](#configuration) · [Documentation](#documentation)
+
+## What you can do
+
+- **Share an order instead of repeating its details.** Create agreed product,
+  total, delivery advance, and receiving-account terms, then share a buyer link.
+- **Collect buyer details in one place.** The `/orders/:token` portal supports
+  delivery information, payment claims, and Bengali/English presentation.
+- **Keep payment evidence and decisions clear.** Record received transactions,
+  compare claims, resolve exceptions, and track the remaining cash-on-delivery amount.
+  Reconciliation does not independently verify payments with a payment provider.
+- **Find the next orders to work on.** Use attention and delivery-preparation views,
+  search, date filters, and CSV exports.
+- **Prepare courier handoffs.** Review Pathao settings, location choices, courier
+  drafts, submission outcomes, and uncertain results. Written-address and manual
+  resolution paths remain available.
+- **Use guided seller assistance.** Create orders, record transactions, find work,
+  and review payment issues. Guided writes require explicit confirmation; optional
+  Gemini review wording is separate from local parsing and domain decisions.
 
 ## Quickstart
 
-Install **Node.js 22.12+**, **Python 3.12+**, and **uv**, then open a terminal in the project root. The recorded Node version is in [`.node-version`](.node-version).
+### Requirements
+
+- **Node.js 22.12+**; the recorded version is in [`.node-version`](.node-version).
+- **Python 3.12** and **uv**.
+- **Git**, and network access for the initial dependency installation.
+
+From the repository root:
 
 ```sh
 npm run setup
 npm run doctor
 ```
 
-Setup installs dependencies from `backend/uv.lock` and `frontend/package-lock.json` and requires network access. No root `npm install` or cloud credentials are needed.
+Setup installs locked backend and frontend dependencies and configures the
+repository's Git hooks. No root `npm install` is needed.
 
-Start the backend:
+Start the API:
 
 ```sh
 npm run dev:backend
 ```
 
-In a second terminal, also at the project root:
+In a second terminal, from the same directory:
 
 ```sh
 npm run dev:frontend
 ```
 
-Open the [app](http://localhost:5173) and [interactive API docs](http://localhost:8000/docs). Public chat and idea-generation demos always return local mock responses, including when Gemini credentials are configured, and consume no provider quota. Vite prints the actual frontend URL if port 5173 is occupied; a different origin may require updating backend CORS settings.
+Open the [web app](http://localhost:5173) and
+[interactive API docs](http://localhost:8000/docs).
+Vite prints a different URL if port 5173 is occupied; update backend CORS and
+Clerk's authorized origin if you use another origin.
 
-To verify the workspace:
+**Expected without credentials:** the app opens to its landing page and signed-out
+workspace, and the API serves local standby endpoints. This starts the application;
+it does not provide an authenticated seller session or enable public buyer links.
+For example, `GET /api/health` returns runtime status and configuration flags.
 
-```sh
-npm run check
-```
+For setup failures, see [environment recovery](docs/agents/environment.md).
 
-A successful run prints a PASS summary for each stage and a unique `.cache/checks/<run>/result.json` path. The result records reached and skipped stages; adjacent files retain full logs. See [environment recovery](docs/agents/environment.md) if setup or prerequisite checks fail.
+## Seller workflow
 
-## Try the demo
+With seller authentication and the relevant storage/access configuration in place:
 
-| App tab | What to try | Expected behavior without credentials |
-| --- | --- | --- |
-| Gemini Playground | Send a chat message or generate a project pitch | Mock chat and a structured sample idea |
-| Data & Storage | List items and create an item | API records kept in memory until the backend restarts |
-| Stack Runbook | Read local setup instructions | Reference commands and configuration guidance |
+1. Set up the shop and its receiving-payment accounts.
+2. Create an order with the agreed total and delivery advance; share its buyer link.
+3. The buyer reviews the terms and submits delivery details and a payment claim.
+4. Record received transactions and review reconciliation or payment exceptions.
+5. Review delivery readiness and the courier draft, then explicitly submit when ready.
+6. Resolve uncertain courier outcomes before attempting another submission.
 
-The API exposes these routes under the default `/api` prefix:
+Buyer claims, seller-recorded receipts, and seller decisions are distinct records.
+The seller retains authority over exception acceptance and courier actions. See the
+[API contracts](docs/API_CONTRACTS.md) for validation and lifecycle rules.
 
-| Method | Route | Purpose |
-| --- | --- | --- |
-| GET | `/api/health` | Runtime status and provider configuration flags |
-| POST | `/api/chat` | Local mock chat response |
-| POST | `/api/generate-idea` | Local structured sample idea |
-| GET | `/api/items` | List demo items |
-| POST | `/api/items` | Create a demo item |
-| GET | `/api/team` | Sample team roster |
+## Configuration
 
-For request and response schemas, use the running API docs. See [API contracts](docs/API_CONTRACTS.md) for conventions and demo boundaries.
+Environment files are optional for the credential-free start. For configuration,
+use [`backend/.env.example`](backend/.env.example) and
+[`frontend/.env.example`](frontend/.env.example) as references; create local `.env`
+files without overwriting existing settings. Replace placeholders only for the
+services you intend to configure, then restart the affected servers.
 
-## Configuration and limits
+| Area | Configuration and boundary |
+| --- | --- |
+| API connection | `VITE_API_BASE_URL` defaults to `http://localhost:8000/api`; backend `CORS_ORIGINS` controls allowed browser origins. |
+| Seller sign-in | Frontend `VITE_CLERK_PUBLISHABLE_KEY`; backend trusted `CLERK_ISSUER` and verifier settings, including the authorized frontend origin. Keys alone do not prove a working session. |
+| Durable storage | PostgreSQL via `DATABASE_URL` or `PG*` settings, the required schema, `ORDER_LINK_ENCRYPTION_KEY`, and payment-marker protection. Durable mode checks readiness at startup. |
+| Buyer links | Public access is denied by default. The implemented link-possession policy is restricted to local synthetic self-tests and requires durable storage and verified seller authentication. |
+| Pathao | Account settings, credential encryption, location environment, and booking controls are separate concerns. Configuration is not evidence of a successful booking. |
+| Optional AI | `REVIEW_GEMINI_ENABLED`, `GEMINI_API_KEY`, and `GEMINI_MODEL` control optional generated review wording. Self-test mode disables AI; public chat/idea demos remain local mocks. |
 
-Environment files are optional for the local standby demo. To customize settings, copy [`backend/.env.example`](backend/.env.example) to `backend/.env` and [`frontend/.env.example`](frontend/.env.example) to `frontend/.env`, preserving any existing files. Restart the affected development server after changing configuration.
+Keep private credentials on the backend. Vite exposes `VITE_*` values to the
+browser, so those values must be public configuration.
 
-| Setting | Location | Current role |
-| --- | --- | --- |
-| `PROJECT_NAME` | Backend | API title and health response; defaults to `Middleman API` |
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | Backend | Shared settings reserved for the later seller review assistant; public demos remain local mocks |
-| `DATABASE_URL` or individual `PG*` fields | Backend | Configure the optional SQLAlchemy/asyncpg database layer |
-| `DIRECT_URL` | Backend | Reserved configuration; no migration workflow is included |
-| `CLERK_*` | Backend | Configuration scaffolding; authentication is not enforced |
-| `CORS_ORIGINS` | Backend | Allowed browser origins |
-| `VITE_API_BASE_URL` | Frontend | API base URL; defaults to `http://localhost:8000/api` |
-| `VITE_CLERK_*` | Frontend | Configuration scaffolding; no sign-in flow is implemented |
+The [self-test reference](docs/phase-1-self-test.md) describes the restricted
+buyer-access policy and integration prerequisites. It is a historical plan, not a
+completed acceptance report or a production deployment guide.
 
-Keep private credentials in backend environment settings. Vite exposes `VITE_*` values to the browser; use them only for public configuration.
+### Development boundaries
 
-Before extending the template, account for these boundaries:
+- Offline development and unit tests work without live-provider credentials.
+  Development identity adapters and test overrides do not establish live authentication.
+- Demo `/api/items` records always use process memory, even with a database URL.
+  They disappear on restart and are not shared across workers. Seller workflow
+  durability is a separate storage path.
+- Legacy demo clients can simulate results after network failures; a simulated
+  result does not prove a server write.
+- Health/configuration flags and passing local checks do not prove hosted auth,
+  PostgreSQL concurrency, live Gemini/Pathao behavior, or browser/device acceptance.
 
-- **Items are temporary.** Routes use process memory even with a database URL configured. Records disappear on restart and are not shared across worker processes.
-- **Clerk keys do not secure routes.** Token validation, authorization, and sign-in flows require implementation. Example webhook settings do not imply a working webhook endpoint.
-- **Fallbacks can conceal failures.** The frontend can return simulated results when API requests fail, including item creation. A displayed item does not prove a server write.
-- **Badges describe configuration.** A provider shown as connected or ready does not establish a successful provider call, durable storage, or authentication enforcement.
-- **Checks have a defined scope.** The HTTP smoke checks local API behavior and built assets. It does not exercise React in a browser or validate live providers or a deployment.
+## Development commands
 
-## Everyday commands
-
-Run these from the project root so the wrappers preserve cache and lockfile handling.
+Run commands from the root so workspace wrappers preserve cache and lockfile handling.
 
 | Command | Purpose |
 | --- | --- |
-| `npm run setup` | Install locked backend and frontend dependencies |
-| `npm run doctor` | Check prerequisites, backend package metadata, and the local TypeScript executable |
-| `npm run context` | List source paths; append paths or quoted `path#L10-L40` ranges for bounded context |
-| `npm run check` | Run the complete local verification gate |
-| `npm run conventions` | Check source/test sizes, tracked scratch Markdown, documentation links, and root commands |
-| `npm run test` | Run tooling, backend, and frontend tests |
-| `npm run lint` | Run backend and frontend linters |
+| `npm run setup` | Install locked dependencies and configure Git hooks |
+| `npm run doctor` | Check prerequisites and installed dependency metadata |
+| `npm run check` | Run the full local verification gate |
+| `npm run conventions` | Check file sizes, documentation links, and repository rules |
 | `npm run typecheck` | Check Python and TypeScript types |
-| `npm run build` | Build the frontend for production |
-| `npm run smoke` | Check local HTTP behavior; requires a frontend build |
-| `npm run audit:frontend` | Run the separate online frontend dependency audit |
+| `npm run lint` | Run backend and frontend linters |
+| `npm run build` | Build the frontend |
+| `npm run context` | List source paths for bounded code exploration |
 
-For focused iteration:
+For focused tests:
 
 ```sh
 npm run test:backend -- tests/test_health.py
 npm run test:frontend -- src/services/api.test.ts
 ```
 
+The full gate covers tooling, conventions, lint, types, backend/frontend tests,
+a production build, and local HTTP smoke. Each invocation records stage results
+under `.cache/checks/<run>/result.json`, with adjacent logs. Browser, device,
+PostgreSQL integration, hosted authentication, and live-provider acceptance are
+separate checks; see [verification scope](docs/agents/verification.md).
+
 ## Project layout
 
 ```text
+frontend/src/
+  features/          Seller, buyer, assistant, locale, landing, and demo UI
+  components/        Shared UI
+  services/          Shared typed API helpers and legacy demo clients
 backend/
-  app/api/           API routes
-  app/core/          Settings and optional database layer
-  app/models/        Pydantic request and response schemas
-  app/services/      Gemini integration and standby behavior
-  tests/             Backend tests
-frontend/
-  src/components/    Shared UI
-  src/features/      Gemini and item feature slices
-  src/services/      Typed API client and fallbacks
-scripts/             Workspace commands and HTTP smoke
-docs/                Architecture, contracts, and agent references
-tasks/               Task and evaluation templates
-AGENTS.md            Shared working rules for coding agents
+  app/api/           Workflow routers
+  app/models/        Pydantic request and response contracts
+  app/services/      Domain rules, storage adapters, and provider integrations
+  app/core/          Configuration, authentication, database, and token handling
+  migrations/        SQL schema migrations
+  tests/             Backend tests and integration harnesses
+scripts/             Workspace commands and local verification
+docs/                Architecture, contracts, and verification references
+tasks/               Task and handoff templates
 ```
 
-## Contributing and adapting
+## Documentation
 
-Read [AGENTS.md](AGENTS.md) before making changes. Trace the relevant contracts and callers, keep changes focused, and add meaningful tests when changing behavior. Run `npm run check` before handing off code; record failed, blocked, and unrun gates explicitly.
+- [Product context](PRODUCT.md): audience, scope, and product principles.
+- [Architecture](docs/ARCHITECTURE.md): module ownership, data flow, and storage boundaries.
+- [API contracts](docs/API_CONTRACTS.md): orders, payments, buyer access, courier, and assistant workflows.
+- [Repository conventions](docs/CONVENTIONS.md): file size, ownership, and work-storage rules.
+- [Documentation index](docs/README.md): deeper references and historical evidence.
 
-Use the [architecture guide](docs/ARCHITECTURE.md) for module boundaries, the
-[repository conventions](docs/CONVENTIONS.md) for size and work-storage rules, the
-[verification reference](docs/agents/verification.md) for acceptance limits, and the
-[task template](tasks/task-template.md) when work needs a handoff or multiple
-sessions. Replace sample domain content and the team roster as you adapt the template.
+## Contributing
+
+Read [AGENTS.md](AGENTS.md) and the relevant workflow contract before changing
+behavior. Trace callers and tests, keep changes focused, and add regression
+coverage for bugs and changed domain logic. Run focused checks while editing and
+`npm run check` before handing off code; report failed, blocked, and unrun gates.
+Use the [task template](tasks/task-template.md) for work spanning multiple sessions.
 
 ## License
 
-No project license file is included. Choose and add a license before distributing the template under specific reuse terms.
+No project license file is included. Reuse and redistribution terms have not been
+specified; do not assume an open-source license.
