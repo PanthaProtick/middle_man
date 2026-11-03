@@ -1,6 +1,6 @@
 # Remove seller payment SMS import
 
-Status: ready-for-agent
+Status: resolved
 
 ## Problem Statement
 
@@ -115,5 +115,8 @@ Repository inspection baseline: `0badffcdbf9eefa4dea0ad84971fa9817b2336ef`.
 The initial inspection observed an unrelated seller metrics stylesheet change;
 recheck the checkout and preserve unrelated work before implementation.
 
-This ticket is specification-only. No implementation, database migration, browser
-acceptance or root verification run has been performed for the removal yet.
+Implemented on `codex/remove-seller-sms-import` (2026-11-03). Tickets 01–03 record
+implementation, review fixes, PostgreSQL preservation checks and synthetic browser
+acceptance. No database migration was needed. Final root verification passed at
+`.cache/checks/check-GTFyHK/result.json`; live providers and hosted acceptance were
+not run.
