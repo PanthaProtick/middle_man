@@ -38,7 +38,8 @@ Accepted payment history within an order is unaffected.
 - Used allocations are immutable. Later contradictions remain seller alerts. All
   receipt comparison and mutation responses, including errors, use private/no-store
   headers. Buyer projections expose no decision reasons or competing-claim identities.
-- Literal SMS endpoints are registered before the dynamic receipt-ID endpoint.
+- SMS import and import-history endpoints are retired (404); manual and guided
+  transaction entry retain the ordinary receipt reconciliation contract.
 
 ## Unallocated receipt corrections
 

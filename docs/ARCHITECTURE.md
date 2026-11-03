@@ -66,7 +66,6 @@ Routers are split by workflow rather than one central routes module:
 | `api/link_access.py` | `/api/seller/orders` buyer-link revoke/reissue |
 | `api/public_orders.py` | `/api/public/orders` public reads, submission, Pathao locations |
 | `api/transactions.py` | `/api/seller/transactions` listing, comparison, corrections |
-| `api/sms.py` | `/api/seller/transactions` SMS import and parsing |
 | `api/courier.py` | `/api/seller/orders` courier drafts, submission, reconciliation |
 | `api/pathao.py` | `/api/seller/courier/pathao` account, catalog, location settings |
 | `api/structured_retention.py` | `/api/seller/retention/structured` retention status/cleanup |
@@ -125,7 +124,7 @@ giving a decision authority over future revisions. Exact reconciliation continue
 enforcing amount, sender, receiving account, time, and single-use rules. Resolution
 never changes an accepted allocation.
 
-Claim admission, manual/SMS observations, seller resolution, and recovery
+Claim admission, manual/guided observations, seller resolution, and recovery
 reconciliation acquire the shop row lock before order/receipt locks. Same-shop
 writes therefore serialize, including absent receipt identities. This trades
 throughput on unrelated payments within a shop for a consistent known-claims
