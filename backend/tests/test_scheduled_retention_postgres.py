@@ -15,7 +15,8 @@ async def seed_due(connection, shop_id):
     await connection.execute('''INSERT INTO sms_evidence
         (id, shop_id, owner_id, text_digest, raw_text, collected_at, delete_after)
         VALUES ('due', $1, 'synthetic', 'digest-due', 'private synthetic SMS', $2, $3),
-        ('future', $1, 'synthetic', 'digest-future', 'not due', $2, $4)''',
+        ('future', $1, 'synthetic', 'digest-future', 'not due',
+         $2 + INTERVAL '1 microsecond', $4)''',
         shop_id, NOW - dt.timedelta(days=30), NOW, NOW + dt.timedelta(microseconds=1))
 
 
@@ -30,7 +31,8 @@ async def test_scheduler_boundary_overlap_repeat_and_payment_protection(postgres
         VALUES ('other-shop', 'other-owner', 'Other synthetic shop', $1, $1)''', NOW)
     await connection.execute('''INSERT INTO sms_evidence
         (id, shop_id, owner_id, text_digest, raw_text, collected_at, delete_after)
-        VALUES ('other-due', 'other-shop', 'other-owner', 'other-digest', 'due', $1, $1)''', NOW)
+        VALUES ('other-due', 'other-shop', 'other-owner', 'other-digest', 'due',
+                $1::timestamptz - INTERVAL '30 days', $1)''', NOW)
     before = await run_scheduled_retention(sessions, NOW - dt.timedelta(microseconds=1))
     assert before.status == 'clean'
     assert (before.raw_purged, before.orders_removed) == (0, 0)

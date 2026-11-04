@@ -4,12 +4,12 @@
 
 **Blocked by:** 01: Repeatable clean-database initialization; 05: Vercel deployment and isolated preview routing.
 
-**Status:** needs-info (implemented; disposable PostgreSQL acceptance target required)
+**Status:** resolved (local PostgreSQL acceptance passed; hosted scheduling remains ticket 09)
 
 - [x] Provide a scheduling-compatible authenticated invocation of existing retention operations; reject missing or invalid scheduler authorization without granting seller impersonation.
 - [x] Preserve existing lifecycle rules, cutoff boundaries, shop scope, and payment-protection retention requirements; leave unrelated and ineligible records intact.
 - [x] Repeated or overlapping execution is safe, and partial failures remain observable and retryable without falsely reporting complete cleanup.
-- [ ] Tests cover authorization, repeat execution, overlap where applicable, cutoff boundaries, failure reporting, and preservation of ineligible records. Use PostgreSQL for durable behavior evidence.
+- [x] Tests cover authorization, repeat execution, overlap where applicable, cutoff boundaries, failure reporting, and preservation of ineligible records. Use PostgreSQL for durable behavior evidence.
 - [x] Document scheduling cadence, platform/plan constraints, environment-scoped secrets, failure visibility, missed-run recovery, and safe operator retry.
 - [x] Do not revive retired screenshot storage or location catalogue crawling; verify deployed scheduling separately in ticket 09.
 - [x] Run focused checks and final root `npm run check`; record exact results, the fresh result artifact, and any unrun PostgreSQL gates.
@@ -65,10 +65,46 @@
 - Hosted scheduler, production secrets, alerts, provider/backup erasure and
   preview/production recovery remain NOT RUN; ticket 09 owns deployed acceptance.
 
-## Next action
+## Previous next action (completed below)
 
 Provide a disposable loopback PostgreSQL target via `BUYER_TEST_POSTGRES_URL`;
 run the new scheduler PostgreSQL file and existing structured/personal retention
 PostgreSQL suites, then repeat the root gate. Keep the PostgreSQL acceptance item
 open until real durable evidence is recorded. Configure and verify the hosted
 schedule/monitoring separately in ticket 09.
+
+## PostgreSQL acceptance completed (2026-11-04)
+
+- Follow-up base: `2ad5fae`; current branch `main` retained. Prepared a new,
+  disposable PostgreSQL 18.4 cluster using installed local `initdb`/`pg_ctl`.
+  Data/log root: `.cache/retention-pg-1793769508037/`; bound only to
+  `127.0.0.1:55438`, with a dedicated synthetic `retention_test` superuser.
+  Local trust authentication is confined to this disposable test cluster.
+  No production Neon connection or application database credentials were used.
+- Set `BUYER_TEST_POSTGRES_URL=postgresql://retention_test@127.0.0.1:55438/postgres`
+  only in the test-command environment. Each PostgreSQL fixture creates and drops
+  an isolated schema/database. Confirmed zero `buyer_test_%` schemas remained
+  after the focused and full suites.
+- Initial focused run: **2 failed, 10 passed**. Both scheduler tests failed while
+  seeding SMS rows, before scheduler execution: the fixture violated migration
+  0007's `sms_original_deadline` requirement that deletion be exactly 30 days
+  after collection. Corrected the future row's collection by the same microsecond
+  as its deadline and the other-shop row's collection to 30 days before deletion.
+  Database constraints, assertions, and production retention logic remain intact.
+- Focused rerun: `npm run test:backend -- tests/test_scheduled_retention_postgres.py
+  tests/test_structured_retention_postgres.py tests/test_personal_retention_postgres.py`:
+  **12 passed, 0 skipped** in 9.55s (scheduler 2, structured 7, personal 3).
+  Used `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-retention-pg-focused-fixed`.
+- Root `npm run check` with the same disposable PostgreSQL URL and
+  `PYTEST_ADDOPTS=--basetemp=E:/middle_man/.cache/pytest-retention-pg-root`: **PASS**.
+  Fresh artifact: `.cache/checks/check-xD2xwS/result.json`. Backend: **963 passed,
+  0 skipped** in 196.00s; frontend: **126 files / 687 tests passed**. Tooling,
+  conventions, backend lint/types, frontend lint/build, and HTTP smoke passed.
+- Durable evidence now covers scheduler cutoff/overlap/repeat, failure reporting
+  and retry, two-shop processing, ineligible data preservation, calendar/leap-day
+  boundaries, personal-data erasure, persistent failures, and consumed-payment
+  replay protection. This closes the prior PostgreSQL acceptance gap.
+- Next action: ticket 09 verifies hosted delivery, production authorization,
+  schedule duration, monitoring/alerts, missed runs, and deployment recovery.
+  Local PostgreSQL acceptance does not establish those hosted behaviors or
+  provider/backup-copy erasure.
