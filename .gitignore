@@ -65,3 +65,9 @@ frontend/test-results/
 
 # Durable Private Evidence Storage
 .evidence/
+
+# Local Agent Skills & Tooling (installed per-developer, not shared)
+.agents/
+.codex/
+.impeccable/
+skills-lock.json
