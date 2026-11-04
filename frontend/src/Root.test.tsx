@@ -65,9 +65,10 @@ afterEach(async () => {
   window.history.replaceState({}, '', '/');
 });
 
-it('renders seller sign-in with a development Clerk key in an optimized preview build', async () => {
+it.each(['preview', 'production'])('renders development Clerk sign-in in explicit %s configuration', async tier => {
   vi.stubEnv('PROD', true);
-  vi.stubEnv('VERCEL_ENV', 'preview');
+  vi.stubEnv('VERCEL_ENV', tier);
+  vi.stubEnv('VITE_APP_ENV', tier === 'production' ? 'hosted-development' : '');
   await act(async () => {
     root.render(<LocaleProvider><Root publishableKey="pk_test_synthetic" /></LocaleProvider>);
   });

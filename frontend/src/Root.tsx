@@ -17,7 +17,10 @@ export interface RootProps {
  */
 export function Root({ publishableKey, publicPortal = false }: RootProps): React.JSX.Element {
   const { locale } = useLocale();
-  validateSessionConfiguration(publishableKey, import.meta.env.PROD, publicPortal, import.meta.env.VERCEL_ENV);
+  validateSessionConfiguration(
+    publishableKey, import.meta.env.PROD, publicPortal,
+    import.meta.env.VERCEL_ENV, import.meta.env.VITE_APP_ENV,
+  );
 
   if (!publishableKey || publishableKey.includes('your_clerk') || publicPortal) {
     return <App />;

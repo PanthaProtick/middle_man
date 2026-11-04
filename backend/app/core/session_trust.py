@@ -24,7 +24,10 @@ def validate_https_origin(value: str, name: str) -> None:
 
 def validate_session_trust(cfg: Settings) -> None:
     validate_https_origin(cfg.CLERK_ISSUER, "CLERK_ISSUER")
-    if (urlsplit(cfg.CLERK_ISSUER).hostname or "").endswith(".clerk.accounts.dev"):
+    if (
+        not cfg.is_hosted_development
+        and (urlsplit(cfg.CLERK_ISSUER).hostname or "").endswith(".clerk.accounts.dev")
+    ):
         raise ValueError("Development Clerk issuer is not permitted in production")
     validate_https_origin(cfg.CLERK_AUTHORIZED_PARTY, "CLERK_AUTHORIZED_PARTY")
     origins = cfg.CORS_ORIGINS

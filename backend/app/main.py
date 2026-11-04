@@ -69,7 +69,7 @@ app = FastAPI(
 
 @app.middleware("http")
 async def protect_public_responses(request: Request, call_next: RequestResponseEndpoint) -> Response:
-    if settings.is_production and get_seller_identity in getattr(request.app, "dependency_overrides", {}):
+    if settings.requires_hosted_security and get_seller_identity in getattr(request.app, "dependency_overrides", {}):
         return JSONResponse(
             status_code=401,
             content={"code": "UNAUTHORIZED", "message": "Seller identity overrides are forbidden in production"},

@@ -112,13 +112,22 @@ class Settings(BaseSettings):
         return self.ENV.strip().lower() == "production"
 
     @property
+    def is_hosted_development(self) -> bool:
+        return self.ENV.strip().lower() == "hosted-development"
+
+    @property
+    def requires_hosted_security(self) -> bool:
+        """Both hosted profiles require production storage, secrets and session trust."""
+        return self.is_production or self.is_hosted_development
+
+    @property
     def is_durable_mode(self) -> bool:
         """Determines whether durable persistence is strictly required.
 
         In offline development, memory fallbacks are allowed.
         Self-test integration, production, and real courier booking require durable persistence.
         """
-        return self.is_production or self.SELF_TEST_MODE or self.PATHAO_PRODUCTION_BOOKING_ENABLED
+        return self.requires_hosted_security or self.SELF_TEST_MODE or self.PATHAO_PRODUCTION_BOOKING_ENABLED
 
     @property
     def is_clerk_configured(self) -> bool:
@@ -182,13 +191,15 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def validate_vercel_environment(self) -> Self:
+        if self.is_hosted_development and self.SELF_TEST_MODE:
+            raise ValueError("Hosted development cannot use SELF_TEST_MODE")
         if self.VERCEL_ENV == "preview":
-            if self.is_production or self.PATHAO_PRODUCTION_BOOKING_ENABLED:
+            if self.requires_hosted_security or self.PATHAO_PRODUCTION_BOOKING_ENABLED:
                 raise ValueError("Vercel preview cannot enable production mode or courier booking")
             if self.effective_database_url and not self.SELF_TEST_MODE:
                 raise ValueError("Vercel preview database access requires explicit isolated SELF_TEST_MODE")
-        if self.VERCEL_ENV == "production" and not self.is_production:
-            raise ValueError("Vercel production requires ENV=production")
+        if self.VERCEL_ENV == "production" and not self.requires_hosted_security:
+            raise ValueError("Vercel production requires ENV=production or ENV=hosted-development")
         return self
 
     model_config = SettingsConfigDict(

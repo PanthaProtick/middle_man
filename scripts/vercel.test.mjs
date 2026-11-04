@@ -41,3 +41,18 @@ test('retention cron targets only the backend maintenance endpoint daily', () =>
   }
   assert.equal(JSON.parse(read('frontend/vercel.json')).crons, undefined);
 });
+
+test('hosted development is explicit and keeps provider secrets out of frontend', () => {
+  const frontend = read('frontend/.env.hosted-development.example');
+  const keys = frontend.split(/\r?\n/).filter(line => line && !line.startsWith('#')).map(line => line.split('=')[0]);
+  assert.deepEqual(keys.sort(), ['VITE_API_BASE_URL', 'VITE_APP_ENV', 'VITE_CLERK_PUBLISHABLE_KEY']);
+  assert.match(frontend, /VITE_APP_ENV=hosted-development/);
+  assert.match(frontend, /VITE_CLERK_PUBLISHABLE_KEY=pk_test_/);
+  const backend = read('backend/.env.hosted-development.example').split(/\r?\n/);
+  for (const setting of ['ENV=hosted-development', 'SELF_TEST_MODE=false', 'DATABASE_URL=',
+    'DIRECT_URL=', 'GEMINI_API_KEY=', 'REVIEW_GEMINI_ENABLED=true',
+    'PATHAO_LOCATION_ENVIRONMENT=production', 'PATHAO_PRODUCTION_BOOKING_ENABLED=true',
+    'ORDER_LINK_ENCRYPTION_KEY=', 'PAYMENT_MARKER_SECRET=', 'PATHAO_CREDENTIAL_ENCRYPTION_KEY=']) {
+    assert.ok(backend.includes(setting), `Missing hosted-development setting: ${setting}`);
+  }
+});

@@ -8,12 +8,13 @@ from app.core.config import settings
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("environment", ["production", "hosted-development"])
 @pytest.mark.parametrize("case", ["expired", "issuer", "party", "missing_party", "signature", "dev"])
-async def test_production_rejects_untrusted_sessions(client, monkeypatch, case):
-    issuer = "https://clerk.shop.example"
+async def test_production_rejects_untrusted_sessions(client, monkeypatch, case, environment):
+    issuer = "https://demo.clerk.accounts.dev" if environment == "hosted-development" else "https://clerk.shop.example"
     party = "https://shop.example"
     key, jwk = _generate_rsa_key_pair()
-    monkeypatch.setattr(settings, "ENV", "production")
+    monkeypatch.setattr(settings, "ENV", environment)
     monkeypatch.setattr(settings, "CLERK_ISSUER", issuer)
     monkeypatch.setattr(settings, "CLERK_AUTHORIZED_PARTY", party)
     monkeypatch.setattr(auth_module, "_clerk_verifier", ClerkTokenVerifier(

@@ -59,7 +59,7 @@ def validate_production_secrets(cfg: Settings) -> None:
                 f"PATHAO_CREDENTIAL_ENCRYPTION_KEY must be a valid Fernet key: {exc}"
             )
 
-    if not cfg.is_production:
+    if not cfg.requires_hosted_security:
         return
 
     link_key = cfg.ORDER_LINK_ENCRYPTION_KEY.strip()
@@ -100,7 +100,7 @@ def validate_production_secrets(cfg: Settings) -> None:
 
 def validate_seller_auth_readiness(cfg: Settings, app: Optional[FastAPI] = None) -> None:
     """Validates live seller authentication configuration in production."""
-    if not cfg.is_production:
+    if not cfg.requires_hosted_security:
         return
 
     if app is not None and bool(app.dependency_overrides):
@@ -120,7 +120,7 @@ def validate_seller_auth_readiness(cfg: Settings, app: Optional[FastAPI] = None)
 
     secret_key = cfg.CLERK_SECRET_KEY.strip()
     if secret_key:
-        if secret_key.startswith("sk_test_"):
+        if secret_key.startswith("sk_test_") and not cfg.is_hosted_development:
             raise ProductionReadinessError(
                 "Development Clerk secret key (sk_test_*) is not permitted in production"
             )
@@ -129,7 +129,7 @@ def validate_seller_auth_readiness(cfg: Settings, app: Optional[FastAPI] = None)
 
     pub_key = cfg.CLERK_PUBLISHABLE_KEY.strip()
     if pub_key:
-        if pub_key.startswith("pk_test_"):
+        if pub_key.startswith("pk_test_") and not cfg.is_hosted_development:
             raise ProductionReadinessError(
                 "Development Clerk publishable key (pk_test_*) is not permitted in production"
             )

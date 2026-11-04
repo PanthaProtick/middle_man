@@ -1,5 +1,11 @@
 # Vercel projects and preview isolation
 
+For the dedicated `submission-demo` deployment with Clerk development sessions,
+live Gemini and real Pathao bookings, use the explicit
+[hosted-development profile](hosted-development.md). It uses a dedicated pair's
+Vercel Production scope while retaining hosted security and storage requirements.
+The production and Preview defaults below are unchanged.
+
 Ticket 05 prepares configuration only. No account, DNS, plan, migration, or hosted
 deployment is changed by this work. Hosted acceptance remains ticket 09.
 
@@ -70,7 +76,8 @@ enabling previews. The startup guard rejects production mode, real courier booki
 and database access without explicit self-test mode in Vercel previews. It cannot
 identify the owner of a database URL: resource permissions and scope separation
 are mandatory even when self-test mode is enabled. Production Vercel deployments
-must use `ENV=production` and therefore retain fail-closed readiness checks.
+must use `ENV=production` or the explicit `ENV=hosted-development` profile; both
+retain fail-closed readiness checks.
 
 Use one stable preview frontend alias and paired preview API, or explicitly scope
 a pair per branch. Configure its exact HTTPS frontend origin in preview
