@@ -1,6 +1,7 @@
 import { useLocationCatalog } from './useLocationCatalog';
 import { useLocale } from '../locale';
 import type { LocationAvailability, LocationChoice, PathaoSelection } from './pathaoTypes';
+import './PathaoLocations.css';
 
 interface Props {
   portalToken: string;

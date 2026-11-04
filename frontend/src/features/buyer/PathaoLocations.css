@@ -1,0 +1,72 @@
+/* Pathao Location Catalog & Resolution */
+
+.pathao-locations {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.pathao-locations p {
+  margin: 0;
+  font-size: 0.825rem;
+  color: var(--text-secondary);
+}
+
+.pathao-location-loading {
+  padding: 8px 12px;
+  border: 1px solid var(--primary-accent);
+  border-radius: var(--radius-sm, 8px);
+  background: var(--color-surface-subtle, #e3eee8);
+  color: var(--primary-accent);
+  animation: mm-fade-in var(--duration-normal, 200ms) var(--ease-out-calm, ease) forwards;
+}
+
+.pathao-location-loading strong {
+  font-size: var(--font-size-sm, 0.85rem);
+}
+
+.pathao-location-choice {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.pathao-location-choice label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.pathao-location-choice input,
+.pathao-location-choice select {
+  width: 100%;
+  min-width: 0;
+}
+
+.pathao-location-help {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  user-select: none;
+}
+
+.pathao-location-help input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary-accent);
+  flex: 0 0 auto;
+}
+
+.pathao-location-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
