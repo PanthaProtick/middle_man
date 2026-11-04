@@ -3,6 +3,7 @@ import { ShoppingBag, LogOut } from 'lucide-react';
 import type { HealthStatus } from '../services/api';
 import { sellerCopy } from '../features/locale/sellerCopy';
 import { LocaleSwitch, useLocale } from '../features/locale';
+import aigniteSticker from '../assets/built-for-aignite-2026.png';
 
 interface HeaderProps {
   health: HealthStatus | null;
@@ -25,7 +26,16 @@ export default function Header({
           <ShoppingBag size={21} aria-hidden="true" />
         </div>
         <div className="brand-text">
-          <h1>Middleman</h1>
+          <div className="brand-title-wrap">
+            <h1>Middleman</h1>
+            <img
+              src={aigniteSticker}
+              alt="Built for AIgnite 2026"
+              className="brand-sticker"
+              loading="eager"
+              decoding="async"
+            />
+          </div>
           <p>{text.tagline}</p>
         </div>
       </div>

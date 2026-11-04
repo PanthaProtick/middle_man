@@ -40,6 +40,13 @@
   flex-shrink: 0;
 }
 
+.brand-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  vertical-align: middle;
+}
+
 .brand-text h1 {
   font-family: var(--font-heading);
   font-size: 1.15rem;
@@ -48,6 +55,23 @@
   color: var(--color-action-primary, #146653);
   margin: 0;
   line-height: 1.2;
+}
+
+.brand-sticker {
+  height: 22px;
+  width: auto;
+  max-height: 1.4rem;
+  object-fit: contain;
+  display: inline-block;
+  flex-shrink: 0;
+  user-select: none;
+  vertical-align: middle;
+}
+
+@media (max-width: 480px) {
+  .brand-sticker {
+    height: 18px;
+  }
 }
 
 .brand-text p {
