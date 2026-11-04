@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { orderAmountMinor } from './orderNumbers';
 import { receiptError } from '../locale/receiptCopy';
 import { recordManualTransaction, SellerApiError } from './api';
+import { currentPaymentTime } from './paymentTime';
 import type { PaymentAccount, ReceiptView } from './types';
 
 interface ManualTransactionOptions {
@@ -23,7 +24,7 @@ export function useManualTransaction({
   const [trxId, setTrxId] = useState<string>('');
   const [amountBdt, setAmountBdt] = useState<string>('');
   const [senderNumber, setSenderNumber] = useState<string>('');
-  const [occurredAt, setOccurredAt] = useState<string>('');
+  const [occurredAt, setOccurredAt] = useState<string>(() => currentPaymentTime());
 
   const [submitting, setSubmitting] = useState<boolean>(false);
   const [localError, setLocalError] = useState<string | null>(null);

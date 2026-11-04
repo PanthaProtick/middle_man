@@ -118,10 +118,13 @@ it('collects bilingual payment details locally and only records after explicit c
   await click('Review'); await click('Confirm');
   const write = requests.find(request => request.options?.method === 'POST')!;
   expect(write.url).toContain('/api/seller/transaction-submissions/epoch.');
-  expect(JSON.parse(String(write.options?.body))).toEqual({
+  const body = JSON.parse(String(write.options?.body));
+  expect(body).toMatchObject({
     payment_account_id: 'account-1', provider: 'bkash', trx_id: 'EXACT-Trx 01', amount_minor: 125050,
-    sender_number: '01811223344', occurred_at: null,
+    sender_number: '01811223344',
   });
+  expect(body.occurred_at).toEqual(expect.any(String));
+  expect(Math.abs(Date.parse(body.occurred_at) - Date.now())).toBeLessThan(120_000);
   expect(host.textContent).toContain('Payment recorded');
   expect(document.activeElement?.getAttribute('aria-label')).toBe('Payment recorded');
   expect(host.textContent).toContain('No matching buyer claim');
@@ -130,7 +133,7 @@ it('collects bilingual payment details locally and only records after explicit c
   expect(onOpenPayment).toHaveBeenCalledWith('receipt-1');
 });
 
-it('interprets Bangla entry and keeps optional sender and time omitted', async () => {
+it('interprets Bangla entry, keeps optional sender omitted, and records the default time', async () => {
   const requests: { options?: RequestInit }[] = [];
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, options) => {
     requests.push({ options });
@@ -142,10 +145,13 @@ it('interprets Bangla entry and keeps optional sender and time omitted', async (
   expect(errorLabels()).toEqual([]);
   await click('Review'); await click('Confirm');
   const write = requests.find(request => request.options?.method === 'POST')!;
-  expect(JSON.parse(String(write.options?.body))).toMatchObject({
+  const body = JSON.parse(String(write.options?.body));
+  expect(body).toMatchObject({
     payment_account_id: 'account-3', provider: 'nagad', trx_id: 'ABC123', amount_minor: 50000,
-    sender_number: null, occurred_at: null,
+    sender_number: null,
   });
+  expect(body.occurred_at).toEqual(expect.any(String));
+  expect(Math.abs(Date.parse(body.occurred_at) - Date.now())).toBeLessThan(120_000);
 });
 
 it.each([

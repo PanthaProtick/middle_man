@@ -2,6 +2,7 @@ import { canonicalizeBdPhone } from './api';
 import { conversationalAmount } from './guidedOrder';
 import { asciiDigits } from './orderNumbers';
 import type { ManualReceiptInput, PaymentAccount } from './types';
+import { currentPaymentTime } from './paymentTime';
 import { paymentMessageFields } from './paymentMessageFields';
 
 export interface PaymentFields {
@@ -15,7 +16,7 @@ export interface PaymentFields {
 export type PaymentFieldKey = keyof PaymentFields;
 
 export const emptyPaymentFields = (): PaymentFields => ({
-  account: '', trxId: '', amount: '', sender: '', occurredAt: '',
+  account: '', trxId: '', amount: '', sender: '', occurredAt: currentPaymentTime(),
 });
 
 const labels = /(?:^|[\s;,])(?<label>receiving account|account|hisab|হিসাব|অ্যাকাউন্ট|trx\s*id|transaction\s*id|txn\s*id|trx|transaction|ট্রানজেকশন(?:\s*আইডি)?|আইডি|amount received|received amount|actual received amount|amount|taka|টাকার পরিমাণ|টাকা|পরিমাণ|sender number|sender phone|sender|প্রেরকের নম্বর|প্রেরক|ফোন(?:\s*নম্বর)?|occurred at|payment time|occurred|time|তারিখ|সময়)\s*[:=]\s*/gi;
