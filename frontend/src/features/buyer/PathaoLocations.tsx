@@ -1,5 +1,6 @@
 import { useLocationCatalog } from './useLocationCatalog';
 import { useLocale } from '../locale';
+import { LocationLoading } from './LocationLoading';
 import type { LocationAvailability, LocationChoice, PathaoSelection } from './pathaoTypes';
 import './PathaoLocations.css';
 
@@ -68,9 +69,7 @@ function LocationChoiceSelect({
         </div>
       )}
       {loading && (
-        <div className="pathao-location-loading" role="status" aria-atomic="true">
-          <strong>{t('buyer.location.loading')}</strong>
-        </div>
+        <LocationLoading>{t('buyer.location.loading')}</LocationLoading>
       )}
     </div>
   );

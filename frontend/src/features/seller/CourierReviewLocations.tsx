@@ -1,5 +1,6 @@
 import { useCourierText } from '../locale/courierCopy';
 import { useEffect, useState } from 'react';
+import { LocationLoading } from '../buyer/LocationLoading';
 import { requestJson } from './api';
 import type { Review, ReviewCatalog } from './courierReviewTypes';
 import type { LocationChoice, PathaoSelection } from '../buyer/pathaoTypes';
@@ -47,7 +48,7 @@ export function CourierReviewLocations({ path, token, review, value, onChange }:
         }}><option value="">{t((['Choose city', 'Choose zone', 'Choose area'] as const)[index])}</option>
         {lists[index].choices.map(item => <option value={item.id} key={item.id}>{item.name}{item.home_delivery_available === false ? t(' — unsupported') : ''}</option>)}
       </select>
-      {lists[index].loading && <span role="status">{t((['Loading Pathao city…', 'Loading Pathao zone…', 'Loading Pathao area…'] as const)[index])}</span>}
+      {lists[index].loading && <LocationLoading>{t((['Loading Pathao city…', 'Loading Pathao zone…', 'Loading Pathao area…'] as const)[index])}</LocationLoading>}
     </label>)}
   </div>;
 }

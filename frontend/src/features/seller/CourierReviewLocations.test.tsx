@@ -50,6 +50,7 @@ it('shows each selection immediately while only its dependent options are pendin
   expect(form.select(0).disabled).toBe(false);
   expect(form.select(1).disabled).toBe(true);
   expect(form.host.textContent).toContain('Loading Pathao zone');
+  expect(form.host.querySelector('[role="status"] svg')?.getAttribute('aria-hidden')).toBe('true');
   await act(async () => resolveZones(response([{ id: 10, name: 'Central' }])));
   await choose(form.select(1), '10');
   expect(form.select(0).value).toBe('1');
@@ -57,6 +58,7 @@ it('shows each selection immediately while only its dependent options are pendin
   expect(form.select(1).disabled).toBe(false);
   expect(form.select(2).disabled).toBe(true);
   await act(async () => resolveAreas(response([{ id: 100, name: 'Test area' }])));
+  expect(form.host.querySelector('[role="status"]')).toBeNull();
   await choose(form.select(2), '100');
   expect(Array.from(form.host.querySelectorAll('select'), select => select.value)).toEqual(['1', '10', '100']);
   expect(fetcher).toHaveBeenCalledTimes(3);

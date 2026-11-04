@@ -57,7 +57,7 @@ it('keeps parents interactive during slow child reads, ignores late responses an
     expect(city().disabled).toBe(false);
     expect(zone().disabled).toBe(true);
     expect(container.querySelector('[role="status"]')?.parentElement?.querySelector('select')?.name).toBe('pathao_city');
-    expect(container.querySelector('.pathao-location-spinner')).toBeNull();
+    expect(container.querySelector('[role="status"] svg')).not.toBeNull();
     expect(fetchMock).toHaveBeenCalledTimes(2);
     await choose('2');
     await act(async () => pending.get('2')!(response([{id: 20, name: 'Current zone'}])));

@@ -28,7 +28,7 @@ it('translates an in-flight catalog without repeating the request and preserves 
   const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(() => new Promise<Response>(resolve => {finish = resolve;}));
   await render();
   expect(container.querySelector('section [role="status"] strong')?.textContent).toBe('Pathao-এর এলাকার তালিকা লোড হচ্ছে…');
-  expect(container.querySelector('.pathao-location-spinner')).toBeNull();
+  expect(container.querySelector('[role="status"] svg')?.getAttribute('aria-hidden')).toBe('true');
   expect(container.querySelector('section')?.getAttribute('aria-busy')).toBe('true');
   expect(container.querySelector('section [role="status"]')?.previousElementSibling?.querySelector('select')?.name).toBe('pathao_city');
   expect(container.querySelector('section')?.getAttribute('aria-label')).toBe('Pathao-এর ডেলিভারির এলাকা');

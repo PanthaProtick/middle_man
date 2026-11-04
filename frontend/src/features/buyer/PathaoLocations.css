@@ -14,19 +14,6 @@
   color: var(--text-secondary);
 }
 
-.pathao-location-loading {
-  padding: 8px 12px;
-  border: 1px solid var(--primary-accent);
-  border-radius: var(--radius-sm, 8px);
-  background: var(--color-surface-subtle, #e3eee8);
-  color: var(--primary-accent);
-  animation: mm-fade-in var(--duration-normal, 200ms) var(--ease-out-calm, ease) forwards;
-}
-
-.pathao-location-loading strong {
-  font-size: var(--font-size-sm, 0.85rem);
-}
-
 .pathao-location-choice {
   display: grid;
   gap: 6px;
