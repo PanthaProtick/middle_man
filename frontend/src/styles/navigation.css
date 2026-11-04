@@ -43,7 +43,7 @@
 .brand-title-wrap {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   vertical-align: middle;
 }
 
@@ -58,9 +58,9 @@
 }
 
 .brand-sticker {
-  height: 22px;
+  height: 36px;
   width: auto;
-  max-height: 1.4rem;
+  max-height: 40px;
   object-fit: contain;
   display: inline-block;
   flex-shrink: 0;
@@ -68,9 +68,20 @@
   vertical-align: middle;
 }
 
-@media (max-width: 480px) {
+@media (max-width: 640px) {
   .brand-sticker {
-    height: 18px;
+    height: 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .brand-title-wrap {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .brand-sticker {
+    height: 24px;
   }
 }
 
