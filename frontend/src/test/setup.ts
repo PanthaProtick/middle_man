@@ -30,6 +30,9 @@ installUsableLocalStorage();
 
 // Every test opts into its own response; unexpected HTTP must fail immediately.
 beforeEach(() => {
+  // Unit tests use the local proxy unless a hosted-routing scenario opts in.
+  // Do not let a developer's build environment select test request destinations.
+  vi.stubEnv('VITE_API_BASE_URL', '');
   vi.stubGlobal('fetch', vi.fn(() => {
     throw new Error('Unexpected network request in a unit test. Mock fetch explicitly.');
   }));
@@ -38,4 +41,5 @@ beforeEach(() => {
 afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
+  vi.unstubAllEnvs();
 });

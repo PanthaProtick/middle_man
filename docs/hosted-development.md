@@ -27,6 +27,18 @@ Clerk credentials and issuers.
 
 ## Database and secrets
 
+Set frontend `VITE_API_BASE_URL` to the absolute API URL including `https://`
+and its `/api` prefix (for example `https://demo-api.vercel.app/api`). Rebuild
+the frontend after changing it. Health, seller requests (including exports and
+session refresh retries), buyer submissions and location lookups all use this
+configured destination. With no configured base, product requests retain relative
+`/api` paths for the local Vite proxy.
+
+If health works but shop setup fails, inspect the browser's shop request URL.
+It must target the API domain, not the frontend's SPA fallback. A cached HTML
+response from the frontend is not an authenticated API response; do not disable
+Clerk verification or widen CORS to work around incorrect routing.
+
 In Neon, select the intended project and the **`submission-demo` branch**, database
 and runtime role before copying its pooled TLS connection string to `DATABASE_URL`.
 Verify the branch-to-endpoint mapping in the console. A database name such as

@@ -1,4 +1,5 @@
 import type { BuyerSubmissionInput, PublicOrder } from './types';
+import { apiUrl } from '../../services/apiUrl';
 import { formatBdt } from '../locale/format';
 
 export interface ApiError {
@@ -57,7 +58,7 @@ async function readJson<T>(
     headers['Idempotency-Key'] = idempotencyKey;
   }
 
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(apiUrl(url), { ...options, headers });
   if (!res.ok) {
     let errBody: { error?: ApiError; detail?: string } = {};
     try {

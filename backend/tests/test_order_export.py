@@ -31,6 +31,21 @@ async def test_export_is_authenticated_and_literal_route(client: AsyncClient):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize(('query', 'count'), [('', '1'), ('?status=confirmed', '0')])
+async def test_cross_origin_export_exposes_count(client: AsyncClient, query: str, count: str):
+    app.dependency_overrides[get_seller_identity] = lambda: SellerIdentity(owner_id='export-cors')
+    await _create_test_order(client)
+    origin = 'http://localhost:5173'
+    response = await client.get(f'/api/seller/orders/export{query}', headers={'Origin': origin})
+    assert response.status_code == 200
+    assert response.headers['Access-Control-Allow-Origin'] == origin
+    exposed = {name.strip().lower() for name in response.headers['Access-Control-Expose-Headers'].split(',')}
+    assert 'x-export-count' in exposed
+    assert response.headers['X-Export-Count'] == count
+    assert len(list(csv.DictReader(io.StringIO(response.text)))) == int(count)
+
+
+@pytest.mark.asyncio
 async def test_export_scope_balances_filters_and_private_fields(client: AsyncClient):
     app.dependency_overrides[get_seller_identity] = lambda: SellerIdentity(owner_id='export-a')
     order = await _create_test_order(client)

@@ -1,3 +1,5 @@
+import { apiUrl } from '../../services/apiUrl';
+
 export type SessionFailure = 'unauthorized' | 'unavailable';
 const authReasons = ['expired', 'not_yet_valid', 'issuer_mismatch', 'audience_mismatch',
   'origin_mismatch', 'invalid_signature', 'rejected'] as const;
@@ -52,7 +54,8 @@ export async function sellerFetch(url: string, options: RequestInit = {}, token?
     headers: Object.fromEntries(headers.entries()),
     ...(session ? { signal: session.controller.signal } : {}),
   };
-  let response = await fetch(url, request);
+  const endpoint = apiUrl(url);
+  let response = await fetch(endpoint, request);
   if (session?.controller.signal.aborted) throw new Error('Seller session changed');
   if (session && response.status === 401) {
     const reason = authReason(response.headers.get('X-Seller-Auth-Reason'));
@@ -64,7 +67,7 @@ export async function sellerFetch(url: string, options: RequestInit = {}, token?
         session.bearerToken = replacement;
         if (!options.method || ['GET', 'HEAD'].includes(options.method.toUpperCase())) {
           headers.set('Authorization', `Bearer ${replacement}`);
-          response = await fetch(url, { ...request, headers: Object.fromEntries(headers.entries()) });
+          response = await fetch(endpoint, { ...request, headers: Object.fromEntries(headers.entries()) });
           if (session.controller.signal.aborted) throw new Error('Seller session changed');
         }
       } else failSession(session, 'unauthorized', reason);

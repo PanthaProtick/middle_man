@@ -1,4 +1,6 @@
-const API_BASE: string = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+import { apiUrl } from './apiUrl';
+
+const endpoint = (path: string) => apiUrl(`/api${path}`, 'http://localhost:8000/api');
 
 export interface HealthStatus {
   status: string;
@@ -43,7 +45,7 @@ export interface ItemCreatePayload {
 
 export async function fetchHealth(): Promise<HealthStatus> {
   try {
-    const res = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) });
+    const res = await fetch(endpoint('/health'), { signal: AbortSignal.timeout(3000) });
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     return await res.json();
   } catch (err) {
@@ -61,7 +63,7 @@ export async function fetchHealth(): Promise<HealthStatus> {
 
 export async function sendChatMessage(message: string, systemInstruction?: string): Promise<ChatResponse> {
   try {
-    const res = await fetch(`${API_BASE}/chat`, {
+    const res = await fetch(endpoint('/chat'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message, system_instruction: systemInstruction })
@@ -80,7 +82,7 @@ export async function sendChatMessage(message: string, systemInstruction?: strin
 
 export async function generateIdea(topic: string, targetAudience?: string): Promise<HackathonIdea> {
   try {
-    const res = await fetch(`${API_BASE}/generate-idea`, {
+    const res = await fetch(endpoint('/generate-idea'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ topic, target_audience: targetAudience })
@@ -105,7 +107,7 @@ export async function generateIdea(topic: string, targetAudience?: string): Prom
 
 export async function fetchItems(): Promise<Item[]> {
   try {
-    const res = await fetch(`${API_BASE}/items`);
+    const res = await fetch(endpoint('/items'));
     if (!res.ok) throw new Error(`Items error! status: ${res.status}`);
     return await res.json();
   } catch {
@@ -115,7 +117,7 @@ export async function fetchItems(): Promise<Item[]> {
 
 export async function createItem(item: ItemCreatePayload): Promise<Item> {
   try {
-    const res = await fetch(`${API_BASE}/items`, {
+    const res = await fetch(endpoint('/items'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(item)

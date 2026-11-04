@@ -96,7 +96,7 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["Retry-After", "X-Seller-Auth-Reason"],
+    expose_headers=["Retry-After", "X-Seller-Auth-Reason", "X-Export-Count"],
 )
 
 

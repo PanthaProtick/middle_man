@@ -24,7 +24,7 @@ function mount() {
   const root = createRoot(host); roots.push(root);
   function Form() {
     const [value, setValue] = useState<PathaoSelection>({});
-    return <CourierReviewLocations path="/review" token="seller" review={review} value={value} onChange={setValue} />;
+    return <CourierReviewLocations path="/api/seller/orders/order-1/courier-review" token="seller" review={review} value={value} onChange={setValue} />;
   }
   return { host, render: () => root.render(<Form />), select: (index: number) => host.querySelectorAll('select')[index] };
 }

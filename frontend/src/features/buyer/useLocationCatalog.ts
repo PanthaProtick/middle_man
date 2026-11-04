@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { apiUrl } from '../../services/apiUrl';
 import type { LocationAvailability, LocationCatalog, PathaoSelection } from './pathaoTypes';
 import type { MessageKey } from '../locale';
 
@@ -49,7 +50,7 @@ export function useLocationCatalog(token: string, value: PathaoSelection,
           const version = target.version ?? (retry === 0 ? value.catalog_version : undefined);
           if (version) params.set('catalog_version', version);
           const queryString = params.toString();
-          const response = await fetch(`/api/public/orders/${encodeURIComponent(token)}/pathao-locations${queryString ? `?${queryString}` : ''}`,
+          const response = await fetch(apiUrl(`/api/public/orders/${encodeURIComponent(token)}/pathao-locations${queryString ? `?${queryString}` : ''}`),
             {signal: controller.signal, cache: 'no-store', referrerPolicy: 'no-referrer'});
           if (!response.ok) {
             const error = await response.json() as {error?: {code?: string}};
