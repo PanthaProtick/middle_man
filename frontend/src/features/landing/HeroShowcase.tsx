@@ -129,7 +129,7 @@ export function HeroShowcase({ locale }: HeroShowcaseProps): React.JSX.Element {
         <p className="microcard-note">{stepData.note}</p>
       </div>
 
-      <div className="showcase-guarantees" aria-label="Middleman guarantees">
+      <div className="showcase-guarantees" aria-label={locale === 'bn' ? 'অর্ডারের কাজ এক জায়গায়' : 'Order work in one place'}>
         {copy.guarantees.map((item) => (
           <div key={item.id} className="guarantee-chip">
             {getGuaranteeIcon(item.id)}

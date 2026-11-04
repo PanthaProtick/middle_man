@@ -32,7 +32,7 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
   en: {
     deskLabel: 'Middleman Shop Desk',
     activeStatus: 'Dhaka Operations Active',
-    introHeadline: 'Protecting your social commerce sales from agreed chat to verified courier delivery',
+    introHeadline: 'The details behind each parcel, from buyer link to courier preparation.',
     steps: {
       link: {
         tab: '1. Buyer Link',
@@ -66,7 +66,7 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
       },
       courier: {
         tab: '3. Pathao Dispatch',
-        title: '1-tap courier dispatch with exact COD',
+        title: 'Prepare a Pathao handoff with remaining COD',
         orderNumber: 'Consignment #PATHAO-8492',
         item: 'Dhaka Handloom Jamdani Saree',
         itemDetail: 'White & Gold · 1 pc',
@@ -77,19 +77,19 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
         primaryMetricLabel: 'Delivery Destination',
         primaryMetricValue: 'Mirpur-2, Dhaka Zone',
         statusChip: 'Ready for Pickup',
-        note: 'Address and delivery zone are verified. Consignment is staged into Pathao with auto-calculated COD in seconds.',
+        note: 'Review the address, delivery zone, and remaining COD before authorizing a Pathao submission.',
       },
     },
     guarantees: [
-      { id: 'advance', label: '100% Advance Guarded' },
-      { id: 'match', label: '2-Way TrxID Matching' },
-      { id: 'dispatch', label: '1-Tap Pathao Handoff' },
+      { id: 'advance', label: 'Clear Advance & COD' },
+      { id: 'match', label: 'Compare Payment Records' },
+      { id: 'dispatch', label: 'Review Courier Details' },
     ],
   },
   bn: {
     deskLabel: 'মধ্যস্বত্ব শপ ডেস্ক',
     activeStatus: 'ঢাকা শপ অপারেশন সক্রিয়',
-    introHeadline: 'চ্যাটে কথা চূড়ান্ত হওয়া থেকে কুরিয়ার ডেলিভারি পর্যন্ত বিক্রেতার সম্পূর্ণ সুরক্ষা',
+    introHeadline: 'ক্রেতার লিংক থেকে কুরিয়ারের প্রস্তুতি, প্রতিটি পার্সেলের খুঁটিনাটি একসঙ্গে।',
     steps: {
       link: {
         tab: '১. ক্রেতা লিংক',
@@ -108,7 +108,7 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
       },
       match: {
         tab: '২. পেমেন্ট মেলানো',
-        title: 'স্বয়ংক্রিয় বিকাশ ও নগদ ট্রানজাকশন যাচাই',
+        title: 'বিকাশ ও নগদের পেমেন্ট রেকর্ড মেলানো',
         orderNumber: 'দাবি #DH-৮৪৯২',
         item: 'ঢাকার তাঁতের জামদানি শাড়ি',
         itemDetail: 'সাদা ও সোনালি পাড় · ১টি',
@@ -119,11 +119,11 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
         primaryMetricLabel: 'যাচাই ফলাফল',
         primaryMetricValue: 'বিক্রেতার পেমেন্ট রেকর্ডের সাথে মিল পাওয়া গেছে',
         statusChip: 'অগ্রিম নিশ্চিত',
-        note: 'ভুয়া স্ক্রিনশট বা ব্যাংকিং বিভ্রান্তির অবসান। পার্সেল প্যাক করার আগেই অগ্রিম নিশ্চিত ও সংরক্ষিত।',
+        note: 'পেমেন্ট অ্যাপ থেকে পাওয়া তথ্য রেকর্ড করে ক্রেতার দাবির সঙ্গে মিলিয়ে দেখুন। এই মিল পেমেন্ট প্রদানকারীর স্বাধীন যাচাই নয়।',
       },
       courier: {
         tab: '৩. পাঠাও বুকিং',
-        title: 'সঠিক ক্যাশ-অন-ডেলিভারিতে ১-ট্যাপ পাঠাও বুকিং',
+        title: 'বাকি ক্যাশ-অন-ডেলিভারিসহ পাঠাও বুকিংয়ের প্রস্তুতি',
         orderNumber: 'কনসাইনমেন্ট #PATHAO-৮৪৯২',
         item: 'ঢাকার তাঁতের জামদানি শাড়ি',
         itemDetail: 'সাদা ও সোনালি পাড় · ১টি',
@@ -134,13 +134,13 @@ export const heroShowcaseCopy: Record<Locale, HeroShowcaseContent> = {
         primaryMetricLabel: 'ডেলিভারি এরিয়া',
         primaryMetricValue: 'মিরপুর-২, ঢাকা জোন',
         statusChip: 'পিকআপের জন্য প্রস্তুত',
-        note: 'ঢাকার এরিয়া ও ফোন নম্বর যাচাই করে সরাসরি পাঠাও সিস্টেমে নির্ভুল ক্যাশ-অন-ডেলিভারিতে বুকিং সম্পন্ন।',
+        note: 'পাঠাও বুকিংয়ের অনুমতি দেওয়ার আগে ঠিকানা, ডেলিভারি এরিয়া ও বাকি ক্যাশ-অন-ডেলিভারি দেখে নিন।',
       },
     },
     guarantees: [
-      { id: 'advance', label: '১০০% অগ্রিম সুরক্ষিত' },
-      { id: 'match', label: 'নিখুঁত TrxID মেলানো' },
-      { id: 'dispatch', label: '১-ট্যাপ পাঠাও বুকিং' },
+      { id: 'advance', label: 'অগ্রিম ও বাকির স্পষ্ট হিসাব' },
+      { id: 'match', label: 'পেমেন্ট রেকর্ড মেলানো' },
+      { id: 'dispatch', label: 'কুরিয়ারের তথ্য পর্যালোচনা' },
     ],
   },
 };

@@ -4,14 +4,14 @@ import type { Locale } from '../locale';
 export const landingCopy: Record<Locale, LandingCopyContent> = {
   en: {
     hero: {
-      title: 'Collect delivery advances in chat,',
-      titleAccent: 'stop fake orders before shipping.',
-      lead: 'Middleman turns agreed social-commerce sales into secure buyer confirmation links, automated bKash/Nagad reconciliation, and 1-tap Pathao courier handoffs.',
+      title: 'You put heart into your shop.',
+      titleAccent: 'Keep every order together.',
+      lead: 'From “আপু, অর্ডার করতে চাই” to a parcel ready for delivery, there’s a lot on your shoulders. Middleman helps Bangladesh’s Facebook sellers collect buyer details, match bKash or Nagad advances with their payment records, and prepare courier handoffs in one place.',
       primaryCta: 'Start Shop Desk',
       secondaryCta: 'See Workflow Tour',
       demoToggleOpen: 'Preview Live Workspace',
       demoToggleClose: 'Hide Live Workspace',
-      badge: 'Zero courier return losses from unconfirmed parcels',
+      badge: 'For Bangladesh’s Facebook shops, in বাংলা and English.',
     },
     tour: {
       sectionHeading: 'How Middleman protects your business',
@@ -102,14 +102,14 @@ export const landingCopy: Record<Locale, LandingCopyContent> = {
   },
   bn: {
     hero: {
-      title: 'চ্যাটেই ডেলিভারি অগ্রিম নিশ্চিত করুন,',
-      titleAccent: 'ভুয়া অর্ডার রোধ করে নিশ্চিন্তে কুরিয়ার পাঠান।',
-      lead: 'সোশ্যাল কমার্স বিক্রয়কে সুরক্ষিত করতে মধ্যস্বত্ব দিচ্ছে সহজ ক্রেতা কনফার্মেশন লিংক, নির্ভুল বিকাশ/নগদ পেমেন্ট মেলানো এবং ১-ক্লিকে পাঠাও কুরিয়ার বুকিং।',
+      title: 'যত্নে গড়ে তোলা আপনার ব্যবসা।',
+      titleAccent: 'অর্ডারের খুঁটিনাটি থাকুক এক জায়গায়।',
+      lead: '“আপু, অর্ডার করতে চাই” থেকে কুরিয়ারের জন্য পার্সেল প্রস্তুত করা পর্যন্ত কত কাজই তো আপনার কাঁধে। বাংলাদেশের ফেসবুক বিক্রেতাদের জন্য Middleman ক্রেতার তথ্য সংগ্রহ, নিজের পেমেন্ট রেকর্ডের সঙ্গে বিকাশ বা নগদের অগ্রিম মেলানো আর কুরিয়ারের প্রস্তুতি নিয়ে আসে এক জায়গায়।',
       primaryCta: 'শপ ডেস্ক শুরু করুন',
       secondaryCta: 'ওয়াকথ্রু দেখুন',
       demoToggleOpen: 'লাইভ ওয়ার্কস্পেস ডেমো দেখুন',
       demoToggleClose: 'লাইভ ওয়ার্কস্পেস লুকান',
-      badge: 'অনিশ্চিত পার্সেল বুকিংয়ের কারণে কুরিয়ার রিটার্ন খরচ সম্পূর্ণ বন্ধ করুন',
+      badge: 'বাংলাদেশের ফেসবুক ব্যবসার জন্য, বাংলা ও ইংরেজিতে।',
     },
     tour: {
       sectionHeading: 'মধ্যস্বত্ব যেভাবে আপনার ব্যবসা সুরক্ষিত রাখে',

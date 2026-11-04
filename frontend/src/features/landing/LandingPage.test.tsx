@@ -58,11 +58,16 @@ describe('LandingPage surface', () => {
       root.render(<TestWrapper />);
     });
 
-    expect(container.textContent).toContain('Collect delivery advances in chat');
-    expect(container.textContent).toContain('stop fake orders before shipping');
-    expect(container.textContent).toContain('Middleman turns agreed social-commerce sales');
+    expect(container.querySelector('h1')?.textContent).toBe(
+      'You put heart into your shop. Keep every order together.',
+    );
+    expect(container.querySelector('.hero-lead')?.textContent).toContain(
+      'match bKash or Nagad advances with their payment records',
+    );
     expect(container.textContent).toContain('Start Shop Desk');
-    expect(container.textContent).toContain('Zero courier return losses');
+    expect(container.querySelector('.hero-trust-bar')?.textContent).toContain(
+      'For Bangladesh’s Facebook shops, in বাংলা and English.',
+    );
   });
 
   it('switches to authentic Bengali when locale is bn', async () => {
@@ -70,8 +75,15 @@ describe('LandingPage surface', () => {
       root.render(<TestWrapper locale="bn" />);
     });
 
-    expect(container.textContent).toContain('চ্যাটেই ডেলিভারি অগ্রিম নিশ্চিত করুন');
-    expect(container.textContent).toContain('ভুয়া অর্ডার রোধ করে নিশ্চিন্তে কুরিয়ার পাঠান');
+    expect(container.querySelector('h1')?.textContent).toBe(
+      'যত্নে গড়ে তোলা আপনার ব্যবসা। অর্ডারের খুঁটিনাটি থাকুক এক জায়গায়।',
+    );
+    expect(container.querySelector('.hero-lead')?.textContent).toContain(
+      'নিজের পেমেন্ট রেকর্ডের সঙ্গে বিকাশ বা নগদের অগ্রিম মেলানো',
+    );
+    expect(container.querySelector('.hero-trust-bar')?.textContent).toContain(
+      'বাংলাদেশের ফেসবুক ব্যবসার জন্য, বাংলা ও ইংরেজিতে।',
+    );
     expect(container.textContent).toContain('শপ ডেস্ক শুরু করুন');
     expect(container.textContent).toContain('ধাপ ১');
     expect(container.textContent).toContain('চ্যাটে কথা ও লিংক প্রদান');
@@ -117,7 +129,7 @@ describe('LandingPage surface', () => {
     await act(async () => {
       tabs?.[2].click();
     });
-    expect(showcase?.textContent).toContain('1-tap courier dispatch with exact COD');
+    expect(showcase?.textContent).toContain('Prepare a Pathao handoff with remaining COD');
     expect(showcase?.textContent).toContain('Consignment #PATHAO-8492');
     expect(showcase?.textContent).toContain('Remaining COD');
     expect(showcase?.textContent).toContain('৳3,050');
