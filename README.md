@@ -20,10 +20,6 @@ together, and more time caring for the business and the people buying from it.
 
 [Overview](#overview) · [Competition](#competition) · [Architecture](#architecture) · [Quickstart](#quickstart) · [Configuration](#configuration) · [Development](#development) · [Documentation](#documentation)
 
-> **Project status:** Under development. Production readiness and live-service
-> acceptance remain unestablished. The credential-free quickstart launches the
-> application; authenticated seller operations require additional configuration.
-
 ## Competition
 
 Middleman is submitted to [Ostad Presents YUNet AIgnite Buildathon 2026](https://yunet-aignite26.devpost.com/),
