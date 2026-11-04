@@ -18,11 +18,29 @@ details. Sellers reconcile those claims against recorded payments and prepare
 the order for courier handoff. The goal is simple: less time piecing an order
 together, and more time caring for the business and the people buying from it.
 
-[Overview](#overview) · [Architecture](#architecture) · [Quickstart](#quickstart) · [Configuration](#configuration) · [Development](#development) · [Documentation](#documentation)
+[Overview](#overview) · [Competition](#competition) · [Architecture](#architecture) · [Quickstart](#quickstart) · [Configuration](#configuration) · [Development](#development) · [Documentation](#documentation)
 
 > **Project status:** Under development. Production readiness and live-service
 > acceptance remain unestablished. The credential-free quickstart launches the
 > application; authenticated seller operations require additional configuration.
+
+## Competition
+
+Middleman is submitted to [Ostad Presents YUNet AIgnite Buildathon 2026](https://yunet-aignite26.devpost.com/),
+a national AI hackathon for B2C solutions organized by Youth Upskill Network
+(YUNet) for students in Bangladesh. The primary round runs from 1–5 November 2026.
+
+The buildathon asks for a functional web app that solves a real-world consumer
+problem with meaningful use of AI. Middleman addresses a services and productivity
+problem for small social-commerce sellers: orders are agreed in chat, while
+delivery details, payment claims, and courier preparation stay scattered across
+conversations. The product brings that work into one Bengali-and-English
+workspace, with a seller assistant that helps enter orders and transactions and
+review payments while keeping seller confirmation in control of writes.
+
+The required “Built for AIgnite 2026” sticker appears in the application header.
+Submission materials include a hosted web app, a presentation deck of up to five
+slides, and an optional product demo video.
 
 ## Overview
 
