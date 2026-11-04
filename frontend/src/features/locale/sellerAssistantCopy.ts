@@ -13,6 +13,7 @@ export const sellerAssistantCopy = {
     resume: 'Resume draft', discard: 'Discard draft', cancel: 'Keep draft',
     order: 'Create an order', newOrder: 'New order', payment: 'Record a payment', attention: 'Orders needing attention',
     preparation: 'Awaiting delivery preparation', log: 'Temporary conversation',
+    working: 'Assistant is working…',
   },
   bn: {
     title: 'এআই সহকারী', close: 'সহকারী বন্ধ করুন', general: 'ধাপে ধাপে কাজ', review: 'অর্ডার পর্যালোচনা',
@@ -28,5 +29,6 @@ export const sellerAssistantCopy = {
     resume: 'খসড়া চালিয়ে যান', discard: 'খসড়া বাদ দিন', cancel: 'খসড়া রাখুন',
     order: 'অর্ডার তৈরি', newOrder: 'নতুন অর্ডার', payment: 'পেমেন্ট রেকর্ড', attention: 'নজর দেওয়া দরকার এমন অর্ডার',
     preparation: 'ডেলিভারির প্রস্তুতি বাকি', log: 'অস্থায়ী কথোপকথন',
+    working: 'সহকারী কাজ করছে…',
   },
 };

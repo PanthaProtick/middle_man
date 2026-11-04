@@ -97,17 +97,20 @@
 .assistant-chat-feed [role="log"] { display: flex; flex-direction: column; gap: 10px; }
 .assistant-chat-feed :is(.assistant-user-message, .assistant-reply) {
   max-width: 86%; margin: 0; font-size: 0.875rem; line-height: 1.45;
-  animation: assistant-msg-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .assistant-chat-feed .assistant-user-message {
   align-self: flex-end; padding: 10px 14px; border-radius: 14px 14px 2px 14px;
   background: var(--primary-accent, #146653); color: #ffffff;
   box-shadow: 0 2px 6px rgba(20, 102, 83, 0.16);
+  transform-origin: bottom right;
+  animation: assistant-user-in 300ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .assistant-chat-feed .assistant-reply {
   align-self: flex-start; padding: 10px 14px; border-radius: 14px 14px 14px 2px;
   background: #f0f6f3; color: #143d32; border: 1px solid #d2e4db;
   display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-start;
+  transform-origin: bottom left;
+  animation: assistant-reply-in 360ms 80ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 .assistant-chat-feed time {
   display: block; width: 100%; font-size: 0.6875rem; opacity: 0.72;
@@ -119,6 +122,7 @@
   background: var(--primary-accent, #146653); color: #ffffff;
   flex-shrink: 0; box-shadow: 0 1px 3px rgba(20, 102, 83, 0.25);
 }
+.assistant-reply .assistant-avatar { animation: assistant-avatar-pop 320ms 120ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* Composer & Quick Actions */
 .assistant-chat-composer {
@@ -164,13 +168,69 @@
 .assistant-send-btn:hover:not(:disabled) {
   transform: translateY(-1px); box-shadow: 0 4px 10px rgba(20, 102, 83, 0.25);
 }
+.assistant-send-btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.97); box-shadow: 0 1px 3px rgba(20, 102, 83, 0.2);
+}
 .assistant-draft-status {
   display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
   padding: 8px 12px; background: var(--bg-surface, #f5f6f2);
   border: 1px solid var(--border-subtle, #d8e2dd); border-radius: 8px;
 }
 .assistant-draft-status p { width: 100%; margin: 0 0 4px; font-size: 0.8125rem; font-weight: 500; }
+/* Live reply cue while the assistant is processing a confirmed action */
+.assistant-typing {
+  display: flex; align-items: center; gap: 8px; align-self: flex-start;
+  animation: assistant-typing-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.assistant-typing-bubble {
+  display: inline-flex; align-items: center; gap: 4px; padding: 11px 14px;
+  border-radius: 14px 14px 14px 2px; background: #f0f6f3; border: 1px solid #d2e4db;
+}
+.assistant-typing-bubble span {
+  width: 6px; height: 6px; border-radius: 50%; background: #5a8a79;
+  animation: assistant-typing-dot 1.05s infinite ease-in-out;
+}
+.assistant-typing-bubble span:nth-child(2) { animation-delay: 120ms; }
+.assistant-typing-bubble span:nth-child(3) { animation-delay: 240ms; }
+
+/* Cards, workflow forms, and draft prompts join the stream with the same rhythm */
+.assistant-chat-feed [role="log"] :is(.assistant-query-card, .assistant-result),
+.assistant-chat-feed :is(.assistant-workflow-card, .assistant-draft-status) {
+  animation: assistant-card-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 @keyframes assistant-msg-in {
   from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
+}
+@keyframes assistant-user-in {
+  from { opacity: 0; transform: translate3d(14px, 14px, 0) scale(0.96); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes assistant-reply-in {
+  from { opacity: 0; transform: translate3d(-10px, 12px, 0) scale(0.97); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+@keyframes assistant-avatar-pop {
+  from { opacity: 0; transform: scale(0.35); }
+  60% { opacity: 1; transform: scale(1.08); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes assistant-card-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.99); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes assistant-typing-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes assistant-typing-dot {
+  0%, 60%, 100% { opacity: 0.45; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .assistant-chat-feed .assistant-reply,
+  .assistant-reply .assistant-avatar,
+  .assistant-typing-bubble span { animation-delay: 0ms; }
 }

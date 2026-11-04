@@ -1,9 +1,10 @@
-import { useLayoutEffect, useRef } from 'react';
+import { useCallback, useLayoutEffect, useRef } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import './AssistantChat.css';
 import './AssistantPreview.css';
 import './AssistantWorkflow.css';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
+import { assistantScrollTarget } from './assistantScroll';
 import { isCreation, workflows } from './assistantConversation';
 import type { AssistantConversation as Conversation } from './useAssistantConversation';
 import { AssistantDiscardPrompt } from './AssistantDiscardPrompt';
@@ -21,16 +22,47 @@ export function AssistantConversation({ conversation, setReviewTarget }: {
   const { input, setInput } = c;
   const feed = useRef<HTMLDivElement>(null);
   const composer = useRef<HTMLTextAreaElement>(null);
+  const pinned = useRef(true);
+  const renderedMessages = useRef(0);
+  const processing = c.submission.state === 'processing' || c.paymentSubmission.state === 'processing';
+  const scrollToLatest = useCallback(() => {
+    const node = feed.current;
+    if (!node) return;
+    const newest = node.querySelector<HTMLElement>('[role="log"]')?.lastElementChild;
+    if (!(newest instanceof HTMLElement)) { node.scrollTop = node.scrollHeight; return; }
+    const feedRect = node.getBoundingClientRect();
+    const newestRect = newest.getBoundingClientRect();
+    const target = assistantScrollTarget({
+      viewportHeight: node.clientHeight, scrollHeight: node.scrollHeight,
+      newestTop: node.scrollTop + newestRect.top - feedRect.top, newestHeight: newestRect.height,
+    });
+    node.scrollTop = target;
+    pinned.current = node.scrollHeight - target - node.clientHeight < 40;
+  }, []);
   useLayoutEffect(() => {
-    if (feed.current) feed.current.scrollTop = feed.current.scrollHeight;
-  }, [c.messages, c.workflow, c.pending, c.orderReviewing, c.paymentReviewing, c.submission.state, c.paymentSubmission.state]);
+    const node = feed.current;
+    if (!node) return;
+    const previous = renderedMessages.current;
+    renderedMessages.current = c.messages.length;
+    if (!c.messages.length) { node.scrollTop = 0; pinned.current = true; return; }
+    const received = c.messages.slice(previous);
+    if (received.length) {
+      if (pinned.current || received.some(message => 'user' in message)) scrollToLatest();
+      return;
+    }
+    if (pinned.current) scrollToLatest();
+  }, [c.messages, c.workflow, c.pending, c.orderReviewing, c.paymentReviewing, c.submission.state,
+    c.paymentSubmission.state, scrollToLatest]);
   useLayoutEffect(() => {
     if (!composer.current) return;
     composer.current.style.height = 'auto';
     composer.current.style.height = `${Math.min(composer.current.scrollHeight, 160)}px`;
   }, [input]);
   return <div className="assistant-conversation" lang={c.locale}>
-    <div className="assistant-chat-feed" ref={feed}>
+    <div className="assistant-chat-feed" ref={feed} onScroll={() => {
+      const node = feed.current;
+      if (node) pinned.current = node.scrollHeight - node.scrollTop - node.clientHeight < 40;
+    }}>
       <div className="assistant-welcome-card">
         <span className="assistant-welcome-icon" aria-hidden="true">
           <Sparkles size={16} />
@@ -70,6 +102,13 @@ export function AssistantConversation({ conversation, setReviewTarget }: {
         <button type="button" className="btn btn-secondary btn-sm" onClick={c.requestDiscard} disabled={Boolean(c.pending) || c.locked}>{text.discard}</button>
       </div>}
       {c.pending && <AssistantDiscardPrompt conversation={c} />}
+      {processing && <div className="assistant-typing" role="status">
+        <span className="assistant-avatar" aria-hidden="true"><Sparkles size={13} /></span>
+        <span className="assistant-typing-bubble" aria-hidden="true">
+          <span /><span /><span />
+        </span>
+        <span className="sr-only">{text.working}</span>
+      </div>}
     </div>
     <div className="assistant-chat-composer">
       <div className="assistant-workflow-choices">
