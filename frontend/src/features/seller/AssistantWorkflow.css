@@ -1,0 +1,110 @@
+/* Creation flows share the query cards' text inset and reading rhythm. */
+.assistant-workflow-card {
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid var(--border-subtle, #d8e2dd);
+  border-radius: 12px;
+  background: var(--bg-card, #ffffff);
+}
+
+.assistant-workflow-card h4,
+.assistant-result h4 {
+  margin: 0 0 8px;
+  font-size: 0.9375rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.assistant-order-fields,
+.assistant-payment-fields {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.assistant-workflow-card p,
+.assistant-result p {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.assistant-workflow-card ul {
+  margin: 8px 0 0;
+  padding-inline-start: 20px;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.seller-assistant-window .assistant-workflow-card label {
+  min-width: 0;
+  margin: 0;
+}
+
+.assistant-workflow-card :is(input, select) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.assistant-account-select {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.assistant-account-select select {
+  text-overflow: ellipsis;
+}
+
+.assistant-account-details {
+  color: var(--text-secondary, #4e655c);
+  overflow-wrap: anywhere;
+}
+
+.assistant-workflow-card :is(.assistant-order-fields, .assistant-payment-fields) > section {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 12px 0;
+  border: 0;
+  border-block: 1px solid var(--border-subtle, #d8e2dd);
+  border-radius: 0;
+  background: transparent;
+}
+
+.assistant-workflow-card h5 {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.assistant-result {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.assistant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.assistant-actions > button {
+  flex: 1 1 140px;
+}
+
+.assistant-workflow-card button,
+.assistant-result button {
+  min-width: 0;
+  max-width: 100%;
+  height: auto;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.assistant-order-fields > button,
+.assistant-payment-fields > button {
+  justify-self: start;
+}

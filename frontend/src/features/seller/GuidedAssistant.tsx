@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from 'react';
 import { Send, Sparkles } from 'lucide-react';
 import './AssistantChat.css';
 import './AssistantPreview.css';
+import './AssistantWorkflow.css';
 import { sellerAssistantCopy } from '../locale/sellerAssistantCopy';
 import { isCreation, workflows } from './assistantConversation';
 import type { AssistantConversation as Conversation } from './useAssistantConversation';
@@ -51,7 +52,7 @@ export function AssistantConversation({ conversation, setReviewTarget }: {
           <time dateTime={message.at}>{new Date(message.at).toLocaleTimeString(c.locale, { hour: '2-digit', minute: '2-digit' })}</time>
         </p>)}
       </div>
-      {c.workflow && isCreation(c.workflow) && <section data-testid="assistant-workflow" aria-label={text[c.workflow]}>
+      {c.workflow && isCreation(c.workflow) && <section className="assistant-workflow-card" data-testid="assistant-workflow" aria-label={text[c.workflow]}>
         <h4>{text[c.workflow]}</h4>
         {c.draft?.workflow === 'order' && c.workflow === 'order' ? <GuidedOrderFields conversation={c} />
         : c.draft?.workflow === 'payment' && c.workflow === 'payment' ? <GuidedPaymentFields conversation={c} />

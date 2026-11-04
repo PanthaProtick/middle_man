@@ -52,6 +52,8 @@ it('reviews without saving and reopens every entered field in the same card', as
   expect(card?.textContent).toContain('BDT 1,200.00');
   expect(card?.textContent).toContain('Main · bkash · 01711223344');
   expect(button('Confirm').disabled).toBe(false);
+  expect(button('Confirm').parentElement).toBe(button('Make Changes').parentElement);
+  expect(button('Confirm').closest('section[aria-label="Ready to create"]')).toBeNull();
   await send('yes');
   expect(fetcher).not.toHaveBeenCalled();
   await click('Make Changes');

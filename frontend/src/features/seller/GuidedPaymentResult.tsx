@@ -30,20 +30,20 @@ export function GuidedPaymentResult({ result, account, locale, token, onOpenOrde
     <p>{text.account}: {account ?? receipt.payment_account_id}</p>
     <p>{text.amountLine}: BDT {formatOrderAmount(receipt.amount_minor)}</p>
     {receipt.has_conflict ? <p role="alert">{text.conflicted}</p>
-      : orderIds.length > 0 ? <>
-        <p>{text.confirmedOrder}</p>
-        {orderIds.map(orderId => <button key={orderId} type="button" className="btn btn-primary"
-          disabled={opening === orderId} onClick={() => {
-            setOpening(orderId); setFailed(false);
-            void fetchOrder(orderId, token).then(onOpenOrder, () => setFailed(true)).finally(() => setOpening(null));
-          }}>{text.openOrder}</button>)}
-      </>
+      : orderIds.length > 0 ? <p>{text.confirmedOrder}</p>
       : duplicate ? <p role="status">{text.duplicate}</p>
       : receipt.reconciliation_state === 'used' ? <p>{text.used}</p>
       : <p>{text.unmatched}</p>}
     <p>{text.notVerified}</p>
+    <div className="assistant-actions">
+      {!receipt.has_conflict && orderIds.map(orderId => <button key={orderId} type="button" className="btn btn-primary"
+          disabled={opening === orderId} onClick={() => {
+            setOpening(orderId); setFailed(false);
+            void fetchOrder(orderId, token).then(onOpenOrder, () => setFailed(true)).finally(() => setOpening(null));
+          }}>{text.openOrder}</button>)}
     <button type="button" className="btn btn-secondary"
       onClick={() => onOpenPayment(receipt.id)}>{text.openPayment}</button>
+    </div>
     {failed && <p role="alert">{text.openFailed}</p>}
   </AssistantResult>;
 }

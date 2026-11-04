@@ -25,6 +25,7 @@ export function GuidedOrderResult({ order, locale, token, onOpenOrder }: Props):
     <p>{text.remainingCod}: <span className="assistant-numeric">BDT {formatOrderAmount(order.expected_cod_minor)}</span></p>
     <p>{text.account}: {order.account_label} · {order.account_provider} · <span className="assistant-numeric">{order.account_receiving_number}</span></p>
     <a href={link} target="_blank" rel="noreferrer">{link}</a>
+    <div className="assistant-actions">
     <button type="button" className="btn btn-secondary" onClick={() => {
       void (async () => {
         setCopy('copy');
@@ -32,11 +33,12 @@ export function GuidedOrderResult({ order, locale, token, onOpenOrder }: Props):
         catch { setCopy('copyFailed'); }
       })();
     }}>{text.copy}</button>
-    {copy !== 'copy' && <p role="status">{text[copy]}</p>}
     <button type="button" className="btn btn-primary" disabled={opening} onClick={() => {
       setOpening(true); setFailed(false);
       void fetchOrder(order.id, token).then(onOpenOrder, () => setFailed(true)).finally(() => setOpening(false));
     }}>{text.open}</button>
+    </div>
+    {copy !== 'copy' && <p role="status">{text[copy]}</p>}
     {failed && <p role="alert">{text.failed}</p>}
   </AssistantResult>;
 }

@@ -3,6 +3,7 @@ import { emptyPaymentFields } from './guidedPayment';
 import { formatOrderAmount } from './orderNumbers';
 import type { AssistantConversation } from './useAssistantConversation';
 import { useLayoutEffect, useRef } from 'react';
+import { AssistantAccountSelect } from './AssistantAccountSelect';
 
 export function GuidedPaymentFields({ conversation: c }: { conversation: AssistantConversation }): React.JSX.Element {
   const text = guidedPaymentCopy[c.locale];
@@ -23,13 +24,9 @@ export function GuidedPaymentFields({ conversation: c }: { conversation: Assista
     </div>}
     {!c.paymentReviewing && <><p>{text.help}</p>
     {summary.errors.includes('account') && <p role="note">{text.accountHelp}</p>}
-    <label>{text.account}<select ref={accountInput} name="assistant-payment-account" value={fields.account} disabled={disabled}
-      aria-invalid={summary.errors.includes('account')} onChange={event => c.updatePayment({ account: event.target.value })}>
-      <option value="">{text.choose}</option>
-      {c.accounts.filter(account => account.is_active).map(account => <option key={account.id} value={account.id}>
-        {account.label} · {account.provider} · {account.receiving_number}
-      </option>)}
-    </select></label>
+    <AssistantAccountSelect accounts={c.accounts} label={text.account} placeholder={text.choose}
+      name="assistant-payment-account" value={fields.account} disabled={disabled} invalid={summary.errors.includes('account')}
+      inputRef={accountInput} onChange={account => c.updatePayment({ account })} />
     <button type="button" className="btn btn-secondary btn-sm" disabled={c.accountStatus === 'refreshing' || disabled}
       onClick={() => { void c.refreshAccounts(); }}>{c.accountStatus === 'refreshing' ? text.refreshing : text.refresh}</button>
     {c.accountStatus === 'refreshFailed' && <p role="alert">{text.refreshFailed}</p>}
@@ -55,13 +52,15 @@ export function GuidedPaymentFields({ conversation: c }: { conversation: Assista
       {summary.payload.occurred_at && <p>{text.occurredAt}: {fields.occurredAt}</p>}
       <p>{text.preview}</p>
       <p role="note">{text.previewWarning}</p>
+    </section>}
+    <div className="assistant-actions">
       {c.paymentReviewing && <button type="button" className="btn btn-primary" disabled={disabled} onClick={() => {
         if (summary.payload) void submission.submit(summary.payload);
       }}>{text.confirm}</button>}
-    </section>}
     {c.paymentReviewing && <button type="button" className="btn btn-secondary" disabled={disabled} onClick={c.changePayment}>{text.changes}</button>}
     {!c.paymentReviewing && <button type="button" className="btn btn-primary" disabled={disabled || !summary.payload}
       onClick={c.reviewPayment}>{text.review}</button>}
+    </div>
     {submission.state !== 'idle' && <p role="status">{text[submission.state]}</p>}
     {submission.state === 'failed' && submission.failureMessage !== 'failed' &&
       <p role="alert">{text[submission.failureMessage]}</p>}

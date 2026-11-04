@@ -75,6 +75,9 @@ it('reviews editable natural-language details before confirmation and retains th
   expect(requests).toHaveLength(0);
   expect(host.querySelector('[name="assistant-payment-amount"]')).toBeNull();
   expect(document.activeElement?.getAttribute('aria-label')).toBe('Ready to record');
+  const actions = host.querySelector('.assistant-payment-fields .assistant-actions');
+  expect(Array.from(actions?.querySelectorAll('button') ?? []).map(button => button.textContent))
+    .toEqual(['Confirm', 'Make Changes']);
   expect(host.textContent).toContain('01711000000');
   await click('Make Changes');
   expect(host.querySelector<HTMLInputElement>('[name="assistant-payment-amount"]')?.value).toBe('600');

@@ -4,6 +4,7 @@ import { emptyOrderFields } from './guidedOrder';
 import { formatOrderAmount } from './orderNumbers';
 import type { AssistantConversation } from './useAssistantConversation';
 import { useLayoutEffect, useRef } from 'react';
+import { AssistantAccountSelect } from './AssistantAccountSelect';
 
 export function GuidedOrderFields({ conversation: c }: { conversation: AssistantConversation }): React.JSX.Element {
   const text = guidedOrderCopy[c.locale];
@@ -29,13 +30,9 @@ export function GuidedOrderFields({ conversation: c }: { conversation: Assistant
         maxLength={80} aria-invalid={summary.errors.includes(key)} disabled={disabled}
         onChange={event => c.updateOrder({ [key]: event.target.value })} />
     </label>)}
-    <label>{text.account}<select name="assistant-account" value={fields.account} disabled={disabled}
-      aria-invalid={summary.errors.includes('account')} onChange={event => c.updateOrder({ account: event.target.value })}>
-      <option value="">{text.choose}</option>
-      {c.accounts.filter(account => account.is_active).map(account => <option key={account.id} value={account.id}>
-        {account.label} · {account.provider} · {account.receiving_number}
-      </option>)}
-    </select></label>
+    <AssistantAccountSelect accounts={c.accounts} label={text.account} placeholder={text.choose}
+      name="assistant-account" value={fields.account} disabled={disabled} invalid={summary.errors.includes('account')}
+      onChange={account => c.updateOrder({ account })} />
     <button type="button" className="btn btn-secondary btn-sm" disabled={c.accountStatus === 'refreshing' || disabled}
       onClick={() => { void c.refreshAccounts(); }}>{c.accountStatus === 'refreshing' ? text.refreshing : text.refresh}</button>
     {c.accountStatus === 'refreshFailed' && <p role="alert">{text.refreshFailed}</p>}
@@ -47,13 +44,15 @@ export function GuidedOrderFields({ conversation: c }: { conversation: Assistant
       <p>{text.advance}: <span className="assistant-numeric">BDT {formatOrderAmount(summary.payload.required_advance_minor)}</span></p>
       <p>{text.remainingCod}: <span className="assistant-numeric">BDT {formatOrderAmount(summary.payload.total_minor - summary.payload.required_advance_minor)}</span></p>
       <p>{text.account}: {account?.label} · {account?.provider} · <span className="assistant-numeric">{account?.receiving_number}</span></p>
+    </section>}
+    <div className="assistant-actions">
       {c.orderReviewing && <button type="button" className="btn btn-primary" disabled={disabled} onClick={() => {
         if (summary.payload) void c.submission.submit(summary.payload);
       }}>{text.confirm}</button>}
-    </section>}
     {c.orderReviewing && <button type="button" className="btn btn-secondary" disabled={disabled} onClick={c.changeOrder}>{text.changes}</button>}
     {!c.orderReviewing && <button type="button" className="btn btn-primary" disabled={disabled || !summary.payload}
       onClick={c.reviewOrder}>{text.review}</button>}
+    </div>
     {c.submission.state !== 'idle' && <p role="status">{text[c.submission.state]}</p>}
     {c.submission.state === 'failed' && c.submission.failureMessage !== 'failed' &&
       <p role="alert">{orderCreationCopy[c.locale][c.submission.failureMessage]}</p>}

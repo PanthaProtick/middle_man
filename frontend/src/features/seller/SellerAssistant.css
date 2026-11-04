@@ -164,10 +164,6 @@
   overflow-wrap: anywhere;
 }
 
-.assistant-conversation section > button {
-  margin: 4px;
-}
-
 .assistant-result {
   border: 1px solid var(--border-subtle, #d8e2dd);
   border-radius: 10px;
