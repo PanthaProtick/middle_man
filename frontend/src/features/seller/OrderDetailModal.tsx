@@ -135,6 +135,25 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
               </button>
             </div>
 
+            <span className="order-detail-status" style={{ fontWeight: 600, color: isConfirmed ? 'var(--emerald-accent)' : 'var(--text-secondary)' }}>
+              {lifecycleLabel(order.lifecycle, text)}
+            </span>
+
+            <div className="order-detail-tabs" role="tablist" aria-label={text.details}>
+              {tabs.map((label, index) => (
+                <button
+                  key={tabKeys[index]} type="button" role="tab"
+                  id={`${titleId}-${tabKeys[index]}-tab`} aria-controls={`${titleId}-${tabKeys[index]}-panel`}
+                  aria-selected={activeTab === index} tabIndex={activeTab === index ? 0 : -1}
+                  onClick={() => selectTab(index)} onKeyDown={event => onTabKeyDown(event, index)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="order-detail-reference">
             <div style={{ marginBottom: '12px' }}>
               <OrderExport
                 orderId={order.id}
@@ -150,9 +169,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
                 </span>
                 <strong>{order.product_name}</strong>
               </div>
-              <span className="order-detail-status" style={{ fontWeight: 600, color: isConfirmed ? 'var(--emerald-accent)' : 'var(--text-secondary)', whiteSpace: 'nowrap', flexShrink: 0 }}>
-                {lifecycleLabel(order.lifecycle, text)}
-              </span>
             </div>
 
             <div className="order-detail-metrics">
@@ -184,19 +200,6 @@ export function OrderDetailModal({ order: initialOrder, onClose, token, onCorrec
                 {text.reviewDelivery}
               </button>
             )}
-
-            <div className="order-detail-tabs" role="tablist" aria-label={text.details}>
-              {tabs.map((label, index) => (
-                <button
-                  key={tabKeys[index]} type="button" role="tab"
-                  id={`${titleId}-${tabKeys[index]}-tab`} aria-controls={`${titleId}-${tabKeys[index]}-panel`}
-                  aria-selected={activeTab === index} tabIndex={activeTab === index ? 0 : -1}
-                  onClick={() => selectTab(index)} onKeyDown={event => onTabKeyDown(event, index)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
           </div>
 
           <section role="tabpanel" id={`${titleId}-overview-panel`} aria-labelledby={`${titleId}-overview-tab`} hidden={activeTab !== 0}>

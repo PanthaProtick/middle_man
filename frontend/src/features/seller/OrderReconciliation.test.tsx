@@ -106,6 +106,21 @@ describe('Order Reconciliation and Review UI', () => {
     expect(document.activeElement).toBe(close);
   });
 
+  it('pins navigation while keeping export and order terms in the scroll flow', async () => {
+    await act(async () => root.render(<OrderDetailModal order={confirmedOrder} onClose={vi.fn()} />));
+    const header = container.querySelector('.order-detail-sticky-header')!;
+    const reference = container.querySelector('.order-detail-reference')!;
+    expect(header.querySelectorAll('[role="tab"]')).toHaveLength(4);
+    expect(header.querySelector('[aria-label="Close order details"]')).not.toBeNull();
+    expect(header.textContent).toContain('Confirmed');
+    expect(header.textContent).not.toContain(confirmedOrder.id);
+    expect(header.querySelector('.order-detail-metrics')).toBeNull();
+    expect(reference.textContent).toContain(confirmedOrder.id);
+    expect(reference.textContent).toContain('Copy delivery summary');
+    expect(reference.textContent).toContain('Accepted Advance');
+    expect(reference.textContent).toContain('BDT 1,000');
+  });
+
   it.each(['cancel', 'icon', 'footer'])('dismisses via %s and returns focus to Inspect', async method => {
     await act(async () => root.render(<StrictMode><OrderList orders={[confirmedOrder]}
       statusFilter="" onFilterChange={() => {}} nextCursor={null} onLoadMore={() => {}} /></StrictMode>));
