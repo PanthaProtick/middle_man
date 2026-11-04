@@ -1,10 +1,22 @@
 # Middleman
 
-**Order confirmation and fulfillment operations for Bangladesh social-commerce sellers.**
+**Helping Bangladesh's social-commerce sellers turn a sale agreed in chat into an order ready for delivery.**
 
-Middleman connects buyer confirmation links, seller-recorded payments, and courier
-preparation in one workspace. It supports the work after a sale is agreed in chat,
-with Bengali and English interfaces for sellers and buyers.
+A customer messages your Facebook shop: “আপু, অর্ডার করতে চাই।” You agree on the
+product and price. Then comes the work behind the sale: collecting an address,
+checking a bKash or Nagad advance, working out the cash-on-delivery balance, and
+getting the order ready for the courier. Another message arrives before you finish.
+
+When you run a small shop, you are also the person answering questions, checking
+payments, and preparing parcels. Details scattered across conversations mean more
+follow-ups and more room for mistakes. For the buyer who has sent an advance,
+knowing whether their order is confirmed matters too.
+
+Middleman brings that work into one Bengali-and-English workspace. Sellers share
+an order link; buyers review the agreed terms and submit delivery and payment
+details. Sellers reconcile those claims against recorded payments and prepare
+the order for courier handoff. The goal is simple: less time piecing an order
+together, and more time caring for the business and the people buying from it.
 
 [Overview](#overview) · [Architecture](#architecture) · [Quickstart](#quickstart) · [Configuration](#configuration) · [Development](#development) · [Documentation](#documentation)
 
